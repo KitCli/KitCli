@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\KitCli.Commands.Abstractions\KitCli.Commands.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Instructions.Abstractions\KitCli.Instructions.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Workflow.Abstractions\KitCli.Workflow.Abstractions.csproj" />
+    </ItemGroup>
+
+</Project>
