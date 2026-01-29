@@ -6,7 +6,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-
     <PropertyGroup>
         <PackageId>KitCli.Commands.Abstractions</PackageId>
         <Version>1.0.0</Version>

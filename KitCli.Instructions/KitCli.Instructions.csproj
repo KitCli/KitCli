@@ -6,6 +6,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageId>KitCli.Instructions</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Joshua Crowe</Authors>
+        <Company>KitCli</Company>
+    </PropertyGroup>
+
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>KitCli.Instructions.Tests</_Parameter1>
