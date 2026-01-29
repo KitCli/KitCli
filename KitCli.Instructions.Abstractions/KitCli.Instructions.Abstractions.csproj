@@ -6,6 +6,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageId>KitCli.Instructions.Abstractions</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Joshua Crowe</Authors>
+        <Company>KitCli</Company>
+    </PropertyGroup>
+
     <ItemGroup>
       <Compile Remove="NoInstructionPrefixException 2.cs" />
       <Compile Remove="NoInstructionNameException 2.cs" />
