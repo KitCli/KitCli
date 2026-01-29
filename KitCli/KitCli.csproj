@@ -6,6 +6,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageId>KitCli</PackageId>
+        <Version>1.0.1</Version>
+        <Authors>Joshua Crowe</Authors>
+        <Company>KitCli</Company>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="MediatR" Version="12.4.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
@@ -18,6 +25,11 @@
     <ItemGroup>
       <ProjectReference Include="..\KitCli.Workflow.Abstractions\KitCli.Workflow.Abstractions.csproj" />
       <ProjectReference Include="..\KitCli.Workflow\KitCli.Workflow.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Workflow\Run\State\Change\PossibleCliWorkflowRunStateChange.cs" />
+      <Compile Remove="Workflow\Run\State\Change\OutcomeCliWorkflowRunStateChange.cs" />
     </ItemGroup>
 
 </Project>
