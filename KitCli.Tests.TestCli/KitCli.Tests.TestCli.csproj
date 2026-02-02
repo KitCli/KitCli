@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>868198d0-2b94-4f81-a679-15b294a1a758</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\KitCli.Abstractions\KitCli.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Commands.Abstractions\KitCli.Commands.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Commands\KitCli.Commands.csproj" />
+      <ProjectReference Include="..\KitCli.Instructions.Abstractions\KitCli.Instructions.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Instructions\KitCli.Instructions.csproj" />
+      <ProjectReference Include="..\KitCli.Workflow.Abstractions\KitCli.Workflow.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Workflow.Commands\KitCli.Workflow.Commands.csproj" />
+      <ProjectReference Include="..\KitCli.Workflow\KitCli.Workflow.csproj" />
+      <ProjectReference Include="..\KitCli\KitCli.csproj" />
+    </ItemGroup>
+
+</Project>
