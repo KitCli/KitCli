@@ -1,3 +1,4 @@
+using KitCli.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -72,15 +73,19 @@ public class CliAppBuilder
 
         return this;
     }
-
-    public CliAppBuilder WithServices(Func<IServiceCollection, IServiceCollection> configureServices)
+    
+    public CliAppBuilder WithRegistry<TRegistry>() where TRegistry : ICliAppBuilderRegistry, new()
     {
-        configureServices(_services);
+        var registry = new TRegistry();
+        
+        registry.Register(_services);
         
         return this;
     }
-
-    public CliAppBuilder WithConfiguredServices<TSettings>(Func<TSettings, IServiceCollection, IServiceCollection> configureServices)
+    
+    public CliAppBuilder WithRegistry<TSettings, TRegistry>()
+        where TSettings : class
+        where TRegistry : ICliAppBuilderConfigurableRegistry<TSettings>, new()
     {
         if (_configurationBuilder == null)
         {
@@ -105,7 +110,9 @@ public class CliAppBuilder
 
         var settings = section.Get<TSettings>();
 
-        configureServices(settings!, _services);
+        var registry = new TRegistry();
+        
+        registry.Register(settings!, _services);
 
         return this;
     }
