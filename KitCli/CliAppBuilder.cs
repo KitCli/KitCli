@@ -1,6 +1,8 @@
 using KitCli.Abstractions;
+using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KitCli;
 
@@ -119,6 +121,17 @@ public class CliAppBuilder
 
     public async Task Run()
     {
+        var anyInstructionSettings = _services
+            .Any(service => service.ServiceType == typeof(IOptions<InstructionSettings>));
+
+        if (!anyInstructionSettings)
+        {
+            var instructionSettings = new InstructionSettings();
+            var options = new OptionsWrapper<InstructionSettings>(instructionSettings);
+        
+            _services.AddSingleton<IOptions<InstructionSettings>>(options);
+        }
+        
         var serviceProvider = _services.BuildServiceProvider();
         
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
