@@ -1,8 +1,8 @@
+using System.Reflection;
 using KitCli.Abstractions;
 using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KitCli;
 
@@ -29,13 +29,14 @@ public class CliAppBuilder
         }
     }
 
-    // TODO: Verify i need the generic. Can I pass in calling assembly instead?
-    public CliAppBuilder WithUserSecretSettings<TCliApp>() where TCliApp : CliApp
+    public CliAppBuilder WithUserSecretSettings()
     {
         SetUpConfigurationBuilder();
 
+        var callingAssembly = Assembly.GetCallingAssembly();
+        
         _configurationBuilder!
-            .AddUserSecrets<TCliApp>(optional: true, reloadOnChange: true);
+            .AddUserSecrets(callingAssembly, optional: true, reloadOnChange: true);
 
         return this;
     }
@@ -89,6 +90,25 @@ public class CliAppBuilder
         where TSettings : class
         where TRegistry : ICliAppBuilderConfigurableRegistry<TSettings>, new()
     {
+        var settings = GetSettings<TSettings>();
+        var registry = new TRegistry();
+        
+        registry.Register(settings!, _services);
+
+        return this;
+    }
+
+    public async Task Run()
+    {
+        var serviceProvider = _services.BuildServiceProvider();
+        
+        var cliApp = serviceProvider.GetRequiredService<CliApp>();
+        
+        await cliApp.Run();
+    }
+    
+    private TSettings? GetSettings<TSettings>() where TSettings : class
+    {
         if (_configurationBuilder == null)
         {
             throw new Exception("You must call With[..]Settings before calling WithSettings.");
@@ -105,37 +125,18 @@ public class CliAppBuilder
 
         var section = _configuration.GetSection(configurationName);
         
-        if (!section.Exists())
+        var sectionExists = section.Exists();
+        
+        if (!sectionExists && typeof(TSettings) == typeof(InstructionSettings))
+        {
+            return new InstructionSettings() as TSettings;
+        }
+
+        if (!sectionExists)
         {
             throw new Exception($"No configuration section found for {configurationName}");
         }
 
-        var settings = section.Get<TSettings>();
-
-        var registry = new TRegistry();
-        
-        registry.Register(settings!, _services);
-
-        return this;
-    }
-
-    public async Task Run()
-    {
-        var anyInstructionSettings = _services
-            .Any(service => service.ServiceType == typeof(IOptions<InstructionSettings>));
-
-        if (!anyInstructionSettings)
-        {
-            var instructionSettings = new InstructionSettings();
-            var options = new OptionsWrapper<InstructionSettings>(instructionSettings);
-        
-            _services.AddSingleton<IOptions<InstructionSettings>>(options);
-        }
-        
-        var serviceProvider = _services.BuildServiceProvider();
-        
-        var cliApp = serviceProvider.GetRequiredService<CliApp>();
-        
-        await cliApp.Run();
+        return section.Get<TSettings>();
     }
 }

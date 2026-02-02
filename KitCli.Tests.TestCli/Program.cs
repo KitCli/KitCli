@@ -4,7 +4,7 @@ using KitCli.Tests.TestCli;
 
 var aoo = new CliAppBuilder()
     .WithCli<TestCliApp>()
-    .WithUserSecretSettings<TestCliApp>()
+    .WithUserSecretSettings()
     .WithRegistry<CommandRegistry>()
     .WithRegistry<InstructionSettings, ConfiguredCommandRegistry>();
     
