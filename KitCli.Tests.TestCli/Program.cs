@@ -4,8 +4,6 @@ using KitCli.Tests.TestCli;
 
 var aoo = new CliAppBuilder()
     .WithCli<TestCliApp>()
-    .WithUserSecretSettings()
-    .WithRegistry<CommandRegistry>()
-    .WithRegistry<InstructionSettings, ConfiguredCommandRegistry>();
+    .WithRegistry<CommandRegistry>();
     
 await aoo.Run();

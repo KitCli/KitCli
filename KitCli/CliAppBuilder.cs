@@ -3,6 +3,7 @@ using KitCli.Abstractions;
 using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KitCli;
 
@@ -17,16 +18,6 @@ public class CliAppBuilder
         _services.AddCli<TCliApp>();
         
         return this;
-    }
-
-    private void SetUpConfigurationBuilder()
-    {
-        if (_configurationBuilder == null)
-        {
-            _services.AddOptions();
-            
-            _configurationBuilder = new ConfigurationBuilder();
-        }
     }
 
     public CliAppBuilder WithUserSecretSettings()
@@ -100,6 +91,8 @@ public class CliAppBuilder
 
     public async Task Run()
     {
+        EnsureInstructionSettingsRegistered();
+        
         var serviceProvider = _services.BuildServiceProvider();
         
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
@@ -107,8 +100,23 @@ public class CliAppBuilder
         await cliApp.Run();
     }
     
+    private void SetUpConfigurationBuilder()
+    {
+        if (_configurationBuilder == null)
+        {
+            _services.AddOptions();
+            
+            _configurationBuilder = new ConfigurationBuilder();
+        }
+    }
+    
     private TSettings? GetSettings<TSettings>() where TSettings : class
     {
+        if (_configurationBuilder == null && typeof(TSettings) == typeof(InstructionSettings))
+        {
+            return new InstructionSettings() as TSettings;
+        }
+        
         if (_configurationBuilder == null)
         {
             throw new Exception("You must call With[..]Settings before calling WithSettings.");
@@ -138,5 +146,21 @@ public class CliAppBuilder
         }
 
         return section.Get<TSettings>();
+    }
+    
+    private void EnsureInstructionSettingsRegistered()
+    {
+        var anyInstructionSettingsRegistered = _services
+            .Any(sd => sd.ServiceType == typeof(InstructionSettings));
+
+        if (anyInstructionSettingsRegistered)
+        {
+            return;
+        }
+        
+        var instructionSettings = GetSettings<InstructionSettings>();
+        var options = new OptionsWrapper<InstructionSettings>(instructionSettings!);
+        
+        _services.AddSingleton<IOptions<InstructionSettings>>(options);
     }
 }
