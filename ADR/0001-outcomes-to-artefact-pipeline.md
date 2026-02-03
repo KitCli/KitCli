@@ -124,13 +124,11 @@ public class MyCommandFactory : ICliCommandFactory<MyCommand>
 
     public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
-        // Extract artefact value
-        var myArtefact = artefacts
-            .OfType<MyCustomArtefact>()
-            .FirstOrDefault();
+        // Extract artefact by value type
+        var myArtefact = artefacts.OfType<int>();
 
         // Create command with artefact data
-        return new MyCommand(myArtefact?.MyValue ?? 0);
+        return new MyCommand(myArtefact?.Value ?? 0);
     }
 }
 ```
@@ -152,7 +150,9 @@ ValuedCliCommandArtefact<int> requiredIntArtefact = artefacts.OfRequiredType<int
 
 // Check for custom artefact class using LINQ
 bool hasCustomArtefact = artefacts.Any(x => x is MyCustomArtefact);
-var customArtefact = artefacts.OfType<MyCustomArtefact>().FirstOrDefault();
+
+// Get artefact using framework extension (by value type)
+var myIntArtefact = artefacts.OfType<int>();  // Returns ValuedCliCommandArtefact<int>?
 
 // Check if last command ran was of specific type
 bool wasLastCommand = artefacts.LastCommandRanWas<MyCommand>();
@@ -191,9 +191,9 @@ public class MyCommandFactory : ICliCommandFactory<MyCommand>
 
     public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
-        // Extract custom artefact
-        var artefact = artefacts.OfType<MyCustomArtefact>().FirstOrDefault();
-        return new MyCommand(artefact?.MyValue ?? 0);
+        // Extract artefact by value type
+        var artefact = artefacts.OfType<int>();
+        return new MyCommand(artefact?.Value ?? 0);
     }
 }
 ```
