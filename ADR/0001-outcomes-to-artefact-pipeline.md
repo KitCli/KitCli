@@ -181,7 +181,7 @@ public class SetValueCommandHandler : ICliCommandHandler<SetValueCommand>
 }
 
 // Second Command - Consumes the artefact from first command
-public record ProcessValueCommand : CliCommand;
+public record ProcessValueCommand(int InputValue) : CliCommand;
 
 // Factory - Uses artefact from previous command
 public class ProcessValueCommandFactory : ICliCommandFactory<ProcessValueCommand>
@@ -196,7 +196,7 @@ public class ProcessValueCommandFactory : ICliCommandFactory<ProcessValueCommand
     {
         // Extract artefact by value type from previous command's outcome
         var artefact = artefacts.OfType<int>();
-        return new ProcessValueCommand();  // Could pass artefact value to constructor
+        return new ProcessValueCommand(artefact?.Value ?? 0);
     }
 }
 
@@ -207,7 +207,7 @@ public class ProcessValueCommandHandler : ICliCommandHandler<ProcessValueCommand
     {
         return Task.FromResult(new CliCommandOutcome[]
         {
-            new OutputCliCommandOutcome("Processed the value from previous command")
+            new OutputCliCommandOutcome($"Processed value {request.InputValue} from previous command")
         });
     }
 }
