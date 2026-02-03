@@ -145,10 +145,10 @@ services.AddKeyedSingleton<IUnidentifiedCliCommandFactory, MyCommandFactory>(ser
 The framework provides helper methods for working with artefacts:
 ```csharp
 // Get artefact by value type (e.g., int, string, CliListAggregator<T>)
-ValuedCliCommandArtefact<int>? artefact = artefacts.OfType<int>();
+ValuedCliCommandArtefact<int>? pageNumberArtefact = artefacts.OfType<int>();
 
 // Get required artefact (throws if not found)
-ValuedCliCommandArtefact<int> artefact = artefacts.OfRequiredType<int>();
+ValuedCliCommandArtefact<int> requiredIntArtefact = artefacts.OfRequiredType<int>();
 
 // Check for custom artefact class using LINQ
 bool hasCustomArtefact = artefacts.Any(x => x is MyCustomArtefact);
