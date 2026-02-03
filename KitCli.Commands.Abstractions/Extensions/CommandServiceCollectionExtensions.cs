@@ -15,7 +15,7 @@ public static class CommandServiceCollectionExtensions
         }
 
         return serviceCollection
-            .AddCommandArtefacts()
+            .AddCommandArtefactFactories()
             .AddCommandGenerators(assembly)
             .AddMediatRCommandsAndHandlers(assembly);
     }

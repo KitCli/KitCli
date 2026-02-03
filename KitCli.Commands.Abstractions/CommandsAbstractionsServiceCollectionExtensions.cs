@@ -6,15 +6,22 @@ namespace KitCli.Commands.Abstractions;
 
 public static class CommandsAbstractionsServiceCollectionExtensions
 {
-    public static IServiceCollection AddCommandAbstractions(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddSingleton<ICliCommandOutcomeIoWriter, CliCommandNotFoundOutcomeIoWriter>();
-        services.AddSingleton<ICliCommandOutcomeIoWriter, OutputCliCommandOutcomeIoWriter>();
-        services.AddSingleton<ICliCommandOutcomeIoWriter, TableCliCommandOutcomeIoWriter>();
-        services.AddSingleton<ICliCommandOutcomeIoWriter, PageSizeCliCommandOutcomeIoWriter>();
-        services.AddSingleton<ICliCommandOutcomeIoWriter, PageNumberCliCommandOutcomeIoWriter>();
-        services.AddSingleton<ICliCommandOutcomeIoWriter, ExceptionCliCommandOutcomeIoWriter>(); 
+        public IServiceCollection AddCommandAbstractions()
+        {
+            services.AddSingleton<ICliCommandOutcomeIoWriter, CliCommandNotFoundOutcomeIoWriter>();
+            services.AddSingleton<ICliCommandOutcomeIoWriter, OutputCliCommandOutcomeIoWriter>();
+            services.AddSingleton<ICliCommandOutcomeIoWriter, TableCliCommandOutcomeIoWriter>();
+            services.AddSingleton<ICliCommandOutcomeIoWriter, PageSizeCliCommandOutcomeIoWriter>();
+            services.AddSingleton<ICliCommandOutcomeIoWriter, PageNumberCliCommandOutcomeIoWriter>();
+            services.AddSingleton<ICliCommandOutcomeIoWriter, ExceptionCliCommandOutcomeIoWriter>(); 
         
-        return services;
+            return services;
+        }
+
+        public IServiceCollection AddCommandOutcomeIoWriter<TWriter>() 
+            where TWriter : class, ICliCommandOutcomeIoWriter
+            => services.AddSingleton<ICliCommandOutcomeIoWriter, TWriter>();
     }
 }
