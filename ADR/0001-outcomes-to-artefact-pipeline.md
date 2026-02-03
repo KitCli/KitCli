@@ -144,11 +144,15 @@ services.AddKeyedSingleton<IUnidentifiedCliCommandFactory, MyCommandFactory>(ser
 **Artefact Extension Methods:**
 The framework provides helper methods for working with artefacts:
 ```csharp
-// Get artefact of specific type
-ValuedCliCommandArtefact<TArtefactType>? artefact = artefacts.OfType<TArtefactType>();
+// Get artefact by value type (e.g., int, string, CliListAggregator<T>)
+ValuedCliCommandArtefact<int>? artefact = artefacts.OfType<int>();
 
 // Get required artefact (throws if not found)
-ValuedCliCommandArtefact<TArtefactType> artefact = artefacts.OfRequiredType<TArtefactType>();
+ValuedCliCommandArtefact<int> artefact = artefacts.OfRequiredType<int>();
+
+// Check for custom artefact class using LINQ
+bool hasCustomArtefact = artefacts.FirstOrDefault(x => x is MyCustomArtefact) != null;
+var customArtefact = artefacts.OfType<MyCustomArtefact>().FirstOrDefault();
 
 // Check if last command ran was of specific type
 bool wasLastCommand = artefacts.LastCommandRanWas<MyCommand>();
@@ -181,13 +185,15 @@ public class MyCommandFactory : ICliCommandFactory<MyCommand>
 {
     public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
-        return artefacts.OfType<MyCustomArtefact>() != null;
+        // Check for custom artefact class
+        return artefacts.FirstOrDefault(x => x is MyCustomArtefact) != null;
     }
 
     public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
-        var artefact = artefacts.OfType<MyCustomArtefact>();
-        return new MyCommand(artefact?.Value ?? 0);
+        // Extract custom artefact
+        var artefact = artefacts.OfType<MyCustomArtefact>().FirstOrDefault();
+        return new MyCommand(artefact?.MyValue ?? 0);
     }
 }
 ```
