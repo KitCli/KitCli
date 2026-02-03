@@ -81,7 +81,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         catch (Exception exception)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Exceptional);
-            return [new CliCommandExceptionOutcome(exception)];
+            return [new ExceptionCliCommandOutcome(exception)];
         }
         finally
         {

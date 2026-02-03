@@ -123,7 +123,7 @@ public class CliWorkflowTests
             .Setup(sp => sp.GetService(typeof(IMediator)))
             .Returns(new Mock<IMediator>().Object);
         
-        var outcome = new CliCommandOutputOutcome(string.Empty);
+        var outcome = new OutputCliCommandOutcome(string.Empty);
         
         var reusableRunState = new CliWorkflowRunState();
         reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);

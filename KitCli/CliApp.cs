@@ -1,4 +1,5 @@
-using KitCli.Commands.Abstractions.Io.Outcomes;
+using KitCli.Abstractions.Io;
+using KitCli.Commands.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Workflow.Abstractions;
 
@@ -7,17 +8,26 @@ namespace KitCli;
 public abstract class CliApp
 {
     private readonly ICliWorkflow _workflow;
-    protected readonly ICliCommandOutcomeIo Io;
+    protected readonly ICliIo Io;
 
-    protected CliApp(ICliWorkflow workflow, ICliCommandOutcomeIo io)
+    protected CliApp(ICliWorkflow workflow, ICliIo io)
     {
         _workflow = workflow;
         Io = io;
     }
-    
-    public async Task Run()
+
+    public async Task Run(List<ICliCommandOutcomeIoWriter> outcomeIoWriters)
     { 
         OnSessionStart();
+        
+        Io.OnCancel(() =>
+        {
+            _workflow.Stop();
+            
+            OnSessionEnd(_workflow.Runs);
+            
+            Environment.Exit(exitCode: 0);
+        });
         
         while (_workflow.Status != CliWorkflowStatus.Stopped)
         {
@@ -32,13 +42,24 @@ public abstract class CliApp
             OnRunStarted(run, ask);
 
             var outcomes = await runTask;
-            
-            Io.Say(outcomes);
+
+            WriteOutcomes(outcomes, outcomeIoWriters);
             
             OnRunComplete(run, outcomes);
         }
         
         OnSessionEnd(_workflow.Runs);
+    }
+    
+    private void WriteOutcomes(CliCommandOutcome[] outcomes, List<ICliCommandOutcomeIoWriter> outcomeIoWriters)
+    {
+        foreach (var outcome in outcomes)
+        {
+            var writer = outcomeIoWriters
+                .FirstOrDefault(w => w.CanWriteFor(outcome));
+
+            writer?.Write(outcome);
+        }
     }
 
     protected virtual void OnSessionStart()

@@ -13,15 +13,15 @@ public abstract class CliCommandHandler
     protected static Task<CliCommandOutcome[]> AsyncOutcomeAs()
         => Task.FromResult(OutcomeAs());
     
-    protected static CliCommandOutcome[] OutcomeAs(CliTable cliTable)
-        => [new CliCommandTableOutcome(cliTable)];
+    protected static CliCommandOutcome[] OutcomeAs(Table table)
+        => [new TableCliCommandOutcome(table)];
 
     protected static CliCommandOutcome[] OutcomeAs(string message)
-        => [new CliCommandOutputOutcome(message)];
+        => [new OutputCliCommandOutcome(message)];
     
     protected static CliCommandOutcome[] OutcomeAs(params string[] messages)
         => messages
-            .Select(message => new CliCommandOutputOutcome(message))
+            .Select(message => new OutputCliCommandOutcome(message))
             .ToArray<CliCommandOutcome>();
 
     protected static Task<CliCommandOutcome[]> AsyncOutcomeAs(string message)

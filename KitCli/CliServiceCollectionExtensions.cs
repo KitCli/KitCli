@@ -1,5 +1,5 @@
 using KitCli.Abstractions;
-using KitCli.Commands.Abstractions.Io.Outcomes;
+using KitCli.Commands.Abstractions;
 using KitCli.Instructions.Extensions;
 using KitCli.Workflow;
 using KitCli.Workflow.Abstractions;
@@ -14,12 +14,12 @@ public static class CliServiceCollectionExtensions
     {
         serviceCollection.AddCliAbstractions();
         serviceCollection.AddCliInstructions();
+        serviceCollection.AddCommandAbstractions();
         
         serviceCollection.AddCliWorkflowCommands();
         
         serviceCollection.AddSingleton<ICliWorkflow, CliWorkflow>();
-        
-        serviceCollection.AddSingleton<ICliCommandOutcomeIo, CliCommandOutcomeIo>();
+
         
         serviceCollection.AddSingleton<CliApp, TCliApp>();
         

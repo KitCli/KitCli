@@ -2,12 +2,10 @@ using ConsoleTables;
 
 namespace KitCli.Abstractions.Tables;
 
-public class CliTable
+public class Table
 {
     public List<string> Columns { get; set; } = [];
     public List<List<object>> Rows { get; set; } = [];
-
-    public bool ShowRowCount { get; set; } = true;
 
     public override string ToString()
     {
@@ -15,7 +13,8 @@ public class CliTable
         {
             Options =
             {
-                EnableCount = ShowRowCount
+                // I do it in the output formatting
+                EnableCount = false
             }
         };
 

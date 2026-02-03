@@ -1,5 +1,6 @@
 using System.Reflection;
 using KitCli.Abstractions;
+using KitCli.Commands.Abstractions.Io;
 using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -97,7 +98,10 @@ public class CliAppBuilder
         
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
         
-        await cliApp.Run();
+        var outcomeIoWriters = serviceProvider
+            .GetServices<ICliCommandOutcomeIoWriter>();
+        
+        await cliApp.Run(outcomeIoWriters.ToList());
     }
     
     private void SetUpConfigurationBuilder()

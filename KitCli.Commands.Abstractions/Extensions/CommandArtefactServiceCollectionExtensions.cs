@@ -13,6 +13,7 @@ public static class CommandArtefactServiceCollectionExtensions
 {
     public static IServiceCollection AddCommandArtefacts(this IServiceCollection serviceCollection)
     {
+        // TODO: Artefacts - Add Service Collection Extension .AddCommandArtefact<>
         return serviceCollection
             .AddSingleton<ICliCommandArtefactFactory, RanCliCommandArtefactFactory>()
             .AddSingleton<ICliCommandArtefactFactory, PageSizeCliCommandArtefactFactory>()

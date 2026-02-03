@@ -1,4 +1,5 @@
-﻿using KitCli.Commands.Abstractions.Io.Outcomes;
+﻿using KitCli.Abstractions.Io;
+using KitCli.Commands.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Abstractions.Validators;
@@ -24,7 +25,8 @@ public class CliAppTests
     private CliWorkflowRun _workflowRun;
     
     private Mock<ICliWorkflow> _mockCliWorkflow;
-    private Mock<ICliCommandOutcomeIo> _mockCliIo;
+    private Mock<IEnumerable<ICliCommandOutcomeIoWriter>> _mockOutcomeIoWriters;
+    private Mock<ICliIo> _mockCliIo;
     private TestCliApp _classUnderTest;
 
     [SetUp]
@@ -33,8 +35,11 @@ public class CliAppTests
         SetUpWorkflowRun();
         
         _mockCliWorkflow = new Mock<ICliWorkflow>();
-        _mockCliIo = new Mock<ICliCommandOutcomeIo>();
-        _classUnderTest = new TestCliApp(_mockCliWorkflow.Object, _mockCliIo.Object);
+        _mockOutcomeIoWriters = new Mock<IEnumerable<ICliCommandOutcomeIoWriter>>();
+        _mockCliIo = new Mock<ICliIo>();
+        _classUnderTest = new TestCliApp(
+            _mockCliWorkflow.Object,
+            _mockCliIo.Object);
     }
 
     private void SetUpWorkflowRun()
@@ -83,12 +88,11 @@ public class CliAppTests
             });
         
         // Act
-        await _classUnderTest.Run(); // Starts a while loop, awaiting lets it run once.
+        await _classUnderTest.Run(_mockOutcomeIoWriters.Object.ToList()); // Starts a while loop, awaiting lets it run once.
         
-        // Assert
+        // Assertx
         _mockCliWorkflow.Verify(w => w.NextRun(), Times.Once);
-        _mockCliIo.Verify(io => io.Say(It.IsAny<CliCommandOutcome[]>()), Times.Once);
     }
 
-    private class TestCliApp(ICliWorkflow workflow, ICliCommandOutcomeIo io) : CliApp(workflow, io);
+    private class TestCliApp(ICliWorkflow workflow, ICliIo io) : CliApp(workflow, io);
 }

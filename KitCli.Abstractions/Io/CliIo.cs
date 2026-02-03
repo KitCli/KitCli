@@ -10,4 +10,10 @@ public class CliIo : ICliIo
     
     public void Say(string something)
         => Console.WriteLine(something);
+    
+    public void SetTitle(string title)
+        => Console.Title = title;
+
+    public void OnCancel(Action cancel) 
+        => Console.CancelKeyPress += (sender, e) => cancel();
 }
