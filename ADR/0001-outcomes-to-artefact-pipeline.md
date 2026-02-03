@@ -163,37 +163,52 @@ ListAggregatorCliCommandArtefact<TAggregate>? aggregator = artefacts.OfListAggre
 
 **Complete Example:**
 ```csharp
-// Command
-public record MyCommand(int Value) : CliCommand;
+// First Command - Produces an outcome
+public record SetValueCommand(int Value) : CliCommand;
 
 // Handler - Returns reusable outcome
-public class MyCommandHandler : ICliCommandHandler<MyCommand>
+public class SetValueCommandHandler : ICliCommandHandler<SetValueCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(MyCommand request, CancellationToken cancellationToken)
+    public Task<CliCommandOutcome[]> Handle(SetValueCommand request, CancellationToken cancellationToken)
     {
         var outcomes = new CliCommandOutcome[]
         {
-            new OutputCliCommandOutcome($"Processed value: {request.Value}"),
-            new MyCustomOutcome(request.Value * 2)  // Reusable outcome
+            new OutputCliCommandOutcome($"Set value to: {request.Value}"),
+            new MyCustomOutcome(request.Value)  // Reusable outcome - will become artefact
         };
         return Task.FromResult(outcomes);
     }
 }
 
+// Second Command - Consumes the artefact from first command
+public record ProcessValueCommand : CliCommand;
+
 // Factory - Uses artefact from previous command
-public class MyCommandFactory : ICliCommandFactory<MyCommand>
+public class ProcessValueCommandFactory : ICliCommandFactory<ProcessValueCommand>
 {
     public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
-        // Check for custom artefact class
+        // Check if artefact from previous command exists
         return artefacts.Any(x => x is MyCustomArtefact);
     }
 
     public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
-        // Extract artefact by value type
+        // Extract artefact by value type from previous command's outcome
         var artefact = artefacts.OfType<int>();
-        return new MyCommand(artefact?.Value ?? 0);
+        return new ProcessValueCommand();  // Could pass artefact value to constructor
+    }
+}
+
+// Handler for second command
+public class ProcessValueCommandHandler : ICliCommandHandler<ProcessValueCommand>
+{
+    public Task<CliCommandOutcome[]> Handle(ProcessValueCommand request, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new CliCommandOutcome[]
+        {
+            new OutputCliCommandOutcome("Processed the value from previous command")
+        });
     }
 }
 ```
