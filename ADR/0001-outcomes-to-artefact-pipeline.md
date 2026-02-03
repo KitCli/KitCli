@@ -119,7 +119,7 @@ public class MyCommandFactory : ICliCommandFactory<MyCommand>
     public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
         // Check if required artefacts are present
-        return artefacts.FirstOrDefault(x => x is MyCustomArtefact) != null;
+        return artefacts.Any(x => x is MyCustomArtefact);
     }
 
     public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
@@ -151,7 +151,7 @@ ValuedCliCommandArtefact<int>? artefact = artefacts.OfType<int>();
 ValuedCliCommandArtefact<int> artefact = artefacts.OfRequiredType<int>();
 
 // Check for custom artefact class using LINQ
-bool hasCustomArtefact = artefacts.FirstOrDefault(x => x is MyCustomArtefact) != null;
+bool hasCustomArtefact = artefacts.Any(x => x is MyCustomArtefact);
 var customArtefact = artefacts.OfType<MyCustomArtefact>().FirstOrDefault();
 
 // Check if last command ran was of specific type
@@ -186,7 +186,7 @@ public class MyCommandFactory : ICliCommandFactory<MyCommand>
     public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
     {
         // Check for custom artefact class
-        return artefacts.FirstOrDefault(x => x is MyCustomArtefact) != null;
+        return artefacts.Any(x => x is MyCustomArtefact);
     }
 
     public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
