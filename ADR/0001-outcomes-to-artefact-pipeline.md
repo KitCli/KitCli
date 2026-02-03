@@ -98,7 +98,7 @@ public class MyCustomArtefactFactory : ICliCommandArtefactFactory
 
 **Step 4: Register the Factory**
 ```csharp
-services.AddSingleton<ICliCommandArtefactFactory, MyCustomArtefactFactory>();
+services.AddCommandArtefactFactory<MyCustomArtefactFactory>();
 ```
 
 **Pipeline Flow:**
