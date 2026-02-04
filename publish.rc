@@ -1,5 +1,7 @@
 echo "Starting Publish to NuGet"
 
+export NUGET_API_KEY="YOUR_NUGET_API_KEY_HERE"  # Replace with your actual NuGet API key or set it in the environment
+
 # List of project files in the required order
 projects=(
   "KitCli.Abstractions/KitCli.Abstractions.csproj"
@@ -15,6 +17,7 @@ projects=(
 
 for proj in "${projects[@]}"; do
   if [[ -f "$proj" ]]; then
+    # Increment version
     awk '
       BEGIN { in_pg=0 }
       /<PropertyGroup>/ { in_pg=1 }
@@ -35,6 +38,32 @@ for proj in "${projects[@]}"; do
       }
     ' "$proj" > "$proj.tmp" && mv "$proj.tmp" "$proj"
     echo "Updated $proj <Version> in <PropertyGroup> (if present)"
+
+    # Build the project and create the NuGet package
+    dotnet pack "$proj" --configuration Release --no-build --output ./nupkgs
+    if [[ $? -ne 0 ]]; then
+      echo "dotnet pack failed for $proj"
+      exit 1
+    fi
+
+    # Find the generated .nupkg file
+    pkg_name=$(basename "$proj" .csproj)
+    nupkg_file=$(ls ./nupkgs/"$pkg_name".*.nupkg | sort | tail -n 1)
+    if [[ -f "$nupkg_file" ]]; then
+      # Push the package to NuGet
+      if [[ -z "$NUGET_API_KEY" ]]; then
+        echo "NUGET_API_KEY environment variable not set. Skipping push for $nupkg_file."
+      else
+        dotnet nuget push "$nupkg_file" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+        if [[ $? -eq 0 ]]; then
+          echo "Published $nupkg_file to NuGet."
+        else
+          echo "Failed to publish $nupkg_file."
+        fi
+      fi
+    else
+      echo "No .nupkg file found for $proj"
+    fi
   else
     echo "File not found: $proj"
   fi
