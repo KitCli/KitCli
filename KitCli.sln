@@ -5,6 +5,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Meta", "Meta", "{528597EC-7
 		README.md = README.md
 		LICENSE = LICENSE
 		.gitignore = .gitignore
+		update-versions.rc = update-versions.rc
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Instructions", "KitCli.Instructions\KitCli.Instructions.csproj", "{3DAF9443-CB74-4549-8032-551259B306FB}"
