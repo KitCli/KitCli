@@ -39,6 +39,13 @@ for proj in "${projects[@]}"; do
     ' "$proj" > "$proj.tmp" && mv "$proj.tmp" "$proj"
     echo "Updated $proj <Version> in <PropertyGroup> (if present)"
 
+    # Extract the new version from the .csproj
+    new_version=$(grep -oE '<Version>[0-9]+\.[0-9]+\.[0-9]+</Version>' "$proj" | head -n1 | sed -E 's/<\/?Version>//g')
+    if [[ -z "$new_version" ]]; then
+      echo "Could not extract new version from $proj. Skipping."
+      continue
+    fi
+
     # Build the project and create the NuGet package
     dotnet pack "$proj" --configuration Release --no-build --output ./nupkgs
     if [[ $? -ne 0 ]]; then
@@ -46,9 +53,9 @@ for proj in "${projects[@]}"; do
       exit 1
     fi
 
-    # Find the generated .nupkg file
+    # Find the generated .nupkg file using the exact version
     pkg_name=$(basename "$proj" .csproj)
-    nupkg_file=$(ls ./nupkgs/"$pkg_name".*.nupkg | sort | tail -n 1)
+    nupkg_file="./nupkgs/${pkg_name}.${new_version}.nupkg"
     if [[ -f "$nupkg_file" ]]; then
       # Push the package to NuGet
       if [[ -z "$NUGET_API_KEY" ]]; then
@@ -62,7 +69,7 @@ for proj in "${projects[@]}"; do
         fi
       fi
     else
-      echo "No .nupkg file found for $proj"
+      echo "No .nupkg file found for $proj (expected $nupkg_file)"
     fi
   else
     echo "File not found: $proj"
