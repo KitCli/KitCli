@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <PackageId>KitCli.Instructions</PackageId>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
         <Authors>Joshua Crowe</Authors>
         <Company>KitCli</Company>
     </PropertyGroup>
