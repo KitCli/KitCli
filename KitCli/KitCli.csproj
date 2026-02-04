@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <PackageId>KitCli</PackageId>
-        <Version>1.0.8</Version>
+        <Version>1.0.9</Version>
         <Authors>Joshua Crowe</Authors>
         <Company>KitCli</Company>
     </PropertyGroup>
