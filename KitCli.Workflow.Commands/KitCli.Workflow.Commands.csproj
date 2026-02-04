@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <PackageId>KitCli.Workflow.Commands</PackageId>
-        <Version>1.0.6</Version>
+        <Version>1.0.7</Version>
         <Authors>Joshua Crowe</Authors>
         <Company>KitCli</Company>
     </PropertyGroup>
