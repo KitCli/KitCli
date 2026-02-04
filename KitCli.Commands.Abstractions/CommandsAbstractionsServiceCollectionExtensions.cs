@@ -12,6 +12,7 @@ public static class CommandsAbstractionsServiceCollectionExtensions
         {
             services.AddSingleton<ICliCommandOutcomeIoWriter, CliCommandNotFoundOutcomeIoWriter>();
             services.AddSingleton<ICliCommandOutcomeIoWriter, OutputCliCommandOutcomeIoWriter>();
+            services.AddSingleton<ICliCommandOutcomeIoWriter, MessageCliCommandOutcomeIoWriter>();
             services.AddSingleton<ICliCommandOutcomeIoWriter, TableCliCommandOutcomeIoWriter>();
             services.AddSingleton<ICliCommandOutcomeIoWriter, PageSizeCliCommandOutcomeIoWriter>();
             services.AddSingleton<ICliCommandOutcomeIoWriter, PageNumberCliCommandOutcomeIoWriter>();

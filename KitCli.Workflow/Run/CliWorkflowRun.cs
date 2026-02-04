@@ -44,7 +44,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         if (!IsEmptyAsk(ask))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new CliCommandNothingOutcome()];
+            return [new NothingCliCommandOutcome()];
         }
         
         var instruction = _cliInstructionParser.Parse(ask!);
@@ -56,7 +56,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         else
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new CliCommandNothingOutcome()];
+            return [new NothingCliCommandOutcome()];
         }
 
         try
@@ -76,7 +76,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         catch (NoCommandGeneratorException)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new CliCommandNothingOutcome()];
+            return [new NothingCliCommandOutcome()];
         }
         catch (Exception exception)
         {

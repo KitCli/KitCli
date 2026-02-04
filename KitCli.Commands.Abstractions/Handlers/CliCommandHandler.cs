@@ -8,7 +8,7 @@ namespace KitCli.Commands.Abstractions.Handlers;
 public abstract class CliCommandHandler
 {
     protected static CliCommandOutcome[] OutcomeAs()
-        => [new CliCommandNothingOutcome()];
+        => [new NothingCliCommandOutcome()];
     
     protected static Task<CliCommandOutcome[]> AsyncOutcomeAs()
         => Task.FromResult(OutcomeAs());

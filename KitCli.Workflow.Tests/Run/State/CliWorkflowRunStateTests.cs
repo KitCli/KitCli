@@ -22,7 +22,7 @@ public abstract class CliWorkflowRunStateTests
     {
         if (status is ClIWorkflowRunStateStatus.ReachedReusableOutcome)
         {
-            var reusableOutcome = new CliCommandMessageOutcome(
+            var reusableOutcome = new MessageCliCommandOutcome(
                 nameof(ClIWorkflowRunStateStatus.ReachedReusableOutcome));
                 
             state.ChangeTo(status, [reusableOutcome]);

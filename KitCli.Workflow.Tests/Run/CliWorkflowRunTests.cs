@@ -65,7 +65,7 @@ public class CliWorkflowRunTests
         // Assert
         var firstOutcome = outcomes.FirstOrDefault();
         
-        Assert.That(firstOutcome, Is.InstanceOf<CliCommandNothingOutcome>());
+        Assert.That(firstOutcome, Is.InstanceOf<NothingCliCommandOutcome>());
     }
     
     [Test]
@@ -199,7 +199,7 @@ public class CliWorkflowRunTests
         
         var instruction = new CliInstruction("/", "some-valid-ask", null, []);
 
-        var nothingOutcome = new CliCommandNothingOutcome();
+        var nothingOutcome = new NothingCliCommandOutcome();
         
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))

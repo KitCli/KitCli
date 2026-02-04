@@ -2,6 +2,7 @@ using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
+using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
 
 public class TestCliCommandHandler : ICliCommandHandler<TestCliCommand>
@@ -11,6 +12,8 @@ public class TestCliCommandHandler : ICliCommandHandler<TestCliCommand>
         var commandNotFoundOutcome = new CliCommandNotFoundOutcome();
         
         var outputOutcome = new OutputCliCommandOutcome("Output: TestCliCommand executed successfully.");
+        
+        var messageOutcome = new MessageCliCommandOutcome("This is a message outcome for TestCliCommand.");
         
         var table = new Table
         {
@@ -33,6 +36,7 @@ public class TestCliCommandHandler : ICliCommandHandler<TestCliCommand>
         {
             commandNotFoundOutcome,
             outputOutcome,
+            messageOutcome,
             tableOutcome,
             pageSizeOutcome,
             pageNumberOutcome
