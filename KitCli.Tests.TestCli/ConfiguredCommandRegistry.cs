@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Tests.TestCli;
 
-public class ConfiguredCommandRegistry : ICliAppBuilderConfigurableRegistry<InstructionSettings> 
+public class ConfiguredCommandRegistry : IConfigurableCliAppRegistry<InstructionSettings> 
 {
     public void Register(InstructionSettings settings, IServiceCollection services)
     {

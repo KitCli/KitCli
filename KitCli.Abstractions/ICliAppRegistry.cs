@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Abstractions;
 
-public interface ICliAppBuilderRegistry
+public interface ICliAppRegistry
 {
     void Register(IServiceCollection services);
 }

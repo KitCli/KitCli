@@ -76,7 +76,7 @@ public class CliAppBuilder
         return this;
     }
     
-    public CliAppBuilder WithRegistry<TRegistry>() where TRegistry : ICliAppBuilderRegistry, new()
+    public CliAppBuilder WithRegistry<TRegistry>() where TRegistry : ICliAppRegistry, new()
     {
         var registry = new TRegistry();
         
@@ -87,7 +87,7 @@ public class CliAppBuilder
     
     public CliAppBuilder WithRegistry<TSettings, TRegistry>()
         where TSettings : class
-        where TRegistry : ICliAppBuilderConfigurableRegistry<TSettings>, new()
+        where TRegistry : IConfigurableCliAppRegistry<TSettings>, new()
     {
         var settings = GetSettings<TSettings>();
         var registry = new TRegistry();
