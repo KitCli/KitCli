@@ -14,6 +14,7 @@
       <ProjectReference Include="..\KitCli.Commands\KitCli.Commands.csproj" />
       <ProjectReference Include="..\KitCli.Instructions.Abstractions\KitCli.Instructions.Abstractions.csproj" />
       <ProjectReference Include="..\KitCli.Instructions\KitCli.Instructions.csproj" />
+      <ProjectReference Include="..\KitCli.Tests.TestCli.Commands\KitCli.Tests.TestCli.Commands.csproj" />
       <ProjectReference Include="..\KitCli.Workflow.Abstractions\KitCli.Workflow.Abstractions.csproj" />
       <ProjectReference Include="..\KitCli.Workflow.Commands\KitCli.Workflow.Commands.csproj" />
       <ProjectReference Include="..\KitCli.Workflow\KitCli.Workflow.csproj" />

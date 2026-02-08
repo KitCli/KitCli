@@ -14,6 +14,13 @@ public class CliAppBuilder
     private ConfigurationBuilder? _configurationBuilder;
     private IConfigurationRoot? _configuration;
     
+    public CliAppBuilder WithBasicCli()
+    {
+        _services.AddCli<BasicCliApp>();
+        
+        return this;
+    }
+    
     public CliAppBuilder WithCli<TCliApp>() where TCliApp : CliApp
     {
         _services.AddCli<TCliApp>();

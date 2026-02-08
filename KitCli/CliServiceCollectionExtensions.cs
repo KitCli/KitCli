@@ -21,7 +21,7 @@ public static class CliServiceCollectionExtensions
         serviceCollection.AddSingleton<ICliWorkflow, CliWorkflow>();
         
         serviceCollection.AddCliWorkflowCommands();
-        serviceCollection.AddCommandsFromAssembly(Assembly.GetCallingAssembly());
+        serviceCollection.AddCommandsFromAssembly(Assembly.GetEntryAssembly());
         
         serviceCollection.AddSingleton<CliApp, TCliApp>();
         
