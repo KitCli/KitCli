@@ -1,5 +1,7 @@
+using System.Reflection;
 using KitCli.Abstractions;
 using KitCli.Commands.Abstractions;
+using KitCli.Commands.Abstractions.Extensions;
 using KitCli.Instructions.Extensions;
 using KitCli.Workflow;
 using KitCli.Workflow.Abstractions;
@@ -16,10 +18,10 @@ public static class CliServiceCollectionExtensions
         serviceCollection.AddCliInstructions();
         serviceCollection.AddCommandAbstractions();
         
-        serviceCollection.AddCliWorkflowCommands();
-        
         serviceCollection.AddSingleton<ICliWorkflow, CliWorkflow>();
-
+        
+        serviceCollection.AddCliWorkflowCommands();
+        serviceCollection.AddCommandsFromAssembly(Assembly.GetCallingAssembly());
         
         serviceCollection.AddSingleton<CliApp, TCliApp>();
         
