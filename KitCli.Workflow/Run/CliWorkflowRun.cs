@@ -19,21 +19,21 @@ public class CliWorkflowRun : ICliWorkflowRun
     private readonly ICliInstructionParser _cliInstructionParser;
     private readonly ICliInstructionValidator _cliInstructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
-    private readonly IMediator _mediator;
+    private readonly ISender _sender;
 
     public CliWorkflowRun(
         CliWorkflowRunState state,
         ICliInstructionParser cliInstructionParser,
         ICliInstructionValidator cliInstructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
-        IMediator mediator)
+        ISender sender)
     {
         State = state;
         
         _cliInstructionParser = cliInstructionParser;
         _cliInstructionValidator = cliInstructionValidator;
         _workflowCommandProvider = workflowCommandProvider;
-        _mediator = mediator;
+        _sender = sender;
     }
 
     private bool IsEmptyAsk(string? ask) => !string.IsNullOrEmpty(ask);
@@ -63,7 +63,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         {
             var command = GetCommandFromInstruction(instruction);
 
-            var outcomes = await _mediator.Send(command);
+            var outcomes = await _sender.Send(command);
 
             var ranOutcome = new RanCliCommandOutcome(command);
             
