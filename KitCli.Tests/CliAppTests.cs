@@ -21,7 +21,8 @@ public class CliAppTests
     private Mock<ICliInstructionParser> _mockInstructionParser;
     private Mock<ICliInstructionValidator> _mockInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _mockWorkflowCommandProvider;
-    private Mock<IMediator> _mockMediator;
+    private Mock<ISender> _mockSender;
+    private Mock<IPublisher> _mockPublisher;
     private CliWorkflowRun _workflowRun;
     
     private Mock<ICliWorkflow> _mockCliWorkflow;
@@ -48,14 +49,16 @@ public class CliAppTests
         _mockInstructionParser = new Mock<ICliInstructionParser>();
         _mockInstructionValidator = new Mock<ICliInstructionValidator>();
         _mockWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
-        _mockMediator = new Mock<IMediator>();
+        _mockSender = new Mock<ISender>();
+        _mockPublisher = new Mock<IPublisher>();
         
         _workflowRun = new CliWorkflowRun(
             _workflowRunState,
             _mockInstructionParser.Object,
             _mockInstructionValidator.Object,
             _mockWorkflowCommandProvider.Object,
-            _mockMediator.Object);
+            _mockSender.Object,
+            _mockPublisher.Object);
     }
 
     [Test]

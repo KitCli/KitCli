@@ -50,12 +50,15 @@ public class CliWorkflow(IServiceProvider serviceProvider) : ICliWorkflow
         
         var sender = serviceProvider.GetRequiredService<ISender>();
         
+        var publisher = serviceProvider.GetRequiredService<IPublisher>();
+        
         var run = new CliWorkflowRun(
             state,
             instructionParser,
             instructionValidator,
             commandProvider,
-            sender);
+            sender,
+            publisher);
         
         Runs.Add(run);
 

@@ -50,8 +50,12 @@ public class CliWorkflowTests
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
         
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(IMediator)))
-            .Returns(new Mock<IMediator>().Object);
+            .Setup(sp => sp.GetService(typeof(ISender)))
+            .Returns(new Mock<ISender>().Object);
+        
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IPublisher)))
+            .Returns(new Mock<IPublisher>().Object);
         
         // Act
         var run = _classUnderTest.NextRun();
@@ -78,8 +82,12 @@ public class CliWorkflowTests
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
         
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(IMediator)))
-            .Returns(new Mock<IMediator>().Object);
+            .Setup(sp => sp.GetService(typeof(ISender)))
+            .Returns(new Mock<ISender>().Object);
+        
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IPublisher)))
+            .Returns(new Mock<IPublisher>().Object);
 
         var outcome = new TestCliCommandOutcome();
         
@@ -92,7 +100,8 @@ public class CliWorkflowTests
             new Mock<ICliInstructionParser>().Object,
             new Mock<ICliInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
-            new Mock<IMediator>().Object);
+            new Mock<ISender>().Object,
+            new Mock<IPublisher>().Object);
         
         _classUnderTest.Runs.Add(reusableRun);
         
@@ -136,7 +145,8 @@ public class CliWorkflowTests
             new Mock<ICliInstructionParser>().Object,
             new Mock<ICliInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
-            new Mock<IMediator>().Object);
+            new Mock<ISender>().Object,
+            new Mock<IPublisher>().Object);
         
         _classUnderTest.Runs.Add(reusableRun);
         

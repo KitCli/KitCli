@@ -31,7 +31,8 @@ public class CliWorkflowRunTests
     private Mock<ICliInstructionParser> _cliInstructionParser;
     private Mock<ICliInstructionValidator> _cliInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _cliWorkflowCommandProvider;
-    private Mock<IMediator> _mediator;
+    private Mock<ISender> _sender;
+    private Mock<IPublisher> _publisher;
     private CliWorkflowRun _classUnderTest;
     
     [SetUp]
@@ -42,14 +43,16 @@ public class CliWorkflowRunTests
         _cliInstructionParser = new Mock<ICliInstructionParser>();
         _cliInstructionValidator = new Mock<ICliInstructionValidator>();
         _cliWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
-        _mediator = new Mock<IMediator>();
+        _sender = new Mock<ISender>();
+        _publisher = new Mock<IPublisher>();
         
         _classUnderTest = new CliWorkflowRun(
             _cliWorkflowRunState,
             _cliInstructionParser.Object,
             _cliInstructionValidator.Object,
             _cliWorkflowCommandProvider.Object,
-            _mediator.Object
+            _sender.Object,
+            _publisher.Object
             );
     }
     
@@ -169,7 +172,7 @@ public class CliWorkflowRunTests
             .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
             .Returns(new CliCommand());
 
-        _mediator
+        _sender
             .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
             .Throws<Exception>();
         
@@ -213,7 +216,7 @@ public class CliWorkflowRunTests
             .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
             .Returns(new CliCommand());
 
-        _mediator
+        _sender
             .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([nothingOutcome]);
         
@@ -262,7 +265,7 @@ public class CliWorkflowRunTests
             .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
             .Returns(new CliCommand());
 
-        _mediator
+        _sender
             .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([outcome]);
         

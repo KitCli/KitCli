@@ -2,6 +2,7 @@ using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Exceptions;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
+using KitCli.Commands.Abstractions.Outcomes.Skippable;
 using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Abstractions.Validators;
 using KitCli.Instructions.Parsers;
@@ -20,13 +21,15 @@ public class CliWorkflowRun : ICliWorkflowRun
     private readonly ICliInstructionValidator _cliInstructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
     private readonly ISender _sender;
+    private readonly IPublisher _publisher;
 
     public CliWorkflowRun(
         CliWorkflowRunState state,
         ICliInstructionParser cliInstructionParser,
         ICliInstructionValidator cliInstructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
-        ISender sender)
+        ISender sender,
+        IPublisher publisher)
     {
         State = state;
         
@@ -34,6 +37,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         _cliInstructionValidator = cliInstructionValidator;
         _workflowCommandProvider = workflowCommandProvider;
         _sender = sender;
+        _publisher = publisher;
     }
 
     private bool IsEmptyAsk(string? ask) => !string.IsNullOrEmpty(ask);
@@ -69,6 +73,7 @@ public class CliWorkflowRun : ICliWorkflowRun
             
             CliCommandOutcome[] allOutcomes = [ranOutcome, ..outcomes];
             
+            await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
             
             return allOutcomes;
@@ -98,6 +103,16 @@ public class CliWorkflowRun : ICliWorkflowRun
             .ToList();
         
         return _workflowCommandProvider.GetCommand(instruction, priorOutcomes);
+    }
+
+    private Task TriggerCommandReactions(CliCommandOutcome[] outcomes)
+    {
+        var publishTasks = outcomes
+            .OfType<ReactionCliCommandOutcome>()
+            .Select(outcome => _publisher.Publish(outcome.Reaction))
+            .ToList();
+
+        return Task.WhenAll(publishTasks);
     }
 
     private void UpdateStateAfterOutcome(CliCommandOutcome[] outcomes)
