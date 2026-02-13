@@ -15,7 +15,7 @@ public class TestNextCliCommandHandler : CliCommandHandler<TestNextCliCommand>
         return FinishThisCommand()
             .BySaying("Initial Command Ran (0)")
             .ByMovingToCommand(nextCommand)
-            .ToArrayAsync();
+            .EndAsync();
     }
 }
 
@@ -30,7 +30,7 @@ public class NextTestOneCliCommandHandler : CliCommandHandler<TestNextOneCliComm
         return FinishThisCommand()
             .BySaying("Next Test One Command Ran (1)")
             .ByMovingToCommand(nextCommand)
-            .ToArrayAsync();
+            .EndAsync();
     }
 }
 
@@ -45,7 +45,7 @@ public class NextTestTwoCliCommandHandler : CliCommandHandler<NextTestTwoCliComm
         return FinishThisCommand()
             .BySaying("Next Test Two Command Ran (2)")
             .ByMovingToCommand(nextCommand)
-            .ToArrayAsync();
+            .EndAsync();
     }
 }
 
@@ -61,7 +61,7 @@ public class NextTestThreeCliCommandHandler : CliCommandHandler<NextTestThreeCli
         return FinishThisCommand()
             .BySaying("Next Test Three Command Ran (3)")
             .ByMovingToCommand(nextCommand)
-            .ToArrayAsync();
+            .EndAsync();
     }
 }
 
@@ -74,6 +74,6 @@ public class NextTestFourCliCommandHandler : CliCommandHandler<NextTestFourCliCo
         return FinishThisCommand()
             .BySaying("Next Test Four Command Ran (4)")
             .ByFinallySaying("All Done!")
-            .ToArrayAsync();
+            .EndAsync();
     }
 }

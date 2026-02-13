@@ -10,7 +10,7 @@ public abstract class CliCommandHandler<TCliCommand> : IRequestHandler<TCliComma
         => HandleCommand(command, cancellationToken);
 
     public virtual Task<Outcome[]> HandleCommand(TCliCommand command, CancellationToken cancellationToken) 
-        => FinishThisCommand().ByFinallySaying($"No functionality for {command.GetSpecificCommandName()} base command").ToArrayAsync();
+        => FinishThisCommand().ByFinallySaying($"No functionality for {command.GetSpecificCommandName()} base command").EndAsync();
 
     protected static OutcomeList FinishThisCommand() => [];
 }

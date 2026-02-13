@@ -39,5 +39,7 @@ public class OutcomeList : List<Outcome>
     public OutcomeList ByFinallyDoingNothing()
         => ByResultingIn(new NothingOutcome());
     
-    public Task<Outcome[]> ToArrayAsync() => Task.FromResult(ToArray());
+    public Outcome[] End() => ToArray();
+    
+    public Task<Outcome[]> EndAsync() => Task.FromResult(ToArray());
 }
