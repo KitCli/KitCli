@@ -5,7 +5,7 @@ public enum OutcomeKind
     /// <summary>
     /// Has no effect on the workflow run.
     /// </summary>
-    Skippable,
+    Anonymous,
     
     /// <summary>
     /// Allows further operation on the same run.

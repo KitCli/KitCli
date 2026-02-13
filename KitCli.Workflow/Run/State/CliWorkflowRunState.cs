@@ -11,26 +11,9 @@ public class CliWorkflowRunState : ICliWorkflowRunState
 {
     public Stopwatch Stopwatch { get; }= new Stopwatch();
     public List<ICliWorkflowRunStateChange> Changes { get; } = [];
-
-    public bool WasChangedTo(ClIWorkflowRunStateStatus status)
-     =>  Changes.Any(change => change.To == status);
     
     public bool WasChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses)
         => Changes.Any(change => oneOfStatuses.Contains(change.To));
-
-    // TODO: Why not just use (ReachedReusableOutcome)?
-    public bool WasChangedToReusableOutcome()
-    {
-        var lastOutcomeChange = Changes
-            .OfType<OutcomeCliWorkflowRunStateChange>()
-            .LastOrDefault();
-
-        var includesReusableOutcome = lastOutcomeChange?
-            .Outcomes
-            .Any(p => p.IsReusable);
-
-        return includesReusableOutcome ?? false;
-    }
     
     public List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges() 
         => Changes

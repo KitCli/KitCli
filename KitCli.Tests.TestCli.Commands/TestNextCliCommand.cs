@@ -1,8 +1,6 @@
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
-using KitCli.Commands.Abstractions.Outcomes.Final;
-using KitCli.Commands.Abstractions.Outcomes.Reusable;
 
 namespace KitCli.Tests.TestCli.Commands;
 
@@ -12,31 +10,29 @@ public class TestNextCliCommandHandler : CliCommandHandler<TestNextCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(TestNextCliCommand request, CancellationToken cancellationToken)
     {
-        var outcome = new NextCliCommandOutcome(new  NextTestOneCliCommand("Send from original command"));
-        
-        return Task.FromResult(new Outcome[]
-        {
-            outcome
-        });
+        var nextCommand = new TestNextOneCliCommand("I'm first (1)");
+
+        return FinishThisCommand()
+            .BySaying("Initial Command Ran (0)")
+            .ByMovingToCommand(nextCommand)
+            .ToArrayAsync();
     }
 }
 
-public record NextTestOneCliCommand(string Text) : CliCommand;
+public record TestNextOneCliCommand(string Text) : CliCommand;
 
-public class NextTestOneCliCommandHandler : CliCommandHandler<NextTestOneCliCommand>
+public class NextTestOneCliCommandHandler : CliCommandHandler<TestNextOneCliCommand>
 {
-    public override Task<Outcome[]> HandleCommand(NextTestOneCliCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(TestNextOneCliCommand request, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Next Test One Command Ran with Text: {request.Text}");
+        var nextCommand = new NextTestTwoCliCommand("I'm second (2)");
         
-        var outcome = new NextCliCommandOutcome(new  NextTestTwoCliCommand("Send from next test one command"));
-        return Task.FromResult(new Outcome[]
-        {
-            outcome
-        });
+        return FinishThisCommand()
+            .BySaying("Next Test One Command Ran (1)")
+            .ByMovingToCommand(nextCommand)
+            .ToArrayAsync();
     }
 }
-
 
 public record NextTestTwoCliCommand(string Text) : CliCommand;
 
@@ -44,12 +40,12 @@ public class NextTestTwoCliCommandHandler : CliCommandHandler<NextTestTwoCliComm
 {
     public override Task<Outcome[]> HandleCommand(NextTestTwoCliCommand request, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Next Test Two Command Ran with Text: {request.Text}");
-        var outcome = new NextCliCommandOutcome(new  NextTestThreeCliCommand("Send from next test two command"));
-        return Task.FromResult(new Outcome[]
-        {
-            outcome
-        });
+        var nextCommand = new NextTestThreeCliCommand("I'm third (3)");
+        
+        return FinishThisCommand()
+            .BySaying("Next Test Two Command Ran (2)")
+            .ByMovingToCommand(nextCommand)
+            .ToArrayAsync();
     }
 }
 
@@ -60,12 +56,12 @@ public class NextTestThreeCliCommandHandler : CliCommandHandler<NextTestThreeCli
 {
     public override Task<Outcome[]> HandleCommand(NextTestThreeCliCommand request, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Next Test Three Command Ran with Text: {request.Text}");
-        var outcome = new NextCliCommandOutcome(new  NextTestFourCliCommand("Send from next test three command"));
-        return Task.FromResult(new Outcome[]
-        {
-            outcome
-        });
+        var nextCommand = new NextTestFourCliCommand("I'm fourth (4)");
+        
+        return FinishThisCommand()
+            .BySaying("Next Test Three Command Ran (3)")
+            .ByMovingToCommand(nextCommand)
+            .ToArrayAsync();
     }
 }
 
@@ -75,10 +71,9 @@ public class NextTestFourCliCommandHandler : CliCommandHandler<NextTestFourCliCo
 {
     public override Task<Outcome[]> HandleCommand(NextTestFourCliCommand request, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Next Test Four Command Ran with Text: {request.Text}");
-        return Task.FromResult(new Outcome[]
-        {
-            new FinalMessageOutcome("Final Outcome from Next Test Four Command")
-        });
+        return FinishThisCommand()
+            .BySaying("Next Test Four Command Ran (4)")
+            .ByFinallySaying("All Done!")
+            .ToArrayAsync();
     }
 }

@@ -1,10 +1,9 @@
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Exceptions;
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
-using KitCli.Commands.Abstractions.Outcomes.Skippable;
-using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Abstractions.Validators;
 using KitCli.Instructions.Parsers;
 using KitCli.Workflow.Abstractions;
@@ -137,15 +136,15 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private void UpdateStateAfterOutcome(Outcome[] outcomes)
     {
-        var reusableOutcome = outcomes.LastOrDefault(x => x.IsReusable);
+        var lastOutcome = outcomes.LastOrDefault();
         
-        if (reusableOutcome is null)
+        if (lastOutcome is null || !lastOutcome.IsReusable)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, outcomes);
             return;
         }
         
-        if (reusableOutcome is NextCliCommandOutcome)
+        if (lastOutcome is NextCliCommandOutcome)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.MovePastAsk, outcomes);
             return;
@@ -156,11 +155,9 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private void UpdateStateWhenFinished()
     {
-        var runOngoing = State.WasChangedTo(
-            ClIWorkflowRunStateStatus.MovePastAsk,
-            ClIWorkflowRunStateStatus.ReachedReusableOutcome);
+        var runComplete = State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome);
         
-        if (!runOngoing)
+        if (runComplete)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Finished);
         }

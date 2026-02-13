@@ -1,5 +1,5 @@
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
-using KitCli.Commands.Abstractions.Outcomes.Skippable;
 using KitCli.Workflow.Abstractions;
 using KitCli.Workflow.Run.State;
 
@@ -23,7 +23,7 @@ public abstract class CliWorkflowRunStateTests
     {
         if (status is ClIWorkflowRunStateStatus.ReachedReusableOutcome)
         {
-            var reusableOutcome = new MessageOutcome(
+            var reusableOutcome = new SayOutcome(
                 nameof(ClIWorkflowRunStateStatus.ReachedReusableOutcome));
                 
             state.ChangeTo(status, [reusableOutcome]);

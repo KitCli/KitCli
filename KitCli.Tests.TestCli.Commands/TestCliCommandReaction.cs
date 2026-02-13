@@ -1,7 +1,7 @@
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
-using KitCli.Commands.Abstractions.Outcomes.Skippable;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 
 public record TestReactionCliCommand : CliCommand;
 

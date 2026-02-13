@@ -1,6 +1,6 @@
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
-using KitCli.Commands.Abstractions.Outcomes.Skippable;
 
 namespace KitCli.Commands.Abstractions.Artefacts.Aggregator.Filters;
 

@@ -1,10 +1,10 @@
 using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
-using KitCli.Commands.Abstractions.Outcomes.Skippable;
 
 public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
 {
@@ -14,7 +14,7 @@ public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
         
         var outputOutcome = new FinalMessageOutcome("Output: TestCliCommand executed successfully.");
         
-        var messageOutcome = new MessageOutcome("This is a message outcome for TestCliCommand.");
+        var messageOutcome = new SayOutcome("This is a message outcome for TestCliCommand.");
         
         var table = new Table
         {

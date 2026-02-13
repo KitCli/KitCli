@@ -24,10 +24,10 @@ public class CliWorkflow(IServiceProvider serviceProvider) : ICliWorkflow
     /// <returns>A sub-state mchine of an individual execution.</returns>
     public ICliWorkflowRun NextRun()
     {
-        var lastRunToAchieveReusableOutcome = Runs
-            .LastOrDefault(run => run.State.WasChangedToReusableOutcome());
+        var lastRunNotHavingReachedFinalOutcome = Runs
+            .SingleOrDefault(run => !run.State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome));
 
-        return lastRunToAchieveReusableOutcome ?? CreateNewRun();
+        return lastRunNotHavingReachedFinalOutcome ?? CreateNewRun();
     }
 
     /// <summary>

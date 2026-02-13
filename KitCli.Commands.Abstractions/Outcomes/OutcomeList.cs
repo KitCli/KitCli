@@ -1,0 +1,43 @@
+using KitCli.Abstractions.Tables;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
+using KitCli.Commands.Abstractions.Outcomes.Final;
+using KitCli.Commands.Abstractions.Outcomes.Reusable;
+
+namespace KitCli.Commands.Abstractions.Outcomes;
+
+public class OutcomeList : List<Outcome>
+{
+    public OutcomeList ByResultingIn(Outcome outcome)
+    {
+        Add(outcome);
+        return this;
+    }
+    
+    public OutcomeList ByResultingIn(params Outcome[] outcomes)
+    {
+        AddRange(outcomes);
+        return this;
+    }
+    
+    public OutcomeList BySaying(string message)
+        => ByResultingIn(new SayOutcome(message));
+
+    public OutcomeList BySaying(params string[] messages)
+        => ByResultingIn(messages.
+            Select(message => new SayOutcome(message))
+            .ToArray<Outcome>());
+    
+    public OutcomeList ByShowingTable(Table table)
+        => ByResultingIn(new TableOutcome(table));
+    
+    public OutcomeList ByMovingToCommand(CliCommand nextCommand)
+        => ByResultingIn(new NextCliCommandOutcome(nextCommand));
+    
+    public OutcomeList ByFinallySaying(string message)
+        => ByResultingIn(new FinalMessageOutcome(message));
+    
+    public OutcomeList ByFinallyDoingNothing()
+        => ByResultingIn(new NothingOutcome());
+    
+    public Task<Outcome[]> ToArrayAsync() => Task.FromResult(ToArray());
+}
