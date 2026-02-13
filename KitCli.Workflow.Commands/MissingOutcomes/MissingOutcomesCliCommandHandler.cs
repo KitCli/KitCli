@@ -11,7 +11,7 @@ internal class MissingOutcomesCliCommandHandler : CliCommandHandler<MissingOutco
 {
     private const string Message = "The following prerequisite outcomes were not returned from previous commands:";
 
-    public override Task<CliCommandOutcome[]> HandleCommand(MissingOutcomesCliCommand command, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(MissingOutcomesCliCommand command, CancellationToken cancellationToken)
     {
         var missingOutcomeList = string.Join(", ", command.MissingOutcomeNames);
         return AsyncOutcomeAs($"{Message} {missingOutcomeList}");

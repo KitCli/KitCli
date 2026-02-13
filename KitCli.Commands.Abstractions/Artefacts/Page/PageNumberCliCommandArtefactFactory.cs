@@ -5,11 +5,11 @@ namespace KitCli.Commands.Abstractions.Artefacts.Page;
 
 public class PageNumberCliCommandArtefactFactory : ICliCommandArtefactFactory
 {
-    public bool For(CliCommandOutcome outcome) => outcome is PageNumberCliCommandOutcome;
+    public bool For(Outcome outcome) => outcome is PageNumberOutcome;
 
-    public CliCommandArtefact Create(CliCommandOutcome outcome)
+    public CliCommandArtefact Create(Outcome outcome)
     {
-        if (outcome is not PageNumberCliCommandOutcome pageNumberOutcome)
+        if (outcome is not PageNumberOutcome pageNumberOutcome)
             throw new InvalidOperationException("Cannot create PageNumberCliCommandArtefact from the given outcome.");
 
         return new PageNumberCliCommandArtefact(pageNumberOutcome.PageNumber);

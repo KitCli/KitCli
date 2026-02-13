@@ -12,11 +12,11 @@ public class OtherTetCliCommandFactory : BasicCliCommandFactory<OtherTestCliComm
 
 public class OtherTestCliCommandHandler : CliCommandHandler<OtherTestCliCommand>
 {
-    public override Task<CliCommandOutcome[]> HandleCommand(OtherTestCliCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(OtherTestCliCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new CliCommandOutcome[]
+        return Task.FromResult(new Outcome[]
         {
-            new OutputCliCommandOutcome("Other Outcome Ran")
+            new FinalMessageOutcome("Other Outcome Ran")
         });
     }
 }

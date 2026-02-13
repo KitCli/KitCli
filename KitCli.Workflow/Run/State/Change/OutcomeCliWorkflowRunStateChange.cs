@@ -6,13 +6,13 @@ namespace KitCli.Workflow.Run.State.Change;
 
 public class OutcomeCliWorkflowRunStateChange : CliWorkflowRunStateChange, IOutcomeCliWorkflowRunStateChange
 {
-    public CliCommandOutcome[] Outcomes { get; }
+    public Outcome[] Outcomes { get; }
     
     public OutcomeCliWorkflowRunStateChange(
         TimeSpan at,
         ClIWorkflowRunStateStatus from,
         ClIWorkflowRunStateStatus to,
-        CliCommandOutcome[] outcomes) : base(at, from, to)
+        Outcome[] outcomes) : base(at, from, to)
     {
         Outcomes = outcomes;
     }

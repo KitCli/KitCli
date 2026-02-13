@@ -1,6 +1,6 @@
 namespace KitCli.Commands.Abstractions.Outcomes;
 
-public enum CliCommandOutcomeKind
+public enum OutcomeKind
 {
     /// <summary>
     /// Has no effect on the workflow run.

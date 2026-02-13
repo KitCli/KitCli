@@ -5,11 +5,11 @@ namespace KitCli.Commands.Abstractions.Artefacts.Aggregator;
 
 public class ListAggregatorCliCommandArtefactFactory<TAggregate> : ICliCommandArtefactFactory
 {
-    public bool For(CliCommandOutcome outcome) => outcome is ListAggregatorCliCommandOutcome<TAggregate>;
+    public bool For(Outcome outcome) => outcome is ListAggregatorOutcome<TAggregate>;
 
-    public CliCommandArtefact Create(CliCommandOutcome outcome)
+    public CliCommandArtefact Create(Outcome outcome)
     {
-        if (outcome is ListAggregatorCliCommandOutcome<TAggregate> aggregatorOutcome)
+        if (outcome is ListAggregatorOutcome<TAggregate> aggregatorOutcome)
         {
             return new ListAggregatorCliCommandArtefact<TAggregate>(aggregatorOutcome.Aggregator);
         }

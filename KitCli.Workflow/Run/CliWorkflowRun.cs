@@ -42,12 +42,12 @@ public class CliWorkflowRun : ICliWorkflowRun
         _publisher = publisher;
     }
 
-    public async ValueTask<CliCommandOutcome[]> RespondToAsk(string? ask)
+    public async ValueTask<Outcome[]> RespondToAsk(string? ask)
     {
         if (!IsValidAsk(ask))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new NothingCliCommandOutcome()];
+            return [new NothingOutcome()];
         }
         
         var instruction = _cliInstructionParser.Parse(ask!);
@@ -59,7 +59,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         else
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new NothingCliCommandOutcome()];
+            return [new NothingOutcome()];
         }
         
         var priorOutcomes = AllPriorOutcomes();
@@ -69,12 +69,12 @@ public class CliWorkflowRun : ICliWorkflowRun
         return await ExecuteCommand(command);
     }
 
-    public async ValueTask<CliCommandOutcome[]> RespondToNext()
+    public async ValueTask<Outcome[]> RespondToNext()
     { 
         if (!IsValidMovePastAsk())
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidMovePastAsk);
-            return [new NothingCliCommandOutcome()];
+            return [new NothingOutcome()];
         }
 
         State.ChangeTo(ClIWorkflowRunStateStatus.Running);
@@ -86,13 +86,13 @@ public class CliWorkflowRun : ICliWorkflowRun
         return await ExecuteCommand(nextOutcome.NextCommand);
     }
     
-    private async Task<CliCommandOutcome[]> ExecuteCommand(CliCommand command)
+    private async Task<Outcome[]> ExecuteCommand(CliCommand command)
     {
         try
         {
             var outcomes = await _sender.Send(command);
             
-            CliCommandOutcome[] allOutcomes = [new RanCliCommandOutcome(command), ..outcomes];
+            Outcome[] allOutcomes = [new RanOutcome(command), ..outcomes];
             
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
@@ -102,12 +102,12 @@ public class CliWorkflowRun : ICliWorkflowRun
         catch (NoCommandGeneratorException)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new NothingCliCommandOutcome()];
+            return [new NothingOutcome()];
         }
         catch (Exception exception)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Exceptional);
-            return [new ExceptionCliCommandOutcome(exception)];
+            return [new ExceptionOutcome(exception)];
         }
         finally
         {
@@ -125,17 +125,17 @@ public class CliWorkflowRun : ICliWorkflowRun
             .OfType<NextCliCommandOutcome>()
             .Any();
 
-    private Task TriggerCommandReactions(CliCommandOutcome[] outcomes)
+    private Task TriggerCommandReactions(Outcome[] outcomes)
     {
         var publishTasks = outcomes
-            .OfType<ReactionCliCommandOutcome>()
+            .OfType<ReactionOutcome>()
             .Select(outcome => _publisher.Publish(outcome.Reaction))
             .ToList();
 
         return Task.WhenAll(publishTasks);
     }
 
-    private void UpdateStateAfterOutcome(CliCommandOutcome[] outcomes)
+    private void UpdateStateAfterOutcome(Outcome[] outcomes)
     {
         var reusableOutcome = outcomes.LastOrDefault(x => x.IsReusable);
         
@@ -167,7 +167,7 @@ public class CliWorkflowRun : ICliWorkflowRun
     }
     
     // TODO: Perhaps move to extension somewhere
-    private List<CliCommandOutcome> AllPriorOutcomes()
+    private List<Outcome> AllPriorOutcomes()
         => State
             .AllOutcomeStateChanges()
             .SelectMany(change => change.Outcomes)

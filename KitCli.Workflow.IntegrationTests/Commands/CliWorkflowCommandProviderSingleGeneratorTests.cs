@@ -51,7 +51,7 @@ public class CliWorkflowCommandProviderSingleGeneratorTests
     {
         // Arrange
         var instruction = new CliInstruction("/", "test", null, []);
-        var outcomes = new List<CliCommandOutcome>();
+        var outcomes = new List<Outcome>();
         
         // Act
         var result = _cliWorkflowCommandProvider.GetCommand(instruction, outcomes);

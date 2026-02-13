@@ -106,7 +106,7 @@ public class CliAppBuilder
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
         
         var outcomeIoWriters = serviceProvider
-            .GetServices<ICliCommandOutcomeIoWriter>();
+            .GetServices<IOutcomeIoWriter>();
         
         await cliApp.Run(outcomeIoWriters.ToList());
     }

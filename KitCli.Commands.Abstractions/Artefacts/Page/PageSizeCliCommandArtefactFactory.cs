@@ -5,11 +5,11 @@ namespace KitCli.Commands.Abstractions.Artefacts.Page;
 
 public class PageSizeCliCommandArtefactFactory : ICliCommandArtefactFactory
 {
-    public bool For(CliCommandOutcome outcome) => outcome is PageSizeCliCommandOutcome;
+    public bool For(Outcome outcome) => outcome is PageSizeOutcome;
 
-    public CliCommandArtefact Create(CliCommandOutcome outcome)
+    public CliCommandArtefact Create(Outcome outcome)
     {
-        if (outcome is not PageSizeCliCommandOutcome pageSizeOutcome)
+        if (outcome is not PageSizeOutcome pageSizeOutcome)
             throw new InvalidOperationException("Cannot create PageSizeCliCommandArtefact from the given outcome.");
         
         return new PageSizeCliCommandArtefact(pageSizeOutcome.PageSize);

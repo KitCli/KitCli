@@ -75,7 +75,7 @@ public class CliWorkflowCommandProviderMultipleGeneratorTests
     {
         // Arrange
         var instruction = new CliInstruction("/", "test", subCommandName, []);
-        var outcomes = new List<CliCommandOutcome>();
+        var outcomes = new List<Outcome>();
         
         // Act
         var cliCommand = _cliWorkflowCommandProvider.GetCommand(instruction, outcomes);

@@ -15,7 +15,7 @@ namespace KitCli.Workflow.Tests;
 [TestFixture]
 public class CliWorkflowTests
 {
-    private class TestCliCommandOutcome() : CliCommandOutcome(CliCommandOutcomeKind.Reusable);
+    private class TestOutcome() : Outcome(OutcomeKind.Reusable);
     
     private Mock<IServiceProvider> _serviceProviderMock;
     private CliWorkflow _classUnderTest;
@@ -89,7 +89,7 @@ public class CliWorkflowTests
             .Setup(sp => sp.GetService(typeof(IPublisher)))
             .Returns(new Mock<IPublisher>().Object);
 
-        var outcome = new TestCliCommandOutcome();
+        var outcome = new TestOutcome();
         
         var reusableRunState = new CliWorkflowRunState();
         reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);
@@ -132,7 +132,7 @@ public class CliWorkflowTests
             .Setup(sp => sp.GetService(typeof(IMediator)))
             .Returns(new Mock<IMediator>().Object);
         
-        var outcome = new OutputCliCommandOutcome(string.Empty);
+        var outcome = new FinalMessageOutcome(string.Empty);
         
         var reusableRunState = new CliWorkflowRunState();
         reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);

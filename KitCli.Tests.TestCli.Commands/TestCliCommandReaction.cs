@@ -7,11 +7,11 @@ public record TestReactionCliCommand : CliCommand;
 
 public class TestReactionCliCommandHandler : CliCommandHandler<TestReactionCliCommand>
 {
-    public override Task<CliCommandOutcome[]> HandleCommand(TestReactionCliCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(TestReactionCliCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new CliCommandOutcome[]
+        return Task.FromResult(new Outcome[]
         {
-            new ReactionCliCommandOutcome
+            new ReactionOutcome
             {
                 Reaction = new TestCliCommandReaction()
             }

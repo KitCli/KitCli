@@ -11,7 +11,7 @@ namespace KitCli.Workflow.Commands;
 public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICliWorkflowCommandProvider
 {
     // TODO: Test cases for the exceptions.
-    public CliCommand GetCommand(CliInstruction instruction, List<CliCommandOutcome> outcomes)
+    public CliCommand GetCommand(CliInstruction instruction, List<Outcome> outcomes)
     {
         var generators = serviceProvider
             .GetKeyedServices<IUnidentifiedCliCommandFactory>(instruction.Name)
@@ -33,7 +33,7 @@ public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICli
         return generator.Create(instruction, artefacts);
     }
 
-    private List<CliCommandArtefact> ConvertOutcomesToArtefacts(List<CliCommandOutcome> priorOutcomes)
+    private List<CliCommandArtefact> ConvertOutcomesToArtefacts(List<Outcome> priorOutcomes)
     {
         var artefactFactories = serviceProvider.GetServices<ICliCommandArtefactFactory>();
         

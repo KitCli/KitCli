@@ -21,7 +21,7 @@ public class OutcomeCliWorkflowStateChangeTests : CliWorkflowRunStateTests
 
         var state = GetPreparedState(priorStatuses);
 
-        var outcome = new NothingCliCommandOutcome();
+        var outcome = new NothingOutcome();
         
         // Act & Assert
         Assert.Throws<ImpossibleStateChangeException>(() => state.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, [outcome]));
@@ -38,7 +38,7 @@ public class OutcomeCliWorkflowStateChangeTests : CliWorkflowRunStateTests
 
         var state = GetPreparedState(priorStatuses);
 
-        var outcome = new NothingCliCommandOutcome();
+        var outcome = new NothingOutcome();
         
         // Act
         state.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, [outcome]);

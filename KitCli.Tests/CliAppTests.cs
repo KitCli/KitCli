@@ -26,7 +26,7 @@ public class CliAppTests
     private CliWorkflowRun _workflowRun;
     
     private Mock<ICliWorkflow> _mockCliWorkflow;
-    private Mock<IEnumerable<ICliCommandOutcomeIoWriter>> _mockOutcomeIoWriters;
+    private Mock<IEnumerable<IOutcomeIoWriter>> _mockOutcomeIoWriters;
     private Mock<ICliIo> _mockCliIo;
     private TestCliApp _classUnderTest;
 
@@ -36,7 +36,7 @@ public class CliAppTests
         SetUpWorkflowRun();
         
         _mockCliWorkflow = new Mock<ICliWorkflow>();
-        _mockOutcomeIoWriters = new Mock<IEnumerable<ICliCommandOutcomeIoWriter>>();
+        _mockOutcomeIoWriters = new Mock<IEnumerable<IOutcomeIoWriter>>();
         _mockCliIo = new Mock<ICliIo>();
         _classUnderTest = new TestCliApp(
             _mockCliWorkflow.Object,

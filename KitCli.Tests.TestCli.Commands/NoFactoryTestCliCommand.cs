@@ -9,11 +9,11 @@ public record NoFactoryTestCliCommand : CliCommand;
 
 public class NoFactoryTestCliCommandHandler : CliCommandHandler<NoFactoryTestCliCommand>
 {
-    public override Task<CliCommandOutcome[]> HandleCommand(NoFactoryTestCliCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(NoFactoryTestCliCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new CliCommandOutcome[]
+        return Task.FromResult(new Outcome[]
         {
-            new OutputCliCommandOutcome("No Factory Outcome Ran")
+            new FinalMessageOutcome("No Factory Outcome Ran")
         });
     }
 }

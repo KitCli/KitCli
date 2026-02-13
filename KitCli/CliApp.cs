@@ -16,7 +16,7 @@ public abstract class CliApp
         Io = io;
     }
 
-    public async Task Run(List<ICliCommandOutcomeIoWriter> outcomeIoWriters)
+    public async Task Run(List<IOutcomeIoWriter> outcomeIoWriters)
     { 
         OnSessionStart();
         
@@ -61,7 +61,7 @@ public abstract class CliApp
         OnSessionEnd(_workflow.Runs);
     }
     
-    private void WriteOutcomes(CliCommandOutcome[] outcomes, List<ICliCommandOutcomeIoWriter> outcomeIoWriters)
+    private void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
     {
         foreach (var outcome in outcomes)
         {
@@ -84,7 +84,7 @@ public abstract class CliApp
     {
     }
 
-    protected virtual void OnRunComplete(ICliWorkflowRun run, CliCommandOutcome[] outcomes)
+    protected virtual void OnRunComplete(ICliWorkflowRun run, Outcome[] outcomes)
     {
     }
     

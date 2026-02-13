@@ -23,5 +23,5 @@ public interface ICliWorkflowRunState
 
     void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, CliInstruction instruction);
 
-    void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, CliCommandOutcome[] outcomes);
+    void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, Outcome[] outcomes);
 }

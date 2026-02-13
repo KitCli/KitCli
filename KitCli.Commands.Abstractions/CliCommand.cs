@@ -10,7 +10,7 @@ namespace KitCli.Commands.Abstractions;
 /// A command that can be executed via the CLI.
 /// For example, "List all transactions for payee X".
 /// </summary>
-public record CliCommand : IRequest<CliCommandOutcome[]>
+public record CliCommand : IRequest<Outcome[]>
 {
     internal string GetSpecificCommandName()
         => GetType().Name.ReplaceCommandSuffix();

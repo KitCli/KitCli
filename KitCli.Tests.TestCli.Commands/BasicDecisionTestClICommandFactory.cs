@@ -18,11 +18,11 @@ public class BasicDecisionTestClICommandFactory : BasicDecisionCliCommandFactory
 
 public class BasicDecisionTestClICommandHandler : CliCommandHandler<BasicDecisionTestCliCommand>
 {
-    public override Task<CliCommandOutcome[]> HandleCommand(BasicDecisionTestCliCommand command, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(BasicDecisionTestCliCommand command, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new CliCommandOutcome[]
+        return Task.FromResult(new Outcome[]
         {
-            new OutputCliCommandOutcome("Basic Decision Test Command Ran")
+            new FinalMessageOutcome("Basic Decision Test Command Ran")
         });
     }
 }

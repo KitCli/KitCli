@@ -4,13 +4,13 @@ using KitCli.Commands.Abstractions.Outcomes.Final;
 
 namespace KitCli.Commands.Abstractions.Io;
 
-public class TableCliCommandOutcomeIoWriter(ICliIo cliIo) : ICliCommandOutcomeIoWriter
+public class TableOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {
-    public bool CanWriteFor(CliCommandOutcome outcome) => outcome is TableCliCommandOutcome;
+    public bool CanWriteFor(Outcome outcome) => outcome is TableOutcome;
 
-    public void Write(CliCommandOutcome outcome)
+    public void Write(Outcome outcome)
     {
-        var tableOutcome = (TableCliCommandOutcome)outcome;
+        var tableOutcome = (TableOutcome)outcome;
         cliIo.Say(tableOutcome.Table.ToString());
         cliIo.Say($"Results: {tableOutcome.Table.Rows.Count} rows");
     }

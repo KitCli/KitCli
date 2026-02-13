@@ -4,7 +4,7 @@ namespace KitCli.Commands.Abstractions.Artefacts;
 
 public interface ICliCommandArtefactFactory
 {
-    bool For(CliCommandOutcome outcome);
+    bool For(Outcome outcome);
     
-    CliCommandArtefact Create(CliCommandOutcome outcome);
+    CliCommandArtefact Create(Outcome outcome);
 }

@@ -62,7 +62,7 @@ public class CliWorkflowCommandProviderNoApplicableGeneratorTests
     {
         // Arrange
         var instruction = new CliInstruction("/", "test", "non-applicable-sub-command", []);
-        var outcomes = new List<CliCommandOutcome>();
+        var outcomes = new List<Outcome>();
         
         // Act & Assert
         Assert.Throws<NoCommandGeneratorException>(() => _cliWorkflowCommandProvider.GetCommand(instruction, outcomes));

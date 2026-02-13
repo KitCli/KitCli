@@ -5,14 +5,14 @@ using KitCli.Commands.Abstractions.Outcomes.Final;
 
 namespace KitCli.Commands.Abstractions.Outputs.Outcomes;
 
-public class ExceptionCliCommandOutcomeIoWriter(ICliIo cliIo) : ICliCommandOutcomeIoWriter
+public class ExceptionOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {
-    public bool CanWriteFor(CliCommandOutcome outcome)
-        => outcome is ExceptionCliCommandOutcome;
+    public bool CanWriteFor(Outcome outcome)
+        => outcome is ExceptionOutcome;
 
-    public void Write(CliCommandOutcome outcome)
+    public void Write(Outcome outcome)
     {
-        var exceptionOutcome = (ExceptionCliCommandOutcome)outcome;
+        var exceptionOutcome = (ExceptionOutcome)outcome;
         cliIo.Say(exceptionOutcome.Exception.Message);
     }
 }

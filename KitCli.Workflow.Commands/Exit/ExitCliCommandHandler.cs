@@ -8,11 +8,11 @@ namespace KitCli.Workflow.Commands.Exit;
 // TODO: Write unit tests.
 public class ExitCliCommandHandler(ICliWorkflow cliWorkflow) : CliCommandHandler<ExitCliCommand>
 {
-    public override Task<CliCommandOutcome[]> HandleCommand(ExitCliCommand command, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(ExitCliCommand command, CancellationToken cancellationToken)
     {
         cliWorkflow.Stop();
         
-        var outcome = new OutputCliCommandOutcome("Exiting CLI workflow.");
-        return Task.FromResult<CliCommandOutcome[]>([outcome]);
+        var outcome = new FinalMessageOutcome("Exiting CLI workflow.");
+        return Task.FromResult<Outcome[]>([outcome]);
     }
 }

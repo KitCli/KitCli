@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADR", "ADR", "{B5381D3F-A87
 	ProjectSection(SolutionItems) = preProject
 		ADR\DependencyGraph.drawio = ADR\DependencyGraph.drawio
 		ADR\DependencyGraph.drawio.png = ADR\DependencyGraph.drawio.png
+		ADR\Notes - Outcomes.txt = ADR\Notes - Outcomes.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli", "KitCli\KitCli.csproj", "{1C607C1F-B2A8-4405-B5F9-224D8434FDA4}"

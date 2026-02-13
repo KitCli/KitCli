@@ -25,7 +25,7 @@ public class TestCliApp : CliApp
         Io.Say("TestCliApp run started.");
     }
 
-    protected override void OnRunComplete(ICliWorkflowRun run, CliCommandOutcome[] outcomes)
+    protected override void OnRunComplete(ICliWorkflowRun run, Outcome[] outcomes)
     {
         Io.Say("TestCliApp run completed.");
 

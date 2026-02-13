@@ -14,15 +14,15 @@ public class CliWorkflowCommandProviderCommandArtefactTests
 {
     private record TestCliCommand : CliCommand;
 
-    private class TestCliCommandOutcome() : CliCommandOutcome(CliCommandOutcomeKind.Reusable);
+    private class TestOutcome() : Outcome(OutcomeKind.Reusable);
     
     private class TestCliCommandArtefact() : CliCommandArtefact("Test");
     
     private class TestCliCommandArtefactFactory : ICliCommandArtefactFactory
     {
-        public bool For(CliCommandOutcome outcome) => outcome is TestCliCommandOutcome;
+        public bool For(Outcome outcome) => outcome is TestOutcome;
 
-        public CliCommandArtefact Create(CliCommandOutcome outcome) => new TestCliCommandArtefact();
+        public CliCommandArtefact Create(Outcome outcome) => new TestCliCommandArtefact();
     }
 
     private class TestCliCommandFactory : BasicCliCommandFactory<TestCliCommand>;
@@ -59,9 +59,9 @@ public class CliWorkflowCommandProviderCommandArtefactTests
         // Arrange
         var instruction = new CliInstruction("/", "test", null, []);
         
-        var outcomes = new List<CliCommandOutcome>
+        var outcomes = new List<Outcome>
         {
-            new TestCliCommandOutcome()
+            new TestOutcome()
         };
         
         // Act

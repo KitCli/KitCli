@@ -10,19 +10,19 @@ public static class CommandsAbstractionsServiceCollectionExtensions
     {
         public IServiceCollection AddCommandAbstractions()
         {
-            services.AddSingleton<ICliCommandOutcomeIoWriter, CliCommandNotFoundOutcomeIoWriter>();
-            services.AddSingleton<ICliCommandOutcomeIoWriter, OutputCliCommandOutcomeIoWriter>();
-            services.AddSingleton<ICliCommandOutcomeIoWriter, MessageCliCommandOutcomeIoWriter>();
-            services.AddSingleton<ICliCommandOutcomeIoWriter, TableCliCommandOutcomeIoWriter>();
-            services.AddSingleton<ICliCommandOutcomeIoWriter, PageSizeCliCommandOutcomeIoWriter>();
-            services.AddSingleton<ICliCommandOutcomeIoWriter, PageNumberCliCommandOutcomeIoWriter>();
-            services.AddSingleton<ICliCommandOutcomeIoWriter, ExceptionCliCommandOutcomeIoWriter>(); 
+            services.AddSingleton<IOutcomeIoWriter, NotFoundOutcomeIoWriter>();
+            services.AddSingleton<IOutcomeIoWriter, OutputOutcomeIoWriter>();
+            services.AddSingleton<IOutcomeIoWriter, MessageOutcomeIoWriter>();
+            services.AddSingleton<IOutcomeIoWriter, TableOutcomeIoWriter>();
+            services.AddSingleton<IOutcomeIoWriter, PageSizeOutcomeIoWriter>();
+            services.AddSingleton<IOutcomeIoWriter, PageNumberOutcomeIoWriter>();
+            services.AddSingleton<IOutcomeIoWriter, ExceptionOutcomeIoWriter>(); 
         
             return services;
         }
 
         public IServiceCollection AddCommandOutcomeIoWriter<TWriter>() 
-            where TWriter : class, ICliCommandOutcomeIoWriter
-            => services.AddSingleton<ICliCommandOutcomeIoWriter, TWriter>();
+            where TWriter : class, IOutcomeIoWriter
+            => services.AddSingleton<IOutcomeIoWriter, TWriter>();
     }
 }

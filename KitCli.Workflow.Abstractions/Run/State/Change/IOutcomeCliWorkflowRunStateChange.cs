@@ -4,5 +4,5 @@ namespace KitCli.Workflow.Abstractions.Run.State.Change;
 
 public interface IOutcomeCliWorkflowRunStateChange : ICliWorkflowRunStateChange
 {
-    CliCommandOutcome[] Outcomes { get; }
+    Outcome[] Outcomes { get; }
 }

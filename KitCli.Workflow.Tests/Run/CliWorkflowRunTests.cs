@@ -68,7 +68,7 @@ public class CliWorkflowRunTests
         // Assert
         var firstOutcome = outcomes.FirstOrDefault();
         
-        Assert.That(firstOutcome, Is.InstanceOf<NothingCliCommandOutcome>());
+        Assert.That(firstOutcome, Is.InstanceOf<NothingOutcome>());
     }
     
     [Test]
@@ -130,7 +130,7 @@ public class CliWorkflowRunTests
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
             .Throws<NoCommandGeneratorException>();
         
         // Act
@@ -169,7 +169,7 @@ public class CliWorkflowRunTests
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
             .Returns(new CliCommand());
 
         _sender
@@ -202,7 +202,7 @@ public class CliWorkflowRunTests
         
         var instruction = new CliInstruction("/", "some-valid-ask", null, []);
 
-        var nothingOutcome = new NothingCliCommandOutcome();
+        var nothingOutcome = new NothingOutcome();
         
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))
@@ -213,7 +213,7 @@ public class CliWorkflowRunTests
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
             .Returns(new CliCommand());
 
         _sender
@@ -251,7 +251,7 @@ public class CliWorkflowRunTests
         var instruction = new CliInstruction("/", "some-valid-ask", null, []);
 
         var aggregator = new TestListAggregator();
-        var outcome = new CliCommandAggregatorOutcome<IEnumerable<TestAggregate>>(aggregator);
+        var outcome = new AggregatorOutcome<IEnumerable<TestAggregate>>(aggregator);
         
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))
@@ -262,7 +262,7 @@ public class CliWorkflowRunTests
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<CliCommandOutcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
             .Returns(new CliCommand());
 
         _sender

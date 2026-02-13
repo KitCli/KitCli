@@ -18,11 +18,11 @@ public class BasicCreationTestClICommandFactory : BasicCreationCliCommandFactory
 
 public class BasicCreationTestClICommandHandler : CliCommandHandler<BasicCreationTestCliCommand>
 {
-    public override Task<CliCommandOutcome[]> HandleCommand(BasicCreationTestCliCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(BasicCreationTestCliCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new CliCommandOutcome[]
+        return Task.FromResult(new Outcome[]
         {
-            new OutputCliCommandOutcome(request.Test)
+            new FinalMessageOutcome(request.Test)
         });
     }
 }
