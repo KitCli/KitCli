@@ -5,7 +5,7 @@ namespace KitCli.Commands.Abstractions.Factories;
 
 public class BasicCliCommandFactory<TCliCommand> : CliCommandFactory<TCliCommand> where TCliCommand : CliCommand, new()
 {
-    public override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts) => true;
+    public sealed override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts) => true;
 
-    public override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts) => new TCliCommand();
+    public sealed override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts) => new TCliCommand();
 }
