@@ -8,8 +8,8 @@ namespace KitCli.Commands.Abstractions.Handlers;
 
 public abstract class CliCommandHandler<TCliCommand> : IRequestHandler<TCliCommand, CliCommandOutcome[]> where TCliCommand : CliCommand
 {
-    public Task<CliCommandOutcome[]> Handle(TCliCommand request, CancellationToken cancellationToken)
-        => HandleCommand(request, cancellationToken);
+    public Task<CliCommandOutcome[]> Handle(TCliCommand command, CancellationToken cancellationToken)
+        => HandleCommand(command, cancellationToken);
 
     public virtual Task<CliCommandOutcome[]> HandleCommand(TCliCommand command, CancellationToken cancellationToken) 
         => AsyncOutcomeAs($"No functionality for {command.GetSpecificCommandName()} base command");
