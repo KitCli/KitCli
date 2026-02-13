@@ -2,11 +2,19 @@ using KitCli.Abstractions.Aggregators.Filters;
 using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
+using MediatR;
 
 namespace KitCli.Commands.Abstractions.Handlers;
 
-public abstract class CliCommandHandler
+public abstract class CliCommandHandler<TCliCommand> : IRequestHandler<TCliCommand, CliCommandOutcome[]> where TCliCommand : CliCommand
 {
+    public Task<CliCommandOutcome[]> Handle(TCliCommand request, CancellationToken cancellationToken)
+        => HandleCommand(request, cancellationToken);
+
+    public virtual Task<CliCommandOutcome[]> HandleCommand(TCliCommand command, CancellationToken cancellationToken) 
+        => AsyncOutcomeAs($"No functionality for {command.GetSpecificCommandName()} base command");
+    
+    // TODO: Might be a better way to do this.
     protected static CliCommandOutcome[] OutcomeAs()
         => [new NothingCliCommandOutcome()];
     

@@ -6,9 +6,9 @@ using KitCli.Workflow.Abstractions;
 namespace KitCli.Workflow.Commands.Exit;
 
 // TODO: Write unit tests.
-public class ExitCliCommandHandler(ICliWorkflow cliWorkflow) : CliCommandHandler, ICliCommandHandler<ExitCliCommand>
+public class ExitCliCommandHandler(ICliWorkflow cliWorkflow) : CliCommandHandler<ExitCliCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(ExitCliCommand command, CancellationToken cancellationToken)
+    public override Task<CliCommandOutcome[]> HandleCommand(ExitCliCommand command, CancellationToken cancellationToken)
     {
         cliWorkflow.Stop();
         

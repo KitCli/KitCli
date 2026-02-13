@@ -2,4 +2,5 @@ using KitCli.Commands.Abstractions;
 
 namespace KitCli.Workflow.Commands.MissingOutcomes;
 
-public record MissingOutcomesCliCommand(string[] MissingOutcomeNames) : CliCommand;
+// TODO: Revisit strategy for reporting missing outcomes.
+internal record MissingOutcomesCliCommand(string[] MissingOutcomeNames) : CliCommand;

@@ -3,6 +3,7 @@ using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Instructions.Abstractions;
 using MediatR;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("KitCli.Commands.Abstractions.Tests")]
 namespace KitCli.Commands.Abstractions;
 
 /// <summary>
@@ -11,7 +12,7 @@ namespace KitCli.Commands.Abstractions;
 /// </summary>
 public record CliCommand : IRequest<CliCommandOutcome[]>
 {
-    public string GetSpecificCommandName()
+    internal string GetSpecificCommandName()
         => GetType().Name.ReplaceCommandSuffix();
 
     public string GetInstructionName()

@@ -5,9 +5,9 @@ using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
 
-public class TestCliCommandHandler : ICliCommandHandler<TestCliCommand>
+public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(TestCliCommand request, CancellationToken cancellationToken)
+    public override Task<CliCommandOutcome[]> HandleCommand(TestCliCommand command, CancellationToken cancellationToken)
     {
         var commandNotFoundOutcome = new CliCommandNotFoundOutcome();
         

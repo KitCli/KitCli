@@ -18,9 +18,9 @@ public class OtherTetCliCommandFactory : ICliCommandFactory<OtherTestCliCommand>
     }
 }
 
-public class OtherTestCliCommandHandler : ICliCommandHandler<OtherTestCliCommand>
+public class OtherTestCliCommandHandler : CliCommandHandler<OtherTestCliCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(OtherTestCliCommand request, CancellationToken cancellationToken)
+    public override Task<CliCommandOutcome[]> HandleCommand(OtherTestCliCommand request, CancellationToken cancellationToken)
     {
         return Task.FromResult(new CliCommandOutcome[]
         {

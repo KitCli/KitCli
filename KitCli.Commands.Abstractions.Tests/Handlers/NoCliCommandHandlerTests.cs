@@ -9,9 +9,9 @@ public class NoCliCommandHandlerTests
 {
     private record TestCliCommand : CliCommand;
     
-    private class TestCliCommandHandler : NoCliCommandHandler<TestCliCommand>;
+    private class TestCliCommandHandler : CliCommandHandler<TestCliCommand>;
     
-    private NoCliCommandHandler<TestCliCommand> _classUnderTest;
+    private CliCommandHandler<TestCliCommand> _classUnderTest;
 
     [SetUp]
     public void SetUp()
