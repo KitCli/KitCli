@@ -6,4 +6,5 @@ public interface ICliWorkflowRun
 {
     ICliWorkflowRunState State { get; }
     ValueTask<CliCommandOutcome[]> RespondToAsk(string? ask);
+    ValueTask<CliCommandOutcome[]> RespondToNext();
 }

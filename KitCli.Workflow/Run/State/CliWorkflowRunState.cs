@@ -13,10 +13,12 @@ public class CliWorkflowRunState : ICliWorkflowRunState
     public List<ICliWorkflowRunStateChange> Changes { get; } = [];
 
     public bool WasChangedTo(ClIWorkflowRunStateStatus status)
-    {
-        return Changes.Any(change => change.To == status);
-    }
+     =>  Changes.Any(change => change.To == status);
     
+    public bool WasChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses)
+        => Changes.Any(change => oneOfStatuses.Contains(change.To));
+
+    // TODO: Why not just use (ReachedReusableOutcome)?
     public bool WasChangedToReusableOutcome()
     {
         var lastOutcomeChange = Changes
@@ -30,14 +32,11 @@ public class CliWorkflowRunState : ICliWorkflowRunState
         return includesReusableOutcome ?? false;
     }
     
-    public List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges()
-    {
-        return Changes
-            .Where(change => change.To == ClIWorkflowRunStateStatus.ReachedReusableOutcome)
+    public List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges() 
+        => Changes
             .OfType<IOutcomeCliWorkflowRunStateChange>()
             .ToList();
-    }
-    
+
     public void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo)
     {
         var priorState = CanChangeTo(statusToChangeTo);
@@ -130,6 +129,12 @@ public class CliWorkflowRunState : ICliWorkflowRunState
         
         new(ClIWorkflowRunStateStatus.Running, ClIWorkflowRunStateStatus.ReachedReusableOutcome),
         new(ClIWorkflowRunStateStatus.ReachedReusableOutcome, ClIWorkflowRunStateStatus.Running),
+        
+        new(ClIWorkflowRunStateStatus.Running, ClIWorkflowRunStateStatus.MovePastAsk),
+        new(ClIWorkflowRunStateStatus.MovePastAsk, ClIWorkflowRunStateStatus.Running),
+        
+        new(ClIWorkflowRunStateStatus.MovePastAsk, ClIWorkflowRunStateStatus.InvalidMovePastAsk),
+        new(ClIWorkflowRunStateStatus.InvalidMovePastAsk, ClIWorkflowRunStateStatus.Finished),
         
         new(ClIWorkflowRunStateStatus.Running, ClIWorkflowRunStateStatus.ReachedFinalOutcome),
         new(ClIWorkflowRunStateStatus.ReachedFinalOutcome, ClIWorkflowRunStateStatus.Finished),

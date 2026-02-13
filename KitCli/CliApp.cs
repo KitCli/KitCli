@@ -34,10 +34,16 @@ public abstract class CliApp
             var run = _workflow.NextRun();
             
             OnRunCreated(run);
+
+            var movePastAsk = run.State.WasChangedTo(ClIWorkflowRunStateStatus.MovePastAsk);
+
+            var ask = !movePastAsk
+                ? Io.Ask()
+                : null;
             
-            var ask = Io.Ask();
-            
-            var runTask =  run.RespondToAsk(ask);
+            var runTask =  !movePastAsk 
+                ? run.RespondToAsk(ask)
+                : run.RespondToNext();
             
             OnRunStarted(run, ask);
 

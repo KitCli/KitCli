@@ -12,6 +12,8 @@ public interface ICliWorkflowRunState
     List<ICliWorkflowRunStateChange> Changes { get; }
 
     bool WasChangedTo(ClIWorkflowRunStateStatus status);
+    
+    bool WasChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses);
 
     bool WasChangedToReusableOutcome();
 

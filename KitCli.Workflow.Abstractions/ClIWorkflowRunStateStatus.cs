@@ -6,6 +6,8 @@ public enum ClIWorkflowRunStateStatus
     Running,
     InvalidAsk,
     Exceptional,
+    MovePastAsk,
+    InvalidMovePastAsk,
     ReachedReusableOutcome,
     ReachedFinalOutcome,
     Finished,

@@ -2,6 +2,7 @@ using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Exceptions;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
+using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Skippable;
 using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Abstractions.Validators;
@@ -20,6 +21,7 @@ public class CliWorkflowRun : ICliWorkflowRun
     private readonly ICliInstructionParser _cliInstructionParser;
     private readonly ICliInstructionValidator _cliInstructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
+
     private readonly ISender _sender;
     private readonly IPublisher _publisher;
 
@@ -40,12 +42,9 @@ public class CliWorkflowRun : ICliWorkflowRun
         _publisher = publisher;
     }
 
-    private bool IsEmptyAsk(string? ask) => !string.IsNullOrEmpty(ask);
-    
-
     public async ValueTask<CliCommandOutcome[]> RespondToAsk(string? ask)
     {
-        if (!IsEmptyAsk(ask))
+        if (!IsValidAsk(ask))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
             return [new NothingCliCommandOutcome()];
@@ -62,16 +61,38 @@ public class CliWorkflowRun : ICliWorkflowRun
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
             return [new NothingCliCommandOutcome()];
         }
+        
+        var priorOutcomes = AllPriorOutcomes();
+        
+        var command = _workflowCommandProvider.GetCommand(instruction, priorOutcomes);
+        
+        return await ExecuteCommand(command);
+    }
 
+    public async ValueTask<CliCommandOutcome[]> RespondToNext()
+    { 
+        if (!IsValidMovePastAsk())
+        {
+            State.ChangeTo(ClIWorkflowRunStateStatus.InvalidMovePastAsk);
+            return [new NothingCliCommandOutcome()];
+        }
+
+        State.ChangeTo(ClIWorkflowRunStateStatus.Running);
+
+        var nextOutcome = AllPriorOutcomes()
+            .OfType<NextCliCommandOutcome>()
+            .Last();
+        
+        return await ExecuteCommand(nextOutcome.NextCommand);
+    }
+    
+    private async Task<CliCommandOutcome[]> ExecuteCommand(CliCommand command)
+    {
         try
         {
-            var command = GetCommandFromInstruction(instruction);
-
             var outcomes = await _sender.Send(command);
-
-            var ranOutcome = new RanCliCommandOutcome(command);
             
-            CliCommandOutcome[] allOutcomes = [ranOutcome, ..outcomes];
+            CliCommandOutcome[] allOutcomes = [new RanCliCommandOutcome(command), ..outcomes];
             
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
@@ -94,16 +115,15 @@ public class CliWorkflowRun : ICliWorkflowRun
         }
     }
     
-    private CliCommand GetCommandFromInstruction(CliInstruction instruction)
-    {
-        var priorOutcomes = State
-            .AllOutcomeStateChanges()
-            // TODO: Write unit test covering this flattening.
-            .SelectMany(outcomeChange => outcomeChange.Outcomes)
-            .ToList();
-        
-        return _workflowCommandProvider.GetCommand(instruction, priorOutcomes);
-    }
+    // TODO: Could probably be put in line.
+    private bool IsValidAsk(string? ask)
+        => !string.IsNullOrEmpty(ask);
+
+    // TODO: Could probably be moved to an extension method.
+    private bool IsValidMovePastAsk() 
+        => AllPriorOutcomes()
+            .OfType<NextCliCommandOutcome>()
+            .Any();
 
     private Task TriggerCommandReactions(CliCommandOutcome[] outcomes)
     {
@@ -119,18 +139,37 @@ public class CliWorkflowRun : ICliWorkflowRun
     {
         var reusableOutcome = outcomes.LastOrDefault(x => x.IsReusable);
         
-        var nextState = reusableOutcome != null
-            ? ClIWorkflowRunStateStatus.ReachedReusableOutcome
-            : ClIWorkflowRunStateStatus.ReachedFinalOutcome;
-
-        State.ChangeTo(nextState, outcomes);
+        if (reusableOutcome is null)
+        {
+            State.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, outcomes);
+            return;
+        }
+        
+        if (reusableOutcome is NextCliCommandOutcome)
+        {
+            State.ChangeTo(ClIWorkflowRunStateStatus.MovePastAsk, outcomes);
+            return;
+        }
+        
+        State.ChangeTo(ClIWorkflowRunStateStatus.ReachedReusableOutcome, outcomes);
     }
 
     private void UpdateStateWhenFinished()
     {
-        if (!State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedReusableOutcome))
+        var runOngoing = State.WasChangedTo(
+            ClIWorkflowRunStateStatus.MovePastAsk,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome);
+        
+        if (!runOngoing)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Finished);
         }
     }
+    
+    // TODO: Perhaps move to extension somewhere
+    private List<CliCommandOutcome> AllPriorOutcomes()
+        => State
+            .AllOutcomeStateChanges()
+            .SelectMany(change => change.Outcomes)
+            .ToList();
 }
