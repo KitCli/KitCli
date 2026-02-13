@@ -1,7 +1,7 @@
 ﻿using KitCli;
 
 var aoo = new CliAppBuilder()
-    .WithBasicCli()
+    .WithCli<TestCliApp>()
     .WithRegistry<CommandRegistry>();
     
 await aoo.Run();

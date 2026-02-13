@@ -11,27 +11,32 @@ public class TestCliApp : CliApp
 
     protected override void OnSessionStart()
     {
-        Console.WriteLine("TestCliApp session started.");
+        Io.Say("TestCliApp session started.");
         Io.SetTitle("Test Cli App");
     }
 
     protected override void OnRunCreated(ICliWorkflowRun run)
     {
-        Console.WriteLine("TestCliApp run created.");
+        Io.Say("TestCliApp run created.");
     }
 
     protected override void OnRunStarted(ICliWorkflowRun run, string? ask)
     {
-        Console.WriteLine("TestCliApp run started.");
+        Io.Say("TestCliApp run started.");
     }
 
     protected override void OnRunComplete(ICliWorkflowRun run, CliCommandOutcome[] outcomes)
     {
-        Console.WriteLine("TestCliApp run completed.");
+        Io.Say("TestCliApp run completed.");
+
+        var statuses = run.State.Changes.Select(c => c.To);
+        Io.Say($"Run state changes: {string.Join(", ", statuses)}");
+        
+        Io.Say($"Run lasted {run.State.Stopwatch.ElapsedMilliseconds}ms");
     }
 
     protected override void OnSessionEnd(List<ICliWorkflowRun> runs)
     {
-        Console.WriteLine("TestCliApp session ended.");
+        Io.Say("TestCliApp session ended.");
     }
 }

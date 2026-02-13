@@ -20,6 +20,8 @@ public abstract class CliApp
     { 
         OnSessionStart();
         
+        Io.Pause();
+        
         Io.OnCancel(() =>
         {
             _workflow.Stop();
@@ -52,6 +54,8 @@ public abstract class CliApp
             WriteOutcomes(outcomes, outcomeIoWriters);
             
             OnRunComplete(run, outcomes);
+            
+            Io.Pause();
         }
         
         OnSessionEnd(_workflow.Runs);
