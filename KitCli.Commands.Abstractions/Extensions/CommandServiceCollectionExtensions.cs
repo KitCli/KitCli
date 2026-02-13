@@ -7,45 +7,78 @@ namespace KitCli.Commands.Abstractions.Extensions;
 
 public static class CommandServiceCollectionExtensions
 {
-    public static IServiceCollection AddCommandsFromAssembly(this IServiceCollection serviceCollection, Assembly? assembly) 
+    extension(IServiceCollection services)
     {
-        if (assembly == null)
+        public IServiceCollection AddCommandsFromAssembly(Assembly? assembly) 
         {
-            throw new NullReferenceException("No Assembly Containing ICommand Implementation");
+            if (assembly == null)
+            {
+                throw new NullReferenceException("No Assembly Containing ICommand Implementation");
+            }
+
+            if (!assembly.AnyClassTypesImplementType(typeof(CliCommand)))
+            {
+                throw new ArgumentException($"No ICommand Implementations Found in Assembly '{assembly.FullName}'");
+            }
+
+            return services
+                .AddCommandArtefactFactories()
+                .AddCommandFactories(assembly)
+                .AddMediatRCommandsAndHandlers(assembly);
         }
 
-        return serviceCollection
-            .AddCommandArtefactFactories()
-            .AddCommandGenerators(assembly)
-            .AddMediatRCommandsAndHandlers(assembly);
-    }
+        private IServiceCollection AddMediatRCommandsAndHandlers(Assembly assembly)
+            => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
 
-    private static IServiceCollection AddMediatRCommandsAndHandlers(this IServiceCollection serviceCollection, Assembly assembly)
-        => serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
-
-    private static IServiceCollection AddCommandGenerators(this IServiceCollection serviceCollection, Assembly assembly)
-    {
-        var implementationTypes = assembly.WhereClassTypesImplementType(typeof(IUnidentifiedCliCommandFactory));
-        
-        foreach (var implementationType in implementationTypes)
+        private IServiceCollection AddCommandFactories(Assembly assembly)
         {
-            var generatorCommandType = implementationType.FirstOrDefaultGenericTypeArgument();
-            var specificCommandName = CliCommand.StripCommandName(generatorCommandType.Name);
+            var commandImplementationTypes = assembly.WhereClassTypesImplementType(typeof(CliCommand));
+            var factoryImplementationTypes = assembly.WhereClassTypesImplementGenericType(typeof(CliCommandFactory<>));
+
+            foreach (var commandType in commandImplementationTypes)
+            {
+                var matchingFactories = factoryImplementationTypes
+                    .Where(factory => factory.BaseType!.FirstGenericArgumentIs(commandType))
+                    .ToList();
+
+                if (matchingFactories.Count > 1)
+                {
+                    throw new ArgumentException($"Multiple factories found for command type '{commandType.Name}'");
+                }
+
+                if (matchingFactories.Count == 1)
+                {
+                    services.AddCommandFactory(commandType, matchingFactories.First());
+                    continue;
+                }
+
+                var hasEmptyConstructor = commandType.GetConstructor(Type.EmptyTypes) is not null;
+                if (hasEmptyConstructor)
+                {
+                    var basicFactoryType = typeof(BasicCliCommandFactory<>).MakeGenericType(commandType);
+                    services.AddCommandFactory(commandType, basicFactoryType);
+                }
+            }
+        
+            return services;
+        }
+
+        private void AddCommandFactory(Type commandImplementationType, Type factoryImplementationType)
+        {
+            var specificCommandName = CliCommand.StripCommandName(commandImplementationType.Name);
             
             var commandName = specificCommandName.ToLowerSplitString(CliInstructionConstants.DefaultCommandNameSeparator);
             var shorthandCommandName = specificCommandName.ToLowerTitleCharacters();
-
-            serviceCollection
+        
+            services
                 .AddKeyedSingleton(
                     typeof(IUnidentifiedCliCommandFactory),
                     commandName,
-                    implementationType)
+                    factoryImplementationType)
                 .AddKeyedSingleton(
                     typeof(IUnidentifiedCliCommandFactory),
                     shorthandCommandName,
-                    implementationType);
+                    factoryImplementationType);
         }
-        
-        return serviceCollection;
     }
 }

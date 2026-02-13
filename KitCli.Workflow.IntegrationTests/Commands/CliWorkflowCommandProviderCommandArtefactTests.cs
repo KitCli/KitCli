@@ -25,14 +25,7 @@ public class CliWorkflowCommandProviderCommandArtefactTests
         public CliCommandArtefact Create(CliCommandOutcome outcome) => new TestCliCommandArtefact();
     }
 
-    private class TestCliCommandFactory : ICliCommandFactory<TestCliCommand>
-    {
-        public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
-            => artefacts.FirstOrDefault(x => x is TestCliCommandArtefact) != null;
-
-        public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
-            => new TestCliCommand();
-    }
+    private class TestCliCommandFactory : BasicCliCommandFactory<TestCliCommand>;
     
     private IServiceCollection _serviceCollection;
     private ServiceProvider _serviceProvider;

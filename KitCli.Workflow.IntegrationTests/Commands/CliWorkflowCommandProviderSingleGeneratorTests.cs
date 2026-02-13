@@ -13,12 +13,8 @@ namespace KitCli.Workflow.IntegrationTests.Commands;
 public class CliWorkflowCommandProviderSingleGeneratorTests
 {
     private record TestCliCommand : CliCommand;
-    
-    private class TestCliCommandGenerator : ICliCommandFactory<TestCliCommand>
-    {
-        public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
-            => new TestCliCommand();
-    }
+
+    private class TestCliCommandGenerator : BasicCliCommandFactory<TestCliCommand>;
     
     private IServiceCollection _serviceCollection;
     private ServiceProvider _serviceProvider;
