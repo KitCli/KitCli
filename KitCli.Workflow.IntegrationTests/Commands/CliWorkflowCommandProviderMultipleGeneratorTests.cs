@@ -16,19 +16,19 @@ public class CliWorkflowCommandProviderMultipleGeneratorTests
     
     private class TestCliCommandGeneratorA : CliCommandFactory<TestCliCommand>
     {
-        public override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override bool CanCreateWhen(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => instruction.SubInstructionName == "1";
 
-        public override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => new TestCliCommand(1);
     }
     
     private class TestCliCommandGeneratorB : CliCommandFactory<TestCliCommand>
     {
-        public override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override bool CanCreateWhen(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => instruction.SubInstructionName == "2";
         
-        public override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => new TestCliCommand(2);
     }
     
@@ -50,10 +50,10 @@ public class CliWorkflowCommandProviderMultipleGeneratorTests
         var serviceKey = _testCliCommand.GetInstructionName();
         _serviceCollection = new ServiceCollection();
         _serviceCollection
-            .AddKeyedSingleton<IUnidentifiedCliCommandFactory>(
+            .AddKeyedSingleton<ICliCommandFactory>(
                 serviceKey,
                 _testCliCommandGeneratorA)
-            .AddKeyedSingleton<IUnidentifiedCliCommandFactory>(
+            .AddKeyedSingleton<ICliCommandFactory>(
                 serviceKey,
                 _testCliCommandGeneratorB);
         

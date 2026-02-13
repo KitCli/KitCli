@@ -17,15 +17,15 @@ public static class CommandArtefactServiceCollectionExtensions
         {
             // TODO: Artefacts - Add Service Collection Extension .AddCommandArtefact<>
             return serviceCollection
-                .AddSingleton<ICliCommandArtefactFactory, RanCliCommandArtefactFactory>()
-                .AddSingleton<ICliCommandArtefactFactory, PageSizeCliCommandArtefactFactory>()
-                .AddSingleton<ICliCommandArtefactFactory, PageNumberCliCommandArtefactFactory>()
-                .AddSingleton<ICliCommandArtefactFactory, CliListAggregatorFilterCliCommandArtefactFactory>();
+                .AddSingleton<IArtefactFactory, RanArtefactFactory>()
+                .AddSingleton<IArtefactFactory, PageSizeArtefactFactory>()
+                .AddSingleton<IArtefactFactory, PageNumberArtefactFactory>()
+                .AddSingleton<IArtefactFactory, CliListAggregatorFilterArtefactFactory>();
         }
 
         public IServiceCollection AddCommandArtefactFactory<TFactory>()
-            where TFactory : class, ICliCommandArtefactFactory 
-            => serviceCollection.AddSingleton<ICliCommandArtefactFactory, TFactory>();
+            where TFactory : class, IArtefactFactory 
+            => serviceCollection.AddSingleton<IArtefactFactory, TFactory>();
 
         public IServiceCollection AddAggregatorCommandArtefactsFromAssembly(Assembly? assembly)
         {
@@ -48,10 +48,10 @@ public static class CommandArtefactServiceCollectionExtensions
             
                 var typeForReferencedAggregate = aggregatorType.GenericTypeArguments.First();
         
-                var strategyType = typeof(AggregatorCliCommandArtefactFactory<>).MakeGenericType(typeForReferencedAggregate);
+                var strategyType = typeof(AggregatorArtefactFactory<>).MakeGenericType(typeForReferencedAggregate);
 
                 var instance = Activator.CreateInstance(strategyType);
-                if (instance is not ICliCommandArtefactFactory factoryInstance)
+                if (instance is not IArtefactFactory factoryInstance)
                 {
                     throw new InvalidOperationException(
                         $"Could not create instance of type {strategyType.Name} as ICliCommandPropertyFactory");
@@ -84,10 +84,10 @@ public static class CommandArtefactServiceCollectionExtensions
             
                 var typeForReferencedAggregate = aggregatorType.GenericTypeArguments.First();
         
-                var strategyType = typeof(ListAggregatorCliCommandArtefactFactory<>).MakeGenericType(typeForReferencedAggregate);
+                var strategyType = typeof(ListAggregatorArtefactFactory<>).MakeGenericType(typeForReferencedAggregate);
 
                 var instance = Activator.CreateInstance(strategyType);
-                if (instance is not ICliCommandArtefactFactory factoryInstance)
+                if (instance is not IArtefactFactory factoryInstance)
                 {
                     throw new InvalidOperationException(
                         $"Could not create instance of type {strategyType.Name} as ICliCommandPropertyFactory");

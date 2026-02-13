@@ -16,13 +16,13 @@ public class CliWorkflowCommandProviderCommandArtefactTests
 
     private class TestOutcome() : Outcome(OutcomeKind.Reusable);
     
-    private class TestCliCommandArtefact() : CliCommandArtefact("Test");
+    private class TestAnonymousArtefact() : AnonymousArtefact("Test");
     
-    private class TestCliCommandArtefactFactory : ICliCommandArtefactFactory
+    private class TestArtefactFactory : IArtefactFactory
     {
         public bool For(Outcome outcome) => outcome is TestOutcome;
 
-        public CliCommandArtefact Create(Outcome outcome) => new TestCliCommandArtefact();
+        public AnonymousArtefact Create(Outcome outcome) => new TestAnonymousArtefact();
     }
 
     private class TestCliCommandFactory : BasicCliCommandFactory<TestCliCommand>;
@@ -39,8 +39,8 @@ public class CliWorkflowCommandProviderCommandArtefactTests
         
         _serviceCollection = new ServiceCollection();
         _serviceCollection
-            .AddKeyedSingleton<IUnidentifiedCliCommandFactory, TestCliCommandFactory>(serviceKey)
-            .AddSingleton<ICliCommandArtefactFactory, TestCliCommandArtefactFactory>();
+            .AddKeyedSingleton<ICliCommandFactory, TestCliCommandFactory>(serviceKey)
+            .AddSingleton<IArtefactFactory, TestArtefactFactory>();
         
         _serviceProvider = _serviceCollection.BuildServiceProvider();
         

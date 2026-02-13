@@ -12,7 +12,7 @@ public record BasicCreationTestCliCommand(string Test) : CliCommand;
 
 public class BasicCreationTestClICommandFactory : BasicCreationCliCommandFactory<BasicCreationTestCliCommand>
 {
-    public override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
         => new BasicCreationTestCliCommand("Basic Creation Test Command Ran");
 }
 

@@ -17,19 +17,19 @@ public class CliWorkflowCommandProviderNoApplicableGeneratorTests
     
     private class TestCliCommandGeneratorA : CliCommandFactory<TestCliCommand>
     {
-        public override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override bool CanCreateWhen(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => instruction.SubInstructionName == "not applicable";
 
-        public override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => new TestCliCommand();
     }
     
     private class TestCliCommandGeneratorB : CliCommandFactory<TestCliCommand>
     {
-        public override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override bool CanCreateWhen(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => instruction.SubInstructionName == "not applicable";
         
-        public override CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+        public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
             => new TestCliCommand();
     }
     
@@ -43,8 +43,8 @@ public class CliWorkflowCommandProviderNoApplicableGeneratorTests
         var serviceKey = new TestCliCommand().GetInstructionName();
         _serviceCollection = new ServiceCollection();
         _serviceCollection
-            .AddKeyedSingleton<IUnidentifiedCliCommandFactory, TestCliCommandGeneratorA>(serviceKey)
-            .AddKeyedSingleton<IUnidentifiedCliCommandFactory, TestCliCommandGeneratorB>(serviceKey);
+            .AddKeyedSingleton<ICliCommandFactory, TestCliCommandGeneratorA>(serviceKey)
+            .AddKeyedSingleton<ICliCommandFactory, TestCliCommandGeneratorB>(serviceKey);
         
         _serviceProvider = _serviceCollection.BuildServiceProvider();
         

@@ -13,9 +13,9 @@ public class WhenLastCommandRanWasTests
     public void GivenRanCommandArtefact_WhenLastCommandRanWas_ThenShouldReturnTrue()
     {
         // Arrange
-        var artefacts = new List<CliCommandArtefact>
+        var artefacts = new List<AnonymousArtefact>
         {
-            new RanCliCommandArtefact(new TestCliCommand())
+            new RanCliCommandAnonymousArtefact(new TestCliCommand())
         };
         
         // Act
@@ -29,7 +29,7 @@ public class WhenLastCommandRanWasTests
     public void GivenNoRanCommandArtefact_WhenLastCommandRanWas_ThenShouldReturnFalse()
     {
         // Arrange
-        var artefacts = new List<CliCommandArtefact>();
+        var artefacts = new List<AnonymousArtefact>();
         
         // Act
         var result = artefacts.LastCommandRanWas<TestCliCommand>();

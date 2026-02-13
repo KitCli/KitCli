@@ -12,7 +12,7 @@ public record BasicDecisionTestCliCommand : CliCommand;
 
 public class BasicDecisionTestClICommandFactory : BasicDecisionCliCommandFactory<BasicDecisionTestCliCommand>
 {
-    public override bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    public override bool CanCreateWhen(CliInstruction instruction, List<AnonymousArtefact> artefacts)
         => instruction.SubInstructionName == "test";
 }
 

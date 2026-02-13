@@ -3,15 +3,15 @@ using KitCli.Commands.Abstractions.Outcomes.Reusable;
 
 namespace KitCli.Commands.Abstractions.Artefacts.Aggregator;
 
-public class ListAggregatorCliCommandArtefactFactory<TAggregate> : ICliCommandArtefactFactory
+public class ListAggregatorArtefactFactory<TAggregate> : IArtefactFactory
 {
     public bool For(Outcome outcome) => outcome is ListAggregatorOutcome<TAggregate>;
 
-    public CliCommandArtefact Create(Outcome outcome)
+    public AnonymousArtefact Create(Outcome outcome)
     {
         if (outcome is ListAggregatorOutcome<TAggregate> aggregatorOutcome)
         {
-            return new ListAggregatorCliCommandArtefact<TAggregate>(aggregatorOutcome.Aggregator);
+            return new ListAggregatorUnvaluedArtefact<TAggregate>(aggregatorOutcome.Aggregator);
         }
         
         throw new InvalidOperationException(

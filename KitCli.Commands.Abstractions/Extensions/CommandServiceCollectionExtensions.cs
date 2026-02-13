@@ -72,11 +72,11 @@ public static class CommandServiceCollectionExtensions
         
             services
                 .AddKeyedSingleton(
-                    typeof(IUnidentifiedCliCommandFactory),
+                    typeof(ICliCommandFactory),
                     commandName,
                     factoryImplementationType)
                 .AddKeyedSingleton(
-                    typeof(IUnidentifiedCliCommandFactory),
+                    typeof(ICliCommandFactory),
                     shorthandCommandName,
                     factoryImplementationType);
         }

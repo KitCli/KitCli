@@ -14,7 +14,7 @@ public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICli
     public CliCommand GetCommand(CliInstruction instruction, List<Outcome> outcomes)
     {
         var generators = serviceProvider
-            .GetKeyedServices<IUnidentifiedCliCommandFactory>(instruction.Name)
+            .GetKeyedServices<ICliCommandFactory>(instruction.Name)
             .ToList();
         
         if (generators.Count == 0)
@@ -33,9 +33,9 @@ public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICli
         return generator.Create(instruction, artefacts);
     }
 
-    private List<CliCommandArtefact> ConvertOutcomesToArtefacts(List<Outcome> priorOutcomes)
+    private List<AnonymousArtefact> ConvertOutcomesToArtefacts(List<Outcome> priorOutcomes)
     {
-        var artefactFactories = serviceProvider.GetServices<ICliCommandArtefactFactory>();
+        var artefactFactories = serviceProvider.GetServices<IArtefactFactory>();
         
         var convertableOutcomes = priorOutcomes
             .Where(priorOutcome => artefactFactories

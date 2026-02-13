@@ -4,13 +4,13 @@ using KitCli.Commands.Abstractions.Outcomes.Skippable;
 
 namespace KitCli.Commands.Abstractions.Artefacts.Aggregator.Filters;
 
-public class CliListAggregatorFilterCliCommandArtefactFactory : ICliCommandArtefactFactory
+public class CliListAggregatorFilterArtefactFactory : IArtefactFactory
 {
     public bool For(Outcome outcome) => outcome is FilterOutcome;
 
-    public CliCommandArtefact Create(Outcome outcome)
+    public AnonymousArtefact Create(Outcome outcome)
     {
         var filteredOutcome = (FilterOutcome)outcome;
-        return new CliListAggregatorFilterCliCommandArtefact(filteredOutcome.CliListAggregatorFilter);
+        return new CliListAggregatorFilterAnonymousArtefact(filteredOutcome.CliListAggregatorFilter);
     }
 }

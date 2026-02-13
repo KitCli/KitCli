@@ -7,22 +7,22 @@ namespace KitCli.Commands.Abstractions.Artefacts;
 
 public static class CliCommandArtefactExtensions
 {
-    public static ValuedCliCommandArtefact<TArtefactType>? OfType<TArtefactType>(
-        this IEnumerable<CliCommandArtefact> artefacts, string artefactName)
+    public static Artefact<TArtefactType>? OfType<TArtefactType>(
+        this IEnumerable<AnonymousArtefact> artefacts, string artefactName)
         where TArtefactType : notnull
             => artefacts
-                .Where(a => a.ArtefactName == artefactName)
+                .Where(a => a.Name == artefactName)
                 .OfType<TArtefactType>();
 
-    public static ValuedCliCommandArtefact<TArtefactType>? OfType<TArtefactType>(
-        this IEnumerable<CliCommandArtefact> artefacts)
+    public static Artefact<TArtefactType>? OfType<TArtefactType>(
+        this IEnumerable<AnonymousArtefact> artefacts)
         where TArtefactType : notnull
             => LinqEnumerable
-                .OfType<ValuedCliCommandArtefact<TArtefactType>>(artefacts)
+                .OfType<Artefact<TArtefactType>>(artefacts)
                 .FirstOrDefault();
 
-    public static ValuedCliCommandArtefact<TArtefactType> OfRequiredType<TArtefactType>(
-        this IEnumerable<CliCommandArtefact> artefacts) where TArtefactType : notnull
+    public static Artefact<TArtefactType> OfRequiredType<TArtefactType>(
+        this IEnumerable<AnonymousArtefact> artefacts) where TArtefactType : notnull
     {
         var artefact = OfType<TArtefactType>(artefacts);
 
@@ -36,17 +36,17 @@ public static class CliCommandArtefactExtensions
         return artefact;
     }
 
-    public static ListAggregatorCliCommandArtefact<TAggregate>? OfListAggregatorType<TAggregate>(
-        this IEnumerable<CliCommandArtefact> artefacts) where TAggregate : notnull
+    public static ListAggregatorUnvaluedArtefact<TAggregate>? OfListAggregatorType<TAggregate>(
+        this IEnumerable<AnonymousArtefact> artefacts) where TAggregate : notnull
     {
         var valuedCliCommandArtefact = OfType<CliListAggregator<TAggregate>>(artefacts);
-        return valuedCliCommandArtefact as ListAggregatorCliCommandArtefact<TAggregate>;
+        return valuedCliCommandArtefact as ListAggregatorUnvaluedArtefact<TAggregate>;
     } 
     
     public static bool LastCommandRanWas<TLastCliCommand>(
-        this IEnumerable<CliCommandArtefact> artefacts) where TLastCliCommand : CliCommand
+        this IEnumerable<AnonymousArtefact> artefacts) where TLastCliCommand : CliCommand
             => LinqEnumerable
-                .OfType<RanCliCommandArtefact>(artefacts)
+                .OfType<RanCliCommandAnonymousArtefact>(artefacts)
                 .LastOrDefault()
                 ?.RanCommand is TLastCliCommand;
 }

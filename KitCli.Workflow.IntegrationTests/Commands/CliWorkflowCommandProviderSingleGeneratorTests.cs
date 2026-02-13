@@ -31,7 +31,7 @@ public class CliWorkflowCommandProviderSingleGeneratorTests
         
         _serviceCollection = new ServiceCollection();
         _serviceCollection
-            .AddKeyedSingleton<IUnidentifiedCliCommandFactory>(
+            .AddKeyedSingleton<ICliCommandFactory>(
                 _cliCommand.GetInstructionName(),
                 _cliCommandGenerator);
         

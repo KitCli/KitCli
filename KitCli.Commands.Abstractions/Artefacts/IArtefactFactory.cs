@@ -2,9 +2,9 @@ using KitCli.Commands.Abstractions.Outcomes;
 
 namespace KitCli.Commands.Abstractions.Artefacts;
 
-public interface ICliCommandArtefactFactory
+public interface IArtefactFactory
 {
     bool For(Outcome outcome);
     
-    CliCommandArtefact Create(Outcome outcome);
+    AnonymousArtefact Create(Outcome outcome);
 }

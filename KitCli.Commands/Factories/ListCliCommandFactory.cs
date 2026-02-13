@@ -6,7 +6,7 @@ namespace KitCli.Commands.Factories;
 
 public abstract class ListCliCommandFactory
 {
-    protected static (int? pageSize, int? pageNumber) GetPaging(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    protected static (int? pageSize, int? pageNumber) GetPaging(CliInstruction instruction, List<AnonymousArtefact> artefacts)
     {
         var pageSizeArtefact = artefacts
             .OfType<int>(ListCliCommand.ArtefactNames.PageSize);
@@ -22,8 +22,8 @@ public abstract class ListCliCommandFactory
             .Arguments
             .OfType<int>(ListCliCommand.ArgumentNames.PageNumber);
 
-        var pageSize = pageSizeArgument?.ArgumentValue ?? pageSizeArtefact?.ArtefactValue;
-        var pageNumber = pageNumberArgument?.ArgumentValue ?? pageNumberArtefact?.ArtefactValue;
+        var pageSize = pageSizeArgument?.ArgumentValue ?? pageSizeArtefact?.Value;
+        var pageNumber = pageNumberArgument?.ArgumentValue ?? pageNumberArtefact?.Value;
 
         return (pageSize, pageNumber);
     }
