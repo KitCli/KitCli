@@ -48,14 +48,14 @@ public class CliWorkflow(IServiceProvider serviceProvider) : ICliWorkflow
         
         var commandProvider = serviceProvider.GetRequiredService<ICliWorkflowCommandProvider>();
         
-        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        var sender = serviceProvider.GetRequiredService<ISender>();
         
         var run = new CliWorkflowRun(
             state,
             instructionParser,
             instructionValidator,
             commandProvider,
-            mediator);
+            sender);
         
         Runs.Add(run);
 
