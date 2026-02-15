@@ -20,7 +20,7 @@ public static class CommandArtefactServiceCollectionExtensions
                 .AddSingleton<IArtefactFactory, RanArtefactFactory>()
                 .AddSingleton<IArtefactFactory, PageSizeArtefactFactory>()
                 .AddSingleton<IArtefactFactory, PageNumberArtefactFactory>()
-                .AddSingleton<IArtefactFactory, CliListAggregatorFilterArtefactFactory>();
+                .AddSingleton<IArtefactFactory, AggregatorFilterArtefactFactory>();
         }
 
         public IServiceCollection AddCommandArtefactFactory<TFactory>()
@@ -40,7 +40,7 @@ public static class CommandArtefactServiceCollectionExtensions
         
             foreach (var possibleAggregatorType in possibleAggregatorTypes)
             {
-                var aggregatorType = possibleAggregatorType.GetSuperclassGenericOf(typeof(CliAggregator<>));
+                var aggregatorType = possibleAggregatorType.GetSuperclassGenericOf(typeof(Aggregator<>));
                 if (aggregatorType is null)
                 {
                     continue;
@@ -76,7 +76,7 @@ public static class CommandArtefactServiceCollectionExtensions
         
             foreach (var possibleAggregatorType in possibleAggregatorTypes)
             {
-                var aggregatorType = possibleAggregatorType.GetSuperclassGenericOf(typeof(CliListAggregator<>));
+                var aggregatorType = possibleAggregatorType.GetSuperclassGenericOf(typeof(ListAggregator<>));
                 if (aggregatorType is null)
                 {
                     continue;

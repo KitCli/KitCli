@@ -22,7 +22,7 @@ public class CliWorkflowRunTests
 {
     private abstract record TestAggregate;
 
-    private class TestListAggregator : CliListAggregator<TestAggregate>
+    private class TestListAggregator : ListAggregator<TestAggregate>
     {
         protected override IEnumerable<TestAggregate> ListAggregate() => new List<TestAggregate>();
     }

@@ -13,10 +13,10 @@ namespace KitCli.Commands.Abstractions.Artefacts.Aggregator.Filters;
 //     }
 // }
 
-public record CliListAggregatorFilterArtefact : Artefact<CliListAggregatorFilter>
+public record AggregatorFilterArtefact : Artefact<AnonymousAggregatorFilter>
 {
-    public CliListAggregatorFilterArtefact(CliListAggregatorFilter cliListAggregatorFilter) 
-        : base($"{cliListAggregatorFilter.FilterName}-{cliListAggregatorFilter.FilterFieldName}", cliListAggregatorFilter)
+    public AggregatorFilterArtefact(AnonymousAggregatorFilter anonymousAggregatorFilter) 
+        : base($"{anonymousAggregatorFilter.FilterName}-{anonymousAggregatorFilter.FilterFieldName}", anonymousAggregatorFilter)
     {
     }
 }

@@ -1,15 +1,15 @@
 namespace KitCli.Abstractions.Aggregators;
 
-// TODO: Simplify aggregator naming.
-public abstract class CliListAggregator<TAggregate> : CliAggregator<IEnumerable<TAggregate>>
+// TODO: Add a Basic List Aggregator that has pre-aggregate functions.
+public abstract class ListAggregator<TAggregate> : Aggregator<IEnumerable<TAggregate>>
 {
     // TODO: If the filter commands can be linked to Pagination, this being public isn't needed.
     public readonly int PageSize;
     public readonly int PageNumber;
-    
+
     private readonly List<Func<IEnumerable<TAggregate>, IEnumerable<TAggregate>>> _aggregateFunctions = [];
 
-    protected CliListAggregator(int? pageSize = null, int? pageNumber = null)
+    protected ListAggregator(int? pageSize = null, int? pageNumber = null)
     {
         PageSize = pageSize ?? 20;
         PageNumber = pageNumber ?? 1;
@@ -27,7 +27,7 @@ public abstract class CliListAggregator<TAggregate> : CliAggregator<IEnumerable<
 
         return aggregates.Take(PageSize);
     }
-    public CliListAggregator<TAggregate> AfterAggregation(Func<IEnumerable<TAggregate>, IEnumerable<TAggregate>> operationFunction)
+    public ListAggregator<TAggregate> AfterAggregation(Func<IEnumerable<TAggregate>, IEnumerable<TAggregate>> operationFunction)
     {
         _aggregateFunctions.Add(operationFunction);
         return this;

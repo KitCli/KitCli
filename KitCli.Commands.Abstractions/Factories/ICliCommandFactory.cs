@@ -7,7 +7,7 @@ public interface ICliCommandFactory
 {
     ICliCommandFactory Attach(Instruction instruction, List<AnonymousArtefact> artefacts);
     
-    bool CanCreateWhen() => true;
+    bool CanCreateWhen();
     
     CliCommand Create();
 }
