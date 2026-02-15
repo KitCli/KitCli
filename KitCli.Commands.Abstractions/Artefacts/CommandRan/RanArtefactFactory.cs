@@ -5,5 +5,5 @@ namespace KitCli.Commands.Abstractions.Artefacts.CommandRan;
 public class RanArtefactFactory : ArtefactFactory<RanOutcome>
 {
     protected override AnonymousArtefact CreateArtefact(RanOutcome outcome)
-        => new RanCliCommandAnonymousArtefact(outcome.Command);
+        => new RanCliCommandArtefact(outcome.Command);
 }

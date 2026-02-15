@@ -15,7 +15,7 @@ public class TestOutcome(string text) : Outcome(OutcomeKind.Reusable)
     public string Text { get; } = text;
 }
 
-public class TestArtefact(string text) : Artefact<string>(nameof(TestArtefact), text);
+public record TestArtefact(string Text) : Artefact<string>(nameof(TestArtefact), Text);
 
 public class TestArtefactFactory : ArtefactFactory<TestOutcome>
 {

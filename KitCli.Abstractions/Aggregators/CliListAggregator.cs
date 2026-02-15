@@ -1,5 +1,6 @@
 namespace KitCli.Abstractions.Aggregators;
 
+// TODO: Simplify aggregator naming.
 public abstract class CliListAggregator<TAggregate> : CliAggregator<IEnumerable<TAggregate>>
 {
     // TODO: If the filter commands can be linked to Pagination, this being public isn't needed.

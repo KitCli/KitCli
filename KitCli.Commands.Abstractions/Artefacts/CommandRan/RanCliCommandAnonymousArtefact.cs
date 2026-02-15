@@ -1,6 +1,3 @@
 namespace KitCli.Commands.Abstractions.Artefacts.CommandRan;
 
-public class RanCliCommandAnonymousArtefact(CliCommand ranCommand) : AnonymousArtefact(nameof(CliCommand))
-{
-    public CliCommand RanCommand { get; } = ranCommand;
-}
+public record RanCliCommandArtefact(CliCommand RanCommand) : Artefact<CliCommand>(nameof(CliCommand), RanCommand);

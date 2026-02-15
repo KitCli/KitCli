@@ -5,5 +5,5 @@ namespace KitCli.Commands.Abstractions.Artefacts.Aggregator.Filters;
 public class CliListAggregatorFilterArtefactFactory : ArtefactFactory<FilterOutcome>
 {
     protected override AnonymousArtefact CreateArtefact(FilterOutcome outcome)
-        => new CliListAggregatorFilterAnonymousArtefact(outcome.CliListAggregatorFilter);
+        => new CliListAggregatorFilterArtefact(outcome.CliListAggregatorFilter);
 }
