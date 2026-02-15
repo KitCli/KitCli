@@ -10,6 +10,6 @@ public static class StringExtensions
             .Where(c => !char.IsWhiteSpace(c))
             .Any(char.IsLetter);
 
-    public static string ExtractTokenContent(this string terminalInput, CliInstructionTokenIndex tokenIndex)
+    public static string ExtractTokenContent(this string terminalInput, InstructionTokenIndex tokenIndex)
         => terminalInput[tokenIndex.StartIndex..tokenIndex.EndIndex];
 }

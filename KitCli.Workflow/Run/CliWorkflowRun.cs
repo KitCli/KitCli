@@ -17,8 +17,8 @@ public class CliWorkflowRun : ICliWorkflowRun
 {
     public ICliWorkflowRunState State { get; }
     
-    private readonly ICliInstructionParser _cliInstructionParser;
-    private readonly ICliInstructionValidator _cliInstructionValidator;
+    private readonly IInstructionParser _instructionParser;
+    private readonly IInstructionValidator _instructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
 
     private readonly ISender _sender;
@@ -26,16 +26,16 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     public CliWorkflowRun(
         CliWorkflowRunState state,
-        ICliInstructionParser cliInstructionParser,
-        ICliInstructionValidator cliInstructionValidator,
+        IInstructionParser instructionParser,
+        IInstructionValidator instructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
         ISender sender,
         IPublisher publisher)
     {
         State = state;
         
-        _cliInstructionParser = cliInstructionParser;
-        _cliInstructionValidator = cliInstructionValidator;
+        _instructionParser = instructionParser;
+        _instructionValidator = instructionValidator;
         _workflowCommandProvider = workflowCommandProvider;
         _sender = sender;
         _publisher = publisher;
@@ -49,9 +49,9 @@ public class CliWorkflowRun : ICliWorkflowRun
             return [new NothingOutcome()];
         }
         
-        var instruction = _cliInstructionParser.Parse(ask!);
+        var instruction = _instructionParser.Parse(ask!);
         
-        if (_cliInstructionValidator.IsValidInstruction(instruction))
+        if (_instructionValidator.IsValid(instruction))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);
         }

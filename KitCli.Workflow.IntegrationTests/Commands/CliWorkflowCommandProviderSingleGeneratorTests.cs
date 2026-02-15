@@ -50,7 +50,7 @@ public class CliWorkflowCommandProviderSingleGeneratorTests
     public void GivenCommandWithSingleGenerator_WhenGetCommand_ThenReturnsExpectedCommandInstance()
     {
         // Arrange
-        var instruction = new CliInstruction("/", "test", null, []);
+        var instruction = new Instruction("/", "test", null, []);
         var outcomes = new List<Outcome>();
         
         // Act

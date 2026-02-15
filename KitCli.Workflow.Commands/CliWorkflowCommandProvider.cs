@@ -11,7 +11,7 @@ namespace KitCli.Workflow.Commands;
 public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICliWorkflowCommandProvider
 {
     // TODO: Test cases for the exceptions.
-    public CliCommand GetCommand(CliInstruction instruction, List<Outcome> outcomes)
+    public CliCommand GetCommand(Instruction instruction, List<Outcome> outcomes)
     {
         var generators = serviceProvider
             .GetKeyedServices<ICliCommandFactory>(instruction.Name)

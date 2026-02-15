@@ -42,9 +42,9 @@ public class CliWorkflow(IServiceProvider serviceProvider) : ICliWorkflow
     {
         var state = new CliWorkflowRunState();
         
-        var instructionParser = serviceProvider.GetRequiredService<ICliInstructionParser>();
+        var instructionParser = serviceProvider.GetRequiredService<IInstructionParser>();
 
-        var instructionValidator = serviceProvider.GetRequiredService<ICliInstructionValidator>();
+        var instructionValidator = serviceProvider.GetRequiredService<IInstructionValidator>();
         
         var commandProvider = serviceProvider.GetRequiredService<ICliWorkflowCommandProvider>();
         

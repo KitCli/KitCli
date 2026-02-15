@@ -57,7 +57,7 @@ public class CliWorkflowCommandProviderNoApplicableGeneratorTests
     public void GivenCommandAndNoApplicableGenerator_WhenGetCommand_ThenThrowsInvalidOperationException()
     {
         // Arrange
-        var instruction = new CliInstruction("/", "test", "non-applicable-sub-command", []);
+        var instruction = new Instruction("/", "test", "non-applicable-sub-command", []);
         var outcomes = new List<Outcome>();
         
         // Act & Assert

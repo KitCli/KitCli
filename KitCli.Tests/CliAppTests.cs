@@ -18,8 +18,8 @@ namespace KitCli.Tests;
 public class CliAppTests
 {
     private CliWorkflowRunState _workflowRunState;
-    private Mock<ICliInstructionParser> _mockInstructionParser;
-    private Mock<ICliInstructionValidator> _mockInstructionValidator;
+    private Mock<IInstructionParser> _mockInstructionParser;
+    private Mock<IInstructionValidator> _mockInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _mockWorkflowCommandProvider;
     private Mock<ISender> _mockSender;
     private Mock<IPublisher> _mockPublisher;
@@ -46,8 +46,8 @@ public class CliAppTests
     private void SetUpWorkflowRun()
     {
         _workflowRunState = new CliWorkflowRunState();
-        _mockInstructionParser = new Mock<ICliInstructionParser>();
-        _mockInstructionValidator = new Mock<ICliInstructionValidator>();
+        _mockInstructionParser = new Mock<IInstructionParser>();
+        _mockInstructionValidator = new Mock<IInstructionValidator>();
         _mockWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
         _mockSender = new Mock<ISender>();
         _mockPublisher = new Mock<IPublisher>();
@@ -73,14 +73,14 @@ public class CliAppTests
             .Setup(io => io.Ask())
             .Returns("/some-valid-ask");
         
-        var instruction = new CliInstruction("/", "some-valid-ask", null, []);
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
 
         _mockInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))
             .Returns(instruction);
 
         _mockInstructionValidator
-            .Setup(v => v.IsValidInstruction(It.IsAny<CliInstruction>()))
+            .Setup(v => v.IsValid(It.IsAny<Instruction>()))
             .Returns(() =>
             {
                 _mockCliWorkflow

@@ -5,7 +5,7 @@ namespace KitCli.Commands.Abstractions.Factories;
 
 public interface ICliCommandFactory
 {
-    ICliCommandFactory Attach(CliInstruction instruction, List<AnonymousArtefact> artefacts);
+    ICliCommandFactory Attach(Instruction instruction, List<AnonymousArtefact> artefacts);
     
     bool CanCreateWhen() => true;
     

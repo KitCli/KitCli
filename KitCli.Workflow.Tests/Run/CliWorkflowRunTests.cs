@@ -28,8 +28,8 @@ public class CliWorkflowRunTests
     }
     
     private CliWorkflowRunState _cliWorkflowRunState;
-    private Mock<ICliInstructionParser> _cliInstructionParser;
-    private Mock<ICliInstructionValidator> _cliInstructionValidator;
+    private Mock<IInstructionParser> _cliInstructionParser;
+    private Mock<IInstructionValidator> _cliInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _cliWorkflowCommandProvider;
     private Mock<ISender> _sender;
     private Mock<IPublisher> _publisher;
@@ -40,8 +40,8 @@ public class CliWorkflowRunTests
     {
         // Arrange
         _cliWorkflowRunState = new CliWorkflowRunState();
-        _cliInstructionParser = new Mock<ICliInstructionParser>();
-        _cliInstructionValidator = new Mock<ICliInstructionValidator>();
+        _cliInstructionParser = new Mock<IInstructionParser>();
+        _cliInstructionValidator = new Mock<IInstructionValidator>();
         _cliWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
         _sender = new Mock<ISender>();
         _publisher = new Mock<IPublisher>();
@@ -96,7 +96,7 @@ public class CliWorkflowRunTests
         var ask = "some valid ask";
 
         _cliInstructionValidator
-            .Setup(civ => civ.IsValidInstruction(It.IsAny<CliInstruction>()))
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
             .Returns(false);
         
         // Act
@@ -123,14 +123,14 @@ public class CliWorkflowRunTests
         
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))
-            .Returns(new CliInstruction("prefix", "name", null, []));
+            .Returns(new Instruction("prefix", "name", null, []));
         
         _cliInstructionValidator
-            .Setup(civ => civ.IsValidInstruction(It.IsAny<CliInstruction>()))
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
             .Throws<NoCommandGeneratorException>();
         
         // Act
@@ -158,18 +158,18 @@ public class CliWorkflowRunTests
         // Arrange
         var ask = "/some-valid-ask";
         
-        var instruction = new CliInstruction("/", "some-valid-ask", null, []);
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
         
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))
             .Returns(instruction);
         
         _cliInstructionValidator
-            .Setup(civ => civ.IsValidInstruction(It.IsAny<CliInstruction>()))
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
             .Returns(new CliCommand());
 
         _sender
@@ -200,7 +200,7 @@ public class CliWorkflowRunTests
         // Arrange
         var ask = "some valid ask";
         
-        var instruction = new CliInstruction("/", "some-valid-ask", null, []);
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
 
         var nothingOutcome = new NothingOutcome();
         
@@ -209,11 +209,11 @@ public class CliWorkflowRunTests
             .Returns(instruction);
         
         _cliInstructionValidator
-            .Setup(civ => civ.IsValidInstruction(It.IsAny<CliInstruction>()))
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
             .Returns(new CliCommand());
 
         _sender
@@ -248,7 +248,7 @@ public class CliWorkflowRunTests
         // Arrange
         var ask = "some valid ask";
         
-        var instruction = new CliInstruction("/", "some-valid-ask", null, []);
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
 
         var aggregator = new TestListAggregator();
         var outcome = new AggregatorOutcome<IEnumerable<TestAggregate>>(aggregator);
@@ -258,11 +258,11 @@ public class CliWorkflowRunTests
             .Returns(instruction);
         
         _cliInstructionValidator
-            .Setup(civ => civ.IsValidInstruction(It.IsAny<CliInstruction>()))
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
             .Returns(true);
         
         _cliWorkflowCommandProvider
-            .Setup(provider => provider.GetCommand(It.IsAny<CliInstruction>(), It.IsAny<List<Outcome>>()))
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
             .Returns(new CliCommand());
 
         _sender

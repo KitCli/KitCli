@@ -38,12 +38,12 @@ public class CliWorkflowTests
     {
         // Arrange
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ICliInstructionParser)))
-            .Returns(new Mock<ICliInstructionParser>().Object);
+            .Setup(sp => sp.GetService(typeof(IInstructionParser)))
+            .Returns(new Mock<IInstructionParser>().Object);
         
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ICliInstructionValidator)))
-            .Returns(new Mock<ICliInstructionValidator>().Object);
+            .Setup(sp => sp.GetService(typeof(IInstructionValidator)))
+            .Returns(new Mock<IInstructionValidator>().Object);
         
         _serviceProviderMock
             .Setup(sp =>  sp.GetService(typeof(ICliWorkflowCommandProvider)))
@@ -70,12 +70,12 @@ public class CliWorkflowTests
     {
         // Arrange
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ICliInstructionParser)))
-            .Returns(new Mock<ICliInstructionParser>().Object);
+            .Setup(sp => sp.GetService(typeof(IInstructionParser)))
+            .Returns(new Mock<IInstructionParser>().Object);
         
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ICliInstructionValidator)))
-            .Returns(new Mock<ICliInstructionValidator>().Object);
+            .Setup(sp => sp.GetService(typeof(IInstructionValidator)))
+            .Returns(new Mock<IInstructionValidator>().Object);
         
         _serviceProviderMock
             .Setup(sp =>  sp.GetService(typeof(ICliWorkflowCommandProvider)))
@@ -97,8 +97,8 @@ public class CliWorkflowTests
         
         var reusableRun = new CliWorkflowRun(
             reusableRunState,
-            new Mock<ICliInstructionParser>().Object,
-            new Mock<ICliInstructionValidator>().Object,
+            new Mock<IInstructionParser>().Object,
+            new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);
@@ -117,12 +117,12 @@ public class CliWorkflowTests
     {
         // Arrange
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ICliInstructionParser)))
-            .Returns(new Mock<ICliInstructionParser>().Object);
+            .Setup(sp => sp.GetService(typeof(IInstructionParser)))
+            .Returns(new Mock<IInstructionParser>().Object);
         
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ICliInstructionValidator)))
-            .Returns(new Mock<ICliInstructionValidator>().Object);
+            .Setup(sp => sp.GetService(typeof(IInstructionValidator)))
+            .Returns(new Mock<IInstructionValidator>().Object);
         
         _serviceProviderMock
             .Setup(sp =>  sp.GetService(typeof(ICliWorkflowCommandProvider)))
@@ -142,8 +142,8 @@ public class CliWorkflowTests
         
         var reusableRun = new CliWorkflowRun(
             reusableRunState,
-            new Mock<ICliInstructionParser>().Object,
-            new Mock<ICliInstructionValidator>().Object,
+            new Mock<IInstructionParser>().Object,
+            new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);

@@ -6,13 +6,13 @@ namespace KitCli.Workflow.Run.State.Change;
 
 public class InstructionCliWorkflowRunStateChange : CliWorkflowRunStateChange, IInstructionCliWorkflowRunStateChange
 {
-    public CliInstruction Instruction { get;  }
+    public Instruction Instruction { get;  }
 
     public InstructionCliWorkflowRunStateChange(
         TimeSpan at,
         ClIWorkflowRunStateStatus from,
         ClIWorkflowRunStateStatus to,
-        CliInstruction instruction)
+        Instruction instruction)
         : base(at, from, to)
     {
         Instruction = instruction;

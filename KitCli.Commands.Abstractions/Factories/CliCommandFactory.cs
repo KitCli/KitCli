@@ -6,20 +6,20 @@ namespace KitCli.Commands.Abstractions.Factories;
 
 public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where TCliCommand : CliCommand
 {
-    protected CliInstruction? Instruction;
+    protected Instruction? Instruction;
     protected List<AnonymousArtefact>? Artefacts;
     
-    public ICliCommandFactory Attach(CliInstruction instruction, List<AnonymousArtefact> artefacts)
+    public abstract bool CanCreateWhen();
+
+    public abstract CliCommand Create();
+    
+    public ICliCommandFactory Attach(Instruction instruction, List<AnonymousArtefact> artefacts)
     {
         Instruction = instruction;
         Artefacts = artefacts;
 
         return this;
     }
-
-    public abstract bool CanCreateWhen();
-
-    public abstract CliCommand Create();
 
     protected bool SubCommandIs(string subCommandName)
     {
@@ -28,7 +28,7 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         return Instruction!.SubInstructionName == subCommandName;
     }
     
-    protected ValuedCliInstructionArgument<TArgumentType>? GetArgument<TArgumentType>(string? argumentName) where TArgumentType : notnull
+    protected InstructionArgument<TArgumentType>? GetArgument<TArgumentType>(string? argumentName) where TArgumentType : notnull
     {
         var typedArguments = GetArguments<TArgumentType>();
         
@@ -37,7 +37,7 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
             : typedArguments.SingleOrDefault(argument => argument.Name == argumentName);
     }
 
-    protected ValuedCliInstructionArgument<TArgumentType> GetRequiredArgument<TArgumentType>(string? argumentName)
+    protected InstructionArgument<TArgumentType> GetRequiredArgument<TArgumentType>(string? argumentName)
         where TArgumentType : notnull
     {
         var argument = GetArgument<TArgumentType>(argumentName);
@@ -73,12 +73,12 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         return artefact;
     }
 
-    protected IEnumerable<ValuedCliInstructionArgument<TArgumentType>> GetArguments<TArgumentType>()
+    protected IEnumerable<InstructionArgument<TArgumentType>> GetArguments<TArgumentType>()
         where TArgumentType : notnull
     {
         ValidateAttached();
 
-        return Instruction!.Arguments.OfType<ValuedCliInstructionArgument<TArgumentType>>();
+        return Instruction!.Arguments.OfType<InstructionArgument<TArgumentType>>();
     } 
     
     protected IEnumerable<Artefact<TArtefactType>> GetArtefacts<TArtefactType>() where TArtefactType : notnull

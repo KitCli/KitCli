@@ -70,7 +70,7 @@ public class CliWorkflowCommandProviderMultipleGeneratorTests
     public void GivenSubCommand_WhenGetCommand_ThenReturnsExpectedCommandInstance(string subCommandName, int expectedNumber)
     {
         // Arrange
-        var instruction = new CliInstruction("/", "test", subCommandName, []);
+        var instruction = new Instruction("/", "test", subCommandName, []);
         var outcomes = new List<Outcome>();
         
         // Act

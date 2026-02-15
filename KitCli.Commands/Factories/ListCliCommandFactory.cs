@@ -13,8 +13,8 @@ public abstract class ListCliCommandFactory<TCliCommand> : CliCommandFactory<TCl
         var pageSizeArgument = GetArgument<int>(ListCliCommand.ArgumentNames.PageSize);
         var pageNumberArgument = GetArgument<int>(ListCliCommand.ArgumentNames.PageNumber);
         
-        var pageSize = pageSizeArgument?.ArgumentValue ?? pageSizeArtefact?.Value;
-        var pageNumber = pageNumberArgument?.ArgumentValue ?? pageNumberArtefact?.Value;
+        var pageSize = pageSizeArgument?.Value ?? pageSizeArtefact?.Value;
+        var pageNumber = pageNumberArgument?.Value ?? pageNumberArtefact?.Value;
         
         return (pageSize, pageNumber);
     }

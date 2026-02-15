@@ -34,7 +34,7 @@ public class CliWorkflowRunState : ICliWorkflowRunState
         Changes.Add(stateChange);
     }
 
-    public void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, CliInstruction instruction)
+    public void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, Instruction instruction)
     {
         var priorState = CanChangeTo(statusToChangeTo);
         

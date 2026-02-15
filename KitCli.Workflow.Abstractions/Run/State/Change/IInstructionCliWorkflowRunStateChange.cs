@@ -4,5 +4,5 @@ namespace KitCli.Workflow.Abstractions.Run.State.Change;
 
 public interface IInstructionCliWorkflowRunStateChange : ICliWorkflowRunStateChange
 {
-    CliInstruction Instruction { get; }
+    Instruction Instruction { get; }
 }

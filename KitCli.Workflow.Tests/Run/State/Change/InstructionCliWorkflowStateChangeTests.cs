@@ -21,7 +21,7 @@ public class InstructionCliWorkflowStateChangeTests : CliWorkflowRunStateTests
 
         var state = GetPreparedState(priorStatuses);
 
-        var instruction = new CliInstruction(null, null, null, []);
+        var instruction = new Instruction(null, null, null, []);
         
         // Act & Assert
         Assert.Throws<ImpossibleStateChangeException>(() => state.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction));
@@ -33,7 +33,7 @@ public class InstructionCliWorkflowStateChangeTests : CliWorkflowRunStateTests
         // Arrange
         var state = GetPreparedState([]);
 
-        var instruction = new CliInstruction(null, null, null, []);
+        var instruction = new Instruction(null, null, null, []);
         
         // Act
         state.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);

@@ -6,5 +6,5 @@ namespace KitCli.Workflow.Commands;
 
 public interface ICliWorkflowCommandProvider
 {
-    CliCommand GetCommand(CliInstruction instruction, List<Outcome> outcomes);
+    CliCommand GetCommand(Instruction instruction, List<Outcome> outcomes);
 }

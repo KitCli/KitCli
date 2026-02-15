@@ -14,25 +14,25 @@ public static class ServiceCollectionExtensions
         => serviceCollection
             .AddCliInstructionArgumentBuilders()
             .AddTokenExtraction()
-            .AddSingleton<ICliInstructionParser, CliInstructionParser>()
+            .AddSingleton<IInstructionParser, InstructionParser>()
             .AddValidators();
     
     private static IServiceCollection AddCliInstructionArgumentBuilders(this IServiceCollection serviceCollection)
         => serviceCollection
-            .AddSingleton<ICliInstructionArgumentBuilder, DirectoryInfoCliInstructionArgumentBuilder>()
-            .AddSingleton<ICliInstructionArgumentBuilder, GuidCliInstructionArgumentBuilder>()
-            .AddSingleton<ICliInstructionArgumentBuilder, StringCliInstructionArgumentBuilder>()
-            .AddSingleton<ICliInstructionArgumentBuilder, IntCliInstructionArgumentBuilder>()
-            .AddSingleton<ICliInstructionArgumentBuilder, DecimalCliInstructionArgumentBuilder>()
-            .AddSingleton<ICliInstructionArgumentBuilder, DateOnlyCliInstructionArgumentBuilder>()
-            .AddSingleton<ICliInstructionArgumentBuilder, BoolCliInstructionArgumentBuilder>();
+            .AddSingleton<IInstructionArgumentBuilder, DirectoryInfoInstructionArgumentBuilder>()
+            .AddSingleton<IInstructionArgumentBuilder, GuidInstructionArgumentBuilder>()
+            .AddSingleton<IInstructionArgumentBuilder, StringInstructionArgumentBuilder>()
+            .AddSingleton<IInstructionArgumentBuilder, IntInstructionArgumentBuilder>()
+            .AddSingleton<IInstructionArgumentBuilder, DecimalInstructionArgumentBuilder>()
+            .AddSingleton<IInstructionArgumentBuilder, DateOnlyInstructionArgumentBuilder>()
+            .AddSingleton<IInstructionArgumentBuilder, BoolInstructionArgumentBuilder>();
 
     private static IServiceCollection AddTokenExtraction(this IServiceCollection serviceCollection)
         => serviceCollection
-            .AddSingleton<CliInstructionTokenIndexer>()
-            .AddSingleton<CliInstructionTokenExtractor>();
+            .AddSingleton<InstructionTokenIndexer>()
+            .AddSingleton<InstructionTokenExtractor>();
     
     private static IServiceCollection AddValidators(this IServiceCollection serviceCollection)
         => serviceCollection
-            .AddSingleton<ICliInstructionValidator, DefaultCliInstructionValidator>();
+            .AddSingleton<IInstructionValidator, DefaultInstructionValidator>();
 }
