@@ -1,3 +1,4 @@
+using KitCli.Abstractions.Aggregators;
 using KitCli.Commands.Abstractions.Artefacts;
 using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Arguments;
@@ -72,9 +73,25 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
             : typedArtefacts.Any(artefact => artefact.Name == artefactName);
     }
     
+    protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
+    {
+        var artefact = GetArtefact<CliCommand>(typeof(TRanCliCommand).Name);
+
+        return artefact != null;
+    }
+    
     protected Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName) where TArtefactType : notnull
     {
         var typedArtefacts = GetArtefacts<TArtefactType>();
+        
+        return artefactName == null
+            ? typedArtefacts.SingleOrDefault() 
+            : typedArtefacts.SingleOrDefault(artefact => artefact.Name == artefactName);
+    }
+    
+    protected Artefact<Aggregator<TSource, TAggregate>>? GetAggregatorArtefact<TSource, TAggregate>(string? artefactName = null)
+    {
+        var typedArtefacts = GetArtefacts<Aggregator<TSource, TAggregate>>();
         
         return artefactName == null
             ? typedArtefacts.SingleOrDefault() 
@@ -89,6 +106,19 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         {
             // TODO: Handle further upstream in future.
             throw new Exception($"Required artefact '{artefactName}' of type '{typeof(TArtefactType).Name}' not found.");
+        }
+
+        return artefact;
+    }
+    
+    protected Artefact<Aggregator<TSource, TAggregate>> GetRequiredAggregatorArtefact<TSource, TAggregate>(string? artefactName = null)
+    {
+        var artefact = GetAggregatorArtefact<TSource, TAggregate>(artefactName);
+        
+        if (artefact == null)
+        {
+            // TODO: Handle further upstream in future.
+            throw new Exception($"Required artefact '{artefactName}' of type '{typeof(Aggregator<TSource, TAggregate>).Name}' not found.");
         }
 
         return artefact;

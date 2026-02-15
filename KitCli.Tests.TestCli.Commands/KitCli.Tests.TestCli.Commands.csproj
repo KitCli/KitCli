@@ -7,7 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\KitCli.Commands\KitCli.Commands.csproj" />
       <ProjectReference Include="..\KitCli\KitCli.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Bogus" Version="35.6.5" />
     </ItemGroup>
 
 </Project>

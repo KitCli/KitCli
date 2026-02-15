@@ -22,9 +22,9 @@ public class CliWorkflowRunTests
 {
     private abstract record TestAggregate;
 
-    private class TestListAggregator : ListAggregator<TestAggregate>
+    private record TestListAggregator() : Aggregator<TestAggregate, TestAggregate>([])
     {
-        protected override IEnumerable<TestAggregate> ListAggregate() => new List<TestAggregate>();
+        protected override IEnumerable<TestAggregate> DoAggregation(IEnumerable<TestAggregate> source) => new List<TestAggregate>(source);
     }
     
     private CliWorkflowRunState _cliWorkflowRunState;
@@ -251,7 +251,7 @@ public class CliWorkflowRunTests
         var instruction = new Instruction("/", "some-valid-ask", null, []);
 
         var aggregator = new TestListAggregator();
-        var outcome = new AggregatorOutcome<IEnumerable<TestAggregate>>(aggregator);
+        var outcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
         
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))

@@ -1,4 +1,3 @@
-using KitCli.Abstractions.Aggregators.Filters;
 using KitCli.Commands.Abstractions.Outcomes;
 using MediatR;
 

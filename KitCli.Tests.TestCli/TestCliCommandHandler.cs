@@ -22,7 +22,7 @@ public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
         };
 
         return FinishThisCommand()
-            .ByNotFindingCommand()
+            .ByFinallyNotFindingCommand()
             .ByFinallySaying("Final Say Outcome Used")
             .BySaying("Message Outcome Used")
             .ByShowingTable(table)

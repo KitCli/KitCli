@@ -91,7 +91,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         {
             var outcomes = await _sender.Send(command);
             
-            Outcome[] allOutcomes = [new RanOutcome(command), ..outcomes];
+            Outcome[] allOutcomes = [new RanCliCommandOutcome(command), ..outcomes];
             
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);

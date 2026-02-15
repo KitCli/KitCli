@@ -2,8 +2,8 @@ using KitCli.Commands.Abstractions.Outcomes.Reusable;
 
 namespace KitCli.Commands.Abstractions.Artefacts.Aggregator;
 
-public class AggregatorArtefactFactory<TAggregate> : ArtefactFactory<AggregatorOutcome<TAggregate>>
+public class AggregatorArtefactFactory<TSource, TAggregate> : ArtefactFactory<AggregatorOutcome<TSource, TAggregate>>
 {
-    protected override AnonymousArtefact CreateArtefact(AggregatorOutcome<TAggregate> outcome)
-        => new AggregatorArtefact<TAggregate>(outcome.Aggregator);
+    protected override AnonymousArtefact CreateArtefact(AggregatorOutcome<TSource, TAggregate> outcome)
+        => new AggregatorArtefact<TSource, TAggregate>(outcome.Aggregator);
 }
