@@ -6,8 +6,11 @@ namespace KitCli.Commands.Abstractions.Factories;
 
 public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where TCliCommand : CliCommand
 {
-    protected Instruction? Instruction;
-    protected List<AnonymousArtefact>? Artefacts;
+    protected Instruction Instruction => _instruction ?? Instruction.Empty;
+    protected List<AnonymousArtefact> Artefacts => _artefacts ?? [];
+    
+    private Instruction? _instruction;
+    private List<AnonymousArtefact>? _artefacts;
     
     public abstract bool CanCreateWhen();
 
@@ -15,8 +18,8 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     
     public ICliCommandFactory Attach(Instruction instruction, List<AnonymousArtefact> artefacts)
     {
-        Instruction = instruction;
-        Artefacts = artefacts;
+        _instruction = instruction;
+        _artefacts = artefacts;
 
         return this;
     }
@@ -25,7 +28,7 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     {
         ValidateAttached();
         
-        return Instruction!.SubInstructionName == subCommandName;
+        return _instruction!.SubInstructionName == subCommandName;
     }
     
     protected bool AnyArgument<TArgumentType>(string? argumentName) where TArgumentType : notnull
@@ -96,19 +99,19 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     {
         ValidateAttached();
 
-        return Instruction!.Arguments.OfType<InstructionArgument<TArgumentType>>();
+        return _instruction!.Arguments.OfType<InstructionArgument<TArgumentType>>();
     } 
     
     protected IEnumerable<Artefact<TArtefactType>> GetArtefacts<TArtefactType>() where TArtefactType : notnull
     {
         ValidateAttached();
 
-        return Artefacts!.OfType<Artefact<TArtefactType>>();
+        return _artefacts!.OfType<Artefact<TArtefactType>>();
     }
 
     private void ValidateAttached()
     {
-        if (Instruction == null || Artefacts == null)
+        if (_instruction == null || _artefacts == null)
         {
             throw new Exception("Factory not registered, automatic attaching.");
         }
