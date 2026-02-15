@@ -8,8 +8,8 @@ KitCli provides an extensible command-line interface framework where commands ca
 
 The framework needs a clear, documented pattern for:
 1. Returning outcomes from command handlers
-2. Creating `Outcome`s and mapping them to `Artefact`s with artefact factories (e.g., `ICliCommandArtefactFactory`)
-3. Using `Artefact`s in command factories (e.g., `ICliCommandFactory<>`)
+2. Creating `Outcome`s and mapping them to `Artefact`s with artefact factories (e.g., `ArtefactFactory<>`)
+3. Using `Artefact`s in command factories (e.g., `CliCommandFactory<>`)
 
 ## Decision
 
@@ -47,7 +47,7 @@ public class MyCommandHandler : CliCommandHandler<MyCommand>
 }
 ```
 
-**Helper Methods:**
+**Fluent Outcome Building:**
 The `CliCommandHandler<T>` base class provides a fluent API for building outcomes via `FinishThisCommand()`:
 ```csharp
 protected static OutcomeList FinishThisCommand()  // Start building outcomes
@@ -134,18 +134,15 @@ public class MyCommandFactory : CliCommandFactory<MyCommand>
     public override bool CanCreateWhen()
     {
         // Use AnyArtefact() helper to check if required artefacts are present
-        return AnyArtefact<MyCustomArtefact>();
+        return AnyArtefact<int>("myValue");
     }
 
     public override CliCommand Create()
     {
-        // Use GetArgument() helper to extract instruction arguments
-        var valueArg = GetArgument<int>("value");
+        // Use GetRequiredArgument() to simplify argument extraction
+        var value = GetRequiredArgument<int>("value");
         
-        // Use GetArtefact() helper to get artefacts from previous commands
-        var myArtefact = GetArtefact<MyCustomArtefact>();
-        
-        return new MyCommand(myArtefact?.MyValue ?? valueArg?.Value ?? 0);
+        return new MyCommand(value.Value);
     }
 }
 ```
@@ -159,7 +156,7 @@ services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
 ```
 
 The framework automatically:
-- Discovers all `ICliCommandFactory<>` implementations
+- Discovers all `CliCommandFactory<>` implementations
 - Registers them with appropriate service keys based on command names
 - Sets up both full and shorthand command name mappings
 
@@ -167,11 +164,11 @@ The framework automatically:
 When extending `CliCommandFactory<T>`, you have access to:
 ```csharp
 // Get instruction arguments
-protected InstructionArgument<TType>? GetArgument<TType>(string? argumentName)
-protected InstructionArgument<TType> GetRequiredArgument<TType>(string? argumentName)
-protected IEnumerable<InstructionArgument<TType>> GetArguments<TType>()
+protected InstructionArgument<TArgumentType>? GetArgument<TArgumentType>(string? argumentName)
+protected InstructionArgument<TArgumentType> GetRequiredArgument<TArgumentType>(string? argumentName)
+protected IEnumerable<InstructionArgument<TArgumentType>> GetArguments<TArgumentType>()
 
-// Get artefacts from previous commands
+// Get artefacts from previous commands (TArtefactType is the value type, e.g., int, string)
 protected Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName)
 protected Artefact<TArtefactType> GetRequiredArtefact<TArtefactType>(string? artefactName)
 protected IEnumerable<Artefact<TArtefactType>> GetArtefacts<TArtefactType>()
@@ -182,9 +179,9 @@ protected bool AnyArtefact<TArtefactType>(string? artefactName = null)
 // Check sub-command
 protected bool SubCommandIs(string subCommandName)
 
-// Artefacts and Instruction are available as properties
-protected List<AnonymousArtefact>? Artefacts
-protected Instruction? Instruction
+// Artefacts and Instruction are available as properties (not nullable)
+protected List<AnonymousArtefact> Artefacts
+protected Instruction Instruction
 ```
 
 The base factory class provides these helpers for common command creation patterns.
@@ -197,11 +194,11 @@ public record SetValueCommand(int Value) : CliCommand;
 // Handler - Returns reusable outcome using fluent API
 public class SetValueCommandHandler : CliCommandHandler<SetValueCommand>
 {
-    public override Task<Outcome[]> HandleCommand(SetValueCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(SetValueCommand command, CancellationToken cancellationToken)
     {
         return FinishThisCommand()
-            .BySaying($"Set value to: {request.Value}")
-            .ByResultingIn(new MyCustomOutcome(request.Value))  // Add custom reusable outcome
+            .BySaying($"Set value to: {command.Value}")
+            .ByResultingIn(new MyCustomOutcome(command.Value))  // Add custom reusable outcome
             .EndAsync();
     }
 }
@@ -215,28 +212,26 @@ public class ProcessValueCommandFactory : CliCommandFactory<ProcessValueCommand>
     public override bool CanCreateWhen()
     {
         // Use helper method to check if artefact exists
-        return AnyArtefact<MyCustomArtefact>();
+        return AnyArtefact<int>("myValue");
     }
 
     public override CliCommand Create()
     {
-        // Use GetArgument() to check for command line arguments
-        var inputArg = GetArgument<int>("input");
+        // Use GetRequiredArtefact() and GetRequiredArgument() to simplify extraction
+        var artefact = GetRequiredArtefact<int>("myValue");
+        var inputArg = GetRequiredArgument<int>("input");
         
-        // Use GetArtefact() to extract artefact from previous command
-        var artefact = GetArtefact<MyCustomArtefact>();
-        
-        return new ProcessValueCommand(artefact?.MyValue ?? inputArg?.Value ?? 0);
+        return new ProcessValueCommand(artefact.Value + inputArg.Value);
     }
 }
 
 // Handler for second command
 public class ProcessValueCommandHandler : CliCommandHandler<ProcessValueCommand>
 {
-    public override Task<Outcome[]> HandleCommand(ProcessValueCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(ProcessValueCommand command, CancellationToken cancellationToken)
     {
         return FinishThisCommand()
-            .ByFinallySaying($"Processed value {request.InputValue} from previous command")
+            .ByFinallySaying($"Processed value {command.InputValue} from previous command")
             .EndAsync();
     }
 }
