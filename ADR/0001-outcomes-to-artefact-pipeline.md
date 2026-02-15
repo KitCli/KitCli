@@ -8,8 +8,8 @@ KitCli provides an extensible command-line interface framework where commands ca
 
 The framework needs a clear, documented pattern for:
 1. Returning outcomes from command handlers
-2. Creating `Outcome`s and mapping them to `Artefact<>`s with `ArtefactFactory<>`
-3. Using `Artefact<>`s in `CliCommandFactory<>`s
+2. Creating `Outcome`s and mapping them to `Artefact`s with artefact factories (e.g., `ICliCommandArtefactFactory`)
+3. Using `Artefact`s in command factories (e.g., `ICliCommandFactory<>`)
 
 ## Decision
 
@@ -74,7 +74,7 @@ public record MyCustomOutcome(int MyValue) : CliCommandOutcome(CliCommandOutcome
 
 **Step 2: Create a Corresponding Artefact**
 ```csharp
-public class MyCustomArtefact(int myValue) : ValuedCliCommandArtefact<int>(nameof(myValue), myValue)
+public class MyCustomArtefact(int myValue) : ValuedCliCommandArtefact<int>(nameof(MyValue), myValue)
 {
     public int MyValue { get; } = myValue;
 }
@@ -91,7 +91,9 @@ public class MyCustomArtefactFactory : ICliCommandArtefactFactory
 
     public CliCommandArtefact Create(CliCommandOutcome outcome)
     {
-        var myOutcome = (MyCustomOutcome)outcome;
+        if (outcome is not MyCustomOutcome myOutcome)
+            throw new InvalidOperationException($"Expected MyCustomOutcome, got {outcome.GetType().Name}");
+            
         return new MyCustomArtefact(myOutcome.MyValue);
     }
 }
