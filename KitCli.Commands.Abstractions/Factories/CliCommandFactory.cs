@@ -28,6 +28,15 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         return Instruction!.SubInstructionName == subCommandName;
     }
     
+    protected bool AnyArgument<TArgumentType>(string? argumentName) where TArgumentType : notnull
+    {
+        var typedArguments = GetArguments<TArgumentType>();
+        
+        return argumentName == null
+            ? typedArguments.Any() 
+            : typedArguments.Any(argument => argument.Name == argumentName);
+    }
+    
     protected InstructionArgument<TArgumentType>? GetArgument<TArgumentType>(string? argumentName) where TArgumentType : notnull
     {
         var typedArguments = GetArguments<TArgumentType>();
@@ -51,6 +60,15 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         return argument;
     }
 
+    protected bool AnyArtefact<TArtefactType>(string? artefactName) where TArtefactType : notnull
+    {
+        var typedArtefacts = GetArtefacts<TArtefactType>();
+        
+        return artefactName == null
+            ? typedArtefacts.Any() 
+            : typedArtefacts.Any(artefact => artefact.Name == artefactName);
+    }
+    
     protected Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName) where TArtefactType : notnull
     {
         var typedArtefacts = GetArtefacts<TArtefactType>();
