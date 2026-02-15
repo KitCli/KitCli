@@ -8,8 +8,8 @@ KitCli provides an extensible command-line interface framework where commands ca
 
 The framework needs a clear, documented pattern for:
 1. Returning outcomes from command handlers
-2. Creating custom outcomes with appropriate artefact factories
-3. Using artefacts in subsequent commands
+2. Creating `Outcome`s and mapping them to `Artefact<>`s with `ArtefactFactory<>`
+3. Using `Artefact<>`s in `CliCommandFactory<>`s
 
 ## Decision
 
@@ -35,7 +35,7 @@ Commands return outcomes through their handlers implementing `ICliCommandHandler
 
 **Example:**
 ```csharp
-public class MyCommandHandler : ICliCommandHandler<MyCommand>
+public class MyCommandHandler : CliCommandHandler, ICliCommandHandler<MyCommand>
 {
     public Task<CliCommandOutcome[]> Handle(MyCommand request, CancellationToken cancellationToken)
     {
@@ -52,7 +52,7 @@ public class MyCommandHandler : ICliCommandHandler<MyCommand>
 ```
 
 **Helper Methods:**
-The `CliCommandHandler` base class provides convenience methods:
+The `CliCommandHandler` base class provides convenience methods for common outcome scenarios:
 ```csharp
 protected static CliCommandOutcome[] OutcomeAs()  // Returns CliCommandNothingOutcome
 protected static CliCommandOutcome[] OutcomeAs(string message)  // Returns OutputCliCommandOutcome
@@ -60,16 +60,15 @@ protected static CliCommandOutcome[] OutcomeAs(Table table)  // Returns TableCli
 protected static CliCommandOutcome[] OutcomeAs(CliListAggregatorFilter filter)  // Returns FilterCliCommandOutcome
 ```
 
+Handlers can extend `CliCommandHandler` to access these helper methods.
+
 ### 2. Creating Custom Outcomes with Artefact Factories
 
 To create custom reusable outcomes that can be converted to artefacts:
 
 **Step 1: Create a Custom Outcome**
 ```csharp
-public class MyCustomOutcome(int myValue) : CliCommandOutcome(CliCommandOutcomeKind.Reusable)
-{
-    public int MyValue { get; } = myValue;
-}
+public record MyCustomOutcome(int MyValue) : CliCommandOutcome(CliCommandOutcomeKind.Reusable);
 ```
 
 **Step 2: Create a Corresponding Artefact**
@@ -81,6 +80,9 @@ public class MyCustomArtefact(int myValue) : ValuedCliCommandArtefact<int>(nameo
 ```
 
 **Step 3: Create an Artefact Factory**
+
+The framework automatically handles artefact creation through reflection for standard patterns. For custom cases, implement `ICliCommandArtefactFactory`:
+
 ```csharp
 public class MyCustomArtefactFactory : ICliCommandArtefactFactory
 {
@@ -88,9 +90,7 @@ public class MyCustomArtefactFactory : ICliCommandArtefactFactory
 
     public CliCommandArtefact Create(CliCommandOutcome outcome)
     {
-        if (outcome is not MyCustomOutcome myOutcome)
-            throw new InvalidOperationException("Cannot create MyCustomArtefact from the given outcome.");
-
+        var myOutcome = (MyCustomOutcome)outcome;
         return new MyCustomArtefact(myOutcome.MyValue);
     }
 }
@@ -128,31 +128,38 @@ public class MyCommandFactory : ICliCommandFactory<MyCommand>
         var myArtefact = artefacts.OfType<int>();
 
         // Create command with artefact data
-        return new MyCommand(myArtefact?.Value ?? 0);
+        return new MyCommand(myArtefact?.ArtefactValue ?? 0);
     }
 }
 ```
 
-**Step 2: Register the Factory**
+**Step 2: Register Command Factories**
+
+Command factories are registered automatically via reflection when using `AddCommandsFromAssembly()`:
+
 ```csharp
-var serviceKey = new MyCommand().GetInstructionName();
-services.AddKeyedSingleton<IUnidentifiedCliCommandFactory, MyCommandFactory>(serviceKey);
+services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
 ```
 
+The framework automatically:
+- Discovers all `ICliCommandFactory<>` implementations
+- Registers them with appropriate service keys based on command names
+- Sets up both full and shorthand command name mappings
+
 **Artefact Extension Methods:**
-The framework provides helper methods for working with artefacts:
+The framework provides helper methods for working with artefacts in command factories:
 ```csharp
-// Get artefact by value type (e.g., int, string, CliListAggregator<T>)
-ValuedCliCommandArtefact<int>? pageNumberArtefact = artefacts.OfType<int>();
+// Get artefact by value type and name
+ValuedCliCommandArtefact<int>? pageNumberArtefact = artefacts.OfType<int>("pageNumber");
+
+// Get artefact by value type only
+ValuedCliCommandArtefact<int>? intArtefact = artefacts.OfType<int>();
 
 // Get required artefact (throws if not found)
 ValuedCliCommandArtefact<int> requiredIntArtefact = artefacts.OfRequiredType<int>();
 
 // Check for custom artefact class using LINQ
 bool hasCustomArtefact = artefacts.Any(x => x is MyCustomArtefact);
-
-// Get artefact using framework extension (by value type)
-var myIntArtefact = artefacts.OfType<int>();  // Returns ValuedCliCommandArtefact<int>?
 
 // Check if last command ran was of specific type
 bool wasLastCommand = artefacts.LastCommandRanWas<MyCommand>();
@@ -161,13 +168,15 @@ bool wasLastCommand = artefacts.LastCommandRanWas<MyCommand>();
 ListAggregatorCliCommandArtefact<TAggregate>? aggregator = artefacts.OfListAggregatorType<TAggregate>();
 ```
 
+Command factories can extend base factory classes (like `ListCliCommandFactory`) to access additional helpers for common patterns.
+
 **Complete Example:**
 ```csharp
 // First Command - Produces an outcome
 public record SetValueCommand(int Value) : CliCommand;
 
 // Handler - Returns reusable outcome
-public class SetValueCommandHandler : ICliCommandHandler<SetValueCommand>
+public class SetValueCommandHandler : CliCommandHandler, ICliCommandHandler<SetValueCommand>
 {
     public Task<CliCommandOutcome[]> Handle(SetValueCommand request, CancellationToken cancellationToken)
     {
@@ -196,12 +205,12 @@ public class ProcessValueCommandFactory : ICliCommandFactory<ProcessValueCommand
     {
         // Extract artefact by value type from previous command's outcome
         var artefact = artefacts.OfType<int>();
-        return new ProcessValueCommand(artefact?.Value ?? 0);
+        return new ProcessValueCommand(artefact?.ArtefactValue ?? 0);
     }
 }
 
 // Handler for second command
-public class ProcessValueCommandHandler : ICliCommandHandler<ProcessValueCommand>
+public class ProcessValueCommandHandler : CliCommandHandler, ICliCommandHandler<ProcessValueCommand>
 {
     public Task<CliCommandOutcome[]> Handle(ProcessValueCommand request, CancellationToken cancellationToken)
     {
