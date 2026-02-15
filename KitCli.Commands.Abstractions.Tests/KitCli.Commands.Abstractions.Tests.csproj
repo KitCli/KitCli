@@ -20,8 +20,4 @@
       <ProjectReference Include="..\KitCli.Commands.Abstractions\KitCli.Commands.Abstractions.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Artefacts\" />
-    </ItemGroup>
-
 </Project>

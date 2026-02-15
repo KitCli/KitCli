@@ -1,6 +1,7 @@
 namespace KitCli.Instructions.Abstractions;
 
-public class CliInstructionArgument(string argumentName)
+// TODO: Rename to anonymous.
+public class CliInstructionArgument(string name)
 {
-    public string ArgumentName { get; } = argumentName;
+    public string Name { get; } = name;
 }

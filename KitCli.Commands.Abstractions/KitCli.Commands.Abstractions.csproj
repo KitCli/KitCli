@@ -16,6 +16,7 @@
     <ItemGroup>
       <ProjectReference Include="..\KitCli.Abstractions\KitCli.Abstractions.csproj" />
       <ProjectReference Include="..\KitCli.Instructions.Abstractions\KitCli.Instructions.Abstractions.csproj" />
+      <ProjectReference Include="..\KitCli.Instructions\KitCli.Instructions.csproj" />
     </ItemGroup>
 
     <ItemGroup>

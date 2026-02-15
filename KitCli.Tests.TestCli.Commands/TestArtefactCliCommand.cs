@@ -16,7 +16,7 @@ public class TestOutcome(string text) : Outcome(OutcomeKind.Reusable)
     public string Text { get; } = text;
 }
 
-public class TestArtefact(string text) : Artefact<string>("TestArtefact", text);
+public class TestArtefact(string text) : Artefact<string>(nameof(TestArtefact), text);
 
 public class TestArtefactFactory : ArtefactFactory<TestOutcome>
 {
@@ -36,11 +36,11 @@ public record TestArtefactResultCliCommand(string Text) : CliCommand;
 
 public class TestArtefactResultCliCommandFactory : BasicCreationCliCommandFactory<TestArtefactResultCliCommand>
 {
-    public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
+    public override CliCommand Create()
     {
-        var artefact = artefacts.OfRequiredType<string>(nameof(TestArtefact));
+        var testArtefact = GetRequiredArtefact<string>(nameof(TestArtefact));
 
-        return new TestArtefactResultCliCommand(artefact.Value);
+        return new TestArtefactResultCliCommand(testArtefact.Value);
     }
 }
 

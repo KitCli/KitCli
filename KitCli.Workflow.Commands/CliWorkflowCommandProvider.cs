@@ -23,14 +23,17 @@ public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICli
         }
         
         var artefacts = ConvertOutcomesToArtefacts(outcomes);
-
-        var generator = generators.FirstOrDefault(g => g.CanCreateWhen(instruction, artefacts));
+        
+        var generator = generators
+            .Select(g => g.Attach(instruction, artefacts))
+            .FirstOrDefault(g => g.CanCreateWhen());
+        
         if (generator == null)
         {
             throw new NoCommandGeneratorException("Did not find generator for " + instruction.Name);
         }
 
-        return generator.Create(instruction, artefacts);
+        return generator.Create();
     }
 
     private List<AnonymousArtefact> ConvertOutcomesToArtefacts(List<Outcome> priorOutcomes)

@@ -1,30 +1,21 @@
-using KitCli.Commands.Abstractions.Artefacts;
-using KitCli.Instructions.Abstractions;
-using KitCli.Instructions.Arguments;
+using KitCli.Commands.Abstractions;
+using KitCli.Commands.Abstractions.Factories;
 
 namespace KitCli.Commands.Factories;
 
-public abstract class ListCliCommandFactory
+public abstract class ListCliCommandFactory<TCliCommand> : CliCommandFactory<TCliCommand> where TCliCommand : CliCommand
 {
-    protected static (int? pageSize, int? pageNumber) GetPaging(CliInstruction instruction, List<AnonymousArtefact> artefacts)
+    protected (int? pageSize, int? pageNumber) GetPaging()
     {
-        var pageSizeArtefact = artefacts
-            .OfType<int>(ListCliCommand.ArtefactNames.PageSize);
-
-        var pageNumberArtefact = artefacts
-            .OfType<int>(ListCliCommand.ArtefactNames.PageNumber);
-
-        var pageSizeArgument = instruction
-            .Arguments
-            .OfType<int>(ListCliCommand.ArgumentNames.PageSize);
-
-        var pageNumberArgument = instruction
-            .Arguments
-            .OfType<int>(ListCliCommand.ArgumentNames.PageNumber);
-
+        var pageSizeArtefact = GetArtefact<int>(ListCliCommand.ArtefactNames.PageSize);
+        var pageNumberArtefact = GetArtefact<int>(ListCliCommand.ArtefactNames.PageNumber);
+        
+        var pageSizeArgument = GetArgument<int>(ListCliCommand.ArgumentNames.PageSize);
+        var pageNumberArgument = GetArgument<int>(ListCliCommand.ArgumentNames.PageNumber);
+        
         var pageSize = pageSizeArgument?.ArgumentValue ?? pageSizeArtefact?.Value;
         var pageNumber = pageNumberArgument?.ArgumentValue ?? pageNumberArtefact?.Value;
-
+        
         return (pageSize, pageNumber);
     }
 }

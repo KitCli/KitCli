@@ -1,10 +1,8 @@
 using KitCli.Commands.Abstractions;
-using KitCli.Commands.Abstractions.Artefacts;
 using KitCli.Commands.Abstractions.Factories;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
-using KitCli.Instructions.Abstractions;
 
 namespace KitCli.Tests.TestCli.Commands;
 
@@ -12,8 +10,7 @@ public record BasicDecisionTestCliCommand : CliCommand;
 
 public class BasicDecisionTestClICommandFactory : BasicDecisionCliCommandFactory<BasicDecisionTestCliCommand>
 {
-    public override bool CanCreateWhen(CliInstruction instruction, List<AnonymousArtefact> artefacts)
-        => instruction.SubInstructionName == "test";
+    public override bool CanCreateWhen() => SubCommandIs("test");
 }
 
 public class BasicDecisionTestClICommandHandler : CliCommandHandler<BasicDecisionTestCliCommand>
