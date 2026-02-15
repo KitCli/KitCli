@@ -24,13 +24,13 @@ Commands return outcomes through their handlers implementing `ICliCommandHandler
   - `CliCommandNotFoundOutcome` - Command not found
   - `ExceptionCliCommandOutcome` - Exception occurred
   - `CliCommandNothingOutcome` - No operation
-  - `FilterCliCommandOutcome` - Apply a filter
 - **Reusable Outcomes** (`CliCommandOutcomeKind.Reusable`): Allow further operations
   - `PageNumberCliCommandOutcome` - Set page number
   - `PageSizeCliCommandOutcome` - Set page size
   - `CliCommandMessageOutcome` - Pass a message
   - `CliCommandAggregatorOutcome` - Aggregator data
   - `ListAggregatorCliCommandOutcome` - List aggregator
+  - `FilterCliCommandOutcome` - Metadata indicating a filter was applied to an aggregate
 - **Skippable Outcomes** (`CliCommandOutcomeKind.Skippable`): No effect on workflow
   - `RanCliCommandOutcome` - Track command execution
 
