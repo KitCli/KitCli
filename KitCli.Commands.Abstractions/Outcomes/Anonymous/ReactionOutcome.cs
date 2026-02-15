@@ -1,6 +1,3 @@
 namespace KitCli.Commands.Abstractions.Outcomes.Anonymous;
 
-public class ReactionOutcome() : Outcome(OutcomeKind.Anonymous)
-{
-    public CliCommandReaction Reaction { get; init; }
-}
+public record ReactionOutcome(CliCommandReaction Reaction) : Outcome(OutcomeKind.Anonymous);

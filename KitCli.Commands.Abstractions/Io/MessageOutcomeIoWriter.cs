@@ -12,6 +12,6 @@ public class MessageOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
     public void Write(Outcome outcome)
     {
         var messageOutcome = (SayOutcome)outcome;
-        cliIo.Say(messageOutcome.Message);
+        cliIo.Say(messageOutcome.Something);
     }
 }

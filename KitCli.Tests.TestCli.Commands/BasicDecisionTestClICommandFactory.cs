@@ -19,7 +19,7 @@ public class BasicDecisionTestClICommandHandler : CliCommandHandler<BasicDecisio
     {
         return Task.FromResult(new Outcome[]
         {
-            new FinalMessageOutcome("Basic Decision Test Command Ran")
+            new FinalSayOutcome("Basic Decision Test Command Ran")
         });
     }
 }

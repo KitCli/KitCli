@@ -6,11 +6,11 @@ namespace KitCli.Commands.Abstractions.Io;
 
 public class OutputOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {
-    public bool CanWriteFor(Outcome outcome) => outcome is FinalMessageOutcome;
+    public bool CanWriteFor(Outcome outcome) => outcome is FinalSayOutcome;
 
     public void Write(Outcome outcome)
     {
-        var outputOutcome = (FinalMessageOutcome)outcome;
-        cliIo.Say(outputOutcome.Output);
+        var outputOutcome = (FinalSayOutcome)outcome;
+        cliIo.Say(outputOutcome.Something);
     }
 }

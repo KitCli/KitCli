@@ -12,7 +12,7 @@ public class ExitCliCommandHandler(ICliWorkflow cliWorkflow) : CliCommandHandler
     {
         cliWorkflow.Stop();
         
-        var outcome = new FinalMessageOutcome("Exiting CLI workflow.");
+        var outcome = new FinalSayOutcome("Exiting CLI workflow.");
         return Task.FromResult<Outcome[]>([outcome]);
     }
 }

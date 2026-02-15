@@ -33,8 +33,11 @@ public class OutcomeList : List<Outcome>
     public OutcomeList ByMovingToCommand(CliCommand nextCommand)
         => ByResultingIn(new NextCliCommandOutcome(nextCommand));
     
+    public OutcomeList ByReacting(CliCommandReaction reaction)
+        => ByResultingIn(new ReactionOutcome(reaction));
+
     public OutcomeList ByFinallySaying(string message)
-        => ByResultingIn(new FinalMessageOutcome(message));
+        => ByResultingIn(new FinalSayOutcome(message));
     
     public OutcomeList ByFinallyDoingNothing()
         => ByResultingIn(new NothingOutcome());

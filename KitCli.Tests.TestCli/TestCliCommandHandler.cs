@@ -12,7 +12,7 @@ public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
     {
         var commandNotFoundOutcome = new NotFoundOutcome();
         
-        var outputOutcome = new FinalMessageOutcome("Output: TestCliCommand executed successfully.");
+        var outputOutcome = new FinalSayOutcome("Output: TestCliCommand executed successfully.");
         
         var messageOutcome = new SayOutcome("This is a message outcome for TestCliCommand.");
         

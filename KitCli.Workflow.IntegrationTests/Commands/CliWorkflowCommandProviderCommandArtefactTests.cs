@@ -14,7 +14,7 @@ public class CliWorkflowCommandProviderCommandArtefactTests
 {
     private record TestCliCommand : CliCommand;
 
-    private class TestOutcome() : Outcome(OutcomeKind.Reusable);
+    private record TestOutcome() : Outcome(OutcomeKind.Reusable);
     
     private record TestArtefact() : AnonymousArtefact("Test");
     

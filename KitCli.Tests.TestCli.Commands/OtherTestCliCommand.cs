@@ -16,7 +16,7 @@ public class OtherTestCliCommandHandler : CliCommandHandler<OtherTestCliCommand>
     {
         return Task.FromResult(new Outcome[]
         {
-            new FinalMessageOutcome("Other Outcome Ran")
+            new FinalSayOutcome("Other Outcome Ran")
         });
     }
 }

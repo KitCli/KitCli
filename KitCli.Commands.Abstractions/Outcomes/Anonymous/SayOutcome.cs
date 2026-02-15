@@ -1,6 +1,3 @@
 namespace KitCli.Commands.Abstractions.Outcomes.Anonymous;
 
-public class SayOutcome(string message) : Outcome(OutcomeKind.Anonymous)
-{
-    public string Message { get; } = message;
-}
+public record SayOutcome(string Something) : Outcome(OutcomeKind.Anonymous);

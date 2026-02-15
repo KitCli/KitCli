@@ -19,7 +19,7 @@ public class BasicCreationTestClICommandHandler : CliCommandHandler<BasicCreatio
     {
         return Task.FromResult(new Outcome[]
         {
-            new FinalMessageOutcome(request.Test)
+            new FinalSayOutcome(request.Test)
         });
     }
 }

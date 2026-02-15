@@ -2,7 +2,4 @@ using KitCli.Abstractions.Tables;
 
 namespace KitCli.Commands.Abstractions.Outcomes.Anonymous;
 
-public class TableOutcome(Table table) : Outcome(OutcomeKind.Anonymous)
-{
-    public Table Table = table;
-}
+public record TableOutcome(Table Table) : Outcome(OutcomeKind.Anonymous);

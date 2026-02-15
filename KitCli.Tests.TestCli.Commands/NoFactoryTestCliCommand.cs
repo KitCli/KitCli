@@ -13,7 +13,7 @@ public class NoFactoryTestCliCommandHandler : CliCommandHandler<NoFactoryTestCli
     {
         return Task.FromResult(new Outcome[]
         {
-            new FinalMessageOutcome("No Factory Outcome Ran")
+            new FinalSayOutcome("No Factory Outcome Ran")
         });
     }
 }

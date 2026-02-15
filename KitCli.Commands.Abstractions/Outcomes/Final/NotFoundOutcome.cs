@@ -1,5 +1,3 @@
 namespace KitCli.Commands.Abstractions.Outcomes.Final;
 
-public class NotFoundOutcome() : Outcome(OutcomeKind.Final)
-{
-}
+public record NotFoundOutcome() : Outcome(OutcomeKind.Final);

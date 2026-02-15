@@ -10,10 +10,7 @@ public record TestArtefactCliCommand : CliCommand;
 
 // No command handler, automatically registered.
 
-public class TestOutcome(string text) : Outcome(OutcomeKind.Reusable)
-{
-    public string Text { get; } = text;
-}
+public record TestOutcome(string Text) : Outcome(OutcomeKind.Reusable);
 
 public record TestArtefact(string Text) : Artefact<string>(nameof(TestArtefact), Text);
 

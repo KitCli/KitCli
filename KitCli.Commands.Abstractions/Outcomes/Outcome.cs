@@ -1,9 +1,6 @@
 namespace KitCli.Commands.Abstractions.Outcomes;
 
-// TODO: Can this be a record?
-public abstract class Outcome(OutcomeKind kind)
+public abstract record Outcome(OutcomeKind Kind)
 {
-    private OutcomeKind Kind { get; } = kind;
-
     public bool IsReusable => Kind == OutcomeKind.Reusable;
 }

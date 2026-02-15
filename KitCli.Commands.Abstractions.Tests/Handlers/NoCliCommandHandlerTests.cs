@@ -31,8 +31,8 @@ public class NoCliCommandHandlerTests
         // Assert
         Assert.That(outcome.Length, Is.EqualTo(1));
         
-        var outputOutcome = outcome[0] as FinalMessageOutcome;
+        var outputOutcome = outcome[0] as FinalSayOutcome;
         Assert.That(outputOutcome, Is.Not.Null);
-        Assert.That(outputOutcome.Output, Is.Not.Null);
+        Assert.That(outputOutcome.Something, Is.Not.Null);
     }
 }
