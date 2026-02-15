@@ -23,7 +23,8 @@ Commands return outcomes through their handlers implementing `ICliCommandHandler
   - `TableCliCommandOutcome` - Display data in a table
   - `CliCommandNotFoundOutcome` - Command not found
   - `ExceptionCliCommandOutcome` - Exception occurred
-  - `RanCliCommandOutcome` - Command completed successfully
+  - `CliCommandNothingOutcome` - No operation
+  - `FilterCliCommandOutcome` - Apply a filter
 - **Reusable Outcomes** (`CliCommandOutcomeKind.Reusable`): Allow further operations
   - `PageNumberCliCommandOutcome` - Set page number
   - `PageSizeCliCommandOutcome` - Set page size
@@ -31,7 +32,7 @@ Commands return outcomes through their handlers implementing `ICliCommandHandler
   - `CliCommandAggregatorOutcome` - Aggregator data
   - `ListAggregatorCliCommandOutcome` - List aggregator
 - **Skippable Outcomes** (`CliCommandOutcomeKind.Skippable`): No effect on workflow
-  - `CliCommandNothingOutcome` - No operation
+  - `RanCliCommandOutcome` - Track command execution
 
 **Example:**
 ```csharp
