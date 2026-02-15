@@ -2,6 +2,7 @@ using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
+using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
 
 namespace KitCli.Commands.Abstractions.Outcomes;
 
@@ -30,17 +31,26 @@ public class OutcomeList : List<Outcome>
     public OutcomeList ByShowingTable(Table table)
         => ByResultingIn(new TableOutcome(table));
     
+    public OutcomeList ByRememberingPageSize(int pageSize)
+        => ByResultingIn(new PageSizeOutcome(pageSize));
+    
+    public OutcomeList ByRememberingPageNumber(int pageNumber)
+        => ByResultingIn(new PageNumberOutcome(pageNumber));
+    
     public OutcomeList ByMovingToCommand(CliCommand nextCommand)
         => ByResultingIn(new NextCliCommandOutcome(nextCommand));
     
     public OutcomeList ByReacting(CliCommandReaction reaction)
         => ByResultingIn(new ReactionOutcome(reaction));
 
+    public OutcomeList ByFinallyDoingNothing()
+        => ByResultingIn(new NothingOutcome());
+    
     public OutcomeList ByFinallySaying(string message)
         => ByResultingIn(new FinalSayOutcome(message));
     
-    public OutcomeList ByFinallyDoingNothing()
-        => ByResultingIn(new NothingOutcome());
+    public OutcomeList ByNotFindingCommand()
+        => ByResultingIn(new CliCommandNotFoundOutcome());
     
     public Outcome[] End() => ToArray();
     

@@ -7,7 +7,7 @@ namespace KitCli.Commands.Abstractions.Io;
 public class NotFoundOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {
     public bool CanWriteFor(Outcome outcome)
-        => outcome is NotFoundOutcome;
+        => outcome is CliCommandNotFoundOutcome;
 
     public void Write(Outcome outcome)
     {

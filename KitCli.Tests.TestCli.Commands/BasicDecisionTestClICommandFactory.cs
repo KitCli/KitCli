@@ -16,10 +16,7 @@ public class BasicDecisionTestClICommandFactory : BasicDecisionCliCommandFactory
 public class BasicDecisionTestClICommandHandler : CliCommandHandler<BasicDecisionTestCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(BasicDecisionTestCliCommand command, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(new Outcome[]
-        {
-            new FinalSayOutcome("Basic Decision Test Command Ran")
-        });
-    }
+        => FinishThisCommand()
+            .ByFinallySaying("Basic Decision Test Command Ran")
+            .EndAsync();
 }

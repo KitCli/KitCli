@@ -8,15 +8,10 @@ namespace KitCli.Tests.TestCli.Commands;
 
 public record OtherTestCliCommand : CliCommand;
 
-public class OtherTetCliCommandFactory : BasicCliCommandFactory<OtherTestCliCommand>;
-
 public class OtherTestCliCommandHandler : CliCommandHandler<OtherTestCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(OtherTestCliCommand request, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(new Outcome[]
-        {
-            new FinalSayOutcome("Other Outcome Ran")
-        });
-    }
+        => FinishThisCommand()
+            .ByFinallySaying("Other Command Ran")
+            .EndAsync();
 }

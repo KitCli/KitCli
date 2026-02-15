@@ -15,11 +15,8 @@ public class BasicCreationTestClICommandFactory : BasicCreationCliCommandFactory
 
 public class BasicCreationTestClICommandHandler : CliCommandHandler<BasicCreationTestCliCommand>
 {
-    public override Task<Outcome[]> HandleCommand(BasicCreationTestCliCommand request, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(new Outcome[]
-        {
-            new FinalSayOutcome(request.Test)
-        });
-    }
+    public override Task<Outcome[]> HandleCommand(BasicCreationTestCliCommand command, CancellationToken cancellationToken)
+        => FinishThisCommand()
+            .ByFinallySaying(command.Test)
+            .EndAsync();
 }

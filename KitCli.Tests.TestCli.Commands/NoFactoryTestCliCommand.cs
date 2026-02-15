@@ -10,10 +10,7 @@ public record NoFactoryTestCliCommand : CliCommand;
 public class NoFactoryTestCliCommandHandler : CliCommandHandler<NoFactoryTestCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(NoFactoryTestCliCommand request, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(new Outcome[]
-        {
-            new FinalSayOutcome("No Factory Outcome Ran")
-        });
-    }
+        => FinishThisCommand()
+            .ByFinallySaying("No Factory Command Ran")
+            .EndAsync();
 }
