@@ -16,13 +16,11 @@ public class CliWorkflowCommandProviderCommandArtefactTests
 
     private class TestOutcome() : Outcome(OutcomeKind.Reusable);
     
-    private class TestAnonymousArtefact() : AnonymousArtefact("Test");
+    private class TestArtefact() : AnonymousArtefact("Test");
     
-    private class TestArtefactFactory : IArtefactFactory
+    private class TestArtefactFactory : ArtefactFactory<TestOutcome>
     {
-        public bool For(Outcome outcome) => outcome is TestOutcome;
-
-        public AnonymousArtefact Create(Outcome outcome) => new TestAnonymousArtefact();
+        protected override AnonymousArtefact CreateArtefact(TestOutcome outcome) => new TestArtefact();
     }
 
     private class TestCliCommandFactory : BasicCliCommandFactory<TestCliCommand>;

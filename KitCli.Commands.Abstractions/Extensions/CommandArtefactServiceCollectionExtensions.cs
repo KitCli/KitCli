@@ -24,7 +24,7 @@ public static class CommandArtefactServiceCollectionExtensions
         }
 
         public IServiceCollection AddCommandArtefactFactory<TFactory>()
-            where TFactory : class, IArtefactFactory 
+            where TFactory : class, IArtefactFactory
             => serviceCollection.AddSingleton<IArtefactFactory, TFactory>();
 
         public IServiceCollection AddAggregatorCommandArtefactsFromAssembly(Assembly? assembly)

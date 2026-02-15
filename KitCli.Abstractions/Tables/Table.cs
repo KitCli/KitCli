@@ -7,6 +7,18 @@ public class Table
     public List<string> Columns { get; set; } = [];
     public List<List<object>> Rows { get; set; } = [];
 
+    public Table()
+    {
+    }
+    
+    public Table(string[] columns, object[][] rows)
+    {
+        Columns = columns.ToList();
+        Rows = rows
+            .Select(r => r.ToList())
+            .ToList();
+    }
+
     public override string ToString()
     {
         var table = new ConsoleTable

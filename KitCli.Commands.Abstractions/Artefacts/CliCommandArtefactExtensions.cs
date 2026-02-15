@@ -5,6 +5,7 @@ using LinqEnumerable = System.Linq.Enumerable;
 
 namespace KitCli.Commands.Abstractions.Artefacts;
 
+// TODO: Convert to extension block.
 public static class CliCommandArtefactExtensions
 {
     public static Artefact<TArtefactType>? OfType<TArtefactType>(
@@ -26,6 +27,22 @@ public static class CliCommandArtefactExtensions
     {
         var artefact = OfType<TArtefactType>(artefacts);
 
+        if (artefact == null)
+        {
+            // TODO: Make a real exception.
+            throw new Exception(
+                $"Artefact of type '{typeof(TArtefactType).Name}' is required for this command.");
+        }
+        
+        return artefact;
+    }
+    
+    public static Artefact<TArtefactType> OfRequiredType<TArtefactType>(
+        this IEnumerable<AnonymousArtefact> artefacts, string artefactName)
+        where TArtefactType : notnull
+    {
+        var artefact = OfType<TArtefactType>(artefacts, artefactName);
+        
         if (artefact == null)
         {
             // TODO: Make a real exception.

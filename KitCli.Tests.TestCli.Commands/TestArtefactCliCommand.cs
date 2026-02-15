@@ -1,0 +1,53 @@
+using KitCli.Commands.Abstractions;
+using KitCli.Commands.Abstractions.Artefacts;
+using KitCli.Commands.Abstractions.Factories;
+using KitCli.Commands.Abstractions.Handlers;
+using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Instructions.Abstractions;
+
+namespace KitCli.Tests.TestCli.Commands;
+
+public record TestArtefactCliCommand : CliCommand;
+
+// No command handler, automatically registered.
+
+public class TestOutcome(string text) : Outcome(OutcomeKind.Reusable)
+{
+    public string Text { get; } = text;
+}
+
+public class TestArtefact(string text) : Artefact<string>("TestArtefact", text);
+
+public class TestArtefactFactory : ArtefactFactory<TestOutcome>
+{
+    protected override AnonymousArtefact CreateArtefact(TestOutcome outcome)
+        => new TestArtefact(outcome.Text);
+}
+
+public class TestArtefactCliCommandHandler : CliCommandHandler<TestArtefactCliCommand>
+{
+    public override Task<Outcome[]> HandleCommand(TestArtefactCliCommand command, CancellationToken cancellationToken)
+        => FinishThisCommand()
+            .ByResultingIn(new TestOutcome("This text was created in original command"))
+            .EndAsync();
+}
+
+public record TestArtefactResultCliCommand(string Text) : CliCommand;
+
+public class TestArtefactResultCliCommandFactory : BasicCreationCliCommandFactory<TestArtefactResultCliCommand>
+{
+    public override CliCommand Create(CliInstruction instruction, List<AnonymousArtefact> artefacts)
+    {
+        var artefact = artefacts.OfRequiredType<string>(nameof(TestArtefact));
+
+        return new TestArtefactResultCliCommand(artefact.Value);
+    }
+}
+
+public class TestArtefactResultCliCommandHandler : CliCommandHandler<TestArtefactResultCliCommand>
+{
+    public override Task<Outcome[]> HandleCommand(TestArtefactResultCliCommand command, CancellationToken cancellationToken)
+        => FinishThisCommand()
+            .ByFinallySaying(command.Text)
+            .EndAsync();
+}

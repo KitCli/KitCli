@@ -31,6 +31,9 @@ public class TestCliApp : CliApp
 
         var statuses = run.State.Changes.Select(c => c.To);
         Io.Say($"Run state changes: {string.Join(", ", statuses)}");
+
+        var outcomeNames = outcomes.Select(outcome => outcome.GetType().Name);
+        Io.Say($"Run outcomes achieved: {string.Join(", ", outcomeNames)}");
         
         Io.Say($"Run lasted {run.State.Stopwatch.ElapsedMilliseconds}ms");
     }

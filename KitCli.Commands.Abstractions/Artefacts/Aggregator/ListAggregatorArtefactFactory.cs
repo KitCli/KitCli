@@ -1,20 +1,9 @@
-using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 
 namespace KitCli.Commands.Abstractions.Artefacts.Aggregator;
 
-public class ListAggregatorArtefactFactory<TAggregate> : IArtefactFactory
+public class ListAggregatorArtefactFactory<TAggregate> : ArtefactFactory<ListAggregatorOutcome<TAggregate>>
 {
-    public bool For(Outcome outcome) => outcome is ListAggregatorOutcome<TAggregate>;
-
-    public AnonymousArtefact Create(Outcome outcome)
-    {
-        if (outcome is ListAggregatorOutcome<TAggregate> aggregatorOutcome)
-        {
-            return new ListAggregatorUnvaluedArtefact<TAggregate>(aggregatorOutcome.Aggregator);
-        }
-        
-        throw new InvalidOperationException(
-            $"Cannot create ListAggregatorCliCommandProperty<{typeof(TAggregate).Name}> from outcome of type {outcome.GetType().Name}");
-    }
+    protected override AnonymousArtefact CreateArtefact(ListAggregatorOutcome<TAggregate> outcome)
+        => new ListAggregatorUnvaluedArtefact<TAggregate>(outcome.Aggregator);
 }
