@@ -36,32 +36,34 @@ Commands return outcomes through their handlers implementing `ICliCommandHandler
 
 **Example:**
 ```csharp
-public class MyCommandHandler : CliCommandHandler, ICliCommandHandler<MyCommand>
+public class MyCommandHandler : CliCommandHandler<MyCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(MyCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(MyCommand request, CancellationToken cancellationToken)
     {
-        var outcomes = new CliCommandOutcome[]
-        {
-            new OutputCliCommandOutcome("Command executed successfully"),
-            new PageNumberCliCommandOutcome(1),  // Reusable outcome
-            new PageSizeCliCommandOutcome(10)     // Reusable outcome
-        };
-        
-        return Task.FromResult(outcomes);
+        return FinishThisCommand()
+            .BySaying("Command executed successfully")
+            .WithPageNumber(1)  // Reusable outcome
+            .WithPageSize(10)   // Reusable outcome
+            .EndAsync();
     }
 }
 ```
 
 **Helper Methods:**
-The `CliCommandHandler` base class provides convenience methods for common outcome scenarios:
+The `CliCommandHandler<T>` base class provides a fluent API for building outcomes via `FinishThisCommand()`:
 ```csharp
-protected static CliCommandOutcome[] OutcomeAs()  // Returns CliCommandNothingOutcome
-protected static CliCommandOutcome[] OutcomeAs(string message)  // Returns OutputCliCommandOutcome
-protected static CliCommandOutcome[] OutcomeAs(Table table)  // Returns TableCliCommandOutcome
-protected static CliCommandOutcome[] OutcomeAs(CliListAggregatorFilter filter)  // Returns FilterCliCommandOutcome
+protected static OutcomeList FinishThisCommand()  // Start building outcomes
+
+// Fluent methods for adding outcomes:
+.BySaying(string message)  // Add output message
+.ByFinallySaying(string message)  // Add final output message
+.WithPageNumber(int pageNumber)  // Add page number
+.WithPageSize(int pageSize)  // Add page size
+.ByMovingToCommand(CliCommand nextCommand)  // Chain to next command
+.EndAsync()  // Complete and return Task<Outcome[]>
 ```
 
-Handlers can extend `CliCommandHandler` to access these helper methods.
+Handlers extend `CliCommandHandler<TCliCommand>` and override `HandleCommand()` to implement command logic.
 
 ### 2. Creating Custom Outcomes with Artefact Factories
 
@@ -74,30 +76,24 @@ public record MyCustomOutcome(int MyValue) : CliCommandOutcome(CliCommandOutcome
 
 **Step 2: Create a Corresponding Artefact**
 ```csharp
-public class MyCustomArtefact(int myValue) : ValuedCliCommandArtefact<int>(nameof(MyValue), myValue)
-{
-    public int MyValue { get; } = myValue;
-}
+public record MyCustomArtefact(int MyValue) : AnonymousArtefact;
 ```
 
 **Step 3: Create an Artefact Factory**
 
-The framework automatically handles artefact creation through reflection for standard patterns. For custom cases, implement `ICliCommandArtefactFactory`:
+Extend `ArtefactFactory<TOutcome>` to simplify artefact creation:
 
 ```csharp
-public class MyCustomArtefactFactory : ICliCommandArtefactFactory
+public class MyCustomArtefactFactory : ArtefactFactory<MyCustomOutcome>
 {
-    public bool For(CliCommandOutcome outcome) => outcome is MyCustomOutcome;
-
-    public CliCommandArtefact Create(CliCommandOutcome outcome)
+    protected override AnonymousArtefact CreateArtefact(MyCustomOutcome outcome)
     {
-        if (outcome is not MyCustomOutcome myOutcome)
-            throw new InvalidOperationException($"Expected MyCustomOutcome, got {outcome.GetType().Name}");
-            
-        return new MyCustomArtefact(myOutcome.MyValue);
+        return new MyCustomArtefact(outcome.MyValue);
     }
 }
 ```
+
+The base class automatically handles type checking via the `For()` method.
 
 **Step 4: Register the Factory**
 ```csharp
@@ -116,22 +112,27 @@ services.AddCommandArtefactFactory<MyCustomArtefactFactory>();
 Command factories receive artefacts and can use them to determine if they can create a command and to configure the command.
 
 **Step 1: Create a Command Factory**
+
+Extend `CliCommandFactory<TCliCommand>` to access helper methods:
+
 ```csharp
-public class MyCommandFactory : ICliCommandFactory<MyCommand>
+public class MyCommandFactory : CliCommandFactory<MyCommand>
 {
-    public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    public override bool CanCreateWhen()
     {
         // Check if required artefacts are present
-        return artefacts.Any(x => x is MyCustomArtefact);
+        return Artefacts!.Any(x => x is MyCustomArtefact);
     }
 
-    public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    public override CliCommand Create()
     {
-        // Extract artefact by value type
-        var myArtefact = artefacts.OfType<int>();
-
-        // Create command with artefact data
-        return new MyCommand(myArtefact?.ArtefactValue ?? 0);
+        // Use helper methods to extract arguments
+        var valueArg = GetArgument<int>("value");
+        
+        // Or get artefacts from previous commands
+        var myArtefact = Artefacts!.OfType<MyCustomArtefact>().FirstOrDefault();
+        
+        return new MyCommand(myArtefact?.MyValue ?? valueArg?.Value ?? 0);
     }
 }
 ```
@@ -149,46 +150,39 @@ The framework automatically:
 - Registers them with appropriate service keys based on command names
 - Sets up both full and shorthand command name mappings
 
-**Artefact Extension Methods:**
-The framework provides helper methods for working with artefacts in command factories:
+**Artefact Helper Methods:**
+When extending `CliCommandFactory<T>`, you have access to:
 ```csharp
-// Get artefact by value type and name
-ValuedCliCommandArtefact<int>? pageNumberArtefact = artefacts.OfType<int>("pageNumber");
+// Get instruction arguments
+protected InstructionArgument<TType>? GetArgument<TType>(string? argumentName)
+protected InstructionArgument<TType> GetRequiredArgument<TType>(string? argumentName)
 
-// Get artefact by value type only
-ValuedCliCommandArtefact<int>? intArtefact = artefacts.OfType<int>();
+// Check sub-command
+protected bool SubCommandIs(string subCommandName)
 
-// Get required artefact (throws if not found)
-ValuedCliCommandArtefact<int> requiredIntArtefact = artefacts.OfRequiredType<int>();
+// Artefacts are available via the Artefacts property
+protected List<AnonymousArtefact>? Artefacts
 
-// Check for custom artefact class using LINQ
-bool hasCustomArtefact = artefacts.Any(x => x is MyCustomArtefact);
-
-// Check if last command ran was of specific type
-bool wasLastCommand = artefacts.LastCommandRanWas<MyCommand>();
-
-// Get list aggregator artefact
-ListAggregatorCliCommandArtefact<TAggregate>? aggregator = artefacts.OfListAggregatorType<TAggregate>();
+// Instruction is available via the Instruction property  
+protected Instruction? Instruction
 ```
 
-Command factories can extend base factory classes (like `ListCliCommandFactory`) to access additional helpers for common patterns.
+The base factory class provides these helpers for common command creation patterns.
 
 **Complete Example:**
 ```csharp
 // First Command - Produces an outcome
 public record SetValueCommand(int Value) : CliCommand;
 
-// Handler - Returns reusable outcome
-public class SetValueCommandHandler : CliCommandHandler, ICliCommandHandler<SetValueCommand>
+// Handler - Returns reusable outcome using fluent API
+public class SetValueCommandHandler : CliCommandHandler<SetValueCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(SetValueCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(SetValueCommand request, CancellationToken cancellationToken)
     {
-        var outcomes = new CliCommandOutcome[]
-        {
-            new OutputCliCommandOutcome($"Set value to: {request.Value}"),
-            new MyCustomOutcome(request.Value)  // Reusable outcome - will become artefact
-        };
-        return Task.FromResult(outcomes);
+        return FinishThisCommand()
+            .BySaying($"Set value to: {request.Value}")
+            .WithCustomOutcome(new MyCustomOutcome(request.Value))  // Reusable outcome
+            .EndAsync();
     }
 }
 
@@ -196,31 +190,30 @@ public class SetValueCommandHandler : CliCommandHandler, ICliCommandHandler<SetV
 public record ProcessValueCommand(int InputValue) : CliCommand;
 
 // Factory - Uses artefact from previous command
-public class ProcessValueCommandFactory : ICliCommandFactory<ProcessValueCommand>
+public class ProcessValueCommandFactory : CliCommandFactory<ProcessValueCommand>
 {
-    public bool CanCreateWhen(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    public override bool CanCreateWhen()
     {
         // Check if artefact from previous command exists
-        return artefacts.Any(x => x is MyCustomArtefact);
+        return Artefacts!.Any(x => x is MyCustomArtefact);
     }
 
-    public CliCommand Create(CliInstruction instruction, List<CliCommandArtefact> artefacts)
+    public override CliCommand Create()
     {
-        // Extract artefact by value type from previous command's outcome
-        var artefact = artefacts.OfType<int>();
-        return new ProcessValueCommand(artefact?.ArtefactValue ?? 0);
+        // Extract artefact from previous command's outcome
+        var artefact = Artefacts!.OfType<MyCustomArtefact>().FirstOrDefault();
+        return new ProcessValueCommand(artefact?.MyValue ?? 0);
     }
 }
 
 // Handler for second command
-public class ProcessValueCommandHandler : CliCommandHandler, ICliCommandHandler<ProcessValueCommand>
+public class ProcessValueCommandHandler : CliCommandHandler<ProcessValueCommand>
 {
-    public Task<CliCommandOutcome[]> Handle(ProcessValueCommand request, CancellationToken cancellationToken)
+    public override Task<Outcome[]> HandleCommand(ProcessValueCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new CliCommandOutcome[]
-        {
-            new OutputCliCommandOutcome($"Processed value {request.InputValue} from previous command")
-        });
+        return FinishThisCommand()
+            .BySaying($"Processed value {request.InputValue} from previous command")
+            .EndAsync();
     }
 }
 ```
