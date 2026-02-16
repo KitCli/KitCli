@@ -46,8 +46,8 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         var typedArguments = GetArguments<TArgumentType>();
         
         return argumentName == null
-            ? typedArguments.SingleOrDefault() 
-            : typedArguments.SingleOrDefault(argument => argument.Name == argumentName);
+            ? typedArguments.LastOrDefault() 
+            : typedArguments.LastOrDefault(argument => argument.Name == argumentName);
     }
 
     protected InstructionArgument<TArgumentType> GetRequiredArgument<TArgumentType>(string? argumentName)
@@ -80,13 +80,13 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         return artefact != null;
     }
     
-    protected Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName) where TArtefactType : notnull
+    protected Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName = null) where TArtefactType : notnull
     {
         var typedArtefacts = GetArtefacts<TArtefactType>();
         
         return artefactName == null
-            ? typedArtefacts.SingleOrDefault() 
-            : typedArtefacts.SingleOrDefault(artefact => artefact.Name == artefactName);
+            ? typedArtefacts.LastOrDefault() 
+            : typedArtefacts.LastOrDefault(artefact => artefact.Name == artefactName);
     }
     
     protected Artefact<Aggregator<TSource, TAggregate>>? GetAggregatorArtefact<TSource, TAggregate>(string? artefactName = null)
@@ -94,11 +94,11 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
         var typedArtefacts = GetArtefacts<Aggregator<TSource, TAggregate>>();
         
         return artefactName == null
-            ? typedArtefacts.SingleOrDefault() 
-            : typedArtefacts.SingleOrDefault(artefact => artefact.Name == artefactName);
+            ? typedArtefacts.LastOrDefault() 
+            : typedArtefacts.LastOrDefault(artefact => artefact.Name == artefactName);
     }
     
-    protected Artefact<TArtefactType> GetRequiredArtefact<TArtefactType>(string? artefactName) where TArtefactType : notnull
+    protected Artefact<TArtefactType> GetRequiredArtefact<TArtefactType>(string? artefactName = null) where TArtefactType : notnull
     {
         var artefact = GetArtefact<TArtefactType>(artefactName);
         

@@ -41,7 +41,7 @@ public class TestAggregatorCliCommandHandler : CliCommandHandler<TestAggregatorC
         var aggregator = new TestAggregator(source)
             .BeforeAggregation(p => p.Where(s => s.Cost > 50))
             .AfterAggregation(a => a.OrderByDescending(a => a.TotalCost));
-
+        
         return FinishThisCommand()
             .ByAggregating(aggregator)
             .EndAsync();

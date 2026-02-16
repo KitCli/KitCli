@@ -22,7 +22,6 @@ public static class CommandServiceCollectionExtensions
             }
 
             return services
-                .AddCommandArtefactFactories()
                 .AddCommandFactories(assembly)
                 .AddMediatRCommandsAndHandlers(assembly);
         }

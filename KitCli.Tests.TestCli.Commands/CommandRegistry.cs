@@ -8,8 +8,6 @@ public class CommandRegistry : ICliAppRegistry
     public void Register(IServiceCollection services)
     {
         services.AddCommandsFromAssembly(typeof(OtherTestCliCommand).Assembly);
-        
-        services.AddAggregatorArtefactFactoriesForAssembly(typeof(OtherTestCliCommand).Assembly);
-        services.AddArtefactFactory<TestArtefactFactory>();
+        services.AddArtefactFactoriesForAssembly(typeof(OtherTestCliCommand).Assembly);
     }
 }

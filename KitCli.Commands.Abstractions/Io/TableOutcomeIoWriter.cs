@@ -13,6 +13,5 @@ public class TableOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
     {
         var tableOutcome = (TableOutcome)outcome;
         cliIo.Say(tableOutcome.Table.ToString());
-        cliIo.Say($"Results: {tableOutcome.Table.Rows.Count} rows");
     }
 }

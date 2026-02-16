@@ -11,7 +11,7 @@ public static class AssemblyExtensions
                 .GetTypes()
                 .WhereClassTypesAssignableFrom(thatImplementType)
                 .Any();
-        
+
         public List<Type> WhereClassTypesImplementType(Type thatImplementType)
             => assembly
                 .GetTypes()
@@ -26,6 +26,18 @@ public static class AssemblyExtensions
                                        assemblyType.BaseType != null && 
                                        assemblyType.BaseType.IsGenericType && 
                                        assemblyType.InheritsFrom(thatImplementGenericType))
+                .ToList();
+
+        public List<Type> AllGenericImplementationsOf(Type thatImp)
+            => assembly
+                .GetTypes()
+                .Where(assemblyType => assemblyType.IsClass &&
+                                       !assemblyType.IsAbstract &&
+                                       assemblyType.BaseType != null &&
+                                       assemblyType.BaseType.IsGenericType)
+                .Select(p => p.GetSuperclassGenericOf(thatImp))
+                .Where(t => t != null)
+                .Select(t => t!)
                 .ToList();
     }
 }

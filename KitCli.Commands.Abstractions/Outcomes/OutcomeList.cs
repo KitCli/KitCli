@@ -48,6 +48,9 @@ public class OutcomeList : List<Outcome>
     public OutcomeList ByRememberingPageNumber(int pageNumber)
         => ByResultingIn(new PageNumberOutcome(pageNumber));
     
+    public OutcomeList ByRememberingHowToBuildTable<TSource, TAggregate>(TableBuilder<TSource, TAggregate> tableBuilder)
+        => ByResultingIn(new TableBuilderOutcome<TSource, TAggregate>(tableBuilder));
+    
     public OutcomeList ByMovingToCommand(CliCommand nextCommand)
         => ByResultingIn(new NextCliCommandOutcome(nextCommand));
     

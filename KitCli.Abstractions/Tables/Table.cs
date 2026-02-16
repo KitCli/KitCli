@@ -10,13 +10,11 @@ public class Table
     public Table()
     {
     }
-    
-    public Table(string[] columns, object[][] rows)
+
+    public Table(List<string> columns, List<List<object>> rows)
     {
-        Columns = columns.ToList();
-        Rows = rows
-            .Select(r => r.ToList())
-            .ToList();
+        Columns = columns;
+        Rows = rows;
     }
 
     public override string ToString()

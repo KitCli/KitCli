@@ -13,27 +13,27 @@ public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICli
     // TODO: Test cases for the exceptions.
     public CliCommand GetCommand(Instruction instruction, List<Outcome> outcomes)
     {
-        var generators = serviceProvider
+        var commandFactories = serviceProvider
             .GetKeyedServices<ICliCommandFactory>(instruction.Name)
             .ToList();
         
-        if (generators.Count == 0)
+        if (commandFactories.Count == 0)
         {
             throw new NoCommandGeneratorException("Did not find generator for " + instruction.Name);
         }
         
         var artefacts = ConvertOutcomesToArtefacts(outcomes);
         
-        var generator = generators
-            .Select(g => g.Attach(instruction, artefacts))
-            .FirstOrDefault(g => g.CanCreateWhen());
+        var commandFactory = commandFactories
+            .Select(commandFactory => commandFactory.Attach(instruction, artefacts))
+            .FirstOrDefault(commandFactory => commandFactory.CanCreateWhen());
         
-        if (generator == null)
+        if (commandFactory == null)
         {
-            throw new NoCommandGeneratorException("Did not find generator for " + instruction.Name);
+            throw new NoCommandGeneratorException("Did not find command factory for " + instruction.Name);
         }
 
-        return generator.Create();
+        return commandFactory.Create();
     }
 
     private List<AnonymousArtefact> ConvertOutcomesToArtefacts(List<Outcome> priorOutcomes)
