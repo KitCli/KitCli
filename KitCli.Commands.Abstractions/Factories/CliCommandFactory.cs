@@ -5,6 +5,12 @@ using KitCli.Instructions.Arguments;
 
 namespace KitCli.Commands.Abstractions.Factories;
 
+/// <summary>
+/// A custom factory for creating a specific <see cref="CliCommand"/>.
+/// This is useful when the command creation logic is complex and cannot be easily handled by a simple constructor or when it requires access to the instruction and artefacts for decision-making.
+/// If you need don't need to use Arguments or Artefacts, you do not need to create this factory: basic commands are automatically created.
+/// </summary>
+/// <typeparam name="TCliCommand">A custom created Command.</typeparam>
 public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where TCliCommand : CliCommand
 {
     protected Instruction Instruction => _instruction ?? Instruction.Empty;

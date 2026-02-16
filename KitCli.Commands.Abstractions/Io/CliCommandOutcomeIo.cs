@@ -1,9 +1,8 @@
 using KitCli.Abstractions.Io;
-using KitCli.Commands.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 
-namespace KitCli.Commands.Abstractions.Outputs.Outcomes;
+namespace KitCli.Commands.Abstractions.Io;
 
 public class ExceptionOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {

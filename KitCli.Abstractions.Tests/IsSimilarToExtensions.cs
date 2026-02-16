@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace KitCli.Abstractions.Tests;
 

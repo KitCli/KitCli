@@ -1,4 +1,3 @@
-using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Arguments;
 using KitCli.Instructions.Builders;
 using NUnit.Framework;
@@ -46,7 +45,7 @@ public class DecimalInstructionArgumentBuilderTests
     [Test]
     public void GivenNoArgumentValue_WhenCreate_ShouldThrowArgumentException()
     {
-        Assert.That<AnonymousInstructionArgument>((
+        Assert.That((
             ) => _decimalInstructionArgumentBuilder.Create(string.Empty, null),
             Throws.ArgumentNullException);
     }

@@ -1,7 +1,6 @@
 using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Anonymous;
-using KitCli.Commands.Abstractions.Outcomes.Final;
 
 namespace KitCli.Commands.Abstractions.Io;
 

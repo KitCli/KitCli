@@ -1,7 +1,8 @@
-using KitCli;
 using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Workflow.Abstractions;
+
+namespace KitCli.Tests.TestCli;
 
 public class TestCliApp : CliApp
 {

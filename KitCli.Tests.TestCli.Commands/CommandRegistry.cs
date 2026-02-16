@@ -1,7 +1,8 @@
 using KitCli.Abstractions;
 using KitCli.Commands.Abstractions.Extensions;
-using KitCli.Tests.TestCli.Commands;
 using Microsoft.Extensions.DependencyInjection;
+
+namespace KitCli.Tests.TestCli.Commands;
 
 public class CommandRegistry : ICliAppRegistry
 {

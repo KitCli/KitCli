@@ -1,6 +1,5 @@
 using Bogus;
 using KitCli.Abstractions.Aggregators;
-using KitCli.Abstractions.Tables;
 using KitCli.Commands;
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Factories;
@@ -12,6 +11,11 @@ namespace KitCli.Tests.TestCli.Commands;
 
 public class TestSource
 {
+    public TestSource(string category)
+    {
+        Category = category;
+    }
+
     public string Category { get; set; }
     public decimal Cost { get; set; }
 }
@@ -39,8 +43,8 @@ public class TestAggregatorCliCommandHandler : CliCommandHandler<TestAggregatorC
         var source = faker.Generate(1000);
         
         var aggregator = new TestAggregator(source)
-            .BeforeAggregation(p => p.Where(s => s.Cost > 50))
-            .AfterAggregation(a => a.OrderByDescending(a => a.TotalCost));
+            .BeforeAggregation(p => p.Where(ts => ts.Cost > 50))
+            .AfterAggregation(a => a.OrderByDescending(ta => ta.TotalCost));
         
         return FinishThisCommand()
             .ByAggregating(aggregator)
@@ -66,10 +70,10 @@ public class TestAggregatorFilterCliCommandHandler : CliCommandHandler<TestAggre
 {
     public override Task<Outcome[]> HandleCommand(TestAggregatorFilterCliCommand command, CancellationToken cancellationToken)
     {
-        var filteredAggregates = command
+        command
             .Aggregator
-            .BeforeAggregation(p => p.Where(s => s.Cost > 75))
-            .AfterAggregation(a => a.OrderByDescending(a => a.TotalCost));
+            .BeforeAggregation(p => p.Where(ts => ts.Cost > 75))
+            .AfterAggregation(a => a.OrderByDescending(ta => ta.TotalCost));
         
         var filter = new AggregatorFilter(
             nameof(TestSource.Cost), 

@@ -1,15 +1,14 @@
 using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
-using KitCli.Commands.Abstractions.Outcomes.Anonymous;
-using KitCli.Commands.Abstractions.Outcomes.Final;
-using KitCli.Commands.Abstractions.Outcomes.Reusable;
-using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
+
+namespace KitCli.Tests.TestCli;
 
 public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(TestCliCommand command, CancellationToken cancellationToken)
     {
+        // TODO: You can use a tableBuilder!
         var table = new Table
         {
             Columns = ["ID", "Name", "Age"],

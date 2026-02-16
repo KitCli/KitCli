@@ -15,5 +15,5 @@ public class CliIo : ICliIo
         => Console.Title = title;
 
     public void OnCancel(Action cancel) 
-        => Console.CancelKeyPress += (sender, e) => cancel();
+        => Console.CancelKeyPress += (_, _) => cancel();
 }

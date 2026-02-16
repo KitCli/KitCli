@@ -31,8 +31,8 @@ public class TestTableBuilderCliCommandHandler : CliCommandHandler<TestTableBuil
         var source = faker.Generate(1000);
         
         var aggregator = new TestAggregator(source)
-            .BeforeAggregation(p => p.Where(s => s.Cost > 50))
-            .AfterAggregation(a => a.OrderByDescending(a => a.TotalCost));
+            .BeforeAggregation(p => p.Where(ts => ts.Cost > 50))
+            .AfterAggregation(a => a.OrderByDescending(ta => ta.TotalCost));
 
         var tableBuilder = new TestTableBuilder()
             .WithAggregator(aggregator)

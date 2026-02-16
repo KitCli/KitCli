@@ -1,5 +1,4 @@
 using KitCli.Commands.Abstractions.Io;
-using KitCli.Commands.Abstractions.Outputs.Outcomes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Commands.Abstractions;

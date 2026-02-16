@@ -1,4 +1,3 @@
-using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Arguments;
 using KitCli.Instructions.Builders;
 using NUnit.Framework;
@@ -46,8 +45,8 @@ public class GuidInstructionArgumentBuilderTests
     [Test]
     public void GivenNoArgumentValue_WhenCreate_ShouldThrowArgumentException()
     {
-        Assert.That<AnonymousInstructionArgument>((
-            ) => _guidInstructionArgumentBuilder.Create(string.Empty, null),
+        Assert.That(
+            () => _guidInstructionArgumentBuilder.Create(string.Empty, null),
             Throws.ArgumentNullException);
     }
 }

@@ -1,5 +1,4 @@
 using KitCli.Commands.Abstractions;
-using KitCli.Commands.Abstractions.Artefacts;
 using KitCli.Commands.Abstractions.Factories;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Instructions.Abstractions;

@@ -7,8 +7,8 @@ public abstract class TableBuilder<TSource, TAggregate>
 {
     private Aggregator<TSource, TAggregate>? _aggregator;
     private TableMap<TAggregate>? _map;
-    private int? _pageSize = null;
-    private int? _pageNumber = null;
+    private int? _pageSize;
+    private int? _pageNumber;
     
     public TableBuilder<TSource, TAggregate> WithAggregator(Aggregator<TSource, TAggregate> aggregator)
     {
@@ -76,7 +76,8 @@ public abstract class TableBuilder<TSource, TAggregate>
             var row = new List<object>();
             foreach (var member in members)
             {
-                var config = _map.ColumnMaps[member];
+                // TODO: Use the config to determine how to map the value, not just ToString()!
+                var unused = _map.ColumnMaps[member];
                 var value = member.GetValue(aggregate);
                 
                 // How does the config define the mapping?
