@@ -1,4 +1,4 @@
-using KitCli.Abstractions.Aggregators.Filters;
+using KitCli.Abstractions.Aggregators;
 
 namespace KitCli.Commands.Abstractions.Outcomes.Anonymous;
 

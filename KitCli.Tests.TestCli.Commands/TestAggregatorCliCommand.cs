@@ -1,6 +1,6 @@
 using Bogus;
 using KitCli.Abstractions.Aggregators;
-using KitCli.Abstractions.Aggregators.Filters;
+using KitCli.Abstractions.Tables;
 using KitCli.Commands;
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Factories;
@@ -36,7 +36,7 @@ public class TestAggregatorCliCommandHandler : CliCommandHandler<TestAggregatorC
             .RuleFor(f => f.Category, f => f.Random.Word())
             .RuleFor(f => f.Cost, f => f.Random.Decimal(10, 100));
         
-        var source = faker.Generate(100);
+        var source = faker.Generate(1000);
         
         var aggregator = new TestAggregator(source)
             .BeforeAggregation(p => p.Where(s => s.Cost > 50))

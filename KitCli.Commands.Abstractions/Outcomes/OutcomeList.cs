@@ -1,5 +1,4 @@
 using KitCli.Abstractions.Aggregators;
-using KitCli.Abstractions.Aggregators.Filters;
 using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
