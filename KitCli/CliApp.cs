@@ -22,14 +22,7 @@ public abstract class CliApp
         
         Io.Pause();
         
-        Io.OnCancel(() =>
-        {
-            _workflow.Stop();
-            
-            OnSessionEnd(_workflow.Runs);
-            
-            Environment.Exit(exitCode: 0);
-        });
+        SetUpEventHandlers();
         
         while (_workflow.Status != CliWorkflowStatus.Stopped)
         {
@@ -37,19 +30,7 @@ public abstract class CliApp
             
             OnRunCreated(run);
 
-            var movePastAsk = run.State.WasChangedTo(ClIWorkflowRunStateStatus.MovePastAsk);
-
-            var ask = !movePastAsk
-                ? Io.Ask()
-                : null;
-            
-            var runTask =  !movePastAsk 
-                ? run.RespondToAsk(ask)
-                : run.RespondToNext();
-            
-            OnRunStarted(run, ask);
-
-            var outcomes = await runTask;
+            var outcomes = await ExecuteRunOperation(run);
 
             WriteOutcomes(outcomes, outcomeIoWriters);
             
@@ -61,6 +42,42 @@ public abstract class CliApp
         OnSessionEnd(_workflow.Runs);
     }
     
+    private void SetUpEventHandlers()
+    {
+        Io.OnCancel(() =>
+        {
+            _workflow.Stop();
+
+            OnSessionEnd(_workflow.Runs);
+
+            Environment.Exit(exitCode: 0);
+        });
+    }
+
+    private ValueTask<Outcome[]> ExecuteRunOperation(ICliWorkflowRun run)
+    {
+        var shouldMovePastAsk = run
+            .State
+            .WasChangedTo(ClIWorkflowRunStateStatus.MovePastAsk);
+
+        if (shouldMovePastAsk)
+        {
+            var movePastAskTask = run.MoveToNext();
+
+            OnMovingPastAsk(run);
+
+            return movePastAskTask;
+        }
+
+        var ask = Io.Ask();
+
+        var runTask =  run.RespondToAsk(ask);
+
+        OnRunStarted(run, ask);
+
+        return runTask;
+    }
+
     private void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
     {
         foreach (var outcome in outcomes)
@@ -84,10 +101,14 @@ public abstract class CliApp
     {
     }
 
+    protected virtual void OnMovingPastAsk(ICliWorkflowRun run)
+    {
+    }
+
     protected virtual void OnRunComplete(ICliWorkflowRun run, Outcome[] outcomes)
     {
     }
-    
+
     protected virtual void OnSessionEnd(List<ICliWorkflowRun> runs)
     {
     }
