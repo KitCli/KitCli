@@ -2,7 +2,7 @@ using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 
-namespace KitCli.Tests.TestCli;
+namespace KitCli.Playground;
 
 public class TestCliCommandHandler : CliCommandHandler<TestCliCommand>
 {

@@ -4,7 +4,7 @@ using KitCli.Commands.Abstractions.Factories;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 
-namespace KitCli.Tests.TestCli.Commands;
+namespace KitCli.Playground.Scenarios;
 
 public record TestArtefactCliCommand : CliCommand;
 

@@ -55,9 +55,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KitCli - Commands", "KitCli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Commands", "KitCli.Commands\KitCli.Commands.csproj", "{D7F3F3E5-2182-49FB-8229-495A93CE3554}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Tests.TestCli", "KitCli.Tests.TestCli\KitCli.Tests.TestCli.csproj", "{1899A279-A209-48B7-B511-A87740C8CB51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground", "KitCli.Playground\KitCli.Playground.csproj", "{1899A279-A209-48B7-B511-A87740C8CB51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Tests.TestCli.Commands", "KitCli.Tests.TestCli.Commands\KitCli.Tests.TestCli.Commands.csproj", "{4DF6A9EA-D653-42FF-B382-52FCB0BAC64A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground.Scenarios", "KitCli.Playground.Scenarios\KitCli.Playground.Scenarios.csproj", "{4DF6A9EA-D653-42FF-B382-52FCB0BAC64A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -154,7 +154,5 @@ Global
 		{A1567276-A0D4-40B8-AAAC-91C9954D07D6} = {0A8161D5-5BA6-4A3E-8D8B-EE76ACEDA645}
 		{D7F3F3E5-2182-49FB-8229-495A93CE3554} = {0A8161D5-5BA6-4A3E-8D8B-EE76ACEDA645}
 		{8D86F478-8F8E-4016-92B3-8009AEDB9E22} = {68F25F73-18EB-4E65-80EB-1EDCAF174DFA}
-		{1899A279-A209-48B7-B511-A87740C8CB51} = {68F25F73-18EB-4E65-80EB-1EDCAF174DFA}
-		{4DF6A9EA-D653-42FF-B382-52FCB0BAC64A} = {68F25F73-18EB-4E65-80EB-1EDCAF174DFA}
 	EndGlobalSection
 EndGlobal

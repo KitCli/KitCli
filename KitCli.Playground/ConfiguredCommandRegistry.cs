@@ -2,7 +2,7 @@ using KitCli.Abstractions;
 using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KitCli.Tests.TestCli;
+namespace KitCli.Playground;
 
 public class ConfiguredCommandRegistry : IConfigurableCliAppRegistry<InstructionSettings> 
 {

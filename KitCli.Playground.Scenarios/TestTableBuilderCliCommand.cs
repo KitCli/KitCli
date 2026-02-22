@@ -5,7 +5,7 @@ using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Factories;
 
-namespace KitCli.Tests.TestCli.Commands;
+namespace KitCli.Playground.Scenarios;
 
 public class TestTableMap : TableMap<TestAggregate>
 {

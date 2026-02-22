@@ -2,9 +2,9 @@ using KitCli.Abstractions;
 using KitCli.Commands.Abstractions.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KitCli.Tests.TestCli.Commands;
+namespace KitCli.Playground.Scenarios;
 
-public class CommandRegistry : ICliAppRegistry
+public class PlaygroundScenarioRegistry : ICliAppRegistry
 {
     public void Register(IServiceCollection services)
     {

@@ -1,5 +1,5 @@
 using KitCli.Commands.Abstractions;
 
-namespace KitCli.Tests.TestCli;
+namespace KitCli.Playground;
 
 public record TestCliCommand : CliCommand;
