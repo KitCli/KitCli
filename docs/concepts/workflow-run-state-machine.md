@@ -18,13 +18,16 @@ paging through a list)? What happens if parsing or validation fails, or
 the command handler throws? All of that needs one enforced set of legal
 transitions — not scattered booleans, where a run left in an
 inconsistent state (e.g. simultaneously "reached its final outcome" and
-"still running") becomes a silent bug rather than an exception. This is
-exactly the class of bug this state machine exists to prevent: two real
-production bugs — the run never reaching `Finished` after certain error
-paths, and a command-lookup exception that was structurally uncatchable
-— existed here until recently, precisely because the finishing logic
-wasn't consistently applied. Both are fixed on `main` today; see git
-history for `CliWorkflowRun.cs` if you want the specifics.
+"still running") becomes a silent bug rather than an exception.
+
+Two bugs of exactly that shape were fixed here recently: the run not
+reaching `Finished` after certain error paths, and a command-lookup
+exception that was structurally uncatchable — both caused by the
+finishing logic not being applied consistently. Neither was filed as a
+separate tracked issue: newly-added CI caught both directly, and they
+were fixed in the same change rather than logged and triaged
+separately. Both are resolved on `main` today; see git history for
+`CliWorkflowRun.cs` if you want the specifics.
 
 ## Solution
 
@@ -46,19 +49,20 @@ public ICliWorkflowRun NextRun()
 ```
 
 Each `CliWorkflowRun` exposes exactly two entry points a caller can call:
-`RespondToAsk(string? ask)` — parse, validate, and run a command from
-fresh user input — and `MoveToNext()` — re-enter a command a prior
-outcome already queued up, with no new input (used for things like
-"show the next page").
+`RespondToAsk(string? ask)` — parse fresh user input and run the command
+it resolves to — and `MoveToNext()` — continue the *same run* into its
+next command, using what a prior outcome already queued up, without
+waiting on a new ask (used for things like "show the next page"). A run
+isn't one command; it's the whole arc across as many commands/asks as it
+takes to reach a final outcome — `MoveToNext` is just the entry point
+for the steps in that arc that don't need fresh input to keep going.
 
 ### The state machine itself
 
-`ICliWorkflowRunState`/`CliWorkflowRunState` (`Run/State/CliWorkflowRunState.cs`)
-is the actual finite state machine: an append-only
-`List<ICliWorkflowRunStateChange>` history, plus a fixed table of
-`PossibleCliWorkflowRunStateChange` pairs (`IfStartedAt` → `CanMoveTo`).
-`ChangeTo(...)` looks up the most recently reached status, checks the
-table, and throws `ImpossibleStateChangeException` if the transition
+The run's state (`CliWorkflowRunState.cs`) is the actual finite state
+machine: an append-only history of every status change, plus a fixed
+table of allowed from/to pairs. Changing status looks up the most
+recently reached one, checks that table, and throws if the transition
 isn't listed — the table is the entire contract for what's legal:
 
 | From | To |
@@ -78,6 +82,24 @@ multi-turn or multi-page run keeps going without ending the state
 machine.
 
 ### Walking the actual flow
+
+```mermaid
+flowchart TD
+    A["RespondToAsk(ask)"] --> B{ask empty/null?}
+    B -- yes --> INV[InvalidAsk] --> FIN[Finished]
+    B -- no --> C{instruction valid?}
+    C -- no --> INV
+    C -- yes --> D[Running] --> E{command factory found?}
+    E -- "no (NoCommandGeneratorException)" --> INV
+    E -- yes --> F[ExecuteCommand]
+    F -- throws --> EXC[Exceptional] --> FIN
+    F -- outcomes returned --> G{last outcome}
+    G -- "none / not reusable" --> RFO[ReachedFinalOutcome] --> FIN
+    G -- NextCliCommandOutcome --> MPA[MovePastAsk]
+    G -- other reusable --> RRO[ReachedReusableOutcome] --> D
+    MPA -- "MoveToNext()" --> D
+    MPA -- invalid MoveToNext --> IMP[InvalidMovePastAsk] --> FIN
+```
 
 `RespondToAsk`:
 - Empty/null ask → `ChangeTo(InvalidAsk)`, return early.
@@ -132,12 +154,20 @@ needing to be kept in sync by hand every time a status or transition is
 added. Nothing generates it from the code that actually performs
 transitions.
 
-**At most one active run per workflow, enforced by `SingleOrDefault`, not the type system.**
+**There must never be more than one active run per workflow — enforced by `SingleOrDefault`, not the type system.**
 `CliWorkflow.NextRun()` assumes there is never more than one run in
-`Runs` that hasn't reached `ReachedFinalOutcome`. If that invariant is
-ever violated, `SingleOrDefault` throws a generic
-`InvalidOperationException`, not a domain-specific one — this is a
-known, tracked gap, not a deliberately chosen error type.
+`Runs` that hasn't reached `ReachedFinalOutcome`. Today that's true by
+construction, not by luck: the only caller of `NextRun()` is
+`CliApp.Run`'s own loop (`KitCli/CliApp.cs`), which `await`s a run to
+completion — `ExecuteRunOperation(run)` fully returns — before it ever
+loops back around to ask `_workflow` for the next one. Nothing else in
+KitCli calls `NextRun()` concurrently. If that ever changed — a second
+caller driving the same `ICliWorkflow`, or a host that doesn't await
+each run to completion before starting another — `SingleOrDefault` would
+throw a generic `InvalidOperationException` on the *next* call, not a
+domain-specific one, and not necessarily at the moment the second run
+was actually created. This is a known, tracked gap, not a deliberately
+chosen error type.
 
 **Run and state-change history are never evicted.** Both
 `CliWorkflow.Runs` and `CliWorkflowRunState.Changes` simply grow for the
@@ -151,7 +181,25 @@ host process.
 The *last* outcome the handler returned — see
 [outcome-artefact-pipeline.md](outcome-artefact-pipeline.md) for what
 outcomes and `OutcomeKind` mean. This doc only covers how that decision
-maps onto run state, not the outcome/artefact model itself.
+maps onto run state, not the outcome/artefact model itself. A command
+handler that ends the run just needs its last outcome to be `Final`-kind
+— e.g. the real `ExitCliCommandHandler`
+(`KitCli.Workflow.Commands/Exit/ExitCliCommandHandler.cs`):
+
+```csharp
+public override Task<Outcome[]> HandleCommand(ExitCliCommand command, CancellationToken cancellationToken)
+{
+    cliWorkflow.Stop();
+    var outcome = new FinalSayOutcome("Exiting CLI workflow.");
+    return Task.FromResult<Outcome[]>([outcome]);
+}
+```
+
+`FinalSayOutcome(Something)` (`Outcomes/Final/FinalSayOutcome.cs`) is
+`Outcome(OutcomeKind.Final)` — its last-outcome status drives
+`UpdateStateAfterOutcome` straight to `ReachedFinalOutcome`. (Yes, its
+message property really is named `Something`, not `Message` — a known,
+tracked naming slip, not a typo in this doc.)
 
 **Can two runs be "in progress" on the same workflow at once?**
 Not by design — see the constraint above. `NextRun()` always resumes the

@@ -16,13 +16,14 @@ looks at the raw string again.
 
 ## Problem
 
-One line of input mixes several kinds of content with no fixed grammar
-declared anywhere: a marker that says "this is a command" (the prefix),
-the command's own name, an optional sub-command name, and an arbitrary
-number of `--name value` argument pairs. And no command declares a
-schema for what its arguments should look like — so once an argument's
-raw text is captured, something still has to decide whether
-`--dueDate 2024-01-01` is a date, a string, or a number.
+A command handler needs its arguments as ready-to-use typed values — not
+a raw string it re-parses itself, and not according to a schema it has
+to declare up front for every command. Solving that means turning one
+line of loosely-structured free text (a prefix, a name, an optional
+sub-name, and an arbitrary number of `--name value` pairs) into a typed,
+addressable `Instruction`, without hand-rolling tokenizing/type-conversion
+logic per command, and without a schema-declaration step slowing down
+adding a new one.
 
 ## Solution
 
@@ -55,8 +56,8 @@ per-command schema for this — instead, every `IInstructionArgumentBuilder`
 (`Builders/`) declares:
 
 ```csharp
-bool For(string? argumentValue);                            // "can I claim this raw value?"
-AnonymousInstructionArgument Create(string name, string? value);  // convert it
+bool For(string? argumentValue); // "can I claim this raw value?"
+AnonymousInstructionArgument Create(string name, string? value); // convert it
 ```
 
 `InstructionParser.Parse` picks the **first** registered builder whose
@@ -86,15 +87,16 @@ command factory and handler downstream actually consumes.
 
 ## Constraints & tradeoffs
 
-**Type inference by sniffing content, not by a declared schema.** A
-command handler never has to declare "argument `dueDate` is a
-`DateOnly`" anywhere — it just asks for the typed argument by name and
-gets it. The cost is that an argument's type is entirely a property of
-what its raw string looks like, decided by whichever builder's `For()`
-returns `true` first — not a property of the command being invoked. This
-is why builder registration order is load-bearing: inserting a new
-builder in the wrong position changes the resolved type of existing
-commands' arguments without touching those commands at all.
+**Type inference by testing the raw value against each builder in turn,
+not by a declared schema.** A command handler never has to declare
+"argument `dueDate` is a `DateOnly`" anywhere — it just asks for the
+typed argument by name and gets it. The cost is that an argument's type
+is entirely a property of what its raw string looks like, decided by
+whichever builder's `For()` returns `true` first — not a property of the
+command being invoked. This is why builder registration order is
+load-bearing: inserting a new builder in the wrong position changes the
+resolved type of existing commands' arguments without touching those
+commands at all.
 
 **No escaping/quoting grammar in the tokenizer.** Splitting on a fixed
 argument prefix string (`--`) means that string can never appear
@@ -112,23 +114,35 @@ Also a known, tracked gap.
 ## Questions & answers
 
 **How do I add a new argument type?**
-Implement `IInstructionArgumentBuilder` and register it in
-`AddCliInstructionArgumentBuilders`, in a position *before*
-`BoolInstructionArgumentBuilder` and before any existing builder whose
-`For` would also incorrectly match your new type's typical raw values.
-Where exactly you insert it determines which raw values it actually gets
-to claim.
+There's no supported extension point for this from consuming code today.
+`AddCliInstructionArgumentBuilders` is a private, fixed sequence of
+`.AddSingleton<IInstructionArgumentBuilder, ...>()` calls inside
+`KitCli.Instructions` itself — the only way to add a builder ahead of
+`BoolInstructionArgumentBuilder` is to edit that method directly, in the
+right position. Registering your own `IInstructionArgumentBuilder` from
+downstream consuming code doesn't achieve this: `IServiceCollection`
+resolves `IEnumerable<T>` in registration order, so anything added
+afterwards lands *after* Bool's unconditional `For` — and since Bool
+matches everything, a builder registered behind it would never be
+reached.
 
 **What happens if two builders could both handle a value?**
 The first one registered wins outright — the second is never consulted,
 and there's no ambiguity error raised. This mirrors the same
 first-match-wins, registration-order-decides pattern used for command
 factory resolution elsewhere in KitCli; it isn't unique to argument
-typing.
+typing. If you're adding a builder (per the answer above), the thing to
+check isn't just "does my `For` correctly identify my own type" — it's
+"does my `For` also accidentally return `true` for values a builder
+ahead of it was supposed to own," since that builder never gets a
+chance to object.
 
 **Where does an argument's name come from, if I want to look it up later?**
-The key produced during extraction (e.g. `argumentOne` from
-`--argumentOne`) becomes `AnonymousInstructionArgument.Name` — the same
-name a `CliCommandFactory<T>`'s `GetArgument<T>(name)` helper (see
-[outcome-artefact-pipeline.md](outcome-artefact-pipeline.md)) looks up
-by, later in the pipeline.
+Whatever the user actually typed after `--` in the terminal input —
+verbatim, with no declared schema behind it. There's no list anywhere of
+"arguments this command accepts" for the parser to check against; the
+name a command factory looks up later (via `GetArgument<T>(name)`, see
+[outcome-artefact-pipeline.md](outcome-artefact-pipeline.md)) only
+resolves if the user happened to type that exact `--name`. Get the name
+wrong on either side — the terminal input or the lookup call — and
+nothing errors; the argument, or the lookup, is just silently absent.
