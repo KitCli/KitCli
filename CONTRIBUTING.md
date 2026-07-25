@@ -82,6 +82,10 @@ before writing it down — a concept doc describing aspirational behavior
 that doesn't match `main` is worse than no doc at all, since nothing
 flags it as wrong.
 
+**Keep them current.** If your change makes an existing concept doc
+inaccurate, update it in the same PR — don't leave the drift for someone
+else to notice later.
+
 ## Issues
 
 Every issue gets three independent labels once triaged:
