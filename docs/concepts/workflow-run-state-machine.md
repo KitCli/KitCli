@@ -11,23 +11,27 @@ tracking one execution from "ask received" through to "finished."
 
 ## Problem
 
-At any point, the host (`CliApp`) needs to know: is this ask valid? Did
-the command just run finish the whole interaction outright, does it want
-another ask, or does it want to run again *without* a fresh ask (e.g.
-paging through a list)? What happens if parsing or validation fails, or
-the command handler throws? All of that needs one enforced set of legal
-transitions — not scattered booleans, where a run left in an
-inconsistent state (e.g. simultaneously "reached its final outcome" and
-"still running") becomes a silent bug rather than an exception.
+At any point, the host (`CliApp`) needs answers to a few questions:
 
-Two bugs of exactly that shape were fixed here recently: the run not
-reaching `Finished` after certain error paths, and a command-lookup
-exception that was structurally uncatchable — both caused by the
-finishing logic not being applied consistently. Neither was filed as a
-separate tracked issue: newly-added CI caught both directly, and they
-were fixed in the same change rather than logged and triaged
-separately. Both are resolved on `main` today; see git history for
-`CliWorkflowRun.cs` if you want the specifics.
+- Is this ask valid?
+- Did the command that just ran finish the whole interaction outright,
+  does it want another ask, or does it want to run again *without* a
+  fresh ask (e.g. paging through a list)?
+- What happens if parsing or validation fails, or the command handler
+  throws?
+
+Answering those consistently needs one enforced set of legal
+transitions, not scattered booleans — otherwise a run can end up in an
+inconsistent state (e.g. simultaneously "reached its final outcome" and
+"still running"), which surfaces as a silent bug rather than an
+exception.
+
+That's not hypothetical: two bugs of exactly that shape existed here
+until recently (the run not reaching `Finished` after certain error
+paths, and a command-lookup exception that was structurally
+uncatchable). Both are resolved on `main` today — neither was ever
+filed as a separate tracked issue, since newly-added CI caught and fixed
+both directly. See git history for `CliWorkflowRun.cs` for specifics.
 
 ## Solution
 
@@ -52,10 +56,12 @@ Each `CliWorkflowRun` exposes exactly two entry points a caller can call:
 `RespondToAsk(string? ask)` — parse fresh user input and run the command
 it resolves to — and `MoveToNext()` — continue the *same run* into its
 next command, using what a prior outcome already queued up, without
-waiting on a new ask (used for things like "show the next page"). A run
-isn't one command; it's the whole arc across as many commands/asks as it
-takes to reach a final outcome — `MoveToNext` is just the entry point
-for the steps in that arc that don't need fresh input to keep going.
+waiting on a new ask (used for things like "show the next page").
+
+A run isn't one command; it's the whole arc across as many commands/asks
+as it takes to reach a final outcome — `MoveToNext` is just the entry
+point for the steps in that arc that don't need fresh input to keep
+going.
 
 ### The state machine itself
 
@@ -135,11 +141,13 @@ what outcomes and their `Kind` mean) to decide the next status:
 
 `UpdateStateWhenFinished` checks whether the run has *ever* reached one
 of the three "run over" statuses (`ReachedFinalOutcome`, `InvalidAsk`,
-`Exceptional`) and, if so, transitions to `Finished`. Because it checks
-the run's whole history rather than just the most recent change, it's
-safe to call from more than one place (both `RespondToAsk`'s
-`NoCommandGeneratorException` catch and `ExecuteCommand`'s `finally`
-call it) without double-finishing a run that's already finished.
+`Exceptional`) and, if so, transitions to `Finished`.
+
+Because it checks the run's whole history rather than just the most
+recent change, it's safe to call from more than one place — both
+`RespondToAsk`'s `NoCommandGeneratorException` catch and
+`ExecuteCommand`'s `finally` call it — without double-finishing a run
+that's already finished.
 
 `MoveToNext` is only valid if some outcome in the run's history so far
 was a `NextCliCommandOutcome` (`IsValidMovePastAsk`); it takes the
