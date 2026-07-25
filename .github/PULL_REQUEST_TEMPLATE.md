@@ -34,4 +34,5 @@ Linked issue: #
 
 If **Breaking change** or a new cross-cutting pattern/project boundary
 change: needs an ADR in `docs/adr/` in this PR. If this changes behavior:
-update `CHANGELOG.md` under `[Unreleased]`.
+update `CHANGELOG.md` under `[Unreleased]`. If this changes behavior a
+concept doc describes: update that doc in `docs/concepts/`.
