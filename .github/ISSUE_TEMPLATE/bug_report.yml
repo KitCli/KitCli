@@ -1,0 +1,30 @@
+name: Bug report
+description: Something in KitCli doesn't work as documented.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: Repro steps
+      description: Minimal steps to reproduce, ideally a snippet using CliAppBuilder.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: packages
+    attributes:
+      label: Affected package(s) and version
+      placeholder: "e.g. KitCli.Instructions 1.0.6"
+    validations:
+      required: true
