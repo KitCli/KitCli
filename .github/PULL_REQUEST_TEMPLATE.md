@@ -4,14 +4,22 @@
 
 Linked issue: #
 
-## Tested how
+## How
+
+## Tested
 
 - [ ] Unit tests
 - [ ] `KitCli.Playground.Scenarios` scenario
 - [ ] Manual
 
-## Checklist
+## Kind of change
 
-- [ ] Does this need an ADR? (new cross-cutting pattern, project boundary
-  change, breaking API change) — if yes, it's in `docs/adr/` in this PR.
-- [ ] `CHANGELOG.md` updated under `[Unreleased]` if this changes behavior.
+- [ ] Bug fix
+- [ ] Feature
+- [ ] Breaking change
+- [ ] Tech debt
+- [ ] Docs / process
+
+If **Breaking change** or a new cross-cutting pattern/project boundary
+change: needs an ADR in `docs/adr/` in this PR. If this changes behavior:
+update `CHANGELOG.md` under `[Unreleased]`.
