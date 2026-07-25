@@ -78,7 +78,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         return await ExecuteCommand(command);
     }
 
-    public async ValueTask<Outcome[]> RespondToNext()
+    public async ValueTask<Outcome[]> MoveToNext()
     { 
         if (!IsValidMovePastAsk())
         {

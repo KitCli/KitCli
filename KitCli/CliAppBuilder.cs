@@ -106,9 +106,10 @@ public class CliAppBuilder
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
         
         var outcomeIoWriters = serviceProvider
-            .GetServices<IOutcomeIoWriter>();
+            .GetServices<IOutcomeIoWriter>()
+            .ToList();
         
-        await cliApp.Run(outcomeIoWriters.ToList());
+        await cliApp.Run(outcomeIoWriters);
     }
     
     private void SetUpConfigurationBuilder()
