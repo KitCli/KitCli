@@ -67,6 +67,21 @@ Copy [`docs/adr/0000-template.md`](docs/adr/0000-template.md), number it
 sequentially, and open it in the same PR as the change it justifies (or on
 its own if the decision precedes the implementation).
 
+## Concepts
+
+A [concept doc](docs/concepts/) explains how a subsystem works today —
+narrative, examples, a Q&A — the opposite of an ADR's terse
+decision-record shape. Write one for a subsystem a consumer would
+reasonably need onboarding to (the outcome/artefact pipeline, the
+instruction-parsing pipeline, the workflow state machine), not for
+something a docstring already covers.
+
+Copy [`docs/concepts/0000-template.md`](docs/concepts/0000-template.md).
+Verify every class/method name and signature against the actual source
+before writing it down — a concept doc describing aspirational behavior
+that doesn't match `main` is worse than no doc at all, since nothing
+flags it as wrong.
+
 ## Issues
 
 Every issue gets three independent labels once triaged:
