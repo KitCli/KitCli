@@ -1,3 +1,12 @@
+<!--
+Title must follow Conventional Commits: <type>(scope): <description>
+  types: feat | fix | docs | chore | refactor | test | ci
+  scope (optional): abstractions | instructions | commands | workflow | host | tooling
+  example: feat(instructions): add quoting support to the tokenizer
+This becomes the squash-merge commit title, i.e. the CHANGELOG line — keep
+it in imperative mood, no "fix stuff."
+-->
+
 ## What
 
 ## Why

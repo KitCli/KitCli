@@ -20,6 +20,14 @@ should be a link, not archaeology.
 - Branch off `main`. No long-running branches — trunk-based, short-lived.
 - One logical change per PR. If your PR description needs "and" to explain
   what it does, it's probably two PRs.
+- **PR titles use [Conventional Commits](https://www.conventionalcommits.org/):**
+  `<type>(scope): <description>` — `type` is one of `feat` `fix` `docs`
+  `chore` `refactor` `test` `ci`; `scope` is optional and, where it applies,
+  matches an [issue area](#issues) (`abstractions`, `instructions`,
+  `commands`, `workflow`, `host`, `tooling`). Example:
+  `feat(instructions): add quoting support to the tokenizer`. This becomes
+  the squash-merge commit title (see below), so it's also the CHANGELOG
+  line — get it right here and there's nothing to rewrite later.
 - Fill in the [PR template](.github/PULL_REQUEST_TEMPLATE.md) — in
   particular, link the issue if one exists, and say how you tested it
   (unit tests / a `KitCli.Playground.Scenarios` scenario / manual).
@@ -28,9 +36,9 @@ should be a link, not archaeology.
   discipline.
 - At least one approving review is required. See [CODEOWNERS](CODEOWNERS)
   for who owns which area.
-- We squash-merge. The squash commit title is the changelog line for that
-  change (see [Versioning](#versioning--releases)) — write it accordingly:
-  imperative mood, no "fix stuff."
+- We squash-merge, so the PR title (Conventional Commits, per above) ends
+  up as the commit title on `main` and the changelog line (see
+  [Versioning](#versioning--releases)).
 
 ## ADRs
 
