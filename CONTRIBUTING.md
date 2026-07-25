@@ -1,0 +1,103 @@
+# Contributing to KitCli
+
+KitCli is a framework other people's code depends on, so the process below
+optimizes for one thing above all: **every non-obvious decision has a paper
+trail.** If someone asks "why does X work this way" in a year, the answer
+should be a link, not archaeology.
+
+## Before you write code
+
+- **Bugs and small fixes** — just open a PR. No issue required for anything
+  you can describe in the PR description.
+- **Features, breaking changes, or anything touching more than one project**
+  — open an issue first using the [feature request
+  template](.github/ISSUE_TEMPLATE/feature_request.yml). Get a shape agreed
+  before investing in the implementation.
+- **Architectural decisions** — see [ADRs](#adrs) below.
+
+## Branching & PRs
+
+- Branch off `main`. No long-running branches — trunk-based, short-lived.
+- One logical change per PR. If your PR description needs "and" to explain
+  what it does, it's probably two PRs.
+- Fill in the [PR template](.github/PULL_REQUEST_TEMPLATE.md) — in
+  particular, link the issue if one exists, and say how you tested it
+  (unit tests / a `KitCli.Playground.Scenarios` scenario / manual).
+- CI (`dotnet build` + `dotnet test` across all six test projects) must be
+  green before merge — this is enforced by branch protection, not
+  discipline.
+- At least one approving review is required. See [CODEOWNERS](CODEOWNERS)
+  for who owns which area.
+- We squash-merge. The squash commit title is the changelog line for that
+  change (see [Versioning](#versioning--releases)) — write it accordingly:
+  imperative mood, no "fix stuff."
+
+## ADRs
+
+An [ADR](docs/adr/) (Architecture Decision Record) captures a decision, its
+alternatives, and its consequences — not how something works today (that's
+[`docs/concepts/`](docs/concepts/)).
+
+**Write one when you're:**
+- Introducing a new cross-cutting pattern (e.g. "commands dispatch through
+  MediatR")
+- Changing a project/package boundary (splitting, merging, renaming a
+  project)
+- Making a breaking change to public API shape
+- Reversing a previous ADR
+
+**Skip it for:** bug fixes, internal refactors, anything a code comment
+already explains. If you're not sure, err toward not writing one — a
+15-minute decision doesn't need a permanent record, and an ADR nobody reads
+because there are too many of them is worse than no ADR.
+
+Copy [`docs/adr/0000-template.md`](docs/adr/0000-template.md), number it
+sequentially, and open it in the same PR as the change it justifies (or on
+its own if the decision precedes the implementation).
+
+## Issues
+
+Every issue gets three independent labels once triaged:
+
+| Axis | Values |
+|---|---|
+| **Type** | `bug` · `feature` · `tech-debt` · `docs` · `process` |
+| **Area** | `area:abstractions` · `area:instructions` · `area:commands` · `area:workflow` · `area:host` · `area:tooling` |
+| **Severity** | `sev:high` · `sev:medium` · `sev:low` |
+
+Use the matching [issue template](.github/ISSUE_TEMPLATE/) — bug report,
+feature request, or tech debt. There's no fixed triage meeting; an issue
+should have an area label within about a week or it's fair game to close as
+stale.
+
+## Versioning & releases
+
+All 9 published packages (`KitCli`, `KitCli.Abstractions`,
+`KitCli.Commands`, `KitCli.Commands.Abstractions`, `KitCli.Instructions`,
+`KitCli.Instructions.Abstractions`, `KitCli.Workflow`,
+`KitCli.Workflow.Abstractions`, `KitCli.Workflow.Commands`) ship as **one
+version number, always** — this is deliberate, not an oversight. Nothing
+today consumes them independently of the bundle, so independent versioning
+would provide a signal nobody reads. If that changes (a package gets a real
+independent consumer), that's a decision for a new ADR, not a silent policy
+drift.
+
+Every squash-merged PR that changes behavior gets a line in
+[`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`, in [Keep a
+Changelog](https://keepachangelog.com/) format. A maintainer cuts a release
+by moving `[Unreleased]` under a version heading and running the publish
+script.
+
+## Code style
+
+Match what's already there — this repo doesn't (yet) have an
+`.editorconfig`-enforced style beyond what the compiler and existing
+conventions imply. If you're touching a file, match its existing patterns
+rather than introducing a new one in the same PR as an unrelated change.
+
+## Questions
+
+Open a [`process`](https://github.com/KitCli/KitCli/labels/process)-labeled
+issue if something in this document is unclear or actively getting in the
+way — this document is itself subject to the same PR process as everything
+else.
