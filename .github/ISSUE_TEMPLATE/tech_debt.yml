@@ -1,0 +1,21 @@
+name: Tech debt
+description: Something works but the implementation has a known cost.
+labels: ["tech-debt"]
+body:
+  - type: textarea
+    id: evidence
+    attributes:
+      label: File/line evidence
+      description: Where the debt lives, concretely.
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: What it costs to leave alone
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Proposed fix

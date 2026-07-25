@@ -129,9 +129,13 @@ public class CliWorkflowTests
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
         
         _serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(IMediator)))
-            .Returns(new Mock<IMediator>().Object);
-        
+            .Setup(sp => sp.GetService(typeof(ISender)))
+            .Returns(new Mock<ISender>().Object);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IPublisher)))
+            .Returns(new Mock<IPublisher>().Object);
+
         var outcome = new FinalSayOutcome(string.Empty);
         
         var reusableRunState = new CliWorkflowRunState();

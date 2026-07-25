@@ -62,9 +62,19 @@ public class CliWorkflowRun : ICliWorkflowRun
         }
         
         var priorOutcomes = AllPriorOutcomes();
-        
-        var command = _workflowCommandProvider.GetCommand(instruction, priorOutcomes);
-        
+
+        CliCommand command;
+        try
+        {
+            command = _workflowCommandProvider.GetCommand(instruction, priorOutcomes);
+        }
+        catch (NoCommandGeneratorException)
+        {
+            State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
+            UpdateStateWhenFinished();
+            return [new NothingOutcome()];
+        }
+
         return await ExecuteCommand(command);
     }
 
@@ -97,11 +107,6 @@ public class CliWorkflowRun : ICliWorkflowRun
             UpdateStateAfterOutcome(allOutcomes);
             
             return allOutcomes;
-        }
-        catch (NoCommandGeneratorException)
-        {
-            State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            return [new NothingOutcome()];
         }
         catch (Exception exception)
         {
@@ -155,8 +160,11 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private void UpdateStateWhenFinished()
     {
-        var runComplete = State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome);
-        
+        var runComplete = State.WasChangedTo(
+            ClIWorkflowRunStateStatus.ReachedFinalOutcome,
+            ClIWorkflowRunStateStatus.InvalidAsk,
+            ClIWorkflowRunStateStatus.Exceptional);
+
         if (runComplete)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Finished);
