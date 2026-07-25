@@ -36,6 +36,9 @@ public class CliAppTests
         
         _mockCliWorkflow = new Mock<ICliWorkflow>();
         _mockOutcomeIoWriters = new Mock<IEnumerable<IOutcomeIoWriter>>();
+        _mockOutcomeIoWriters
+            .Setup(w => w.GetEnumerator())
+            .Returns(new List<IOutcomeIoWriter>().GetEnumerator());
         _mockCliIo = new Mock<ICliIo>();
         _classUnderTest = new TestCliApp(
             _mockCliWorkflow.Object,
