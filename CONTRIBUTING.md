@@ -25,9 +25,13 @@ should be a link, not archaeology.
   `chore` `refactor` `test` `ci`; `scope` is optional and, where it applies,
   matches an [issue area](#issues) (`abstractions`, `instructions`,
   `commands`, `workflow`, `host`, `tooling`). Example:
-  `feat(instructions): add quoting support to the tokenizer`. This becomes
-  the squash-merge commit title (see below), so it's also the CHANGELOG
-  line — get it right here and there's nothing to rewrite later.
+  `feat(instructions): add quoting support to the tokenizer`. `description`
+  is lowercase and imperative, no trailing period. For a breaking change,
+  add `!` right before the colon —
+  `refactor(host)!: rename RespondToNext to MoveToNext` — in addition to
+  checking **Breaking change** in the PR body. This becomes the
+  squash-merge commit title (see below), so it's also the CHANGELOG line —
+  get it right here and there's nothing to rewrite later.
 - Fill in the [PR template](.github/PULL_REQUEST_TEMPLATE.md) — in
   particular, link the issue if one exists, and say how you tested it
   (unit tests / a `KitCli.Playground.Scenarios` scenario / manual).
