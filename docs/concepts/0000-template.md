@@ -1,3 +1,18 @@
+<!--
+Style, from real review feedback on earlier concept docs:
+- One idea per paragraph. If a paragraph does two things, split it.
+- Prefer a list or table over a dense sentence chaining multiple
+  branches/clauses with arrows or semicolons.
+- Don't cram more than 2-3 inline-code names into one sentence — pick
+  the ones that matter and drop or defer the rest.
+- Define or avoid jargon on first use; if a reader would ask "what?",
+  rephrase instead of assuming the term lands.
+- In a Q&A entry, check the answer actually resolves the literal
+  question asked, not just adjacent context.
+- If you mention a known bug/gap, say plainly whether it's tracked or
+  already fixed — don't let it read as narrative color.
+-->
+
 # Title
 
 ## Premise
