@@ -126,11 +126,12 @@ flowchart TD
 
 `UpdateStateAfterOutcome` looks only at the **last** outcome returned
 (see [outcome-artefact-pipeline.md](outcome-artefact-pipeline.md) for
-what outcomes and their `Kind` mean) to decide the next status: no
-outcomes, or the last one isn't reusable → `ReachedFinalOutcome`; the
-last one is a `NextCliCommandOutcome` → `MovePastAsk` (the run is now
-waiting on a `MoveToNext()` call, not a fresh ask); any other reusable
-outcome → `ReachedReusableOutcome`.
+what outcomes and their `Kind` mean) to decide the next status:
+
+- No outcomes, or the last one isn't reusable → `ReachedFinalOutcome`.
+- The last one is a `NextCliCommandOutcome` → `MovePastAsk` (the run is
+  now waiting on a `MoveToNext()` call, not a fresh ask).
+- Any other reusable outcome → `ReachedReusableOutcome`.
 
 `UpdateStateWhenFinished` checks whether the run has *ever* reached one
 of the three "run over" statuses (`ReachedFinalOutcome`, `InvalidAsk`,
@@ -158,16 +159,16 @@ transitions.
 `CliWorkflow.NextRun()` assumes there is never more than one run in
 `Runs` that hasn't reached `ReachedFinalOutcome`. Today that's true by
 construction, not by luck: the only caller of `NextRun()` is
-`CliApp.Run`'s own loop (`KitCli/CliApp.cs`), which `await`s a run to
-completion — `ExecuteRunOperation(run)` fully returns — before it ever
-loops back around to ask `_workflow` for the next one. Nothing else in
-KitCli calls `NextRun()` concurrently. If that ever changed — a second
-caller driving the same `ICliWorkflow`, or a host that doesn't await
-each run to completion before starting another — `SingleOrDefault` would
-throw a generic `InvalidOperationException` on the *next* call, not a
-domain-specific one, and not necessarily at the moment the second run
-was actually created. This is a known, tracked gap, not a deliberately
-chosen error type.
+`CliApp.Run`'s own loop (`KitCli/CliApp.cs`), which awaits a run to
+completion before it ever loops back around to ask `_workflow` for the
+next one. Nothing else in KitCli calls `NextRun()` concurrently.
+
+If that ever changed — a second caller driving the same `ICliWorkflow`,
+or a host that doesn't await each run to completion before starting
+another — `SingleOrDefault` would throw a generic
+`InvalidOperationException` on the *next* call, not necessarily at the
+moment the second run was actually created, and not a domain-specific
+error type. This is a known, tracked gap, not a deliberate choice.
 
 **Run and state-change history are never evicted.** Both
 `CliWorkflow.Runs` and `CliWorkflowRunState.Changes` simply grow for the

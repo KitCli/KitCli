@@ -18,12 +18,13 @@ looks at the raw string again.
 
 A command handler needs its arguments as ready-to-use typed values — not
 a raw string it re-parses itself, and not according to a schema it has
-to declare up front for every command. Solving that means turning one
-line of loosely-structured free text (a prefix, a name, an optional
-sub-name, and an arbitrary number of `--name value` pairs) into a typed,
-addressable `Instruction`, without hand-rolling tokenizing/type-conversion
-logic per command, and without a schema-declaration step slowing down
-adding a new one.
+to declare up front for every command.
+
+Solving that means turning one line of loosely-structured free text (a
+prefix, a name, an optional sub-name, and an arbitrary number of
+`--name value` pairs) into a typed, addressable `Instruction`, without
+hand-rolling tokenizing/type-conversion logic per command, and without a
+schema-declaration step slowing down adding a new one.
 
 ## Solution
 
@@ -33,13 +34,15 @@ stages in order:
 ### 1. Indexing
 
 `InstructionTokenIndexer.Index` (`Indexers/InstructionTokenIndexer.cs`)
-locates four token regions as start/end index pairs into the original
-string, without allocating any substrings yet: `Prefix`, `Name`,
-`SubName`, `Arguments`. It looks for `InstructionSettings.Prefix`
-(default `/`) at position 0, the first space to end the `Name` token,
-`InstructionSettings.ArgumentPrefix` (default `--`) to start the
-`Arguments` span, and treats everything between the end of `Name` and
-the start of `Arguments` as `SubName`.
+locates four token regions — `Prefix`, `Name`, `SubName`, `Arguments` —
+as start/end index pairs into the original string, without allocating
+any substrings yet.
+
+It finds each one by a simple positional rule: the configured prefix
+character (default `/`) at position 0, the first space to end the name,
+the configured argument marker (default `--`) to start the arguments
+span, and everything left between the name and the arguments as the
+sub-name.
 
 ### 2. Extraction
 
@@ -79,11 +82,12 @@ builder instead, silently.
 ### Assembly
 
 Each accepted `(name, typed value)` pair becomes an
-`InstructionArgument<T>` (`Arguments/InstructionArgument.cs`, a record
-deriving from the untyped `AnonymousInstructionArgument`). `Parse` then
-wraps the prefix, name, sub-name, and argument list into one immutable
-`Instruction` record (`Instruction.cs`) — the single object every
-command factory and handler downstream actually consumes.
+`InstructionArgument<T>` (`Arguments/InstructionArgument.cs`) — a record
+deriving from the untyped `AnonymousInstructionArgument`.
+
+`Parse` then wraps the prefix, name, sub-name, and argument list into one
+immutable `Instruction` record (`Instruction.cs`) — the single object
+every command factory and handler downstream actually consumes.
 
 ## Constraints & tradeoffs
 
