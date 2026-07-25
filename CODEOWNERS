@@ -1,0 +1,9 @@
+# See CONTRIBUTING.md for how areas map to review requirements.
+# Everything routes to one owner today; split by area as co-owners join.
+
+/KitCli.Abstractions*/   @joshuaedwardcrowe
+/KitCli.Instructions*/   @joshuaedwardcrowe
+/KitCli.Commands*/       @joshuaedwardcrowe
+/KitCli.Workflow*/       @joshuaedwardcrowe
+/KitCli/                 @joshuaedwardcrowe
+/docs/adr/                @joshuaedwardcrowe
