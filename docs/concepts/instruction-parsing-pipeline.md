@@ -155,7 +155,16 @@ verbatim, with no declared schema behind it. There's no list anywhere of
 "arguments this command accepts" for the parser to check against.
 
 The name a command factory looks up later (via `GetArgument<T>(name)`,
-see [outcome-artefact-pipeline.md](outcome-artefact-pipeline.md)) only
-resolves if the user happened to type that exact `--name`. Get the name
-wrong on either side — the terminal input or the lookup call — and
-nothing errors; the argument, or the lookup, is just silently absent.
+see [artefacts.md](artefacts.md)) only resolves if the user happened to
+type that exact `--name`. Get the name wrong on either side — the
+terminal input or the lookup call — and nothing errors; the argument,
+or the lookup, is just silently absent.
+
+## Related concepts
+
+- [artefacts.md](artefacts.md) — `GetArgument<T>`/`GetRequiredArgument<T>`
+  work the same way as the artefact-lookup helpers, over an
+  `Instruction`'s parsed arguments instead of the run's outcome history.
+- [workflow-run-state-machine.md](workflow-run-state-machine.md) — where
+  `InstructionParser.Parse`'s output actually gets consumed, as the
+  first step of `RespondToAsk`.

@@ -131,8 +131,8 @@ flowchart TD
   out, whichever path was taken.
 
 `UpdateStateAfterOutcome` looks only at the **last** outcome returned
-(see [outcome-artefact-pipeline.md](outcome-artefact-pipeline.md) for
-what outcomes and their `Kind` mean) to decide the next status:
+(see [outcomes.md](outcomes.md) for what outcomes and their `Kind`
+mean) to decide the next status:
 
 - No outcomes, or the last one isn't reusable → `ReachedFinalOutcome`.
 - The last one is a `NextCliCommandOutcome` → `MovePastAsk` (the run is
@@ -187,10 +187,9 @@ host process.
 ## Questions & answers
 
 **What decides whether a run continues after a command, versus ending?**
-The *last* outcome the handler returned — see
-[outcome-artefact-pipeline.md](outcome-artefact-pipeline.md) for what
-outcomes and `OutcomeKind` mean. This doc only covers how that decision
-maps onto run state, not the outcome/artefact model itself. A command
+The *last* outcome the handler returned — see [outcomes.md](outcomes.md)
+for what outcomes and `OutcomeKind` mean. This doc only covers how that
+decision maps onto run state, not the outcome model itself. A command
 handler that ends the run just needs its last outcome to be `Final`-kind
 — e.g. the real `ExitCliCommandHandler`
 (`KitCli.Workflow.Commands/Exit/ExitCliCommandHandler.cs`):
@@ -220,3 +219,14 @@ Because the `NoCommandGeneratorException` case never reaches
 `ExecuteCommand` at all — there's no command to execute, so there's no
 `finally` block downstream to rely on. `RespondToAsk` finishes the run
 itself, right where the failure that ends it actually happened.
+
+## Related concepts
+
+- [outcomes.md](outcomes.md) — what a command handler actually returns,
+  and how `OutcomeKind` maps onto the state transitions this doc covers.
+- [artefacts.md](artefacts.md) — `CliWorkflowCommandProvider` builds the
+  artefact list from the run's outcome history before a command factory
+  runs.
+- [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) —
+  how the raw ask string `RespondToAsk` receives becomes the
+  `Instruction` it parses and validates.
