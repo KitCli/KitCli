@@ -9,7 +9,38 @@ This encodes the review → docs → issues → PR-review-response loop this
 repo already runs on. `CLAUDE.md` holds the standing facts (labels,
 commit format, PR triggers); this skill holds the *procedure*.
 
-## 1. Architectural review
+## 1. Check whether a full review is actually due
+
+Full architectural reviews aren't run on a calendar — they're gated on
+real change volume, since calendar time alone doesn't mean anything
+architectural actually moved.
+
+**Last full architectural review: 2026-07-26, at commit `1290121160171b232b3d52bb12a5ac14bcd80a98`.**
+
+Before starting a new *full* review pass (not before every invocation of
+this skill — only when actually considering a full sweep), check lines
+of source changed since that commit:
+
+```
+git log --since="2026-07-26" --pretty=tformat: --numstat -- '*.cs' \
+  | awk '{add+=$1; del+=$2} END {print add+del}'
+```
+
+Only recommend or run a full review if **both** are true:
+- At least 1,000 lines of `.cs` source changed since that commit — not
+  docs, not generated files. This repo's docs work alone can produce
+  1,000+ lines without a single line of code changing, so don't count
+  the raw repo diff.
+- At least 6 months elapsed since that date.
+
+If asked to "review the codebase" and neither threshold is met, say so
+and scope the work to whatever's actually being asked (a specific area,
+a specific concern) instead of running a full sweep.
+
+After completing a full review, update the date and commit hash above
+to the commit the review was performed against.
+
+## 2. Architectural review
 
 - For a review spanning multiple independent dimensions (e.g. DI/composition,
   error handling, test coverage, naming/dead code), split it across
@@ -27,7 +58,7 @@ commit format, PR triggers); this skill holds the *procedure*.
   language already established for this repo's reviews: severity-tiered
   findings, one finding per card/section, file:line references.
 
-## 2. Findings → GitHub issues
+## 3. Findings → GitHub issues
 
 - One issue per finding. Title: a plain-language statement of the
   problem, not a category label.
@@ -40,7 +71,7 @@ commit format, PR triggers); this skill holds the *procedure*.
   related bugs in the same class), a follow-up comment on the issue is
   fine — don't cram everything into the initial body.
 
-## 3. ADRs and concept docs
+## 4. ADRs and concept docs
 
 - **ADR** (`docs/adr/`, copy `0000-template.md`): a decision + its
   alternatives + its consequences. Write one only for a new
@@ -64,7 +95,7 @@ commit format, PR triggers); this skill holds the *procedure*.
 - Open a PR for the new/updated doc. **Do not merge it** — see
   `CLAUDE.md`'s standing rules.
 
-## 4. Responding to PR review comments
+## 5. Responding to PR review comments
 
 - Fetch the full comment list with `gh api --paginate
   repos/{owner}/{repo}/pulls/{pr}/comments` — the default page size
@@ -91,7 +122,7 @@ commit format, PR triggers); this skill holds the *procedure*.
   done — new comments (including replies asking follow-up questions on
   your replies) can land after your last check.
 
-## 5. Applying this to a repo that doesn't have this operating model yet
+## 6. Applying this to a repo that doesn't have this operating model yet
 
 If asked to bootstrap this process on a repo without `CONTRIBUTING.md`,
 `docs/adr/`, `docs/concepts/`, issue/PR templates, CI, `CODEOWNERS`, or
