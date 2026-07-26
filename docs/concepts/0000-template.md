@@ -41,3 +41,12 @@ already has (or deserves) its own ADR, link it instead of re-explaining it.
 
 Common "how do I..." and "why does it..." questions a consumer would
 actually ask, answered directly.
+
+## Related concepts
+
+A concept doc covers **one** concept — don't let a subsystem's
+neighbors creep in just because they're used together. Instead, list
+the other concept docs this one connects to, one line each: which doc,
+and why a reader might need it. Link out rather than re-explaining;
+this is what keeps splitting concepts into single-topic docs
+sustainable instead of just moving the sprawl around.
