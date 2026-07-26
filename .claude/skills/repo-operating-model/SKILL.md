@@ -15,14 +15,16 @@ Full architectural reviews aren't run on a calendar — they're gated on
 real change volume, since calendar time alone doesn't mean anything
 architectural actually moved.
 
-**Last full architectural review: 2026-07-26, at commit `1290121160171b232b3d52bb12a5ac14bcd80a98`.**
+**Last full architectural review: 2026-07-25** (write-up:
+[`docs/reviews/2026-07-25-architectural-review.md`](../../docs/reviews/2026-07-25-architectural-review.md)),
+at commit `1290121160171b232b3d52bb12a5ac14bcd80a98`.
 
 Before starting a new *full* review pass (not before every invocation of
 this skill — only when actually considering a full sweep), check lines
 of source changed since that commit:
 
 ```
-git log --since="2026-07-26" --pretty=tformat: --numstat -- '*.cs' \
+git log --since="2026-07-25" --pretty=tformat: --numstat -- '*.cs' \
   | awk '{add+=$1; del+=$2} END {print add+del}'
 ```
 
@@ -37,8 +39,12 @@ If asked to "review the codebase" and neither threshold is met, say so
 and scope the work to whatever's actually being asked (a specific area,
 a specific concern) instead of running a full sweep.
 
-After completing a full review, update the date and commit hash above
-to the commit the review was performed against.
+After completing a full review, write it up as
+`docs/reviews/<date>-architectural-review.md` (see the existing one for
+the shape: summary counts, methodology, a findings table grouped by
+severity linking each GitHub issue, and any skipped/already-resolved
+findings), then update the date, write-up link, and commit hash above to
+match.
 
 ## 2. Architectural review
 
