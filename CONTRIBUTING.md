@@ -115,9 +115,25 @@ drift.
 
 Every squash-merged PR that changes behavior gets a line in
 [`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`, in [Keep a
-Changelog](https://keepachangelog.com/) format. A maintainer cuts a release
-by moving `[Unreleased]` under a version heading and running the publish
-script.
+Changelog](https://keepachangelog.com/) format.
+
+**To cut a release:** open a PR that bumps `<Version>` in each project
+that needs it, and merge it. Then run the
+[`Publish`](.github/workflows/publish.yml) workflow manually from the
+Actions tab (`workflow_dispatch` — it never triggers on its own). It
+builds, tests, then packs and pushes each of the 9 packages at its own
+currently-committed version, in dependency order, before cutting
+`CHANGELOG.md`, tagging the commit (using `KitCli`'s own version — the
+umbrella package), and creating a GitHub Release. Requires a
+`NUGET_API_KEY` repository secret.
+
+Note: the "one version number, always" policy above is the documented
+intent, not the current reality — the 9 packages have already drifted
+out of sync (see [#58](https://github.com/KitCli/KitCli/issues/58)).
+The publish workflow deliberately doesn't try to force them back in
+sync; it publishes whatever's committed per-project. Re-synchronizing
+them (or deciding lockstep isn't the right model anymore) is a separate
+decision, tracked on that issue.
 
 ## Code style
 
