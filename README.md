@@ -6,11 +6,7 @@ Commands/Outcomes/Artefacts/Workflow layers on top for state that
 carries across a session — page size, filters, "next page" — without
 each command hand-rolling it.
 
-> **The API below reflects `main`, not what's on NuGet.** The last
-> published version predates a breaking rewrite of the command
-> factory/handler shape by over five months — see
-> [#60](https://github.com/KitCli/KitCli/issues/60) before assuming
-> `dotnet add package KitCli` gets you this today.
+> Reflects `main`, not yet the published package — see [#60](https://github.com/KitCli/KitCli/issues/60).
 
 ## Quick start
 
