@@ -101,6 +101,25 @@ feature request, or tech debt. There's no fixed triage meeting; an issue
 should have an area label within about a week or it's fair game to close as
 stale.
 
+## Projects
+
+Work bigger than a single issue is tracked on a GitHub Projects (v2)
+board rather than just a milestone — a board can carry an `Estimate`
+field (story points, not time) and reflect scope a milestone alone
+can't.
+
+**Starting a new project:** open it with a planning spike first, not a
+pre-built backlog. Decomposing a story-shaped issue into sub-issues
+before the delivery order is actually agreed produces a breakdown that
+looks plausible but can't be proven correct — e.g. proposing a command
+before the data it depends on is parsed. The spike's job is to
+establish that order collaboratively; only create sub-issues once it
+concludes, and in the order it settles on.
+
+**Estimates** go on the leaf/actionable sub-issues, not the parent
+story issue — the parent tracks the outcome, not the effort to reach
+it.
+
 ## Versioning & releases
 
 All 9 published packages (`KitCli`, `KitCli.Abstractions`,
