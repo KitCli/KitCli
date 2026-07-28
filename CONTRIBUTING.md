@@ -101,6 +101,19 @@ feature request, or tech debt. There's no fixed triage meeting; an issue
 should have an area label within about a week or it's fair game to close as
 stale.
 
+**Issue titles** follow a two-stage convention:
+
+- **Idea-stage** (unvalidated, pre-WAG) — plain-language problem
+  statements, e.g. "No way to X" / "Y doesn't handle Z". This is
+  deliberate: an idea is a pitch for an unmet need, not yet a scoped
+  unit of work.
+- **Delivery-stage sub-issues** (carved out by a planning spike, see
+  [Projects](#projects) below, ready to build) — Conventional Commits
+  style, matching PR titles: `type(scope): description`, e.g.
+  `feat(workflow): add side-effect notification handlers`. By this
+  point the work is scoped, so the title should read like the commit
+  that will close it.
+
 ## Projects
 
 Work bigger than a single issue is tracked on a GitHub Projects (v2)
