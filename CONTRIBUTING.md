@@ -185,9 +185,10 @@ not commitments to defend:
    not the effort to reach it.
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
-for a ticket's Build-stage lifecycle. Per its Breakdown stage, **the
-GitHub Issue itself is the story artifact** — no separate markdown file
-or dedicated location. It's already written down, reviewable via
+for a ticket's Build-stage lifecycle, with one extension specific to
+this repo, not something SoloCAIRN itself prescribes: **the GitHub
+Issue itself is the story artifact** — no separate markdown file or
+dedicated location. It's already written down, reviewable via
 comments, and tracked through GitHub's own history.
 
 ## Versioning & releases
