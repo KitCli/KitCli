@@ -116,22 +116,35 @@ stale.
 
 ## Projects
 
-Work bigger than a single issue is tracked on a GitHub Projects (v2)
-board rather than just a milestone — a board can carry an `Estimate`
-field (story points, not time) and reflect scope a milestone alone
-can't.
+Work bigger than a single issue goes through a staged pipeline before
+it's ever decomposed into tickets:
 
-**Starting a new project:** open it with a planning spike first, not a
-pre-built backlog. Decomposing a story-shaped issue into sub-issues
-before the delivery order is actually agreed produces a breakdown that
-looks plausible but can't be proven correct — e.g. proposing a command
-before the data it depends on is parsed. The spike's job is to
-establish that order collaboratively; only create sub-issues once it
-concludes, and in the order it settles on.
-
-**Estimates** go on the leaf/actionable sub-issues, not the parent
-story issue — the parent tracks the outcome, not the effort to reach
-it.
+1. **WAG** — a fast, rough gut-feel estimate (in months), logged on the
+   shared [Ideas board](https://github.com/users/joshuaedwardcrowe/projects/10)'s
+   `WAG (months)` field, purely to judge whether an idea is worth
+   pursuing at all.
+2. **SWAG** — the same estimate, re-checked against everything else
+   competing for the slot, logged in the same board's `SWAG (months)`
+   field. "Prioritizing" means sorting/grouping that board by
+   `Priority` (`High`/`Medium`/`Low`) or `SWAG` — there's no separate
+   roadmap artifact to keep in sync.
+3. **New GitHub Project** — once an idea is greenlit, it graduates off
+   the Ideas board into its own project.
+4. **Inception spike** — validates the WAG/SWAG estimate for real and
+   defines milestones spanning that period, logged on the Ideas
+   board's `Validated Estimate (months)` field. This spike's output is
+   milestones, not tickets.
+5. **Pick up a milestone**, then run a **milestone spike** — this is
+   the one that plans the actual chronological delivery order and
+   produces the ordered ticket breakdown for that specific milestone.
+   Don't skip straight from the inception spike to tickets: decomposing
+   before delivery order is agreed produces a breakdown that looks
+   plausible but can't be proven correct — e.g. proposing a command
+   before the data it depends on is parsed.
+6. **Tickets with Estimates** — the milestone spike's tickets get the
+   `Estimate` field (Fibonacci story points, not time) on the project
+   board, on the leaf/actionable tickets — the parent story tracks the
+   outcome, not the effort to reach it.
 
 ## Versioning & releases
 
