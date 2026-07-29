@@ -195,6 +195,16 @@ Issue itself is the story artifact** — no separate markdown file or
 dedicated location. It's already written down, reviewable via
 comments, and tracked through GitHub's own history.
 
+## Milestones
+
+When a milestone is tied to catching up to (or tracking) an external
+spec or API version, name it after that version (e.g. `YNAB API
+v1.86.0`), not a goal-style description (e.g. `Full YNAB API
+Coverage`) — a version-anchored name pins the milestone to a concrete,
+checkable target and supports a version history over time. For a
+feature-area milestone with no external version to anchor to, a plain
+descriptive name is fine.
+
 ## Versioning & releases
 
 All 9 published packages (`KitCli`, `KitCli.Abstractions`,
