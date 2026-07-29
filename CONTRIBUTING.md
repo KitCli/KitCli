@@ -136,10 +136,13 @@ Work bigger than a single issue goes through a pipeline biased toward
 re-planning over predicting — estimates are inputs to prioritization,
 not commitments to defend:
 
-1. **WAG** — a fast, rough gut-feel estimate (in months), logged on the
-   shared [Ideas board](https://github.com/users/joshuaedwardcrowe/projects/10)'s
+1. **WAG** — a fast, rough gut-feel estimate (in months), logged on
+   [KitCli's own Ideas board](https://github.com/orgs/KitCli/projects/1)'s
    `WAG (months)` field, purely to judge whether an idea is worth
-   pursuing at all. Non-binding — expected to be wrong.
+   pursuing at all. Non-binding — expected to be wrong. This board is
+   owned by the KitCli org, not any individual's personal account —
+   KitCli operates as its own organization, so its idea-staging lives
+   inside it, not mixed in with a maintainer's personal projects.
 2. **SWAG** — the same estimate, re-checked against everything else
    competing for the slot, logged in the same board's `SWAG (months)`
    field. "Prioritizing" means sorting/grouping that board by
