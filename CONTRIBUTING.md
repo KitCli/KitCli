@@ -116,35 +116,46 @@ stale.
 
 ## Projects
 
-Work bigger than a single issue goes through a staged pipeline before
-it's ever decomposed into tickets:
+Work bigger than a single issue goes through a pipeline biased toward
+re-planning over predicting — estimates are inputs to prioritization,
+not commitments to defend:
 
 1. **WAG** — a fast, rough gut-feel estimate (in months), logged on the
    shared [Ideas board](https://github.com/users/joshuaedwardcrowe/projects/10)'s
    `WAG (months)` field, purely to judge whether an idea is worth
-   pursuing at all.
+   pursuing at all. Non-binding — expected to be wrong.
 2. **SWAG** — the same estimate, re-checked against everything else
    competing for the slot, logged in the same board's `SWAG (months)`
    field. "Prioritizing" means sorting/grouping that board by
    `Priority` (`High`/`Medium`/`Low`) or `SWAG` — there's no separate
-   roadmap artifact to keep in sync.
+   roadmap artifact to keep in sync. Still non-binding: a relative
+   sizing input, not a plan.
 3. **New GitHub Project** — once an idea is greenlit, it graduates off
    the Ideas board into its own project.
-4. **Inception spike** — validates the WAG/SWAG estimate for real and
-   defines milestones spanning that period, logged on the Ideas
-   board's `Validated Estimate (months)` field. This spike's output is
-   milestones, not tickets.
-5. **Pick up a milestone**, then run a **milestone spike** — this is
-   the one that plans the actual chronological delivery order and
-   produces the ordered ticket breakdown for that specific milestone.
-   Don't skip straight from the inception spike to tickets: decomposing
-   before delivery order is agreed produces a breakdown that looks
-   plausible but can't be proven correct — e.g. proposing a command
-   before the data it depends on is parsed.
-6. **Tickets with Estimates** — the milestone spike's tickets get the
-   `Estimate` field (Fibonacci story points, not time) on the project
-   board, on the leaf/actionable tickets — the parent story tracks the
-   outcome, not the effort to reach it.
+4. **Inception spike** — plans the *next* milestone in real detail;
+   everything beyond that is a rough forecast, re-planned properly once
+   you actually get there (rolling-wave planning, not a full plan for
+   the whole estimate up front). Refresh the Ideas board's `Validated
+   Estimate (months)` field as it's learned, not just once.
+5. **Backlog refinement, just-in-time** — rather than one big spike
+   producing the full chronological order for an entire milestone, only
+   the next handful of tickets need to be fully ordered and estimated
+   at any moment. The rest of the milestone stays a loosely-ordered
+   backlog, refined incrementally as work proceeds. A milestone-scale
+   re-planning pass is still useful when picking up a milestone cold —
+   treat its output as a starting point, not a fixed contract.
+6. **Fixed-length iterations + end-of-iteration review** — work in
+   short, regular iterations rather than open-ended milestone spans.
+   At the end of each one: check what actually got done vs. planned,
+   re-prioritize the backlog based on what was learned, and feed the
+   iteration's actual pace back into WAG/SWAG calibration. This
+   inspect-and-adapt step is what keeps the rest of the pipeline
+   honest — without it, WAG/SWAG/the inception spike are just a plan
+   nobody revisits.
+7. **Tickets with Estimates** — the leaf/actionable tickets pulled into
+   an iteration get the `Estimate` field (Fibonacci story points, not
+   time) on the project board — the parent story tracks the outcome,
+   not the effort to reach it.
 
 ## Versioning & releases
 
