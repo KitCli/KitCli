@@ -144,6 +144,14 @@ not commitments to defend:
    backlog, refined incrementally as work proceeds. A milestone-scale
    re-planning pass is still useful when picking up a milestone cold —
    treat its output as a starting point, not a fixed contract.
+
+   A **spike** (a specific, scoped investigation — "should we support
+   X," "what does Y actually look like") resolves to one of two
+   outcomes: **new complexity found**, or **no new complexity**. On no
+   new complexity, close the spike and open a fresh, cleanly-titled
+   delivery-stage ticket for the actual build — don't retitle or reuse
+   the spike issue in place. That new ticket gets sized in a normal
+   backlog-refinement pass, not as part of the spike itself.
 6. **Fixed-length iterations + end-of-iteration review** — work in
    short, regular iterations rather than open-ended milestone spans.
    At the end of each one: check what actually got done vs. planned,
