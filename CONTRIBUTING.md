@@ -20,6 +20,9 @@ should be a link, not archaeology.
 - Branch off `main`. No long-running branches — trunk-based, short-lived.
 - One logical change per PR. If your PR description needs "and" to explain
   what it does, it's probably two PRs.
+- **Keep PRs small: max 20 files, 10-15 preferred.** If a change is going
+  to blow past that, plan the split into multiple PRs upfront, not after
+  the fact.
 - **PR titles use [Conventional Commits](https://www.conventionalcommits.org/):**
   `<type>(scope): <description>` — `type` is one of `feat` `fix` `docs`
   `chore` `refactor` `test` `ci`; `scope` is optional and, where it applies,
@@ -43,6 +46,19 @@ should be a link, not archaeology.
 - We squash-merge, so the PR title (Conventional Commits, per above) ends
   up as the commit title on `main` and the changelog line (see
   [Versioning](#versioning--releases)).
+
+## Testing
+
+- **Build test doubles reusably from the start, not as a private nested
+  class you promote later.** Put the double in the relevant test
+  project's `TestHelpers/` (or equivalent) folder the first time, not
+  the second.
+- **Construct fixtures from real types, not hand-rolled equivalents** —
+  build actual `Command`/`Outcome`/`Artefact` instances (or whatever the
+  relevant abstraction is) rather than ad hoc anonymous objects standing
+  in for them, so a fixture can't silently drift from the real shape.
+- **Name test doubles `Test*`** (e.g. `TestCommandHandler`), not
+  `Stub*`/`Fake*`/`Mock*`.
 
 ## ADRs
 
@@ -164,6 +180,12 @@ not commitments to defend:
    an iteration get the `Estimate` field (Fibonacci story points, not
    time) on the project board — the parent story tracks the outcome,
    not the effort to reach it.
+
+This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
+for a ticket's Build-stage lifecycle. Per its Breakdown stage, **the
+GitHub Issue itself is the story artifact** — no separate markdown file
+or dedicated location. It's already written down, reviewable via
+comments, and tracked through GitHub's own history.
 
 ## Versioning & releases
 
