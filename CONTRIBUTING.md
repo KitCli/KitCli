@@ -182,7 +182,11 @@ not commitments to defend:
 7. **Tickets with Estimates** — the leaf/actionable tickets pulled into
    an iteration get the `Estimate` field (Fibonacci story points, not
    time) on the project board — the parent story tracks the outcome,
-   not the effort to reach it.
+   not the effort to reach it. Don't second-guess an estimate just
+   because a ticket is taking a while — re-estimate only on genuine
+   scope change; see [SoloCAIRN's Sizing
+   note](https://github.com/joshuaedwardcrowe/SoloCAIRN/blob/main/docs/03-lifecycle.md)
+   for the full reasoning.
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
 for a ticket's Build-stage lifecycle, with one extension specific to
