@@ -35,6 +35,9 @@ CI runs the same three steps on every PR and push to `main`.
   (`bug|feature|tech-debt|docs|process`) × area
   (`area:abstractions|area:instructions|area:commands|area:workflow|area:host|area:tooling`)
   × severity (`sev:high|sev:medium|sev:low`).
+- **PRs mirror their linked issue's labels and milestone.** GitHub
+  doesn't copy these automatically — set them explicitly when opening
+  the PR, not just on the issue.
 - **PR template triggers** (`.github/PULL_REQUEST_TEMPLATE.md`):
   breaking change or new cross-cutting pattern → ADR required in the
   same PR. Behavior change → `CHANGELOG.md` entry. Behavior a concept

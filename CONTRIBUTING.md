@@ -38,6 +38,10 @@ should be a link, not archaeology.
 - Fill in the [PR template](.github/PULL_REQUEST_TEMPLATE.md) — in
   particular, link the issue if one exists, and say how you tested it
   (unit tests / a `KitCli.Playground.Scenarios` scenario / manual).
+- **If a linked issue exists, mirror its labels and milestone onto the
+  PR.** GitHub doesn't do this automatically. Keeping both in sync means
+  milestone/label filtering and progress tracking work across the PR
+  list too, not just issues.
 - CI (`dotnet build` + `dotnet test` across all six test projects) must be
   green before merge — this is enforced by branch protection, not
   discipline.
@@ -198,12 +202,12 @@ comments, and tracked through GitHub's own history.
 ## Milestones
 
 When a milestone is tied to catching up to (or tracking) an external
-spec or API version, name it after that version (e.g. `YNAB API
-v1.86.0`), not a goal-style description (e.g. `Full YNAB API
-Coverage`) — a version-anchored name pins the milestone to a concrete,
-checkable target and supports a version history over time. For a
-feature-area milestone with no external version to anchor to, a plain
-descriptive name is fine.
+spec or dependency version (e.g. a MediatR major bump), name it after
+that version (e.g. `MediatR vX.Y.Z`), not a goal-style description
+(e.g. `Update to Latest MediatR`) — a version-anchored name pins the
+milestone to a concrete, checkable target and supports a version
+history over time. For a feature-area milestone with no external
+version to anchor to, a plain descriptive name is fine.
 
 ## Versioning & releases
 
