@@ -230,3 +230,6 @@ itself, right where the failure that ends it actually happened.
 - [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) —
   how the raw ask string `RespondToAsk` receives becomes the
   `Instruction` it parses and validates.
+- [0001-mediatr-for-command-dispatch.md](../adr/0001-mediatr-for-command-dispatch.md) —
+  why the resolved `CliCommand` is routed to its handler via MediatR
+  rather than a hand-written type switch.
