@@ -111,6 +111,33 @@ flags it as wrong.
 inaccurate, update it in the same PR — don't leave the drift for someone
 else to notice later.
 
+## Investigations
+
+An investigation ([`docs/investigations/`](docs/investigations/)) is what
+a technical spike produces — what was found, and what to do about it.
+Number sequentially (`000x-question.md`) from
+[`0000-template.md`](docs/investigations/0000-template.md).
+
+Working alone and intermittently, there's no second person carrying the
+context between sessions. That's the whole reason these are written down
+rather than held in someone's head, and it's the bar for whether one is
+worth writing: **would a reader six months from now otherwise re-derive
+this from scratch?** If not, skip it and put the finding straight into
+whichever doc permanently owns it.
+
+**An investigation is not an ADR.** It records what was found; an ADR
+records what was decided. An investigation that leads to a decision
+justifies an ADR rather than replacing it — write both and link them.
+
+Lead with the verdict, not the evidence. A spike resolves to **new
+complexity** or **no new complexity**; the latter closes the spike and
+opens a fresh ticket for the work itself.
+
+Investigations ship through a PR and carry a Status like any other work.
+Durable facts about a dependency belong in that dependency's own
+reference docs too — record them in both places rather than letting this
+folder become the only copy.
+
 ## Issues
 
 Every issue gets three independent labels once triaged:
