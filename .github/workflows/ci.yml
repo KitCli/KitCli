@@ -2,12 +2,11 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
   push:
     branches: [main]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,5 +22,19 @@ jobs:
       - name: Build
         run: dotnet build KitCli.sln --configuration Release --no-restore
 
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore KitCli.sln
+
       - name: Test
-        run: dotnet test KitCli.sln --configuration Release --no-build
+        run: dotnet test KitCli.sln --configuration Release
