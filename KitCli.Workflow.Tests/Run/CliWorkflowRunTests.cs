@@ -289,4 +289,52 @@ public class CliWorkflowRunTests
         var resultingOutcome = resultingOutcomes[1];
         Assert.That(resultingOutcome, Is.EqualTo(outcome));
     }
+
+    [Test]
+    public async Task GivenCommandProviderFailsAfterReachingReusableOutcome_WhenRespondToAsk_LeavesRunAtReusableOutcome()
+    {
+        // Arrange
+        var ask = "some valid ask";
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
+
+        var aggregator = new TestListAggregator();
+        var reusableOutcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(instruction);
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .SetupSequence(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new CliCommand())
+            .Throws<NoCommandGeneratorException>();
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([reusableOutcome]);
+
+        // Act - first ask reaches the reusable checkpoint.
+        _ = await _classUnderTest.RespondToAsk(ask);
+
+        // Act - second ask fails to resolve a command.
+        var secondOutcomes = await _classUnderTest.RespondToAsk(ask);
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+        Assert.That(secondOutcomes.FirstOrDefault(), Is.InstanceOf<NothingOutcome>());
+    }
 }
