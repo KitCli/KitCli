@@ -155,3 +155,11 @@ base class helpers.
   `GetArgument<T>`/`GetRequiredArgument<T>` work the same way as the
   artefact helpers, over the current instruction's parsed arguments
   instead.
+- [command-registration.md](command-registration.md) — how the
+  `CliCommandFactory<T>` reading these artefacts is itself resolved.
+- [0003-reflection-based-automatic-registration.md](../adr/0003-reflection-based-automatic-registration.md) —
+  why artefact factories are discovered by assembly scan rather than
+  registered by hand.
+- [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
+  why `GetArtefact`'s "last outcome wins" and factory resolution's "first
+  factory wins" are each instances of one broader pattern.
