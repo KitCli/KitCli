@@ -2,9 +2,9 @@ using KitCli.Abstractions;
 using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KitCli.Playground;
+namespace KitCli.Playground.App.Terminal;
 
-public class ConfiguredCommandRegistry : IConfigurableCliAppRegistry<InstructionSettings> 
+public class ConfiguredCommandRegistry : IConfigurableCliAppRegistry<InstructionSettings>
 {
     public void Register(InstructionSettings settings, IServiceCollection services)
     {

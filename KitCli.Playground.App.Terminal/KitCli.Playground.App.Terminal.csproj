@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UserSecretsId>868198d0-2b94-4f81-a679-15b294a1a758</UserSecretsId>
-        <RootNamespace>KitCli.Playground</RootNamespace>
+        <RootNamespace>KitCli.Playground.App.Terminal</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
