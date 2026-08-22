@@ -62,7 +62,10 @@ declared anywhere: `HelloCliCommand` → `hello` / `h`.
   [exiting the app](docs/user-guides/exiting-the-app.md),
   [creating a terminal app](docs/user-guides/creating-a-terminal-app.md),
   [creating an args app](docs/user-guides/creating-an-args-app.md),
-  and [creating a registry](docs/user-guides/creating-a-registry.md).
+  [creating a registry](docs/user-guides/creating-a-registry.md),
+  [chaining commands](docs/user-guides/chaining-commands.md),
+  [remembering state across asks](docs/user-guides/reusable-outcomes-and-the-workflow-run.md),
+  and [command reactions](docs/user-guides/command-reactions.md).
 - [`docs/concepts/`](docs/concepts/) — how each subsystem actually
   works today: [instruction parsing](docs/concepts/instruction-parsing-pipeline.md),
   the [workflow state machine](docs/concepts/workflow-run-state-machine.md),
