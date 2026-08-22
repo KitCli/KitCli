@@ -244,3 +244,5 @@ itself, right where the failure that ends it actually happened.
 - [0001-mediatr-for-command-dispatch.md](../adr/0001-mediatr-for-command-dispatch.md) —
   why the resolved `CliCommand` is routed to its handler via MediatR
   rather than a hand-written type switch.
+- [cli-app-host.md](cli-app-host.md) — what drives `RespondToAsk`/
+  `MoveToNext` from outside: the host loop that calls `NextRun()`.
