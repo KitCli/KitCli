@@ -26,12 +26,14 @@ inconsistent state (e.g. simultaneously "reached its final outcome" and
 "still running"), which surfaces as a silent bug rather than an
 exception.
 
-That's not hypothetical: two bugs of exactly that shape existed here
-until recently (the run not reaching `Finished` after certain error
-paths, and a command-lookup exception that was structurally
-uncatchable). Both are resolved on `main` today — neither was ever
-filed as a separate tracked issue, since newly-added CI caught and fixed
-both directly. See git history for `CliWorkflowRun.cs` for specifics.
+That's not hypothetical: an unenforced transition here would let, for
+example, an unrecognized command arriving after a run reached a
+reusable checkpoint (e.g. a chosen plan) discard that run's
+accumulated context and finish it outright. `NextRun()` would then
+hand back the same, already-`Finished` run for the next ask, and the
+state machine has no `Finished -> *` transition — so the following ask
+would crash with an uncaught `ImpossibleStateChangeException`. The
+explicit transition table below is what rules that out.
 
 ## Solution
 
@@ -95,9 +97,11 @@ flowchart TD
     B -- yes --> INV[InvalidAsk] --> FIN[Finished]
     B -- no --> C{instruction valid?}
     C -- no --> INV
-    C -- yes --> D[Running] --> E{command factory found?}
-    E -- "no (NoCommandGeneratorException)" --> INV
-    E -- yes --> F[ExecuteCommand]
+    C -- yes --> E{command factory found?}
+    E -- "no (NoCommandGeneratorException)" --> H{reached ReachedReusableOutcome before?}
+    H -- no --> D2["Running (then immediately InvalidAsk)"] --> INV
+    H -- yes --> RRO2["no state change — stays at ReachedReusableOutcome"]
+    E -- yes --> D[Running] --> F[ExecuteCommand]
     F -- throws --> EXC[Exceptional] --> FIN
     F -- outcomes returned --> G{last outcome}
     G -- "none / not reusable" --> RFO[ReachedFinalOutcome] --> FIN
@@ -111,15 +115,22 @@ flowchart TD
 - Empty/null ask → `ChangeTo(InvalidAsk)`, return early.
 - Parses via `IInstructionParser` (see
   [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md));
-  if `IInstructionValidator` accepts it → `ChangeTo(Running, instruction)`,
-  otherwise → `ChangeTo(InvalidAsk)`, return early.
-- Looks up a command via `ICliWorkflowCommandProvider.GetCommand(...)`.
-  If no factory exists for the instruction (`NoCommandGeneratorException`)
-  → `ChangeTo(InvalidAsk)`, then explicitly calls `UpdateStateWhenFinished()`
-  itself, because this catch fires *before* `ExecuteCommand` is ever
-  reached — there's no `ExecuteCommand`-owned `finally` block to fall
-  through to here.
-- Otherwise, hands off to `ExecuteCommand`.
+  if `IInstructionValidator` rejects it → `ChangeTo(InvalidAsk)`, return
+  early. Otherwise looks up a command via
+  `ICliWorkflowCommandProvider.GetCommand(...)` before touching state.
+- If no factory exists for the instruction (`NoCommandGeneratorException`):
+  - If the run has never reached `ReachedReusableOutcome` →
+    `ChangeTo(Running, instruction)`, then `ChangeTo(InvalidAsk)`, then
+    explicitly calls `UpdateStateWhenFinished()` itself, because this
+    catch fires *before* `ExecuteCommand` is ever reached — there's no
+    `ExecuteCommand`-owned `finally` block to fall through to here.
+  - If the run *has* reached `ReachedReusableOutcome` → makes **zero**
+    state changes and returns early. The run stays exactly at its
+    reusable checkpoint instead of being forced to `Finished`, so the
+    next `RespondToAsk`/`MoveToNext()` call still has that checkpoint's
+    context available.
+- If a command *is* found → `ChangeTo(Running, instruction)`, then hands
+  off to `ExecuteCommand`.
 
 `ExecuteCommand`:
 - Runs the command through `ISender.Send`, prepends a
