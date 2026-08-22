@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\KitCli.Abstractions\KitCli.Abstractions.csproj" />
+      <PackageReference Include="KitCli" Version="1.0.11" />
     </ItemGroup>
 
 </Project>
