@@ -10,13 +10,15 @@ using KitCli.Workflow.Abstractions;
 using KitCli.Workflow.Commands;
 using KitCli.Workflow.Run.State;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Workflow.Run;
 
 public class CliWorkflowRun : ICliWorkflowRun
 {
     public ICliWorkflowRunState State { get; }
-    
+
+    private readonly IServiceScope _serviceScope;
     private readonly IInstructionParser _instructionParser;
     private readonly IInstructionValidator _instructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
@@ -26,6 +28,7 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     public CliWorkflowRun(
         CliWorkflowRunState state,
+        IServiceScope serviceScope,
         IInstructionParser instructionParser,
         IInstructionValidator instructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
@@ -33,7 +36,8 @@ public class CliWorkflowRun : ICliWorkflowRun
         IPublisher publisher)
     {
         State = state;
-        
+
+        _serviceScope = serviceScope;
         _instructionParser = instructionParser;
         _instructionValidator = instructionValidator;
         _workflowCommandProvider = workflowCommandProvider;
@@ -170,9 +174,10 @@ public class CliWorkflowRun : ICliWorkflowRun
         if (runComplete)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.Finished);
+            _serviceScope.Dispose();
         }
     }
-    
+
     // TODO: Perhaps move to extension somewhere
     private List<Outcome> AllPriorOutcomes()
         => State

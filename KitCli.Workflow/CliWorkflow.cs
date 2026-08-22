@@ -12,7 +12,7 @@ namespace KitCli.Workflow;
 /// <summary>
 /// State machine of a command line interface.
 /// </summary>
-public class CliWorkflow(IServiceProvider serviceProvider) : ICliWorkflow
+public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflow
 {
     public List<ICliWorkflowRun> Runs { get; } = [];
     public CliWorkflowStatus Status { get; set; } = CliWorkflowStatus.Started;
@@ -41,19 +41,32 @@ public class CliWorkflow(IServiceProvider serviceProvider) : ICliWorkflow
     private ICliWorkflowRun CreateNewRun()
     {
         var state = new CliWorkflowRunState();
-        
-        var instructionParser = serviceProvider.GetRequiredService<IInstructionParser>();
 
-        var instructionValidator = serviceProvider.GetRequiredService<IInstructionValidator>();
-        
-        var commandProvider = serviceProvider.GetRequiredService<ICliWorkflowCommandProvider>();
-        
-        var sender = serviceProvider.GetRequiredService<ISender>();
-        
-        var publisher = serviceProvider.GetRequiredService<IPublisher>();
-        
+        var serviceScope = serviceScopeFactory.CreateScope();
+
+        var instructionParser = serviceScope
+            .ServiceProvider
+            .GetRequiredService<IInstructionParser>();
+
+        var instructionValidator = serviceScope
+            .ServiceProvider
+            .GetRequiredService<IInstructionValidator>();
+
+        var commandProvider = serviceScope
+            .ServiceProvider
+            .GetRequiredService<ICliWorkflowCommandProvider>();
+
+        var sender = serviceScope
+            .ServiceProvider
+            .GetRequiredService<ISender>();
+
+        var publisher = serviceScope
+            .ServiceProvider
+            .GetRequiredService<IPublisher>();
+
         var run = new CliWorkflowRun(
             state,
+            serviceScope,
             instructionParser,
             instructionValidator,
             commandProvider,

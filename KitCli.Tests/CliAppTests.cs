@@ -8,6 +8,7 @@ using KitCli.Workflow.Commands;
 using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 
@@ -17,6 +18,7 @@ namespace KitCli.Tests;
 public class CliAppTests
 {
     private CliWorkflowRunState _workflowRunState;
+    private Mock<IServiceScope> _mockScope;
     private Mock<IInstructionParser> _mockInstructionParser;
     private Mock<IInstructionValidator> _mockInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _mockWorkflowCommandProvider;
@@ -48,6 +50,7 @@ public class CliAppTests
     private void SetUpWorkflowRun()
     {
         _workflowRunState = new CliWorkflowRunState();
+        _mockScope = new Mock<IServiceScope>();
         _mockInstructionParser = new Mock<IInstructionParser>();
         _mockInstructionValidator = new Mock<IInstructionValidator>();
         _mockWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
@@ -56,6 +59,7 @@ public class CliAppTests
         
         _workflowRun = new CliWorkflowRun(
             _workflowRunState,
+            _mockScope.Object,
             _mockInstructionParser.Object,
             _mockInstructionValidator.Object,
             _mockWorkflowCommandProvider.Object,
