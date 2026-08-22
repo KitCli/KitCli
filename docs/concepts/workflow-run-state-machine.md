@@ -76,6 +76,17 @@ process. `CliWorkflowRun` holds that scope and disposes it in
 [0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md)
 for why a run, rather than a single command, is the scope boundary.
 
+`CreateNewRun()` passes `CliWorkflow`'s own `CancellationToken` into the same
+constructor call, alongside the scope. `CliWorkflowRun` stores it privately
+and uses it internally when it calls `ISender.Send` — neither
+`RespondToAsk` nor `MoveToNext` takes a `CancellationToken` parameter;
+cancellation is ambient to the run from the moment it's created, the same
+way the DI scope is, rather than something every caller has to keep
+supplying. `CliWorkflow.InterruptCurrentRun()` is what a host (`CliApp`)
+calls to signal this — see
+[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
+and [cli-app-host.md](cli-app-host.md) for how a Ctrl+C reaches it.
+
 ### The state machine itself
 
 The run's state (`CliWorkflowRunState.cs`) is the actual finite state

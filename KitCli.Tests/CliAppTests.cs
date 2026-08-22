@@ -76,8 +76,8 @@ public class CliAppTests
             .Returns(_workflowRun);
 
         _mockCliIo
-            .Setup(io => io.Ask())
-            .Returns("/some-valid-ask");
+            .Setup(io => io.AskAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("/some-valid-ask");
         
         var instruction = new Instruction("/", "some-valid-ask", null, []);
 

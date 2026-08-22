@@ -25,6 +25,7 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private readonly ISender _sender;
     private readonly IPublisher _publisher;
+    private readonly CancellationToken _cancellationToken;
 
     public CliWorkflowRun(
         CliWorkflowRunState state,
@@ -33,7 +34,8 @@ public class CliWorkflowRun : ICliWorkflowRun
         IInstructionValidator instructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
         ISender sender,
-        IPublisher publisher)
+        IPublisher publisher,
+        CancellationToken cancellationToken = default)
     {
         State = state;
 
@@ -43,6 +45,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         _workflowCommandProvider = workflowCommandProvider;
         _sender = sender;
         _publisher = publisher;
+        _cancellationToken = cancellationToken;
     }
 
     public async ValueTask<Outcome[]> RespondToAsk(string? ask)
@@ -85,7 +88,7 @@ public class CliWorkflowRun : ICliWorkflowRun
     }
 
     public async ValueTask<Outcome[]> MoveToNext()
-    { 
+    {
         if (!IsValidMovePastAsk())
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidMovePastAsk);
@@ -97,15 +100,15 @@ public class CliWorkflowRun : ICliWorkflowRun
         var nextOutcome = AllPriorOutcomes()
             .OfType<NextCliCommandOutcome>()
             .Last();
-        
+
         return await ExecuteCommand(nextOutcome.NextCommand);
     }
-    
+
     private async Task<Outcome[]> ExecuteCommand(CliCommand command)
     {
         try
         {
-            var outcomes = await _sender.Send(command);
+            var outcomes = await _sender.Send(command, _cancellationToken);
             
             Outcome[] allOutcomes = [new RanCliCommandOutcome(command), ..outcomes];
             
