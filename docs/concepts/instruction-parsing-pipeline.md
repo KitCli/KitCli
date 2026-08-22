@@ -168,6 +168,8 @@ or the lookup, is just silently absent.
 - [workflow-run-state-machine.md](workflow-run-state-machine.md) — where
   `InstructionParser.Parse`'s output actually gets consumed, as the
   first step of `RespondToAsk`.
+- [command-registration.md](command-registration.md) — how the parsed
+  `Instruction.Name` is turned into a command factory.
 - [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
   why argument builder resolution and command/artefact factory resolution
   all follow the same first-match-wins rule.

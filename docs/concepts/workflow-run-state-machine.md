@@ -65,6 +65,17 @@ as it takes to reach a final outcome — `MoveToNext` is just the entry
 point for the steps in that arc that don't need fresh input to keep
 going.
 
+`CreateNewRun()` also creates a DI scope for the run it builds
+(`serviceScopeFactory.CreateScope()`) and resolves that run's
+`IInstructionParser`, `IInstructionValidator`, `ICliWorkflowCommandProvider`,
+`ISender`, and `IPublisher` from it, so a `Scoped`-registered service gets
+one instance per run rather than behaving like a singleton for the whole
+process. `CliWorkflowRun` holds that scope and disposes it in
+`UpdateStateWhenFinished()`, the same guard described below that fires
+`ChangeTo(Finished)` — see
+[0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md)
+for why a run, rather than a single command, is the scope boundary.
+
 ### The state machine itself
 
 The run's state (`CliWorkflowRunState.cs`) is the actual finite state
@@ -152,7 +163,8 @@ mean) to decide the next status:
 
 `UpdateStateWhenFinished` checks whether the run has *ever* reached one
 of the three "run over" statuses (`ReachedFinalOutcome`, `InvalidAsk`,
-`Exceptional`) and, if so, transitions to `Finished`.
+`Exceptional`) and, if so, transitions to `Finished` and disposes the
+run's DI scope.
 
 Because it checks the run's whole history rather than just the most
 recent change, it's safe to call from more than one place — both
@@ -244,5 +256,8 @@ itself, right where the failure that ends it actually happened.
 - [0001-mediatr-for-command-dispatch.md](../adr/0001-mediatr-for-command-dispatch.md) —
   why the resolved `CliCommand` is routed to its handler via MediatR
   rather than a hand-written type switch.
+- [0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md) —
+  why `CreateNewRun` creates a DI scope per run and `CliWorkflowRun`
+  disposes it in `UpdateStateWhenFinished`.
 - [cli-app-host.md](cli-app-host.md) — what drives `RespondToAsk`/
   `MoveToNext` from outside: the host loop that calls `NextRun()`.
