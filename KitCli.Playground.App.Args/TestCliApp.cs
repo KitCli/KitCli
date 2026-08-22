@@ -2,14 +2,10 @@ using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Workflow.Abstractions;
 
-namespace KitCli.Playground;
+namespace KitCli.Playground.App.Args;
 
-public class TestCliApp : CliApp
+public class TestCliApp(ICliWorkflow workflow, ICliIo io) : ArgsCliApp(workflow, io)
 {
-    public TestCliApp(ICliWorkflow workflow, ICliIo io) : base(workflow, io)
-    {
-    }
-
     protected override void OnSessionStart()
     {
         Io.Say("TestCliApp session started.");
@@ -35,7 +31,7 @@ public class TestCliApp : CliApp
 
         var outcomeNames = outcomes.Select(outcome => outcome.GetType().Name);
         Io.Say($"Run outcomes achieved: {string.Join(", ", outcomeNames)}");
-        
+
         Io.Say($"Run lasted {run.State.Stopwatch.ElapsedMilliseconds}ms");
     }
 

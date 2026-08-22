@@ -103,5 +103,5 @@ public class CliAppTests
         _mockCliWorkflow.Verify(w => w.NextRun(), Times.Once);
     }
 
-    private class TestCliApp(ICliWorkflow workflow, ICliIo io) : CliApp(workflow, io);
+    private class TestCliApp(ICliWorkflow workflow, ICliIo io) : TerminalCliApp(workflow, io);
 }

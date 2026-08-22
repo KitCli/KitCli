@@ -7,78 +7,28 @@ namespace KitCli;
 
 public abstract class CliApp
 {
-    private readonly ICliWorkflow _workflow;
+    protected readonly ICliWorkflow Workflow;
     protected readonly ICliIo Io;
 
     protected CliApp(ICliWorkflow workflow, ICliIo io)
     {
-        _workflow = workflow;
+        Workflow = workflow;
         Io = io;
     }
-
-    public async Task Run(List<IOutcomeIoWriter> outcomeIoWriters)
-    { 
-        OnSessionStart();
-        
-        Io.Pause();
-        
-        SetUpEventHandlers();
-        
-        while (_workflow.Status != CliWorkflowStatus.Stopped)
-        {
-            var run = _workflow.NextRun();
-            
-            OnRunCreated(run);
-
-            var outcomes = await ExecuteRunOperation(run);
-
-            WriteOutcomes(outcomes, outcomeIoWriters);
-            
-            OnRunComplete(run, outcomes);
-            
-            Io.Pause();
-        }
-        
-        OnSessionEnd(_workflow.Runs);
-    }
     
-    private void SetUpEventHandlers()
+    protected void SetUpEventHandlers()
     {
         Io.OnCancel(() =>
         {
-            _workflow.Stop();
+            Workflow.Stop();
 
-            OnSessionEnd(_workflow.Runs);
+            OnSessionEnd(Workflow.Runs);
 
             Environment.Exit(exitCode: 0);
         });
     }
 
-    private ValueTask<Outcome[]> ExecuteRunOperation(ICliWorkflowRun run)
-    {
-        var shouldMovePastAsk = run
-            .State
-            .WasChangedTo(ClIWorkflowRunStateStatus.MovePastAsk);
-
-        if (shouldMovePastAsk)
-        {
-            var movePastAskTask = run.MoveToNext();
-
-            OnMovingPastAsk(run);
-
-            return movePastAskTask;
-        }
-
-        var ask = Io.Ask();
-
-        var runTask =  run.RespondToAsk(ask);
-
-        OnRunStarted(run, ask);
-
-        return runTask;
-    }
-
-    private void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
+    protected void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
     {
         foreach (var outcome in outcomes)
         {

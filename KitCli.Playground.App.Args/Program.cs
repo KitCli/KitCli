@@ -1,9 +1,9 @@
-﻿using KitCli;
-using KitCli.Playground;
+using KitCli;
+using KitCli.Playground.App.Args;
 using KitCli.Playground.Scenarios;
 
 var aoo = new CliAppBuilder()
-    .WithCli<TestCliApp>()
+    .WithApp<TestCliApp>()
     .WithRegistry<PlaygroundScenarioRegistry>();
-    
-await aoo.Run();
+
+await aoo.Run(args);

@@ -14,14 +14,14 @@ public class CliAppBuilder
     private ConfigurationBuilder? _configurationBuilder;
     private IConfigurationRoot? _configuration;
     
-    public CliAppBuilder WithBasicCli()
+    public CliAppBuilder WithBasicTerminalApp()
     {
-        _services.AddCli<BasicCliApp>();
+        _services.AddCli<BasicTerminalCliApp>();
         
         return this;
     }
     
-    public CliAppBuilder WithCli<TCliApp>() where TCliApp : CliApp
+    public CliAppBuilder WithApp<TCliApp>() where TCliApp : CliApp
     {
         _services.AddCli<TCliApp>();
         
@@ -97,19 +97,39 @@ public class CliAppBuilder
         return this;
     }
 
-    public async Task Run()
+    public Task Run(string[]? args = null)
     {
         EnsureInstructionSettingsRegistered();
-        
+
         var serviceProvider = _services.BuildServiceProvider();
-        
+
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
-        
+
         var outcomeIoWriters = serviceProvider
             .GetServices<IOutcomeIoWriter>()
             .ToList();
-        
-        await cliApp.Run(outcomeIoWriters);
+
+        var cliAppName = cliApp.GetType().Name;
+        var argsProvided = args is { Length: > 0 };
+
+        if (cliApp is ArgsCliApp && !argsProvided)
+        {
+            var noArgsMessage = $"{cliAppName} is an ArgsCliApp and requires at least one argument to run — none were provided.";
+            throw new ArgumentException(noArgsMessage);
+        }
+
+        if (cliApp is ArgsCliApp argsCliAppToRun && argsProvided)
+        {
+            return argsCliAppToRun.Run(outcomeIoWriters, args!);
+        }
+
+        if (cliApp is TerminalCliApp terminalCliApp)
+        {
+            return terminalCliApp.Run(outcomeIoWriters);
+        }
+
+        var unknownAppMessage = $"{cliAppName} is neither an ArgsCliApp nor a TerminalCliApp — unable to determine how to run it.";
+        throw new ArgumentException(unknownAppMessage);
     }
     
     private void SetUpConfigurationBuilder()

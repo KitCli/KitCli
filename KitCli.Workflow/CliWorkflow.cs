@@ -37,7 +37,7 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
     {
         Status = CliWorkflowStatus.Stopped;
     }
-    
+
     private ICliWorkflowRun CreateNewRun()
     {
         var state = new CliWorkflowRunState();
