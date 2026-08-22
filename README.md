@@ -56,7 +56,13 @@ declared anywhere: `HelloCliCommand` → `hello` / `h`.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — conventions, branching, how to
   propose a change.
 - [`docs/user-guides/`](docs/user-guides/) — how to use a pattern in
-  practice, without needing to know the machinery underneath.
+  practice, without needing to know the machinery underneath:
+  [writing a basic command](docs/user-guides/writing-a-basic-command.md),
+  [reading command arguments](docs/user-guides/reading-command-arguments.md),
+  [exiting the app](docs/user-guides/exiting-the-app.md),
+  [creating a terminal app](docs/user-guides/creating-a-terminal-app.md),
+  [creating an args app](docs/user-guides/creating-an-args-app.md),
+  and [creating a registry](docs/user-guides/creating-a-registry.md).
 - [`docs/concepts/`](docs/concepts/) — how each subsystem actually
   works today: [instruction parsing](docs/concepts/instruction-parsing-pipeline.md),
   the [workflow state machine](docs/concepts/workflow-run-state-machine.md),
