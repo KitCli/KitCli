@@ -80,7 +80,8 @@ command variants at runtime based on prior artefacts). `CliWorkflowCommandProvid
    (`Attach`), then taking the **first** one whose `CanCreateWhen()`
    returns `true` — the same first-match-wins, registration-order-decides
    pattern used for instruction argument builders (see
-   [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md)).
+   [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md)) and
+   `IOutcomeIoWriter` resolution (see [cli-app-host.md](cli-app-host.md)).
    No candidates matching throws `NoCommandGeneratorException` again.
 
 ## Constraints & tradeoffs
@@ -149,3 +150,8 @@ scan-and-test, not keyed lookup.
 - [0003-reflection-based-automatic-registration.md](../adr/0003-reflection-based-automatic-registration.md) —
   why command factories and MediatR handlers are discovered by assembly
   scan rather than registered by hand.
+- [cli-app-host.md](cli-app-host.md) — `IOutcomeIoWriter` resolution uses
+  the same first-match-wins pattern, one level further out.
+- [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
+  names the pattern behind `CanCreateWhen`'s resolution and its three
+  other instances across KitCli.

@@ -170,3 +170,6 @@ or the lookup, is just silently absent.
   first step of `RespondToAsk`.
 - [command-registration.md](command-registration.md) — how the parsed
   `Instruction.Name` is turned into a command factory.
+- [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
+  why argument builder resolution and command/artefact factory resolution
+  all follow the same first-match-wins rule.

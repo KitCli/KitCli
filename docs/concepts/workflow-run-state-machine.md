@@ -259,3 +259,5 @@ itself, right where the failure that ends it actually happened.
 - [0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md) —
   why `CreateNewRun` creates a DI scope per run and `CliWorkflowRun`
   disposes it in `UpdateStateWhenFinished`.
+- [cli-app-host.md](cli-app-host.md) — what drives `RespondToAsk`/
+  `MoveToNext` from outside: the host loop that calls `NextRun()`.
