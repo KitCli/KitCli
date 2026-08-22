@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [1.0.11] - 2026-08-22
+
 ### Added
 
 - `ArgsCliApp` — a `CliApp` base for running a single command from process
