@@ -41,7 +41,7 @@ public class HelloRegistry : ICliAppRegistry
 ```csharp
 // Program.cs
 var app = new CliAppBuilder()
-    .WithBasicCli()
+    .WithBasicTerminalApp()
     .WithRegistry<HelloRegistry>();
 
 await app.Run();
