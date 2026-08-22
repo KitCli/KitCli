@@ -50,12 +50,8 @@ public class CliWorkflowRun : ICliWorkflowRun
         }
         
         var instruction = _instructionParser.Parse(ask!);
-        
-        if (_instructionValidator.IsValid(instruction))
-        {
-            State.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);
-        }
-        else
+
+        if (!_instructionValidator.IsValid(instruction))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
             return [new NothingOutcome()];
@@ -70,11 +66,17 @@ public class CliWorkflowRun : ICliWorkflowRun
         }
         catch (NoCommandGeneratorException)
         {
-            State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            UpdateStateWhenFinished();
+            if (!State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedReusableOutcome))
+            {
+                State.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);
+                State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
+                UpdateStateWhenFinished();
+            }
+
             return [new NothingOutcome()];
         }
 
+        State.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);
         return await ExecuteCommand(command);
     }
 
