@@ -1,4 +1,4 @@
-# 0004. First-match-wins, registration-order-decides resolution for ambiguous candidates
+# 0004. Resolve ambiguous candidates by first match in registration order
 
 Status: Accepted (retroactive — reconstructed from current source, not
 original notes)

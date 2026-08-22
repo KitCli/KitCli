@@ -1,4 +1,4 @@
-# 0003. Reflection-based automatic registration over manual/keyed DI wiring
+# 0003. Discover commands, factories, and handlers by reflection over manual DI wiring
 
 Status: Accepted (retroactive — reconstructed from KitCli and SpendfulnessCli
 history, not original notes)
