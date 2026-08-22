@@ -57,6 +57,12 @@ declared anywhere: `HelloCliCommand` → `hello` / `h`.
   propose a change.
 - [`docs/user-guides/`](docs/user-guides/) — how to use a pattern in
   practice, without needing to know the machinery underneath:
+  [writing a basic command](docs/user-guides/writing-a-basic-command.md),
+  [reading command arguments](docs/user-guides/reading-command-arguments.md),
+  [exiting the app](docs/user-guides/exiting-the-app.md),
+  [creating a terminal app](docs/user-guides/creating-a-terminal-app.md),
+  [creating an args app](docs/user-guides/creating-an-args-app.md),
+  [creating a registry](docs/user-guides/creating-a-registry.md),
   [chaining commands](docs/user-guides/chaining-commands.md),
   [remembering state across asks](docs/user-guides/reusable-outcomes-and-the-workflow-run.md),
   and [command reactions](docs/user-guides/command-reactions.md).
