@@ -6,6 +6,7 @@ on:
 permissions:
   contents: write
   id-token: write # enable GitHub OIDC token issuance, exchanged for a short-lived NuGet API key below
+  pull-requests: write # open the CHANGELOG.md PR below, since main is a protected branch
 
 jobs:
   publish:
@@ -129,14 +130,9 @@ jobs:
             echo "GHOUTPUTEOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Commit CHANGELOG.md
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "chore(release): cut CHANGELOG.md for v${{ env.kitcli_version }}"
-          git push origin HEAD:main
-
+      # Tags the commit that was actually just published (before the CHANGELOG.md
+      # edit below is committed anywhere) — the release corresponds to the code
+      # that produced the packages, not to whatever lands in the changelog PR.
       - name: Tag release
         run: |
           git tag "v${{ env.kitcli_version }}"
@@ -149,3 +145,29 @@ jobs:
           gh release create "v${{ env.kitcli_version }}" \
             --title "v${{ env.kitcli_version }}" \
             --notes "${{ steps.changelog.outputs.notes }}"
+
+      # main requires status checks to pass before any push lands, including a
+      # direct push from this workflow's own bot commit — so the CHANGELOG.md
+      # update goes through a normal PR (which triggers those checks) instead of
+      # `git push origin HEAD:main`, and is left to merge on its own once they pass.
+      - name: Open CHANGELOG.md PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          branch="chore/changelog-v${{ env.kitcli_version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add CHANGELOG.md
+          git commit -m "chore(release): cut CHANGELOG.md for v${{ env.kitcli_version }}"
+          git push origin "$branch"
+
+          pr_url=$(gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "chore(release): cut CHANGELOG.md for v${{ env.kitcli_version }}" \
+            --body "Automated changelog update for v${{ env.kitcli_version }}, opened as a PR because \`main\` requires status checks that a direct push from this workflow can't satisfy.")
+
+          gh pr merge --auto --squash "$pr_url"
