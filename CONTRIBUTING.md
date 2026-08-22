@@ -111,6 +111,30 @@ flags it as wrong.
 inaccurate, update it in the same PR — don't leave the drift for someone
 else to notice later.
 
+## User guides
+
+A [user guide](docs/user-guides/) shows how to accomplish a task with a
+consumer-facing pattern — black-box, no internal machinery. It's the
+opposite of a concept doc's angle on the same subsystem: a concept doc
+explains *why* the machinery works the way it does (reflection-based
+registration, "last match wins," the outcome→artefact pipeline); a user
+guide shows *how* to use it without needing to know any of that. If a
+user guide finds itself explaining an internal reason for something,
+that's a sign it should link to the concept doc instead of restating it.
+
+**Write one when** a consumer-facing pattern exists that a new user
+would reasonably reach for without caring how it's implemented —
+artefacts, command reactions, continuous input, workflow commands.
+**Skip it for** anything that's purely internal machinery with no
+direct consumer-facing API — that's what a concept doc is for.
+
+Copy [`docs/user-guides/0000-template.md`](docs/user-guides/0000-template.md).
+Named by topic like concept docs (not numbered like ADRs). Verify every
+code sample against current source before writing it down.
+
+**Keep them current.** If your change makes an existing user guide
+inaccurate, update it in the same PR.
+
 ## Investigations
 
 An investigation ([`docs/investigations/`](docs/investigations/)) is what
