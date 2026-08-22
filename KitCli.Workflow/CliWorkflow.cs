@@ -14,8 +14,11 @@ namespace KitCli.Workflow;
 /// </summary>
 public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflow
 {
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
     public List<ICliWorkflowRun> Runs { get; } = [];
     public CliWorkflowStatus Status { get; set; } = CliWorkflowStatus.Started;
+    public CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
 
     /// <summary>
@@ -36,6 +39,12 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
     public void Stop()
     {
         Status = CliWorkflowStatus.Stopped;
+    }
+
+    public void InterruptCurrentRun()
+    {
+        _cancellationTokenSource.Cancel();
+        Stop();
     }
 
     private ICliWorkflowRun CreateNewRun()
@@ -71,7 +80,8 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
             instructionValidator,
             commandProvider,
             sender,
-            publisher);
+            publisher,
+            CancellationToken);
         
         Runs.Add(run);
 

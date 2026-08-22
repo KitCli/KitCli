@@ -28,3 +28,11 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - `CliApp`/`CliAppBuilder` now create a DI scope per workflow run, so
   `Scoped`-registered services get a fresh instance per command instead
   of behaving like singletons for the process lifetime. (#71)
+- **Breaking:** Ctrl+C no longer calls `Environment.Exit` from a background
+  thread mid-run, which could dispose a run's DI scope out from under it
+  and skip pending `finally`/`Dispose()` cleanup. Cancellation is now
+  cooperative: `ICliIo.Ask()` is now `AskAsync(CancellationToken)`, and
+  `ICliWorkflow` gained `CancellationToken` and `InterruptCurrentRun()`, so
+  an in-flight run can unwind through its own `catch`/`finally` instead of
+  being killed out from under it. See
+  [0006-cooperative-cancellation.md](docs/adr/0006-cooperative-cancellation.md). (#74)

@@ -22,22 +22,22 @@ public abstract class TerminalCliApp : CliApp
         while (Workflow.Status != CliWorkflowStatus.Stopped)
         {
             var run = Workflow.NextRun();
-            
+
             OnRunCreated(run);
 
             var outcomes = await ExecuteRunOperation(run);
 
             WriteOutcomes(outcomes, outcomeIoWriters);
-            
+
             OnRunComplete(run, outcomes);
-            
+
             Io.Pause();
         }
 
         OnSessionEnd(Workflow.Runs);
     }
-    
-    private ValueTask<Outcome[]> ExecuteRunOperation(ICliWorkflowRun run)
+
+    private async ValueTask<Outcome[]> ExecuteRunOperation(ICliWorkflowRun run)
     {
         var shouldMovePastAsk = run
             .State
@@ -49,15 +49,15 @@ public abstract class TerminalCliApp : CliApp
 
             OnMovingPastAsk(run);
 
-            return movePastAskTask;
+            return await movePastAskTask;
         }
 
-        var ask = Io.Ask();
+        var ask = await Io.AskAsync(Workflow.CancellationToken);
 
-        var runTask =  run.RespondToAsk(ask);
+        var runTask = run.RespondToAsk(ask);
 
         OnRunStarted(run, ask);
 
-        return runTask;
+        return await runTask;
     }
 }

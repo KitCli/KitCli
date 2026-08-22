@@ -181,8 +181,38 @@ public class CliWorkflowTests
     {
         // Act
         _classUnderTest.Stop();
-        
+
         // Assert
         Assert.That(_classUnderTest.Status, Is.EqualTo(CliWorkflowStatus.Stopped));
+    }
+
+    [Test]
+    public void GivenRunning_WhenInterruptCurrentRun_ThenWorkflowStopsRunning()
+    {
+        // Act
+        _classUnderTest.InterruptCurrentRun();
+
+        // Assert
+        Assert.That(_classUnderTest.Status, Is.EqualTo(CliWorkflowStatus.Stopped));
+    }
+
+    [Test]
+    public void GivenRunning_WhenInterruptCurrentRun_ThenCancellationTokenIsCancelled()
+    {
+        // Act
+        _classUnderTest.InterruptCurrentRun();
+
+        // Assert
+        Assert.That(_classUnderTest.CancellationToken.IsCancellationRequested, Is.True);
+    }
+
+    [Test]
+    public void GivenRunning_WhenStop_ThenCancellationTokenIsNotCancelled()
+    {
+        // Act
+        _classUnderTest.Stop();
+
+        // Assert
+        Assert.That(_classUnderTest.CancellationToken.IsCancellationRequested, Is.False);
     }
 }

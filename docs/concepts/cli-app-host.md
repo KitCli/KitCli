@@ -59,7 +59,19 @@ while (Workflow.Status != CliWorkflowStatus.Stopped)
     OnRunComplete(run, outcomes);
     Io.Pause();
 }
+
+OnSessionEnd(Workflow.Runs);
 ```
+
+The loop condition only ever checks `Status`, not `CancellationToken`
+directly — `Workflow.InterruptCurrentRun()` (what a Ctrl+C ends up calling;
+see the `ICliIo` section below) flips `Status` to `Stopped` as part of
+requesting cancellation, so `Status` alone is always an accurate,
+immediately up to date answer to "should the loop keep going," whether the
+session ended via `/exit` or via Ctrl+C. See
+[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
+for why that relationship is one-directional — cancelling always stops, but
+stopping never cancels.
 
 `Workflow.NextRun()` (see
 [workflow-run-state-machine.md](workflow-run-state-machine.md)) hands back
@@ -105,6 +117,11 @@ Two things worth calling out:
   `MoveToNext()` to continue), `ArgsCliApp` doesn't drive that — it stops
   after the first step. One-shot invocation currently means exactly one
   command, not an automated multi-turn sequence.
+- `ArgsCliApp` doesn't pass a `CancellationToken` into `RespondToAsk` — it
+  doesn't need to. `Workflow.NextRun()` already handed the run its
+  cancellation token at construction (see the `ICliIo` section below), so
+  cancelling mid-command reaches this run the same way it reaches
+  `TerminalCliApp`'s, with nothing extra for `ArgsCliApp` to wire up.
 
 `CliAppBuilder.Run(string[]? args)` decides which subclass's `Run` to call
 based on the concrete `CliApp` resolved from DI and whether `args` were
@@ -116,10 +133,13 @@ opaque failure).
 
 `TerminalCliApp`'s private `ExecuteRunOperation` checks whether the run it was just handed already has
 a `MovePastAsk` state change recorded. If so, it calls `run.MoveToNext()`
-directly — no `Io.Ask()` call, because the run has queued-up work from a
+directly — no `Io.AskAsync()` call, because the run has queued-up work from a
 prior outcome (e.g. "show the next page") and doesn't need fresh input. If
-not, it calls `Io.Ask()` for a new ask and passes that into
-`run.RespondToAsk(ask)`.
+not, it calls `Io.AskAsync(Workflow.CancellationToken)` for a new ask and
+passes the result into `run.RespondToAsk(ask)`. Neither `MoveToNext` nor
+`RespondToAsk` takes a `CancellationToken` parameter — the run already has
+one, from when `CliWorkflow` constructed it (see the `ICliIo` section
+below).
 
 `OnRunStarted`/`OnMovingPastAsk` fire *after* the run's task has been
 started but *before* it's awaited — same reasoning as
@@ -158,7 +178,7 @@ unlike `BoolInstructionArgumentBuilder`'s role for arguments.
 ```csharp
 public interface ICliIo
 {
-    string? Ask();
+    Task<string?> AskAsync(CancellationToken cancellationToken);
     void Pause();
     void Say(string something);
     void SetTitle(string title);
@@ -171,8 +191,27 @@ again after every iteration — giving a host implementation a place to, e.g.,
 wait for a keypress between commands (`ArgsCliApp.Run` calls it only once,
 since there's no loop to pace). `SetUpEventHandlers` — defined on the shared
 `CliApp` base and called by both subclasses — wires `Io.OnCancel` once, at
-the top of `Run`, to stop the workflow, fire `OnSessionEnd`, and exit the
-process — the only place `CliApp` calls `Environment.Exit` itself.
+the top of `Run`, to `Workflow.InterruptCurrentRun`. Nothing else happens on
+that cancel-thread callback: no workflow mutation beyond that one call, no
+`OnSessionEnd`, no `Environment.Exit`. `CliIo`'s `Console.CancelKeyPress`
+handler sets `e.Cancel = true` so .NET's own default abrupt termination
+doesn't race the app's own shutdown.
+
+The cancellation token itself lives on `ICliWorkflow`, not `CliApp` — see
+[workflow-run-state-machine.md](workflow-run-state-machine.md) for how
+`CliWorkflow` owns and hands it to each `CliWorkflowRun` at construction,
+the same way it hands over each run's `IServiceScope`. `CliApp` only ever
+reads `Workflow.CancellationToken` directly in one place: passing it into
+`Io.AskAsync`, since sourcing an ask is the one cancellable operation that
+happens outside any run. See
+[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
+for the full reasoning, including why this replaced an earlier
+`Environment.Exit`-based shutdown.
+
+`CliIo.AskAsync` can't actually cancel a blocked `Console.ReadLine()` — it
+races the read against the cancellation token and returns `null` if
+cancellation wins, abandoning the still-blocked read on a background thread
+rather than waiting on it.
 
 ### Lifecycle hooks
 
@@ -198,10 +237,10 @@ whole loop instead of using the hooks, but doing so takes on reimplementing
 `NextRun`/`MovePastAsk` routing and outcome-writing correctly — the hooks
 exist so that's rarely necessary.
 
-**`Environment.Exit` inside `OnCancel`.** Cancelling a session bypasses the
-loop's own `while` condition entirely and terminates the process directly.
-A host that wants a graceful non-process-exiting cancellation path (e.g.
-returning control to an embedding application) isn't served by this today.
+**A command handler that ignores its `CancellationToken` still runs to
+completion on Ctrl+C.** Cooperative cancellation only interrupts handlers
+that actually check the token `ISender.Send` passes them — see
+[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md).
 
 **No hook can prevent or redirect a transition.** All six are `void`; none
 receive a way to signal "don't continue" or "run something else instead."
@@ -240,4 +279,4 @@ this the first iteration."
 - [command-registration.md](command-registration.md) — the same
   first-match-wins resolution pattern used here for `IOutcomeIoWriter`.
 - [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) —
-  where `Io.Ask()`'s return value ends up being parsed.
+  where `Io.AskAsync()`'s return value ends up being parsed.

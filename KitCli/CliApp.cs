@@ -15,17 +15,10 @@ public abstract class CliApp
         Workflow = workflow;
         Io = io;
     }
-    
+
     protected void SetUpEventHandlers()
     {
-        Io.OnCancel(() =>
-        {
-            Workflow.Stop();
-
-            OnSessionEnd(Workflow.Runs);
-
-            Environment.Exit(exitCode: 0);
-        });
+        Io.OnCancel(Workflow.InterruptCurrentRun);
     }
 
     protected void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
