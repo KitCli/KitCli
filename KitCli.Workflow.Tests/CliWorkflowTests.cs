@@ -7,6 +7,7 @@ using KitCli.Workflow.Commands;
 using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 
@@ -18,13 +19,25 @@ public class CliWorkflowTests
     private record TestOutcome() : Outcome(OutcomeKind.Reusable);
     
     private Mock<IServiceProvider> _serviceProviderMock;
+    private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
     private CliWorkflow _classUnderTest;
 
     [SetUp]
     public void SetUp()
     {
         _serviceProviderMock = new Mock<IServiceProvider>();
-        _classUnderTest = new CliWorkflow(_serviceProviderMock.Object);
+
+        var serviceScopeMock = new Mock<IServiceScope>();
+        serviceScopeMock
+            .SetupGet(scope => scope.ServiceProvider)
+            .Returns(_serviceProviderMock.Object);
+
+        _serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
+        _serviceScopeFactoryMock
+            .Setup(factory => factory.CreateScope())
+            .Returns(serviceScopeMock.Object);
+
+        _classUnderTest = new CliWorkflow(_serviceScopeFactoryMock.Object);
     }
 
     [Test]
@@ -97,6 +110,7 @@ public class CliWorkflowTests
         
         var reusableRun = new CliWorkflowRun(
             reusableRunState,
+            new Mock<IServiceScope>().Object,
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
@@ -146,6 +160,7 @@ public class CliWorkflowTests
         
         var reusableRun = new CliWorkflowRun(
             reusableRunState,
+            new Mock<IServiceScope>().Object,
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,

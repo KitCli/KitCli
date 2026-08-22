@@ -12,6 +12,7 @@ using KitCli.Workflow.Commands;
 using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 
@@ -26,28 +27,31 @@ public class CliWorkflowRunTests
     {
         protected override IEnumerable<TestAggregate> DoAggregation(IEnumerable<TestAggregate> source) => new List<TestAggregate>(source);
     }
-    
+
     private CliWorkflowRunState _cliWorkflowRunState;
+    private Mock<IServiceScope> _scope;
     private Mock<IInstructionParser> _cliInstructionParser;
     private Mock<IInstructionValidator> _cliInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _cliWorkflowCommandProvider;
     private Mock<ISender> _sender;
     private Mock<IPublisher> _publisher;
     private CliWorkflowRun _classUnderTest;
-    
+
     [SetUp]
     public void SetUp()
     {
         // Arrange
         _cliWorkflowRunState = new CliWorkflowRunState();
+        _scope = new Mock<IServiceScope>();
         _cliInstructionParser = new Mock<IInstructionParser>();
         _cliInstructionValidator = new Mock<IInstructionValidator>();
         _cliWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
         _sender = new Mock<ISender>();
         _publisher = new Mock<IPublisher>();
-        
+
         _classUnderTest = new CliWorkflowRun(
             _cliWorkflowRunState,
+            _scope.Object,
             _cliInstructionParser.Object,
             _cliInstructionValidator.Object,
             _cliWorkflowCommandProvider.Object,
