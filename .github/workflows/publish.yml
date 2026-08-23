@@ -14,6 +14,35 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # workflow_dispatch lets you pick any branch/tag to run against — this
+      # rejects anything but main so a stray branch can't be published just
+      # because it happens to build and test cleanly on its own.
+      - name: Require ref = main
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "::error::Publish must be run from main (got ${{ github.ref }}). Re-run this workflow with main selected as the branch."
+            exit 1
+          fi
+
+      # The Test step below re-runs the test suite, but that only proves the
+      # code passes right now — it doesn't prove this exact commit went
+      # through the real CI pipeline (ci.yml's build/test jobs) and passed.
+      # Require that first, so publish can't run ahead of or around CI.
+      - name: Require CI to have passed for this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          conclusion=$(gh run list \
+            --workflow ci.yml \
+            --commit "${{ github.sha }}" \
+            --json conclusion \
+            --jq '.[0].conclusion // "not_found"')
+          if [ "$conclusion" != "success" ]; then
+            echo "::error::CI (ci.yml) has not passed for commit ${{ github.sha }} (status: $conclusion). Publish only runs once CI has succeeded on this exact commit — wait for it to finish, or push a new commit and let CI run first."
+            exit 1
+          fi
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
