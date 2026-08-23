@@ -90,6 +90,16 @@ public static class CommandServiceCollectionExtensions
                     typeof(ICliCommandFactory),
                     shorthandCommandName,
                     factoryImplementationType);
+
+            var commandAliases = commandImplementationType.GetCliCommandAliasNames();
+            foreach (var commandAlias in commandAliases)
+            {
+                services
+                    .AddKeyedSingleton(
+                        typeof(ICliCommandFactory),
+                        commandAlias,
+                        factoryImplementationType);
+            }
         }
     }
 }

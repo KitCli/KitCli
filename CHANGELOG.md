@@ -6,6 +6,13 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- `[CliCommandAlias("...")]` — declare extra instruction names a `CliCommand`
+  responds to, alongside its mechanically-derived full and shorthand
+  names, without renaming the type. Repeatable for more than one alias.
+  See [0007-cli-command-alias-attribute.md](docs/adr/0007-cli-command-alias-attribute.md).
+
 ## [1.0.11] - 2026-08-22
 
 ### Added

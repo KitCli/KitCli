@@ -43,6 +43,20 @@ Both `spare-money` and `sm` resolve to the same command — there's no way
 to opt out of the shorthand or pick a different one; it's mechanically
 derived from the type name every time.
 
+A command can additionally opt in to extra names by applying
+`[CliCommandAlias("...")]` (`CliCommandAliasAttribute.cs`) to its type,
+one attribute per alias:
+
+```csharp
+[CliCommandAlias("gimme")]
+[CliCommandAlias("give-me-cash")]
+public record SpareMoneyCommand : CliCommand;
+```
+
+`spare-money`, `sm`, `gimme`, and `give-me-cash` all then resolve to the
+same command. Unlike the full and shorthand names, aliases are opt-in and
+author-chosen — nothing about them is derived from the type name.
+
 ### Registering a factory per command type
 
 `AddCommandFactories` (`CommandServiceCollectionExtensions.cs`) reflection-scans
@@ -50,8 +64,9 @@ the given assembly for every `CliCommand` subtype and every
 `CliCommandFactory<>` subtype, then matches each command type to the
 factory whose generic argument is that type:
 
-- **Exactly one match** → that factory is registered, keyed under both the
-  full and shorthand instruction names, via `AddKeyedSingleton`.
+- **Exactly one match** → that factory is registered, keyed under the
+  full and shorthand instruction names plus any `[CliCommandAlias]`-declared
+  names, via `AddKeyedSingleton`.
 - **More than one match** → registration itself throws
   `ArgumentException("Multiple factories found for command type '...'")`
   — a command type can have at most one dedicated factory.
@@ -112,9 +127,10 @@ or exercise it at runtime.
 
 **What if I want a command name that doesn't fit the PascalCase-to-dashed
 convention?**
-There's no supported override today — the name is entirely mechanical, off
-the type name. Renaming the type is the only way to change the instruction
-name a command responds to.
+The full and shorthand names are still entirely mechanical, off the type
+name — renaming the type is the only way to change those. But you can add
+any additional name via `[CliCommandAlias("...")]` without renaming the
+type; see above.
 
 **Why register both the full name and the shorthand, rather than pick one?**
 So a user (or another command) can always use either — a longer, more
@@ -155,3 +171,7 @@ scan-and-test, not keyed lookup.
 - [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
   names the pattern behind `CanCreateWhen`'s resolution and its three
   other instances across KitCli.
+- [0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md) — why
+  extra instruction names are declared via a repeatable `[CliCommandAlias]`
+  attribute rather than an override argument or a separate registration
+  list.
