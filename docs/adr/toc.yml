@@ -10,3 +10,5 @@
   href: 0005-args-driven-cli-app.md
 - name: "0006. Drive Ctrl+C shutdown with a CancellationToken, not Environment.Exit"
   href: 0006-cooperative-cancellation.md
+- name: "0007. Add extra instruction names via a [CliCommandAlias] attribute"
+  href: 0007-cli-command-alias-attribute.md

@@ -80,7 +80,7 @@ public static class CommandServiceCollectionExtensions
             
             var commandName = specificCommandName.ToLowerSplitString(InstructionConstants.DefaultCommandNameSeparator);
             var shorthandCommandName = specificCommandName.ToLowerTitleCharacters();
-        
+
             services
                 .AddKeyedSingleton(
                     typeof(ICliCommandFactory),
@@ -90,6 +90,18 @@ public static class CommandServiceCollectionExtensions
                     typeof(ICliCommandFactory),
                     shorthandCommandName,
                     factoryImplementationType);
+
+            var aliases = commandImplementationType
+                .GetCustomAttributes<CliCommandAliasAttribute>(inherit: false)
+                .Select(alias => alias.Name);
+
+            foreach (var alias in aliases)
+            {
+                services.AddKeyedSingleton(
+                    typeof(ICliCommandFactory),
+                    alias,
+                    factoryImplementationType);
+            }
         }
     }
 }
