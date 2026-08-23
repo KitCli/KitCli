@@ -65,7 +65,10 @@ declared anywhere: `HelloCliCommand` → `hello` / `h`.
   [creating a registry](docs/user-guides/creating-a-registry.md),
   [chaining commands](docs/user-guides/chaining-commands.md),
   [remembering state across asks](docs/user-guides/reusable-outcomes-and-the-workflow-run.md),
-  and [command reactions](docs/user-guides/command-reactions.md).
+  [command reactions](docs/user-guides/command-reactions.md),
+  [showing a paged table](docs/user-guides/showing-a-paged-table.md),
+  [remembering your own state](docs/user-guides/remembering-your-own-state.md),
+  and [gating a command with CanCreateWhen](docs/user-guides/gating-a-command-with-cancreatewhen.md).
 - [`docs/concepts/`](docs/concepts/) — how each subsystem actually
   works today: [instruction parsing](docs/concepts/instruction-parsing-pipeline.md),
   the [workflow state machine](docs/concepts/workflow-run-state-machine.md),
