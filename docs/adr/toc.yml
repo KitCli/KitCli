@@ -12,3 +12,5 @@
   href: 0006-cooperative-cancellation.md
 - name: "0007. Add extra instruction names via a [CliCommandAlias] attribute"
   href: 0007-cli-command-alias-attribute.md
+- name: "0008. Suggest declared next commands via a [CliNextCommandIs] attribute"
+  href: 0008-suggest-next-commands-attribute.md

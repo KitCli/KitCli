@@ -12,6 +12,12 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   responds to, alongside its mechanically-derived full and shorthand
   names, without renaming the type. Repeatable for more than one alias.
   See [0007-cli-command-alias-attribute.md](docs/adr/0007-cli-command-alias-attribute.md).
+- `[CliNextCommandIs("...", "...")]` — declare the instruction name(s) and
+  description(s) a `CliCommand` expects next once it reaches a reusable
+  outcome. When a later ask doesn't resolve to any command, the workflow
+  run now suggests these instead of returning silently. Repeatable for more
+  than one next command.
+  See [0008-suggest-next-commands-attribute.md](docs/adr/0008-suggest-next-commands-attribute.md).
 
 ### Fixed
 

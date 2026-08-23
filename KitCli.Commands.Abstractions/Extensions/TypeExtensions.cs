@@ -71,5 +71,15 @@ public static class TypeExtensions
             => type
                 .GetCustomAttributes<CliCommandAliasAttribute>(inherit: false)
                 .Select(alias => alias.Name);
+
+        /// <summary>
+        /// Gets every next-command name and description declared on this type via
+        /// <see cref="CliNextCommandIsAttribute"/>.
+        /// </summary>
+        /// <returns>The declared next-command name/description pairs, in declaration order.</returns>
+        public IEnumerable<(string Name, string Description)> GetCliNextCommandNames()
+            => type
+                .GetCustomAttributes<CliNextCommandIsAttribute>(inherit: false)
+                .Select(next => (next.Name, next.Description));
     }
 }

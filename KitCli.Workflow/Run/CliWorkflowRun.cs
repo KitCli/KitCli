@@ -1,9 +1,11 @@
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Exceptions;
+using KitCli.Commands.Abstractions.Extensions;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
+using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Abstractions.Validators;
 using KitCli.Instructions.Parsers;
 using KitCli.Workflow.Abstractions;
@@ -11,6 +13,7 @@ using KitCli.Workflow.Commands;
 using KitCli.Workflow.Run.State;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KitCli.Workflow.Run;
 
@@ -28,6 +31,7 @@ public class CliWorkflowRun : ICliWorkflowRun
     private readonly IInstructionParser _instructionParser;
     private readonly IInstructionValidator _instructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
+    private readonly InstructionSettings _instructionSettings;
 
     private readonly ISender _sender;
     private readonly IPublisher _publisher;
@@ -42,6 +46,9 @@ public class CliWorkflowRun : ICliWorkflowRun
     /// <param name="instructionParser">Parses raw ask strings into instructions.</param>
     /// <param name="instructionValidator">Validates a parsed instruction before a command is resolved for it.</param>
     /// <param name="workflowCommandProvider">Resolves the command to execute for a valid instruction.</param>
+    /// <param name="instructionSettings">
+    /// The configured instruction settings, used to prefix any suggested next-command names.
+    /// </param>
     /// <param name="sender">Dispatches resolved commands to their MediatR handlers.</param>
     /// <param name="publisher">Publishes reaction outcomes raised while executing a command.</param>
     /// <param name="cancellationToken">
@@ -53,6 +60,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         IInstructionParser instructionParser,
         IInstructionValidator instructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
+        IOptions<InstructionSettings> instructionSettings,
         ISender sender,
         IPublisher publisher,
         CancellationToken cancellationToken = default)
@@ -63,6 +71,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         _instructionParser = instructionParser;
         _instructionValidator = instructionValidator;
         _workflowCommandProvider = workflowCommandProvider;
+        _instructionSettings = instructionSettings.Value;
         _sender = sender;
         _publisher = publisher;
         _cancellationToken = cancellationToken;
@@ -86,7 +95,7 @@ public class CliWorkflowRun : ICliWorkflowRun
             UpdateStateWhenFinished();
             return [new NothingOutcome()];
         }
-        
+
         var priorOutcomes = AllPriorOutcomes();
 
         CliCommand command;
@@ -101,9 +110,11 @@ public class CliWorkflowRun : ICliWorkflowRun
                 State.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);
                 State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
                 UpdateStateWhenFinished();
+
+                return [new NothingOutcome()];
             }
 
-            return [new NothingOutcome()];
+            return SuggestNextCommands(priorOutcomes);
         }
 
         State.ChangeTo(ClIWorkflowRunStateStatus.Running, instruction);
@@ -136,12 +147,12 @@ public class CliWorkflowRun : ICliWorkflowRun
         try
         {
             var outcomes = await _sender.Send(command, _cancellationToken);
-            
+
             Outcome[] allOutcomes = [new RanCliCommandOutcome(command), ..outcomes];
-            
+
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
-            
+
             return allOutcomes;
         }
         catch (Exception exception)
@@ -154,13 +165,13 @@ public class CliWorkflowRun : ICliWorkflowRun
             UpdateStateWhenFinished();
         }
     }
-    
+
     // TODO: Could probably be put in line.
     private bool IsValidAsk(string? ask)
         => !string.IsNullOrEmpty(ask);
 
     // TODO: Could probably be moved to an extension method.
-    private bool IsValidMovePastAsk() 
+    private bool IsValidMovePastAsk()
         => AllPriorOutcomes()
             .OfType<NextCliCommandOutcome>()
             .Any();
@@ -178,19 +189,19 @@ public class CliWorkflowRun : ICliWorkflowRun
     private void UpdateStateAfterOutcome(Outcome[] outcomes)
     {
         var lastOutcome = outcomes.LastOrDefault();
-        
+
         if (lastOutcome is null || !lastOutcome.IsReusable)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, outcomes);
             return;
         }
-        
+
         if (lastOutcome is NextCliCommandOutcome)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.MovePastAsk, outcomes);
             return;
         }
-        
+
         State.ChangeTo(ClIWorkflowRunStateStatus.ReachedReusableOutcome, outcomes);
     }
 
@@ -207,6 +218,32 @@ public class CliWorkflowRun : ICliWorkflowRun
             State.ChangeTo(ClIWorkflowRunStateStatus.Finished);
             _serviceScope.Dispose();
         }
+    }
+
+    private Outcome[] SuggestNextCommands(List<Outcome> priorOutcomes)
+    {
+        var lastRanCommandType = priorOutcomes
+            .OfType<RanCliCommandOutcome>()
+            .LastOrDefault()?
+            .Command
+            .GetType();
+
+        var possibleCommandsToMoveTo = lastRanCommandType?
+            .GetCliNextCommandNames()
+            .ToList() ?? [];
+
+        if (possibleCommandsToMoveTo.Count == 0)
+        {
+            return [new NothingOutcome()];
+        }
+
+        var prefix = _instructionSettings.Prefix.ToString();
+
+        return possibleCommandsToMoveTo
+            .Select(Outcome (next) => new SuggestionOutcome(
+                $"{prefix}{next.Name}",
+                next.Description))
+            .ToArray();
     }
 
     // TODO: Perhaps move to extension somewhere
