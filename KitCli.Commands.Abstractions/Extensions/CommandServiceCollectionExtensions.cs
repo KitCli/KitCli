@@ -80,7 +80,7 @@ public static class CommandServiceCollectionExtensions
             
             var commandName = specificCommandName.ToLowerSplitString(InstructionConstants.DefaultCommandNameSeparator);
             var shorthandCommandName = specificCommandName.ToLowerTitleCharacters();
-
+        
             services
                 .AddKeyedSingleton(
                     typeof(ICliCommandFactory),
