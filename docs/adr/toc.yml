@@ -1,0 +1,12 @@
+- name: "0001. Use MediatR for command dispatch"
+  href: 0001-mediatr-for-command-dispatch.md
+- name: "0002. Create a DI scope per workflow run"
+  href: 0002-di-scope-per-workflow-run.md
+- name: "0003. Discover commands, factories, and handlers by reflection over manual DI wiring"
+  href: 0003-reflection-based-automatic-registration.md
+- name: "0004. Resolve ambiguous candidates by first match in registration order"
+  href: 0004-first-match-wins-resolution.md
+- name: "0005. Split CliApp into ArgsCliApp and TerminalCliApp"
+  href: 0005-args-driven-cli-app.md
+- name: "0006. Drive Ctrl+C shutdown with a CancellationToken, not Environment.Exit"
+  href: 0006-cooperative-cancellation.md

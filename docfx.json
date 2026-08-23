@@ -1,0 +1,49 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": ".",
+          "files": [
+            "KitCli/**.csproj",
+            "KitCli.Abstractions/**.csproj",
+            "KitCli.Commands/**.csproj",
+            "KitCli.Commands.Abstractions/**.csproj",
+            "KitCli.Instructions/**.csproj",
+            "KitCli.Instructions.Abstractions/**.csproj",
+            "KitCli.Workflow/**.csproj",
+            "KitCli.Workflow.Abstractions/**.csproj",
+            "KitCli.Workflow.Commands/**.csproj",
+            "KitCli.Tooling.Release/**.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["api/**.yml", "api/index.md"]
+      },
+      {
+        "files": ["user-guides/**.md", "user-guides/toc.yml", "concepts/**.md", "concepts/toc.yml", "adr/**.md", "adr/toc.yml"],
+        "src": "docs",
+        "dest": "docs",
+        "exclude": ["**/0000-template.md"]
+      },
+      {
+        "files": ["index.md", "toc.yml"]
+      }
+    ],
+    "resource": [
+      {
+        "files": ["docs/dependency-graph.png"]
+      }
+    ],
+    "output": "_site",
+    "template": ["default", "modern"]
+  }
+}

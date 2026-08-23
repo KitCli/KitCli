@@ -399,3 +399,8 @@ FodyWeavers.xsd
 *.sln.iml
 
 .idea
+
+# DocFX
+_site/
+api/*.yml
+api/.manifest

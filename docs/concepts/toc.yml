@@ -1,0 +1,16 @@
+- name: Command registration
+  href: command-registration.md
+- name: CliApp host loop
+  href: cli-app-host.md
+- name: Instruction parsing pipeline
+  href: instruction-parsing-pipeline.md
+- name: Outcomes
+  href: outcomes.md
+- name: Aggregators
+  href: aggregators.md
+- name: Artefacts
+  href: artefacts.md
+- name: Tables
+  href: tables.md
+- name: Workflow run state machine
+  href: workflow-run-state-machine.md
