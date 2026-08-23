@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace KitCli.Commands.Abstractions.Extensions;
 
 /// <summary>
@@ -60,5 +62,14 @@ public static class TypeExtensions
         /// <returns>The first generic type argument, or <see langword="null"/> if this type has none.</returns>
         public Type? FirstGenericArgumentOrDefault()
             => type.GenericTypeArguments.FirstOrDefault();
+
+        /// <summary>
+        /// Gets every instruction name declared on this type via <see cref="CliCommandAliasAttribute"/>.
+        /// </summary>
+        /// <returns>The declared alias names, in declaration order.</returns>
+        public IEnumerable<string> GetCliCommandAliasNames()
+            => type
+                .GetCustomAttributes<CliCommandAliasAttribute>(inherit: false)
+                .Select(alias => alias.Name);
     }
 }
