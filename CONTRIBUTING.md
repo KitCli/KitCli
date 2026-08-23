@@ -201,8 +201,11 @@ not commitments to defend:
    sorting/grouping the board by `Priority` or `SWAG` — there's no
    separate roadmap artifact to keep in sync. Still non-binding: a
    relative sizing input, not a plan.
-3. **New GitHub Project** — once an idea is greenlit, it graduates off
-   the Ideas board into its own project.
+3. **The domain board** — a greenlit idea joins the board for the domain
+   it belongs to. There is one board per domain area — Instructions,
+   Commands, Outcomes, Artefacts, Workflow, Packaging, Tooling & Docs —
+   not one per idea. A board is a place in the codebase, so it outlives
+   any single piece of work.
 4. **Inception spike** — plans the *next* milestone in real detail;
    everything beyond that is a rough forecast, re-planned properly once
    you actually get there (rolling-wave planning, not a full plan for
@@ -223,22 +226,33 @@ not commitments to defend:
    delivery-stage ticket for the actual build — don't retitle or reuse
    the spike issue in place. That new ticket gets sized in a normal
    backlog-refinement pass, not as part of the spike itself.
-6. **Fixed-length iterations + end-of-iteration review** — work in
-   short, regular iterations rather than open-ended milestone spans.
-   At the end of each one: check what actually got done vs. planned,
-   re-prioritize the backlog based on what was learned, and feed the
-   iteration's actual pace back into WAG/SWAG calibration. This
-   inspect-and-adapt step is what keeps the rest of the pipeline
-   honest — without it, WAG/SWAG/the inception spike are just a plan
-   nobody revisits.
-7. **Tickets with Estimates** — the leaf/actionable tickets pulled into
-   an iteration get the `Estimate` field (Fibonacci story points, not
-   time) on the project board — the parent story tracks the outcome,
-   not the effort to reach it. Don't second-guess an estimate just
-   because a ticket is taking a while — re-estimate only on genuine
-   scope change; see [SoloCAIRN's Sizing
+6. **Tickets with Estimates** — leaf/actionable tickets get the
+   `Estimate` field (Fibonacci story points, not time) on their domain
+   board — the parent story tracks the outcome, not the effort to reach
+   it. Don't second-guess an estimate just because a ticket is taking a
+   while — re-estimate only on genuine scope change; see [SoloCAIRN's
+   Sizing
    note](https://github.com/joshuaedwardcrowe/SoloCAIRN/blob/main/docs/03-lifecycle.md)
    for the full reasoning.
+
+   **Points are for relative sizing only.** They say this issue is a
+   bigger bite than that one, which is what you need to choose what to
+   pick up next. They are deliberately not tracked against velocity, and
+   this repo runs no fixed-length iterations. Velocity exists to
+   forecast a date or size an iteration's capacity; a repo with no
+   deadline and nobody waiting has neither, and a cadence with no
+   consumer is process that decays into decoration. Two reference
+   anchors keep the scale honest instead — see below.
+
+   **Reference anchors.** Points are relative, so they need fixed points
+   to triangulate against. Compare each new estimate to two of these,
+   ideally one smaller and one larger:
+
+   | Points | Reference | Shape |
+   |---|---|---|
+   | 2 | [#101](https://github.com/KitCli/KitCli/pull/101) | 80 lines, one file, one test class. No design decision, no docs. |
+   | 5 | [#100](https://github.com/KitCli/KitCli/pull/100) | 195 lines across 10 files. New public API, an ADR, tests. |
+   | 13 | [#82](https://github.com/KitCli/KitCli/pull/82) | 812 lines across 23 files. Breaking, with an ADR and a concept doc. |
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
 for a ticket's Build-stage lifecycle, with one extension specific to
@@ -249,13 +263,27 @@ comments, and tracked through GitHub's own history.
 
 ## Milestones
 
-When a milestone is tied to catching up to (or tracking) an external
-spec or dependency version (e.g. a MediatR major bump), name it after
-that version (e.g. `MediatR vX.Y.Z`), not a goal-style description
-(e.g. `Update to Latest MediatR`) — a version-anchored name pins the
-milestone to a concrete, checkable target and supports a version
-history over time. For a feature-area milestone with no external
-version to anchor to, a plain descriptive name is fine.
+**A milestone is a goal, not a release.** Releases are handled by git
+tags and [`CHANGELOG.md`](CHANGELOG.md) — never by a milestone. A
+milestone groups issues that together deliver one outcome, and it closes
+when that outcome is met.
+
+Milestones deliberately cut **across** domain boards. That's the whole
+point of having both: a board answers "what part of the codebase is
+this," a milestone answers "what are we trying to achieve." A milestone
+whose issues all sit on one board is just that board written twice —
+delete it.
+
+Name it after the outcome, in plain language — `Support Args CLIs`,
+`Output Tables to Terminal`. A milestone may contain closed issues; one
+whose work is already done is a record of a goal met, and shows as
+complete rather than being wrong.
+
+One exception to plain-language naming: when a milestone tracks an
+external spec or dependency version (e.g. a MediatR major bump), name it
+after that version (`MediatR vX.Y.Z`) rather than a goal-style
+description (`Update to Latest MediatR`) — a version-anchored name pins
+it to a concrete, checkable target.
 
 ## Versioning & releases
 
