@@ -2,6 +2,7 @@ using KitCli.Abstractions.Aggregators;
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Exceptions;
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Instructions.Abstractions;
@@ -13,6 +14,7 @@ using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
@@ -21,6 +23,13 @@ namespace KitCli.Workflow.Tests.Run;
 [TestFixture]
 public class CliWorkflowRunTests
 {
+    [CliNextCommandIs("next", "Show the next page.")]
+    [CliNextCommandIs("prev", "Show the previous page.")]
+    private record TestReusableCommand : CliCommand;
+
+    private static readonly IOptions<InstructionSettings> DefaultInstructionSettings =
+        Options.Create(new InstructionSettings());
+
     private abstract record TestAggregate;
 
     private record TestListAggregator() : Aggregator<TestAggregate, TestAggregate>([])
@@ -55,6 +64,7 @@ public class CliWorkflowRunTests
             _cliInstructionParser.Object,
             _cliInstructionValidator.Object,
             _cliWorkflowCommandProvider.Object,
+            DefaultInstructionSettings,
             _sender.Object,
             _publisher.Object
             );
@@ -346,5 +356,60 @@ public class CliWorkflowRunTests
 
         Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
         Assert.That(secondOutcomes.FirstOrDefault(), Is.InstanceOf<NothingOutcome>());
+    }
+
+    [Test]
+    public async Task GivenCommandProviderFailsAfterReachingReusableOutcomeWithDeclaredNextCommands_WhenRespondToAsk_SuggestsThem()
+    {
+        // Arrange
+        var ask = "some valid ask";
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
+
+        var aggregator = new TestListAggregator();
+        var reusableOutcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(instruction);
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .SetupSequence(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new TestReusableCommand())
+            .Throws<NoCommandGeneratorException>();
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([reusableOutcome]);
+
+        // Act - first ask reaches the reusable checkpoint.
+        _ = await _classUnderTest.RespondToAsk(ask);
+
+        // Act - second ask fails to resolve a command.
+        var secondOutcomes = await _classUnderTest.RespondToAsk(ask);
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+
+        var expectedOutcomes = new Outcome[]
+        {
+            new SuggestionOutcome("/next", "Show the next page."),
+            new SuggestionOutcome("/prev", "Show the previous page."),
+        };
+
+        Assert.That(secondOutcomes, Is.EqualTo(expectedOutcomes).AsCollection);
     }
 }

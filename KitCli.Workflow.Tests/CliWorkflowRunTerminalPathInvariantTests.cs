@@ -10,6 +10,7 @@ using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
@@ -27,6 +28,9 @@ namespace KitCli.Workflow.Tests;
 [TestFixture]
 public class CliWorkflowRunTerminalPathInvariantTests
 {
+    private static readonly IOptions<InstructionSettings> DefaultInstructionSettings =
+        Options.Create(new InstructionSettings());
+
     private static async Task<ICliWorkflowRun> ViaReachedFinalOutcome()
     {
         var state = new CliWorkflowRunState();
@@ -50,6 +54,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             parser.Object,
             validator.Object,
             provider.Object,
+            DefaultInstructionSettings,
             sender.Object,
             new Mock<IPublisher>().Object);
 
@@ -68,6 +73,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
+            DefaultInstructionSettings,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);
 
@@ -99,6 +105,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             parser.Object,
             validator.Object,
             provider.Object,
+            DefaultInstructionSettings,
             sender.Object,
             new Mock<IPublisher>().Object);
 
@@ -123,6 +130,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
+            DefaultInstructionSettings,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);
 
@@ -175,6 +183,8 @@ public class CliWorkflowRunTerminalPathInvariantTests
             .Returns(new Mock<IInstructionValidator>().Object);
         serviceProviderMock.Setup(sp => sp.GetService(typeof(ICliWorkflowCommandProvider)))
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(IOptions<InstructionSettings>)))
+            .Returns(DefaultInstructionSettings);
         serviceProviderMock.Setup(sp => sp.GetService(typeof(ISender)))
             .Returns(new Mock<ISender>().Object);
         serviceProviderMock.Setup(sp => sp.GetService(typeof(IPublisher)))

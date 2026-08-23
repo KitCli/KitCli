@@ -1,3 +1,4 @@
+using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Abstractions.Validators;
 using KitCli.Instructions.Parsers;
 using KitCli.Workflow.Abstractions;
@@ -6,6 +7,7 @@ using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KitCli.Workflow;
 
@@ -66,6 +68,10 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
             .ServiceProvider
             .GetRequiredService<ICliWorkflowCommandProvider>();
 
+        var instructionSettings = serviceScope
+            .ServiceProvider
+            .GetRequiredService<IOptions<InstructionSettings>>();
+
         var sender = serviceScope
             .ServiceProvider
             .GetRequiredService<ISender>();
@@ -80,6 +86,7 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
             instructionParser,
             instructionValidator,
             commandProvider,
+            instructionSettings,
             sender,
             publisher,
             CancellationToken);

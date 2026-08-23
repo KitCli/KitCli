@@ -22,6 +22,7 @@ public static class CommandsAbstractionsServiceCollectionExtensions
                 .AddOutcomeIoWriter<TableOutcomeIoWriter>()
                 .AddOutcomeIoWriter<PageSizeOutcomeIoWriter>()
                 .AddOutcomeIoWriter<PageNumberOutcomeIoWriter>()
+                .AddOutcomeIoWriter<SuggestionOutcomeIoWriter>()
                 .AddOutcomeIoWriter<ExceptionOutcomeIoWriter>();
 
         /// <summary>
