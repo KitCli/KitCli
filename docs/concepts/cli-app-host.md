@@ -147,6 +147,18 @@ started but *before* it's awaited — same reasoning as
 show a "working…" indicator concurrently with the run actually executing,
 rather than only after it finishes.
 
+Once either call returns, `ExecuteRunOperation` checks the resulting
+outcomes for an `ExceptionOutcome` — the marker a run's `Exceptional`
+status carries (see
+[workflow-run-state-machine.md](workflow-run-state-machine.md)). If one is
+present, it rethrows the original exception via `ExceptionDispatchInfo`,
+preserving the original stack trace, ending the whole `Run` loop rather
+than continuing to the next ask. This is deliberate: `Exceptional` means a
+command failed in a way the app didn't account for, so it's treated as
+loud and session-ending, unlike `InvalidAsk` (a mistyped or unrecognized
+command) or `ReachedFinalOutcome`, both of which just let the loop
+continue to the next ask as normal.
+
 ### Writing outcomes
 
 ```csharp

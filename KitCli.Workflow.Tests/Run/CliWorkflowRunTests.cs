@@ -76,23 +76,28 @@ public class CliWorkflowRunTests
     }
     
     [Test]
-    public async Task GivenInvalidAsk_WhenRespondToAsk_ChangesStateToInvalidAsk()
+    public async Task GivenInvalidAsk_WhenRespondToAsk_ChangesStateToInvalidAskThenFinished()
     {
         // Arrange
         var ask = string.Empty;
-        
+
         // Act
         _ = await _classUnderTest.RespondToAsk(ask);
-        
+
         // Assert
-        var lastStateChange = _cliWorkflowRunState
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.InvalidAsk,
+            ClIWorkflowRunStateStatus.Finished
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
             .Changes
-            .LastOrDefault();
-        
-        Assert.That(lastStateChange, Is.Not.Null);
-        Assert.That(lastStateChange.To, Is.EqualTo(ClIWorkflowRunStateStatus.InvalidAsk));
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
     }
-    
+
     [Test]
     public async Task GivenInstructionParserFails_WhenRespondToAsk_StateChangeBeforeFinishIsInvalidAsk()
     {
@@ -102,16 +107,17 @@ public class CliWorkflowRunTests
         _cliInstructionValidator
             .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
             .Returns(false);
-        
+
         // Act
         _ = await _classUnderTest.RespondToAsk(ask);
-        
+
         // Assert
         var expectedStateChangeTypes = new[]
         {
             ClIWorkflowRunStateStatus.InvalidAsk,
+            ClIWorkflowRunStateStatus.Finished
         };
-        
+
         var stateChangeTypes = _cliWorkflowRunState
             .Changes
             .Select(x => x.To);

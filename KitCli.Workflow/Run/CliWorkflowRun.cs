@@ -74,14 +74,16 @@ public class CliWorkflowRun : ICliWorkflowRun
         if (!IsValidAsk(ask))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
+            UpdateStateWhenFinished();
             return [new NothingOutcome()];
         }
-        
+
         var instruction = _instructionParser.Parse(ask!);
 
         if (!_instructionValidator.IsValid(instruction))
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
+            UpdateStateWhenFinished();
             return [new NothingOutcome()];
         }
         
@@ -114,6 +116,9 @@ public class CliWorkflowRun : ICliWorkflowRun
         if (!IsValidMovePastAsk())
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.InvalidMovePastAsk);
+
+            UpdateStateWhenFinished();
+
             return [new NothingOutcome()];
         }
 
@@ -194,7 +199,8 @@ public class CliWorkflowRun : ICliWorkflowRun
         var runComplete = State.WasChangedTo(
             ClIWorkflowRunStateStatus.ReachedFinalOutcome,
             ClIWorkflowRunStateStatus.InvalidAsk,
-            ClIWorkflowRunStateStatus.Exceptional);
+            ClIWorkflowRunStateStatus.Exceptional,
+            ClIWorkflowRunStateStatus.InvalidMovePastAsk);
 
         if (runComplete)
         {

@@ -29,10 +29,10 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
     /// <inheritdoc/>
     public ICliWorkflowRun NextRun()
     {
-        var lastRunNotHavingReachedFinalOutcome = Runs
-            .SingleOrDefault(run => !run.State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome));
+        var lastRunNotYetFinished = Runs
+            .SingleOrDefault(run => !run.State.WasChangedTo(ClIWorkflowRunStateStatus.Finished));
 
-        return lastRunNotHavingReachedFinalOutcome ?? CreateNewRun();
+        return lastRunNotYetFinished ?? CreateNewRun();
     }
 
     /// <inheritdoc/>

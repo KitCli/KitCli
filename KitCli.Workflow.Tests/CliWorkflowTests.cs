@@ -157,7 +157,8 @@ public class CliWorkflowTests
         reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.ReachedReusableOutcome);
         reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);
         reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, [outcome]);
-        
+        reusableRunState.ChangeTo(ClIWorkflowRunStateStatus.Finished);
+
         var reusableRun = new CliWorkflowRun(
             reusableRunState,
             new Mock<IServiceScope>().Object,
