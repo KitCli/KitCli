@@ -7,4 +7,5 @@ public enum ReleaseExceptionCode
     CircularProjectReference,
     ProcessFailedToStart,
     DotnetCommandFailed,
+    GitCommandFailed,
 }

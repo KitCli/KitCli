@@ -20,13 +20,38 @@ public class ReleaseRunner(string repoRoot)
         foreach (var project in order)
             Console.WriteLine($"  - {project.PackageId}");
 
+        // A project needs a new version if it changed itself, or if anything it references
+        // (directly or transitively) is getting bumped — otherwise a consumer who only upgrades
+        // the root package wouldn't actually receive a lower-level fix/feature. `order` is
+        // dependencies-first, so by the time a project is checked, everything it references has
+        // already been decided.
+        var toBump = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var project in order)
+        {
+            var changed = ProjectChangeDetector.HasChangedSinceLastRelease(repoRoot, project);
+            var dependsOnBumped = project.ProjectReferences.Any(toBump.Contains);
+            if (changed || dependsOnBumped)
+                toBump.Add(project.Path);
+        }
+
+        var bumping = order.Where(project => toBump.Contains(project.Path)).ToList();
+        if (bumping.Count == 0)
+        {
+            Console.WriteLine("No packable project has changed since its last release; nothing to bump or publish.");
+            return;
+        }
+
+        Console.WriteLine("Bumping (changed, or depends on something that changed):");
+        foreach (var project in bumping)
+            Console.WriteLine($"  - {project.PackageId}");
+
         if (dryRun)
         {
             Console.WriteLine("Dry run: no files were modified and no commands were run.");
             return;
         }
 
-        foreach (var project in order)
+        foreach (var project in bumping)
             VersionBumper.BumpPatchVersion(project);
 
         BuildSolution();
@@ -34,7 +59,7 @@ public class ReleaseRunner(string repoRoot)
         var nupkgDir = Path.Combine(repoRoot, "nupkgs");
         Directory.CreateDirectory(nupkgDir);
 
-        foreach (var project in order)
+        foreach (var project in bumping)
             PackAndPublish(project, nupkgDir, publish);
     }
 
