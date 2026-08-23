@@ -1,6 +1,8 @@
+using System.Runtime.ExceptionServices;
 using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Workflow.Abstractions;
 
 namespace KitCli;
@@ -75,7 +77,7 @@ public abstract class TerminalCliApp : CliApp
 
             OnMovingPastAsk(run);
 
-            return await movePastAskTask;
+            return RethrowIfExceptional(await movePastAskTask);
         }
 
         var ask = await Io.AskAsync(Workflow.CancellationToken);
@@ -84,6 +86,24 @@ public abstract class TerminalCliApp : CliApp
 
         OnRunStarted(run, ask);
 
-        return await runTask;
+        return RethrowIfExceptional(await runTask);
+    }
+
+    /// <summary>
+    /// Rethrows the original exception behind an <see cref="ExceptionOutcome"/> so an unexpected
+    /// command failure ends the whole interactive session, instead of silently continuing to the
+    /// next ask. Unlike an invalid ask, an <c>Exceptional</c> run means something the app didn't
+    /// account for happened, and that shouldn't be masked by looping back for another prompt.
+    /// </summary>
+    private static Outcome[] RethrowIfExceptional(Outcome[] outcomes)
+    {
+        var exceptionOutcome = outcomes.OfType<ExceptionOutcome>().SingleOrDefault();
+
+        if (exceptionOutcome is not null)
+        {
+            ExceptionDispatchInfo.Capture(exceptionOutcome.Exception).Throw();
+        }
+
+        return outcomes;
     }
 }

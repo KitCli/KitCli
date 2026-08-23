@@ -26,14 +26,15 @@ inconsistent state (e.g. simultaneously "reached its final outcome" and
 "still running"), which surfaces as a silent bug rather than an
 exception.
 
-That's not hypothetical: an unenforced transition here would let, for
-example, an unrecognized command arriving after a run reached a
-reusable checkpoint (e.g. a chosen plan) discard that run's
-accumulated context and finish it outright. `NextRun()` would then
-hand back the same, already-`Finished` run for the next ask, and the
-state machine has no `Finished -> *` transition — so the following ask
-would crash with an uncaught `ImpossibleStateChangeException`. The
-explicit transition table below is what rules that out.
+Concretely: `NextRun()` only ever reuses a run that hasn't reached
+`Finished`, and every one of the four statuses that terminate a run
+(`ReachedFinalOutcome`, `InvalidAsk`, `Exceptional`, `InvalidMovePastAsk` —
+see the table below) drives the run all the way to `Finished` before
+`RespondToAsk`/`MoveToNext` return control. Together those two guarantees
+are what rule out an already-`Finished` run being handed back for a fresh
+ask: the state machine has no `Finished -> *` transition, so if either
+guarantee ever slipped, the next ask on that run would crash with an
+uncaught `ImpossibleStateChangeException`.
 
 ## Solution
 
@@ -41,16 +42,16 @@ explicit transition table below is what rules that out.
 
 `CliWorkflow` is the top-level object: a `Runs` list plus a `Status`
 (`Started`/`Stopped`). `NextRun()` does **not** always create a new run —
-it reuses the single run in `Runs` that hasn't yet reached
-`ReachedFinalOutcome`, and only calls `CreateNewRun()` if none exists:
+it reuses the single run in `Runs` that hasn't yet reached `Finished`, and
+only calls `CreateNewRun()` if none exists:
 
 ```csharp
 public ICliWorkflowRun NextRun()
 {
-    var lastRunNotHavingReachedFinalOutcome = Runs
-        .SingleOrDefault(run => !run.State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome));
+    var lastRunNotYetFinished = Runs
+        .SingleOrDefault(run => !run.State.WasChangedTo(ClIWorkflowRunStateStatus.Finished));
 
-    return lastRunNotHavingReachedFinalOutcome ?? CreateNewRun();
+    return lastRunNotYetFinished ?? CreateNewRun();
 }
 ```
 
@@ -134,12 +135,13 @@ flowchart TD
 ```
 
 `RespondToAsk`:
-- Empty/null ask → `ChangeTo(InvalidAsk)`, return early.
+- Empty/null ask → `ChangeTo(InvalidAsk)`, `UpdateStateWhenFinished()`,
+  return early.
 - Parses via `IInstructionParser` (see
   [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md));
-  if `IInstructionValidator` rejects it → `ChangeTo(InvalidAsk)`, return
-  early. Otherwise looks up a command via
-  `ICliWorkflowCommandProvider.GetCommand(...)` before touching state.
+  if `IInstructionValidator` rejects it → `ChangeTo(InvalidAsk)`,
+  `UpdateStateWhenFinished()`, return early. Otherwise looks up a command
+  via `ICliWorkflowCommandProvider.GetCommand(...)` before touching state.
 - If no factory exists for the instruction (`NoCommandGeneratorException`):
   - If the run has never reached `ReachedReusableOutcome` →
     `ChangeTo(Running, instruction)`, then `ChangeTo(InvalidAsk)`, then
@@ -173,15 +175,21 @@ mean) to decide the next status:
 - Any other reusable outcome → `ReachedReusableOutcome`.
 
 `UpdateStateWhenFinished` checks whether the run has *ever* reached one
-of the three "run over" statuses (`ReachedFinalOutcome`, `InvalidAsk`,
-`Exceptional`) and, if so, transitions to `Finished` and disposes the
-run's DI scope.
+of the four "run over" statuses (`ReachedFinalOutcome`, `InvalidAsk`,
+`Exceptional`, `InvalidMovePastAsk`) and, if so, transitions to `Finished`
+and disposes the run's DI scope.
 
 Because it checks the run's whole history rather than just the most
-recent change, it's safe to call from more than one place — both
-`RespondToAsk`'s `NoCommandGeneratorException` catch and
-`ExecuteCommand`'s `finally` call it — without double-finishing a run
-that's already finished.
+recent change, it's safe to call from more than one place — `RespondToAsk`
+calls it directly after each of its two `InvalidAsk` branches and again in
+its `NoCommandGeneratorException` catch, `MoveToNext` calls it after its
+`InvalidMovePastAsk` branch, and `ExecuteCommand`'s `finally` calls it on
+every path through there — without double-finishing a run that's already
+finished. Every one of those call sites matters: a status being a legal
+dead end in the transition table is not, by itself, enough — the code
+must also actually call `UpdateStateWhenFinished()` at that dead end, or
+the run stays one step short of `Finished` and `NextRun()` treats it as
+still active.
 
 `MoveToNext` is only valid if some outcome in the run's history so far
 was a `NextCliCommandOutcome` (`IsValidMovePastAsk`); it takes the
@@ -199,8 +207,8 @@ transitions.
 
 **There must never be more than one active run per workflow — enforced by `SingleOrDefault`, not the type system.**
 `CliWorkflow.NextRun()` assumes there is never more than one run in
-`Runs` that hasn't reached `ReachedFinalOutcome`. Today that's true by
-construction, not by luck: the only caller of `NextRun()` is
+`Runs` that hasn't reached `Finished`. That's true by construction, not
+by luck: the only caller of `NextRun()` is
 `CliApp.Run`'s own loop (`KitCli/CliApp.cs`), which awaits a run to
 completion before it ever loops back around to ask `_workflow` for the
 next one. Nothing else in KitCli calls `NextRun()` concurrently.

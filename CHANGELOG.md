@@ -13,6 +13,24 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   names, without renaming the type. Repeatable for more than one alias.
   See [0007-cli-command-alias-attribute.md](docs/adr/0007-cli-command-alias-attribute.md).
 
+### Fixed
+
+- A workflow run that ended via a mistyped/empty ask, an unrecognized
+  command, or a failed command handler could be left one status short of
+  `Finished`. `CliWorkflow.NextRun()` then handed that run back for the
+  next ask instead of starting a new one, crashing with
+  `ImpossibleStateChangeException` on the following input.
+  `NextRun()` now checks `Finished` (not just `ReachedFinalOutcome`)
+  before reusing a run, and every terminal path drives the run all the
+  way to `Finished` before returning. See
+  [workflow-run-state-machine.md](docs/concepts/workflow-run-state-machine.md).
+
+### Changed
+
+- A command handler that throws an unhandled exception now ends the whole
+  interactive session instead of silently continuing to the next ask. See
+  [cli-app-host.md](docs/concepts/cli-app-host.md).
+
 ## [1.0.11] - 2026-08-22
 
 ### Added
