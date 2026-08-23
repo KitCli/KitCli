@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [1.0.12] - 2026-08-23
+
 ### Added
 
 - `[CliCommandAlias("...")]` — declare extra instruction names a `CliCommand`
