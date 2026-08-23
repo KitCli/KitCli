@@ -5,11 +5,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Commands.Abstractions.Extensions;
 
+/// <summary>
+/// Dependency injection registration helpers for discovering <see cref="CliCommand"/> types, their factories,
+/// and their MediatR handlers from an assembly.
+/// </summary>
 public static class CommandServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddCommandsFromAssembly(Assembly? assembly) 
+        /// <summary>
+        /// Registers every command factory (see <see cref="AddCommandFactories"/>) and MediatR command/handler
+        /// found in the given assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to scan for <see cref="CliCommand"/> implementations.</param>
+        /// <returns>The same service collection, for chaining.</returns>
+        /// <exception cref="NullReferenceException">Thrown when <paramref name="assembly"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="assembly"/> contains no <see cref="CliCommand"/> implementations.</exception>
+        public IServiceCollection AddCommandsFromAssembly(Assembly? assembly)
         {
             if (assembly == null)
             {

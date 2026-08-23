@@ -3,10 +3,22 @@ using Microsoft.Extensions.Options;
 
 namespace KitCli.Instructions.Indexers;
 
+/// <summary>
+/// Locates the position of the prefix, name, sub-name, and arguments tokens within terminal input.
+/// </summary>
+/// <param name="instructionOptions">The configured instruction settings, including the prefix and argument-prefix characters.</param>
 public class InstructionTokenIndexer(IOptions<InstructionSettings> instructionOptions)
 {
     private readonly InstructionSettings _instructionSettings = instructionOptions.Value;
 
+    /// <summary>
+    /// Indexes the terminal input, locating the position of each token type.
+    /// </summary>
+    /// <param name="terminalInput">The full terminal input string.</param>
+    /// <returns>
+    /// A collection of token positions; each entry's <see cref="InstructionTokenIndex.Found"/> indicates whether
+    /// that token type was present in <paramref name="terminalInput"/>.
+    /// </returns>
     public InstructionTokenIndexCollection Index(string terminalInput)
     {
         if (string.IsNullOrEmpty(terminalInput))

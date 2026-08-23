@@ -11,10 +11,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Commands.Abstractions.Extensions;
 
+/// <summary>
+/// Dependency injection registration helpers for <see cref="IArtefactFactory"/> discovery.
+/// </summary>
 public static class ArtefactServiceCollectionExtensions
 {
     extension(IServiceCollection serviceCollection)
     {
+        /// <summary>
+        /// Registers the built-in artefact factories, then reflection-scans the given assembly for every
+        /// custom <see cref="ArtefactFactory{TOutcome}"/>, every closed <see cref="Aggregator{TSource,TAggregate}"/>
+        /// implementation, and every closed <see cref="TableBuilder{TSource,TAggregate}"/> implementation, registering
+        /// their corresponding factories automatically.
+        /// </summary>
+        /// <param name="assembly">The assembly to scan for custom artefact factories, aggregators, and table builders.</param>
+        /// <returns>The same service collection, for chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="assembly"/> is <see langword="null"/>.</exception>
         public IServiceCollection AddArtefactFactoriesForAssembly(Assembly? assembly)
         {
             if (assembly == null)

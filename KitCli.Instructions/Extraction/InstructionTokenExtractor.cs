@@ -4,10 +4,19 @@ using KitCli.Instructions.Indexers;
 
 namespace KitCli.Instructions.Extraction;
 
+/// <summary>
+/// Extracts the raw prefix, name, sub-name, and argument tokens from terminal input, given their positions.
+/// </summary>
 public class InstructionTokenExtractor
 {
+    /// <summary>
+    /// Extracts the raw string tokens from terminal input using the supplied token positions.
+    /// </summary>
+    /// <param name="indexes">The positions of each token type within <paramref name="terminalInput"/>.</param>
+    /// <param name="terminalInput">The full terminal input string.</param>
+    /// <returns>The extracted prefix, name, sub-name, and argument tokens.</returns>
     public InstructionTokenExtraction Extract(
-        InstructionTokenIndexCollection indexes, 
+        InstructionTokenIndexCollection indexes,
         string terminalInput)
     {
         var prefixToken = ExtractOptionalToken(indexes, terminalInput, InstructionTokenType.Prefix);

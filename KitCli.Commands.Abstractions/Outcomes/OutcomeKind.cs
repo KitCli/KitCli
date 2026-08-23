@@ -1,5 +1,8 @@
 namespace KitCli.Commands.Abstractions.Outcomes;
 
+/// <summary>
+/// The effect an <see cref="Outcome"/> has on the workflow run it belongs to.
+/// </summary>
 public enum OutcomeKind
 {
     /// <summary>

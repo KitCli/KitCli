@@ -16,15 +16,17 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
+    /// <inheritdoc/>
     public List<ICliWorkflowRun> Runs { get; } = [];
+
+    /// <inheritdoc/>
     public CliWorkflowStatus Status { get; set; } = CliWorkflowStatus.Started;
+
+    /// <inheritdoc/>
     public CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
 
-    /// <summary>
-    /// Create a new run, a sub-state machine of an individual execution.
-    /// </summary>
-    /// <returns>A sub-state mchine of an individual execution.</returns>
+    /// <inheritdoc/>
     public ICliWorkflowRun NextRun()
     {
         var lastRunNotHavingReachedFinalOutcome = Runs
@@ -33,14 +35,13 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
         return lastRunNotHavingReachedFinalOutcome ?? CreateNewRun();
     }
 
-    /// <summary>
-    /// Close the state machine.
-    /// </summary>
+    /// <inheritdoc/>
     public void Stop()
     {
         Status = CliWorkflowStatus.Stopped;
     }
 
+    /// <inheritdoc/>
     public void InterruptCurrentRun()
     {
         _cancellationTokenSource.Cancel();

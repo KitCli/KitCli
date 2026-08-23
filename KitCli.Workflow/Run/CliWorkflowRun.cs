@@ -14,8 +14,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Workflow.Run;
 
+/// <summary>
+/// Default <see cref="ICliWorkflowRun"/> implementation: drives one execution arc from an ask
+/// through to a final outcome by parsing/validating input, resolving and executing commands via
+/// MediatR, publishing reaction outcomes, and enforcing the run's state machine transitions.
+/// </summary>
 public class CliWorkflowRun : ICliWorkflowRun
 {
+    /// <inheritdoc/>
     public ICliWorkflowRunState State { get; }
 
     private readonly IServiceScope _serviceScope;
@@ -27,6 +33,20 @@ public class CliWorkflowRun : ICliWorkflowRun
     private readonly IPublisher _publisher;
     private readonly CancellationToken _cancellationToken;
 
+    /// <summary>
+    /// Creates a run bound to a specific DI scope and the services resolved from it. The scope is
+    /// disposed once the run finishes.
+    /// </summary>
+    /// <param name="state">The run's state machine, initially at its default (not-yet-<c>Created</c>) status.</param>
+    /// <param name="serviceScope">The DI scope this run owns; disposed when the run reaches <c>Finished</c>.</param>
+    /// <param name="instructionParser">Parses raw ask strings into instructions.</param>
+    /// <param name="instructionValidator">Validates a parsed instruction before a command is resolved for it.</param>
+    /// <param name="workflowCommandProvider">Resolves the command to execute for a valid instruction.</param>
+    /// <param name="sender">Dispatches resolved commands to their MediatR handlers.</param>
+    /// <param name="publisher">Publishes reaction outcomes raised while executing a command.</param>
+    /// <param name="cancellationToken">
+    /// The token passed through to <see cref="ISender.Send"/> for every command this run executes.
+    /// </param>
     public CliWorkflowRun(
         CliWorkflowRunState state,
         IServiceScope serviceScope,
@@ -48,6 +68,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         _cancellationToken = cancellationToken;
     }
 
+    /// <inheritdoc/>
     public async ValueTask<Outcome[]> RespondToAsk(string? ask)
     {
         if (!IsValidAsk(ask))
@@ -87,6 +108,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         return await ExecuteCommand(command);
     }
 
+    /// <inheritdoc/>
     public async ValueTask<Outcome[]> MoveToNext()
     {
         if (!IsValidMovePastAsk())

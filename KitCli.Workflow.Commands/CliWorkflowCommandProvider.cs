@@ -8,9 +8,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KitCli.Workflow.Commands;
 
+/// <summary>
+/// Resolves a <see cref="CliCommand"/> for an instruction by selecting the first registered
+/// <see cref="ICliCommandFactory"/> that can create it, converting prior outcomes into artefacts
+/// the factory can use to decide.
+/// </summary>
+/// <param name="serviceProvider">Provider used to resolve keyed command factories and artefact factories.</param>
 public class CliWorkflowCommandProvider(IServiceProvider serviceProvider) : ICliWorkflowCommandProvider
 {
     // TODO: Test cases for the exceptions.
+    /// <inheritdoc/>
     public CliCommand GetCommand(Instruction instruction, List<Outcome> outcomes)
     {
         var commandFactories = serviceProvider

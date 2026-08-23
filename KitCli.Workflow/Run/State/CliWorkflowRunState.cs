@@ -7,19 +7,32 @@ using KitCli.Workflow.Run.State.Change;
 
 namespace KitCli.Workflow.Run.State;
 
+/// <summary>
+/// Default <see cref="ICliWorkflowRunState"/> implementation. Enforces the fixed table of legal
+/// from/to status transitions (<see cref="PossibleStateChanges"/>), throwing
+/// <see cref="ImpossibleStateChangeException"/> when a requested change isn't listed, and starts/stops
+/// <see cref="Stopwatch"/> as the run enters <see cref="ClIWorkflowRunStateStatus.Running"/>/
+/// <see cref="ClIWorkflowRunStateStatus.Finished"/>.
+/// </summary>
 public class CliWorkflowRunState : ICliWorkflowRunState
 {
+    /// <inheritdoc/>
     public Stopwatch Stopwatch { get; }= new Stopwatch();
+
+    /// <inheritdoc/>
     public List<ICliWorkflowRunStateChange> Changes { get; } = [];
-    
+
+    /// <inheritdoc/>
     public bool WasChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses)
         => Changes.Any(change => oneOfStatuses.Contains(change.To));
-    
-    public List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges() 
+
+    /// <inheritdoc/>
+    public List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges()
         => Changes
             .OfType<IOutcomeCliWorkflowRunStateChange>()
             .ToList();
 
+    /// <inheritdoc/>
     public void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo)
     {
         var priorState = CanChangeTo(statusToChangeTo);
@@ -34,6 +47,7 @@ public class CliWorkflowRunState : ICliWorkflowRunState
         Changes.Add(stateChange);
     }
 
+    /// <inheritdoc/>
     public void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, Instruction instruction)
     {
         var priorState = CanChangeTo(statusToChangeTo);
@@ -49,6 +63,7 @@ public class CliWorkflowRunState : ICliWorkflowRunState
         Changes.Add(stateChange);
     }
     
+    /// <inheritdoc/>
     public void ChangeTo(ClIWorkflowRunStateStatus statusToChangeTo, Outcome[] outcomes)
     {
         var priorState = CanChangeTo(statusToChangeTo);
