@@ -268,14 +268,16 @@ tags and [`CHANGELOG.md`](CHANGELOG.md) — never by a milestone. A
 milestone groups issues that together deliver one outcome, and it closes
 when that outcome is met.
 
-Milestones deliberately cut **across** domain boards. That's the whole
-point of having both: a board answers "what part of the codebase is
-this," a milestone answers "what are we trying to achieve." A milestone
-whose issues all sit on one board is just that board written twice —
-delete it.
+Milestones are free to cut **across** domain boards, and often do. The
+two answer different questions: a board asks "what part of the codebase
+is this," a milestone asks "what are we trying to achieve." A goal that
+happens to live entirely inside one board is still a goal — the board
+tracks the area indefinitely, the milestone closes when the outcome is
+met.
 
-Name it after the outcome, in plain language — `Support Args CLIs`,
-`Output Tables to Terminal`. A milestone may contain closed issues; one
+Name it after the outcome, in plain language, as a verb and an object —
+`Support Args CLIs`, `Output Tables to Terminal`, `Publish Packages to
+NuGet`. A milestone may contain closed issues; one
 whose work is already done is a record of a goal met, and shows as
 complete rather than being wrong.
 
