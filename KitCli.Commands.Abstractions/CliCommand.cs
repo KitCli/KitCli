@@ -16,9 +16,10 @@ public record CliCommand : IRequest<Outcome[]>
         => GetType().Name.ReplaceCommandSuffix();
 
     /// <summary>
-    /// Derives the dashed instruction name this command responds to, by stripping the <c>Command</c> suffix
-    /// off the type name and inserting a separator before every uppercase letter (except the first).
-    /// For example, <c>SpareMoneyCommand</c> becomes <c>spare-money</c>.
+    /// Derives the dashed instruction name this command responds to, by removing <c>CliCommand</c>
+    /// from the type name and inserting a separator before every uppercase letter (except the first).
+    /// For example, <c>SpareMoneyCliCommand</c> becomes <c>spare-money</c>. A type named
+    /// <c>SpareMoneyCommand</c> keeps its suffix and becomes <c>spare-money-command</c>.
     /// </summary>
     /// <returns>The instruction name derived from this command's type.</returns>
     public string GetInstructionName()
@@ -27,10 +28,10 @@ public record CliCommand : IRequest<Outcome[]>
             .ToLowerSplitString(InstructionConstants.DefaultCommandNameSeparator);
 
     /// <summary>
-    /// Strips the <c>Command</c> suffix off a command type name.
+    /// Removes <c>CliCommand</c> from a command type name.
     /// </summary>
     /// <param name="commandName">The command type name to strip.</param>
-    /// <returns><paramref name="commandName"/> with any trailing <c>Command</c> suffix removed.</returns>
+    /// <returns><paramref name="commandName"/> with every occurrence of <c>CliCommand</c> removed.</returns>
     public static string StripCommandName(string commandName)
         => commandName.ReplaceCommandSuffix();
 }
