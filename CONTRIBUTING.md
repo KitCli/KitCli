@@ -134,6 +134,25 @@ replaces. It ships through a PR with a Status like any other work. Durable
 facts about a dependency belong in that dependency's own docs too, not
 only here.
 
+## Technology
+
+A technology page ([`docs/technology/`](docs/technology/)) is the reference
+home for how KitCli uses one external dependency: which of its features
+KitCli supports, and where each stops. It answers "can I do X with the
+container?" — not how a KitCli subsystem works, which is
+[`docs/concepts/`](docs/concepts/).
+
+**Write one when** a dependency's behaviour shapes what consumers can
+build — the DI container's lifetimes, MediatR's dispatch — and the answer
+is a table a reader returns to. **Skip it for** a dependency KitCli
+consumes without constraining.
+
+Name by dependency, not numbered. Tables over prose. Verify every row
+against source or a runnable check before it lands: an unverified support
+table is worse than none, because readers trust it. Name the tracking
+issue for each gap, or say plainly that none exists. **Keep them current**
+in the same PR as any change that moves a row.
+
 ## Issues
 
 Every triaged issue carries three independent labels:
