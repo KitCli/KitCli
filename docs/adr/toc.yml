@@ -14,3 +14,5 @@
   href: 0007-cli-command-alias-attribute.md
 - name: "0008. Suggest declared next commands via a [CliNextCommandIs] attribute"
   href: 0008-suggest-next-commands-attribute.md
+- name: "0009. Transport typed payloads in non-generic envelopes, never dynamic"
+  href: 0009-non-generic-envelopes-over-dynamic.md
