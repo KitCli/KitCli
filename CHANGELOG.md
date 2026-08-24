@@ -6,6 +6,19 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Fixed
+
+- `CliAppBuilder.Run` built its service provider with no validation, so a
+  singleton that depended on a `Scoped` service — an `IOutcomeIoWriter`
+  taking a scoped collaborator, for instance — was silently allowed. The
+  singleton captured whichever instance existed when it was first resolved
+  and held it for the app's whole lifetime, quietly diverging from the
+  fresh per-run instance every command handler gets. Nothing failed or
+  warned. The provider is now built with `ValidateScopes` and
+  `ValidateOnBuild` on, so this fails at startup, naming the singleton and
+  the scoped service it can't consume. See
+  [cli-app-host.md](docs/concepts/cli-app-host.md).
+
 ## [1.0.12] - 2026-08-23
 
 ### Added

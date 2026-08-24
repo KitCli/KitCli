@@ -15,6 +15,12 @@ namespace KitCli;
 /// </summary>
 public class CliAppBuilder
 {
+    private static readonly ServiceProviderOptions ServiceProviderOptions = new()
+    {
+        ValidateScopes = true,
+        ValidateOnBuild = true
+    };
+
     private readonly ServiceCollection _services = [];
     private ConfigurationBuilder? _configurationBuilder;
     private IConfigurationRoot? _configuration;
@@ -152,6 +158,10 @@ public class CliAppBuilder
     /// </summary>
     /// <param name="args">The process args to run an <see cref="ArgsCliApp"/> with; ignored by a <see cref="TerminalCliApp"/>.</param>
     /// <returns>The running task for the resolved app's <c>Run</c> call.</returns>
+    /// <exception cref="AggregateException">
+    /// Thrown at startup if any registered service can't be constructed, or if a singleton depends on a
+    /// <c>Scoped</c> service — the provider is built with both validations on.
+    /// </exception>
     /// <exception cref="ArgumentException">
     /// Thrown if the resolved app is an <see cref="ArgsCliApp"/> and no <paramref name="args"/> were
     /// provided, or if it is neither an <see cref="ArgsCliApp"/> nor a <see cref="TerminalCliApp"/>.
@@ -160,7 +170,7 @@ public class CliAppBuilder
     {
         EnsureInstructionSettingsRegistered();
 
-        var serviceProvider = _services.BuildServiceProvider();
+        var serviceProvider = _services.BuildServiceProvider(ServiceProviderOptions);
 
         var cliApp = serviceProvider.GetRequiredService<CliApp>();
 
