@@ -129,6 +129,17 @@ provided, throwing a specific `ArgumentException` if an `ArgsCliApp` is
 asked to run with no args (rather than silently doing nothing, or an
 opaque failure).
 
+It builds the service provider first, with both `ValidateScopes` and
+`ValidateOnBuild` on. `Run` resolves the `CliApp` and the
+`IOutcomeIoWriter` list once, from the root provider, before any run
+starts — so anything reached from there is effectively a singleton for the
+app's lifetime, while command handlers get per-run instances from the
+run's own scope (see
+[workflow-run-state-machine.md](workflow-run-state-machine.md)). The two
+validations make that boundary enforced rather than implied: a singleton
+that depends on a `Scoped` service fails at startup, naming both types,
+instead of silently capturing one instance and holding it.
+
 ### Ask vs. move-past-ask (`TerminalCliApp` only)
 
 `TerminalCliApp`'s private `ExecuteRunOperation` checks whether the run it was just handed already has
@@ -276,6 +287,13 @@ are never consulted for that outcome. There's no registration-based
 ordering here the way there is for instruction argument builders or
 artefact factories — the caller of `Run` controls the list's order
 directly.
+
+**Can a custom `IOutcomeIoWriter` depend on a `Scoped` service?**
+No. Writers are registered as singletons and resolved once from the root
+provider, so they'd capture a single instance rather than tracking the
+per-run one. `CliAppBuilder.Run`'s provider validation rejects this at
+startup. A writer that needs I/O should take `ICliIo`; one that needs
+per-run data should read it off the `Outcome` it's handed.
 
 **Why does `Io.Pause()` get called both before the loop and after every
 iteration, rather than just once per iteration?**
