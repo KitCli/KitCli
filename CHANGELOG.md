@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [1.0.13] - 2026-08-24
+
 ### Fixed
 
 - `CliAppBuilder.Run` built its service provider with no validation, so a
