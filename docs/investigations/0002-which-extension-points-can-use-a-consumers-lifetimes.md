@@ -1,4 +1,4 @@
-# 0001. Which extension points can use a consumer's registered lifetimes?
+# 0002. Which extension points can use a consumer's registered lifetimes?
 
 - **Status:** In Review
 - **Spike:** not yet filed
