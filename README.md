@@ -6,7 +6,30 @@ Commands/Outcomes/Artefacts/Workflow layers on top for state that
 carries across a session — page size, filters, "next page" — without
 each command hand-rolling it.
 
-> Reflects `main`, not yet the published package — see [#60](https://github.com/KitCli/KitCli/issues/60).
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Project structure](#project-structure)
+- [Build and test](#build-and-test)
+- [Documentation](#documentation)
+- [Packages](#packages)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Requirements
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) — every
+  project targets `net10.0`.
+
+## Installation
+
+```bash
+dotnet add package KitCli
+```
+
+`KitCli` is the umbrella package. It pulls in everything you need to build
+an app; reference the others directly only when you are extending the
+framework rather than consuming it.
 
 ## Quick start
 
@@ -51,7 +74,41 @@ Run it and type `/hello` (or the shorthand, `/h`) — a command's
 invocation name is derived from its type name automatically, not
 declared anywhere: `HelloCliCommand` → `hello` / `h`.
 
-## Learn more
+
+## Project structure
+
+```
+KitCli/                              the umbrella package: CliApp, CliAppBuilder
+KitCli.Abstractions/                 ICliIo, Aggregator, Table
+KitCli.Instructions[.Abstractions]/  parsing an ask into a typed Instruction
+KitCli.Commands[.Abstractions]/      CliCommand, factories, outcomes, artefacts
+KitCli.Workflow[.Abstractions]/      the run state machine
+KitCli.Workflow.Commands/            built-in commands (/exit)
+
+KitCli.Playground.*/                 runnable sample apps and scenarios
+KitCli.Tooling.Release/              the release CLI, itself built with KitCli
+*.Tests, *.IntegrationTests/         six test projects
+```
+
+![Dependency graph](docs/dependency-graph.png)
+
+## Build and test
+
+```bash
+dotnet restore KitCli.sln
+dotnet build KitCli.sln
+dotnet test KitCli.sln
+```
+
+CI runs those three steps on every PR and every push to `main`, across all
+six test projects. To see the framework running, start a playground app:
+
+```bash
+dotnet run --project KitCli.Playground.App.Terminal     # interactive
+dotnet run --project KitCli.Playground.App.Args -- /echo --name Alex   # one-shot
+```
+
+## Documentation
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — conventions, branching, how to
   propose a change.
@@ -91,3 +148,16 @@ declared anywhere: `HelloCliCommand` → `hello` / `h`.
 `KitCli.Workflow.Commands`) — see
 [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning--releases) for how
 they're versioned and released.
+
+Versions have drifted apart rather than shipping in lockstep as intended —
+see [#58](https://github.com/KitCli/KitCli/issues/58).
+
+## Contributing
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first — it covers Conventional
+Commit titles, the label taxonomy, PR size limits, and when a change needs
+an ADR or a concept doc.
+
+## License
+
+[MIT](LICENSE).
