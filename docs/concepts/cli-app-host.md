@@ -23,32 +23,36 @@ while (Workflow.Status != CliWorkflowStatus.Stopped)
 OnSessionEnd(Workflow.Runs);
 ```
 
-`ExecuteRunOperation` checks the run for a recorded `MovePastAsk` change.
-Finding one it calls `MoveToNext()` and asks for no input; otherwise it
-calls `Io.AskAsync` and passes the result to `RespondToAsk`.
+`ExecuteRunOperation` calls `MoveToNext()` when the run has a recorded
+`MovePastAsk` change, and otherwise `Io.AskAsync` then `RespondToAsk`.
 
 ## The mode is a compile-time choice
 
 Which subclass you extend decides args-driven or terminal-driven for the
-life of the class. `CliAppBuilder.Run` dispatches on the concrete type and
-throws if an `ArgsCliApp` gets no args. See
-[0005-args-driven-cli-app.md](../adr/0005-args-driven-cli-app.md).
+life of the class; `CliAppBuilder.Run` dispatches on the concrete type and
+throws if an `ArgsCliApp` gets no args
+([ADR 0005](../adr/0005-args-driven-cli-app.md)).
 
-**An args app runs exactly one command.** It calls `Workflow.Stop()`
-unconditionally after one `RespondToAsk`, so a command that queues a next
-step with `ByMovingToCommand` never gets to run it.
+**An args app runs exactly one command** — it calls `Workflow.Stop()` after
+one `RespondToAsk`, so a queued `ByMovingToCommand` step never runs.
 
 Six `protected virtual` hooks — `OnSessionStart`, `OnRunCreated`,
 `OnRunStarted`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd` — let an
-app observe without overriding `Run`. None can redirect flow. In a one-shot
-invocation five fire once each and `OnMovingPastAsk` never does.
+app observe without overriding `Run`. None redirects flow, and
+`OnRunStarted`/`OnMovingPastAsk` fire *while* the run executes, so they
+suit progress indicators rather than setup. One-shot invocations fire five
+of them once each; `OnMovingPastAsk` never fires.
 
-`OnRunStarted` and `OnMovingPastAsk` fire while the run executes, not
-before it, so they suit progress indicators and not setup.
+An `ExceptionOutcome` makes `TerminalCliApp` rethrow, ending the session.
+`InvalidAsk` and `ReachedFinalOutcome` let the loop continue.
 
-An `ExceptionOutcome` makes `TerminalCliApp` rethrow the original
-exception, ending the session. `InvalidAsk` and `ReachedFinalOutcome` both
-let the loop continue.
+## Everything outside a run is a singleton
+
+`CliAppBuilder.Run` builds the provider with `ValidateScopes` and
+`ValidateOnBuild` on, then resolves the `CliApp` and its writers once from
+the root. Those live for the whole app; only handlers get per-run
+instances. **A singleton depending on a `Scoped` service fails at
+startup**, naming both types, instead of silently capturing one.
 
 ## See also
 

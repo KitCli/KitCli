@@ -16,7 +16,8 @@ public interface IOutcomeIoWriter
 `AddCommandAbstractions` registers eight built-ins, each claiming exactly
 one outcome type and writing through `ICliIo`. `CliAppBuilder.Run` resolves
 them once from the root provider, so DI registration order becomes match
-order. Because no two claim the same type, first-match-wins decides nothing
+order — and a writer taking a `Scoped` dependency fails at startup. Give it
+`ICliIo`, or read per-run data off the `Outcome`. Because no two claim the same type, first-match-wins decides nothing
 today; it is the rule waiting for the first writer that claims a base type.
 
 ## Silence is often deliberate
