@@ -293,37 +293,42 @@ it to a concrete, checkable target.
 
 ## Versioning & releases
 
-All 9 published packages (`KitCli`, `KitCli.Abstractions`,
-`KitCli.Commands`, `KitCli.Commands.Abstractions`, `KitCli.Instructions`,
-`KitCli.Instructions.Abstractions`, `KitCli.Workflow`,
-`KitCli.Workflow.Abstractions`, `KitCli.Workflow.Commands`) ship as **one
-version number, always** — this is deliberate, not an oversight. Nothing
-today consumes them independently of the bundle, so independent versioning
-would provide a signal nobody reads. If that changes (a package gets a real
-independent consumer), that's a decision for a new ADR, not a silent policy
-drift.
-
 Every squash-merged PR that changes behavior gets a line in
 [`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`, in [Keep a
 Changelog](https://keepachangelog.com/) format.
 
-**To cut a release:** open a PR that bumps `<Version>` in each project
-that needs it, and merge it. Then run the
-[`Publish`](.github/workflows/publish.yml) workflow manually from the
-Actions tab (`workflow_dispatch` — it never triggers on its own). It
-builds, tests, then packs and pushes each of the 9 packages at its own
-currently-committed version, in dependency order, before cutting
-`CHANGELOG.md`, tagging the commit (using `KitCli`'s own version — the
-umbrella package), and creating a GitHub Release. Requires a
-`NUGET_API_KEY` repository secret.
+**To cut a release**, run the release CLI — itself a KitCli app — from the
+repo root:
 
-Note: the "one version number, always" policy above is the documented
-intent, not the current reality — the 9 packages have already drifted
-out of sync (see [#58](https://github.com/KitCli/KitCli/issues/58)).
-The publish workflow deliberately doesn't try to force them back in
-sync; it publishes whatever's committed per-project. Re-synchronizing
-them (or deciding lockstep isn't the right model anymore) is a separate
-decision, tracked on that issue.
+```bash
+dotnet run --project KitCli.Tooling.Release -- /release --dry-run   # report what would happen
+dotnet run --project KitCli.Tooling.Release -- /release             # bump, build, pack into nupkgs/
+dotnet run --project KitCli.Tooling.Release -- /release --publish   # ...and push to NuGet
+```
+
+It finds every csproj carrying both `<PackageId>` and `<Version>`, orders
+them dependencies-first, and bumps a project when that project changed
+since its own last release, or when anything it references is being
+bumped. "Last release" comes from pickaxe-searching git history for the
+commit that set the currently-committed `<Version>`, so no tags are
+involved. It then builds the solution in Release, packs each bumped
+project, and with `--publish` pushes using `--skip-duplicate`. The API key
+comes from `NUGET_API_KEY`, or `~/.kitcli/nuget-api-key`.
+
+**Do these by hand — the tool does none of them:** run `dotnet test`,
+update `CHANGELOG.md`, tag the commit, create a GitHub Release.
+
+**It only ever bumps the patch number.** A `feat`, or a breaking change,
+releases as a patch like anything else, so a version says nothing about
+the size of what changed.
+
+**Packages no longer ship in lockstep.** Only what changed gets a new
+version, so someone upgrading the umbrella package still receives
+lower-level fixes through its dependencies. That is the tool's deliberate
+design and it replaces this file's former "one version number, always"
+policy — the drift on
+[#58](https://github.com/KitCli/KitCli/issues/58) is now the intended
+behaviour rather than an accident. Which model is right is owed an ADR.
 
 ## Code style
 
