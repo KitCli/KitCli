@@ -93,7 +93,7 @@ and throws a named exception on a mismatch; the writers cast unchecked
 after a separate `CanWriteFor` call, so a writer registered against the
 wrong outcome throws `InvalidCastException` instead. This is known and
 already flagged in source, at
-[`IOutcomeIoWriter.cs:10`](../../KitCli.Commands.Abstractions/Io/IOutcomeIoWriter.cs),
+`KitCli.Commands.Abstractions/Io/IOutcomeIoWriter.cs`,
 and tracked as [#117](https://github.com/KitCli/KitCli/issues/117).
 
 Avoiding `dynamic` does not by itself make KitCli AOT-safe, and this ADR
