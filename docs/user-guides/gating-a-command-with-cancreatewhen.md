@@ -2,18 +2,16 @@
 
 ## What this is for
 
-Sometimes a command should only be offered under certain
-conditions — only after a specific prior command ran, or only for a
-particular sub-command word. `CanCreateWhen()` is where that
-condition belongs, not inside the handler.
+A command sometimes belongs only under certain conditions: after a
+specific prior command, or for one sub-command word. `CanCreateWhen()`
+holds that condition, not the handler.
 
 ## How to do it
 
 ### Gating on a sub-command word
 
-`BasicDecisionCliCommandFactory<T>` (a `CliCommandFactory<T>` whose
-`Create()` is already implemented, so you only write `CanCreateWhen`)
-pairs naturally with `SubCommandIs`:
+`BasicDecisionCliCommandFactory<T>` implements `Create()` for you, leaving
+`CanCreateWhen` alone to write. It pairs naturally with `SubCommandIs`:
 
 ```csharp
 public record StartCliCommand : CliCommand;
@@ -24,15 +22,15 @@ public class StartCliCommandFactory : BasicDecisionCliCommandFactory<StartCliCom
 }
 ```
 
-`/start test` resolves to `StartCliCommand`; `/start` (or `/start
-anything-else`) doesn't — it falls through to "no matching command"
-instead, the same as if no factory existed at all.
+`/start test` resolves to `StartCliCommand`. `/start`, and `/start
+anything-else`, fall through to "no matching command", exactly as though
+no factory existed.
 
 ### Gating on what already happened in this run
 
-Any `CliCommandFactory<T>` can check `LastCommandWas<TPriorCommand>()`
-or query an artefact directly, to make a command only available once
-some earlier step has actually happened:
+Any `CliCommandFactory<T>` can call `LastCommandWas<TPriorCommand>()` or
+query an artefact, offering a command only once an earlier step has
+happened:
 
 ```csharp
 public class ConfirmDeleteCliCommandFactory : CliCommandFactory<ConfirmDeleteCliCommand>
@@ -43,45 +41,46 @@ public class ConfirmDeleteCliCommandFactory : CliCommandFactory<ConfirmDeleteCli
 }
 ```
 
-Typing `/confirm-delete` before ever running `/request-delete` fails
-to resolve — there's no way to reach the confirmation step out of
-order.
+Typing `/confirm-delete` before `/request-delete` fails to resolve, so
+nobody reaches the confirmation step out of order.
+
+Despite its name, `LastCommandWas<T>()` returns `true` when `T` ran at any
+point in the current run, not only when it ran most recently. Use it to
+ask "has this step happened yet", never "is this the step immediately
+before".
 
 ## Common mistakes
 
-**Putting the same check inside the handler instead of
-`CanCreateWhen`.** If a handler runs and then checks "wait, was this
-actually valid to call?", that check happened one step too late — the
-command already resolved and ran. Move eligibility checks into
-`CanCreateWhen` so an invalid ask fails to resolve at all, before any
+**Putting the check inside the handler instead of `CanCreateWhen`.** A
+handler that runs and then asks "was this valid to call?" asks one step
+too late; the command already resolved and ran. Move eligibility checks
+into `CanCreateWhen`, where an invalid ask fails to resolve before any
 handler logic runs.
 
 **Assuming a `false` from `CanCreateWhen` gives the user a helpful
-error.** It doesn't — the ask just fails to resolve to any command,
-the same as a typo or an unrecognized instruction name. If the user
-needs to know *why* (e.g. "you need to select an account first"),
-that's on you to communicate some other way — there's no built-in
-"almost matched but rejected" message.
+error.** The ask fails to resolve to any command, like a typo or an
+unknown name, and no "almost matched but rejected" message exists. To tell
+the user why — "you need to select an account first" — declare the valid
+moves on the previous command with `[CliNextCommandIs(name, description)]`.
+Mid-run, an ask resolving to nothing then prints those suggestions instead
+of failing silently.
 
-**Writing a second factory for the same command type to try to
-route between two behaviors.** `AddCommandsFromAssembly` throws at
-startup ("Multiple factories found for command type") if it finds
-more than one `CliCommandFactory<T>` for the same `T` in the scanned
-assembly — `CanCreateWhen` gates whether *one* factory's command is
-offered, it doesn't let you register competing factories for the same
-command type. If you need genuinely different behavior for different
-inputs, either branch inside one `Create()`/handler, or give each
-variant its own distinct command type.
+**Writing a second factory for the same command type to route between two
+behaviors.** `AddCommandsFromAssembly` throws at startup ("Multiple
+factories found for command type") on finding two `CliCommandFactory<T>`
+for one `T` in the scanned assembly. `CanCreateWhen` gates whether *one*
+factory's command is offered; it never lets competing factories share a
+command type. For genuinely different behavior, branch inside one
+`Create()` or handler, or give each variant its own command type.
 
 ## Learn more
 
-- [writing-a-basic-command.md](writing-a-basic-command.md) — when you
-  need a factory at all, versus the automatic one.
+- [writing-a-basic-command.md](writing-a-basic-command.md) — when you need
+  a factory, versus the automatic one.
 - [reading-command-arguments.md](reading-command-arguments.md) and
   [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
-  the argument/artefact helpers available inside `CanCreateWhen` and
-  `Create()` alongside `SubCommandIs`/`LastCommandWas`.
+  the argument and artefact helpers available inside `CanCreateWhen` and
+  `Create()`, alongside `SubCommandIs` and `LastCommandWas`.
 - [docs/concepts/command-registration.md](../concepts/command-registration.md) —
-  exactly how `CanCreateWhen` fits into command resolution: keyed DI
-  narrows candidates first, `CanCreateWhen` picks among them second,
-  first match wins.
+  how `CanCreateWhen` fits into command resolution: keyed DI narrows the
+  candidates, `CanCreateWhen` picks among them, first match wins.

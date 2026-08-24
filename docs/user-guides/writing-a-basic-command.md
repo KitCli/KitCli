@@ -2,32 +2,38 @@
 
 ## What this is for
 
-Every piece of behavior in a KitCli app is a command: a marker type
-the user's typed ask resolves to, plus a handler that does the work.
-This is the minimum you need to add one.
+Every piece of behavior in a KitCli app is a command: a marker type the
+user's ask resolves to, plus a handler that does the work. This is the
+minimum to add one.
 
 ## How to do it
 
-Three pieces, all in the assembly your app registers:
+Two pieces, in the assembly your app registers:
 
 ```csharp
 // 1. The command — just a marker type.
-public record GreetCliCommand(string Name) : CliCommand;
+public record GreetCliCommand : CliCommand;
 
-// 2. The handler — does the actual work.
+// 2. The handler — does the work.
 public class GreetCliCommandHandler : CliCommandHandler<GreetCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(GreetCliCommand command, CancellationToken ct)
         => FinishThisCommand()
-            .ByFinallySaying($"Hello, {command.Name}!")
+            .ByFinallySaying("Hello!")
             .EndAsync();
 }
 ```
 
-That's it — no factory needed here. A command's invocation name is
-derived automatically from its type name: `GreetCliCommand` → `/greet`
-(and the shorthand `/g`, the first letter of each capitalized word).
-Register every command in the assembly once, from your
+No factory needed. A command's invocation name comes from its type name:
+`GreetCliCommand` → `/greet`, plus the shorthand `/g`, the first letter of
+each capitalized word.
+
+**Name the type `...CliCommand`, not `...Command`.** The derivation strips
+the word `CliCommand`. A type called `GreetCommand` keeps its suffix and
+answers to `/greet-command`.
+
+Commands in the same assembly as your `Program.cs` register themselves.
+For commands anywhere else, register that assembly once from your
 `ICliAppRegistry`:
 
 ```csharp
@@ -38,15 +44,16 @@ public class MyAppRegistry : ICliAppRegistry
 }
 ```
 
-### When you actually need a factory
+### When you need a factory
 
-`GreetCliCommand` above has a parameterless-constructor-free record
-whose args come straight from the constructor — but a command factory
-is what builds a command from the current ask's typed arguments,
-prior artefacts, or arbitrary decision logic. Write one only when the
-command needs one of those to be constructed:
+A factory builds a command from the current ask's typed arguments, prior
+artefacts, or a runtime decision. Write one when your command needs any of
+those, which includes every command with constructor parameters — a
+`GreetCliCommand` taking the name to greet:
 
 ```csharp
+public record GreetCliCommand(string Name) : CliCommand;
+
 public class GreetCliCommandFactory : CliCommandFactory<GreetCliCommand>
 {
     public override bool CanCreateWhen() => true;
@@ -59,36 +66,49 @@ public class GreetCliCommandFactory : CliCommandFactory<GreetCliCommand>
 }
 ```
 
-If you don't write one, and the command type has a public
-parameterless constructor, KitCli builds one for you automatically
-(`BasicCliCommandFactory<T>`) — that's what made the first example
-above work with zero factory code.
+Three base classes exist, so you write only the half you care about:
+
+| Base class | Write | Use when |
+|---|---|---|
+| `CliCommandFactory<T>` | both methods | you need custom building *and* gating |
+| `BasicCreationCliCommandFactory<T>` | `Create()` only | the command always applies, but needs building |
+| `BasicDecisionCliCommandFactory<T>` | `CanCreateWhen()` only | the command is `new T()`, but applies only sometimes |
+
+Skip the factory when the command type has a public parameterless
+constructor and needs no gating. KitCli registers
+`BasicCliCommandFactory<T>` for it, which is what makes the first example
+above work with no factory code.
 
 ## Common mistakes
 
-**Writing a factory for every command out of habit.** If a command has
-a parameterless constructor and needs no arguments, artefacts, or
-conditional creation logic, a factory is pure boilerplate — skip it.
+**Writing a factory for every command out of habit.** Given a
+parameterless constructor and no need for arguments, artefacts, or
+conditional creation, a factory is pure boilerplate. Skip it.
 
-**Forgetting `CanCreateWhen()` decides whether the command is offered
-at all, not just how it's built.** Returning `false` doesn't fail
-loudly — the instruction resolves to "no matching command" instead
-(see [reading-command-arguments.md](reading-command-arguments.md) for
-reading the arguments `CanCreateWhen` and `Create` would use to decide).
+**Giving a command constructor parameters but no factory.** The automatic
+`BasicCliCommandFactory<T>` covers only types with a public parameterless
+constructor. A positional record like `GreetCliCommand(string Name)` with
+no factory gets no factory at all, and startup says nothing. The command
+is unreachable when someone types its name.
 
-**Expecting the handler to see the raw typed ask.** By the time
-`HandleCommand` runs, argument parsing is already done — the command
-instance you constructed (in a factory, or via its constructor) is all
-the handler ever sees.
+**Forgetting that `CanCreateWhen()` decides whether the command is offered
+at all, not only how it is built.** Returning `false` fails quietly: the
+instruction resolves to "no matching command." See
+[reading-command-arguments.md](reading-command-arguments.md) for the
+arguments `CanCreateWhen` and `Create` read to decide.
+
+**Expecting the handler to see the raw ask.** Argument parsing finishes
+before `HandleCommand` runs. The command instance you constructed, in a
+factory or through its constructor, is all the handler sees.
 
 ## Learn more
 
 - [reading-command-arguments.md](reading-command-arguments.md) — using
   arguments from the current ask inside a factory.
 - [creating-a-registry.md](creating-a-registry.md) — wiring
-  `AddCommandsFromAssembly` up for a real app, including
-  settings-driven registries.
+  `AddCommandsFromAssembly` up for a real app, settings-driven registries
+  included.
 - [docs/concepts/command-registration.md](../concepts/command-registration.md) —
-  how a command's name/shorthand is derived, and exactly how
-  `AddCommandsFromAssembly` decides between your factory and the
-  automatic one.
+  how a command's name and shorthand are derived, and how
+  `AddCommandsFromAssembly` chooses between your factory and the automatic
+  one.

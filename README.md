@@ -69,9 +69,13 @@ declared anywhere: `HelloCliCommand` → `hello` / `h`.
   [showing a paged table](docs/user-guides/showing-a-paged-table.md),
   [remembering your own state](docs/user-guides/remembering-your-own-state.md),
   and [gating a command with CanCreateWhen](docs/user-guides/gating-a-command-with-cancreatewhen.md).
-- [`docs/concepts/`](docs/concepts/) — how each subsystem actually
-  works today: [instruction parsing](docs/concepts/instruction-parsing-pipeline.md),
+- [`docs/concepts/`](docs/concepts/) — how each subsystem works today:
+  [command registration](docs/concepts/command-registration.md),
+  [instruction parsing](docs/concepts/instruction-parsing-pipeline.md),
   the [workflow state machine](docs/concepts/workflow-run-state-machine.md),
+  the [host loop](docs/concepts/cli-app-host.md),
+  [CLI I/O](docs/concepts/cli-io.md) and
+  [outcome writing](docs/concepts/outcome-writing.md),
   [outcomes](docs/concepts/outcomes.md) and
   [artefacts](docs/concepts/artefacts.md),
   [aggregators](docs/concepts/aggregators.md) and

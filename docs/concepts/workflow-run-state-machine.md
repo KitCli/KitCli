@@ -2,12 +2,12 @@
 
 ## Premise
 
-Running a KitCli app means repeatedly turning user input ("asks") into
-commands and outcomes, possibly across many separate command
-executions, without losing track of what's already happened. `ICliWorkflow`
-(`CliWorkflow.cs`) holds a list of `ICliWorkflowRun`s; each
-`CliWorkflowRun` (`Run/CliWorkflowRun.cs`) is its own small state machine
-tracking one execution from "ask received" through to "finished."
+Running a KitCli app means turning user input ("asks") into commands and
+outcomes over and over, often across many command executions, without
+losing track of what has happened. `ICliWorkflow` (`CliWorkflow.cs`) holds
+a list of `ICliWorkflowRun`s. Each `CliWorkflowRun`
+(`Run/CliWorkflowRun.cs`) is its own small state machine, tracking one
+execution from "ask received" to "finished."
 
 ## Problem
 
@@ -20,30 +20,28 @@ At any point, the host (`CliApp`) needs answers to a few questions:
 - What happens if parsing or validation fails, or the command handler
   throws?
 
-Answering those consistently needs one enforced set of legal
-transitions, not scattered booleans — otherwise a run can end up in an
-inconsistent state (e.g. simultaneously "reached its final outcome" and
-"still running"), which surfaces as a silent bug rather than an
-exception.
+Answering those consistently takes one enforced set of legal
+transitions, not scattered booleans. Otherwise a run reaches an
+inconsistent state — "reached its final outcome" and "still running" at
+once — which shows up as a silent bug rather than an exception.
 
-Concretely: `NextRun()` only ever reuses a run that hasn't reached
-`Finished`, and every one of the four statuses that terminate a run
-(`ReachedFinalOutcome`, `InvalidAsk`, `Exceptional`, `InvalidMovePastAsk` —
-see the table below) drives the run all the way to `Finished` before
-`RespondToAsk`/`MoveToNext` return control. Together those two guarantees
-are what rule out an already-`Finished` run being handed back for a fresh
-ask: the state machine has no `Finished -> *` transition, so if either
-guarantee ever slipped, the next ask on that run would crash with an
-uncaught `ImpossibleStateChangeException`.
+Two guarantees hold the line. `NextRun()` reuses only a run that has not
+reached `Finished`, and each of the four terminating statuses
+(`ReachedFinalOutcome`, `InvalidAsk`, `Exceptional`, `InvalidMovePastAsk`,
+see the table below) drives the run to `Finished` before `RespondToAsk` or
+`MoveToNext` returns. Together they rule out handing an already-`Finished`
+run a fresh ask. The state machine has no `Finished -> *` transition, so
+were either guarantee to slip, the next ask on that run would crash with
+an uncaught `ImpossibleStateChangeException`.
 
 ## Solution
 
 ### The two levels
 
-`CliWorkflow` is the top-level object: a `Runs` list plus a `Status`
-(`Started`/`Stopped`). `NextRun()` does **not** always create a new run —
-it reuses the single run in `Runs` that hasn't yet reached `Finished`, and
-only calls `CreateNewRun()` if none exists:
+`CliWorkflow` is the top-level object: a `Runs` list plus a `Status` of
+`Started` or `Stopped`. `NextRun()` does **not** always create a run. It
+reuses the single run in `Runs` short of `Finished`, calling
+`CreateNewRun()` only when none exists:
 
 ```csharp
 public ICliWorkflowRun NextRun()
@@ -55,21 +53,27 @@ public ICliWorkflowRun NextRun()
 }
 ```
 
-Each `CliWorkflowRun` exposes exactly two entry points a caller can call:
-`RespondToAsk(string? ask)` — parse fresh user input and run the command
-it resolves to — and `MoveToNext()` — continue the *same run* into its
-next command, using what a prior outcome already queued up, without
-waiting on a new ask (used for things like "show the next page").
+(`ClIWorkflowRunStateStatus` is spelled that way in the source — a typo in
+the public enum's own name, tracked as
+[#41](https://github.com/KitCli/KitCli/issues/41).)
 
-A run isn't one command; it's the whole arc across as many commands/asks
-as it takes to reach a final outcome — `MoveToNext` is just the entry
-point for the steps in that arc that don't need fresh input to keep
-going.
+Each `CliWorkflowRun` exposes two entry points:
+
+- `RespondToAsk(string? ask)` parses fresh user input and runs the command
+  it resolves to.
+- `MoveToNext()` continues the *same run* into its next command, using
+  what a prior outcome queued, without waiting on a new ask. Paging
+  through a list uses this.
+
+A run is not one command. It is the whole arc across as many commands and
+asks as reaching a final outcome takes, and `MoveToNext` is the entry
+point for those steps in the arc needing no fresh input.
 
 `CreateNewRun()` also creates a DI scope for the run it builds
 (`serviceScopeFactory.CreateScope()`) and resolves that run's
 `IInstructionParser`, `IInstructionValidator`, `ICliWorkflowCommandProvider`,
-`ISender`, and `IPublisher` from it, so a `Scoped`-registered service gets
+`IOptions<InstructionSettings>`, `ISender`, and `IPublisher` from it, so a
+`Scoped`-registered service gets
 one instance per run rather than behaving like a singleton for the whole
 process. `CliWorkflowRun` holds that scope and disposes it in
 `UpdateStateWhenFinished()`, the same guard described below that fires
@@ -77,24 +81,23 @@ process. `CliWorkflowRun` holds that scope and disposes it in
 [0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md)
 for why a run, rather than a single command, is the scope boundary.
 
-`CreateNewRun()` passes `CliWorkflow`'s own `CancellationToken` into the same
-constructor call, alongside the scope. `CliWorkflowRun` stores it privately
-and uses it internally when it calls `ISender.Send` — neither
-`RespondToAsk` nor `MoveToNext` takes a `CancellationToken` parameter;
-cancellation is ambient to the run from the moment it's created, the same
-way the DI scope is, rather than something every caller has to keep
-supplying. `CliWorkflow.InterruptCurrentRun()` is what a host (`CliApp`)
-calls to signal this — see
+`CreateNewRun()` passes `CliWorkflow`'s own `CancellationToken` into that
+same constructor call, alongside the scope. `CliWorkflowRun` keeps it
+private and uses it when calling `ISender.Send`. Neither `RespondToAsk`
+nor `MoveToNext` takes a `CancellationToken` parameter: cancellation is
+ambient to the run from creation, as the DI scope is, rather than
+something every caller keeps supplying. A host (`CliApp`) signals it
+through `CliWorkflow.InterruptCurrentRun()` — see
 [0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
-and [cli-app-host.md](cli-app-host.md) for how a Ctrl+C reaches it.
+and [cli-io.md](cli-io.md) for how a Ctrl+C reaches it.
 
 ### The state machine itself
 
-The run's state (`CliWorkflowRunState.cs`) is the actual finite state
-machine: an append-only history of every status change, plus a fixed
-table of allowed from/to pairs. Changing status looks up the most
-recently reached one, checks that table, and throws if the transition
-isn't listed — the table is the entire contract for what's legal:
+The run's state (`CliWorkflowRunState.cs`) is the finite state machine:
+an append-only history of every status change, plus a fixed table of
+allowed from/to pairs. Changing status looks up the most recent status,
+checks the table, and throws when the transition is missing. That table
+is the entire contract:
 
 | From | To |
 |---|---|
@@ -107,10 +110,9 @@ isn't listed — the table is the entire contract for what's legal:
 | `InvalidMovePastAsk` | `Finished` |
 | `ReachedFinalOutcome` | `Finished` |
 
-Note that `ReachedReusableOutcome` and `MovePastAsk` both loop back to
-`Running` rather than going straight to `Finished` — that loop is how a
-multi-turn or multi-page run keeps going without ending the state
-machine.
+`ReachedReusableOutcome` and `MovePastAsk` both loop back to `Running`
+rather than heading straight for `Finished`. That loop is how a multi-turn
+or multi-page run keeps going without ending the state machine.
 
 ### Walking the actual flow
 
@@ -123,7 +125,7 @@ flowchart TD
     C -- yes --> E{command factory found?}
     E -- "no (NoCommandGeneratorException)" --> H{reached ReachedReusableOutcome before?}
     H -- no --> D2["Running (then immediately InvalidAsk)"] --> INV
-    H -- yes --> RRO2["no state change — stays at ReachedReusableOutcome"]
+    H -- yes --> RRO2["no state change — suggest declared next commands"]
     E -- yes --> D[Running] --> F[ExecuteCommand]
     F -- throws --> EXC[Exceptional] --> FIN
     F -- outcomes returned --> G{last outcome}
@@ -145,14 +147,13 @@ flowchart TD
 - If no factory exists for the instruction (`NoCommandGeneratorException`):
   - If the run has never reached `ReachedReusableOutcome` →
     `ChangeTo(Running, instruction)`, then `ChangeTo(InvalidAsk)`, then
-    explicitly calls `UpdateStateWhenFinished()` itself, because this
-    catch fires *before* `ExecuteCommand` is ever reached — there's no
-    `ExecuteCommand`-owned `finally` block to fall through to here.
-  - If the run *has* reached `ReachedReusableOutcome` → makes **zero**
-    state changes and returns early. The run stays exactly at its
-    reusable checkpoint instead of being forced to `Finished`, so the
-    next `RespondToAsk`/`MoveToNext()` call still has that checkpoint's
-    context available.
+    `UpdateStateWhenFinished()` explicitly. This catch fires *before*
+    `ExecuteCommand` is reached, so no `finally` block downstream can
+    finish the run.
+  - If the run *has* reached `ReachedReusableOutcome` → **zero** state
+    changes, returning `SuggestNextCommands(...)`. The run holds its
+    reusable checkpoint instead of being forced to `Finished`, so the next
+    `RespondToAsk` or `MoveToNext()` still has that context.
 - If a command *is* found → `ChangeTo(Running, instruction)`, then hands
   off to `ExecuteCommand`.
 
@@ -161,7 +162,10 @@ flowchart TD
   `RanCliCommandOutcome` marker to the returned outcomes, publishes any
   `ReactionOutcome`s via `IPublisher`, then calls `UpdateStateAfterOutcome`
   with the full outcome array.
-- Any exception anywhere in that → `ChangeTo(Exceptional)`.
+- Any exception anywhere in that → `ChangeTo(Exceptional)`, and the run
+  returns a single `ExceptionOutcome` carrying that exception.
+  `TerminalCliApp` rethrows it (see [cli-app-host.md](cli-app-host.md));
+  `ArgsCliApp` prints it.
 - A `finally` block always calls `UpdateStateWhenFinished()` on the way
   out, whichever path was taken.
 
@@ -174,66 +178,85 @@ mean) to decide the next status:
   now waiting on a `MoveToNext()` call, not a fresh ask).
 - Any other reusable outcome → `ReachedReusableOutcome`.
 
-`UpdateStateWhenFinished` checks whether the run has *ever* reached one
-of the four "run over" statuses (`ReachedFinalOutcome`, `InvalidAsk`,
-`Exceptional`, `InvalidMovePastAsk`) and, if so, transitions to `Finished`
+`UpdateStateWhenFinished` asks whether the run has *ever* reached one of
+the four "run over" statuses — `ReachedFinalOutcome`, `InvalidAsk`,
+`Exceptional`, `InvalidMovePastAsk`. If so, it transitions to `Finished`
 and disposes the run's DI scope.
 
-Because it checks the run's whole history rather than just the most
-recent change, it's safe to call from more than one place — `RespondToAsk`
-calls it directly after each of its two `InvalidAsk` branches and again in
-its `NoCommandGeneratorException` catch, `MoveToNext` calls it after its
-`InvalidMovePastAsk` branch, and `ExecuteCommand`'s `finally` calls it on
-every path through there — without double-finishing a run that's already
-finished. Every one of those call sites matters: a status being a legal
-dead end in the transition table is not, by itself, enough — the code
-must also actually call `UpdateStateWhenFinished()` at that dead end, or
-the run stays one step short of `Finished` and `NextRun()` treats it as
-still active.
+It reads the whole history rather than the most recent change, so several
+places call it safely, without double-finishing a run: `RespondToAsk`
+after each of its two `InvalidAsk` branches and again in its
+`NoCommandGeneratorException` catch, `MoveToNext` after its
+`InvalidMovePastAsk` branch, and `ExecuteCommand`'s `finally` on every
+path.
 
-`MoveToNext` is only valid if some outcome in the run's history so far
-was a `NextCliCommandOutcome` (`IsValidMovePastAsk`); it takes the
-**last** such outcome and re-executes its `NextCommand` through the same
-`ExecuteCommand` path.
+Every one of those call sites matters. A status being a legal dead end in
+the transition table settles nothing by itself; the code must call
+`UpdateStateWhenFinished()` at that dead end, or the run stops one step
+short of `Finished` and `NextRun()` treats it as active.
+
+`MoveToNext` is valid only when some outcome in the run's history was a
+`NextCliCommandOutcome` (`IsValidMovePastAsk`). It takes the **last** such
+outcome and re-executes its `NextCommand` down the same `ExecuteCommand`
+path.
+
+### Suggesting what to type next
+
+The parked-at-a-checkpoint branch above returns `SuggestNextCommands`. It
+answers the case of a user mid-flow — paging through a list, say — typing
+something that resolves to no command. Instead of silence, the run offers
+the moves the last command declared:
+
+1. Find the most recent `RanCliCommandOutcome` in the run's history, and
+   take the type of the command it carries.
+2. Read that type's `[CliNextCommandIs(name, description)]` attributes via
+   `TypeExtensions.GetCliNextCommandNames()`.
+3. Return one `SuggestionOutcome` per declared name, each prefixed with the
+   configured instruction prefix (`/` by default).
+
+A command declaring none leaves the run returning a single
+`NothingOutcome`, the silent result. See
+[0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
+
+`RespondToAsk`'s three early exits — empty ask, failed validation,
+unresolved ask on a fresh run — each return a single `NothingOutcome` too,
+as does an invalid `MoveToNext`.
 
 ## Constraints & tradeoffs
 
-**An explicit transition table as data, over inline conditionals.**
-Illegal transitions throw immediately with a clear message pointing at
-exactly which from/to pair was rejected — at the cost of the table
-needing to be kept in sync by hand every time a status or transition is
-added. Nothing generates it from the code that actually performs
+**An explicit transition table as data, over inline conditionals.** An
+illegal transition throws at once, naming the rejected from/to pair. The
+cost is hand-maintenance: every new status or transition must be added to
+the table, and nothing generates it from the code performing the
 transitions.
 
-**There must never be more than one active run per workflow — enforced by `SingleOrDefault`, not the type system.**
-`CliWorkflow.NextRun()` assumes there is never more than one run in
-`Runs` that hasn't reached `Finished`. That's true by construction, not
-by luck: the only caller of `NextRun()` is
-`CliApp.Run`'s own loop (`KitCli/CliApp.cs`), which awaits a run to
-completion before it ever loops back around to ask `_workflow` for the
-next one. Nothing else in KitCli calls `NextRun()` concurrently.
+**One active run per workflow, enforced by `SingleOrDefault` rather than
+the type system.** `CliWorkflow.NextRun()` assumes `Runs` never holds two
+runs short of `Finished`. Construction guarantees that: its only callers
+are `TerminalCliApp.Run`'s loop and `ArgsCliApp.Run`'s single pass, both
+in `KitCli/`. The loop awaits a run to completion before asking for the
+next; the single pass asks once. No other production code calls it, and
+the tests that do never call it concurrently.
 
-If that ever changed — a second caller driving the same `ICliWorkflow`,
-or a host that doesn't await each run to completion before starting
-another — `SingleOrDefault` would throw a generic
-`InvalidOperationException` on the *next* call, not necessarily at the
-moment the second run was actually created, and not a domain-specific
-error type. This is a known, tracked gap, not a deliberate choice.
+Were that to change — a second caller driving the same `ICliWorkflow`, or
+a host starting a run before the last finished — `SingleOrDefault` would
+throw a generic `InvalidOperationException` on the *next* call, rather
+than a domain error when the second run appeared. Tracked as
+[#42](https://github.com/KitCli/KitCli/issues/42).
 
-**Run and state-change history are never evicted.** Both
-`CliWorkflow.Runs` and `CliWorkflowRunState.Changes` simply grow for the
-life of the process. Fine for a short CLI invocation; worth knowing
-about before reusing a long-lived `CliWorkflow` in, say, a long-running
-host process.
+**Run and state-change history are never evicted.** `CliWorkflow.Runs`
+and `CliWorkflowRunState.Changes` both grow for the life of the process.
+That suits a short CLI invocation, but check it before reusing a
+long-lived `CliWorkflow` inside a long-running host. Tracked as
+[#23](https://github.com/KitCli/KitCli/issues/23).
 
 ## Questions & answers
 
-**What decides whether a run continues after a command, versus ending?**
-The *last* outcome the handler returned — see [outcomes.md](outcomes.md)
-for what outcomes and `OutcomeKind` mean. This doc only covers how that
-decision maps onto run state, not the outcome model itself. A command
-handler that ends the run just needs its last outcome to be `Final`-kind
-— e.g. the real `ExitCliCommandHandler`
+**What decides whether a run continues after a command, or ends?**
+The *last* outcome the handler returned; see [outcomes.md](outcomes.md)
+for the outcome model. This doc covers only how that decision maps onto
+run state. To end the run, a handler needs its last outcome to be
+`Final`-kind, as in `ExitCliCommandHandler`
 (`KitCli.Workflow.Commands/Exit/ExitCliCommandHandler.cs`):
 
 ```csharp
@@ -247,24 +270,23 @@ public override Task<Outcome[]> HandleCommand(ExitCliCommand command, Cancellati
 
 `FinalSayOutcome(Something)` (`Outcomes/Final/FinalSayOutcome.cs`) is
 `Outcome(OutcomeKind.Final)` — its last-outcome status drives
-`UpdateStateAfterOutcome` straight to `ReachedFinalOutcome`. (Yes, its
-message property really is named `Something`, not `Message` — a known,
-tracked naming slip, not a typo in this doc.)
+`UpdateStateAfterOutcome` straight to `ReachedFinalOutcome`. Its message
+property really is named `Something`, not `Message`; that's a naming slip
+tracked as [#37](https://github.com/KitCli/KitCli/issues/37), not a typo
+in this doc.
 
 **Can two runs be "in progress" on the same workflow at once?**
-Not by design — see the constraint above. `NextRun()` always resumes the
-one incomplete run if one exists, rather than starting a second one
-alongside it.
+No; see the constraint above. `NextRun()` resumes the one incomplete run
+whenever it exists, rather than starting a second alongside it.
 
-**Why does `RespondToAsk` sometimes call `UpdateStateWhenFinished()` directly instead of just letting `ExecuteCommand` handle it?**
-Because the `NoCommandGeneratorException` case never reaches
-`ExecuteCommand` at all — there's no command to execute, so there's no
-`finally` block downstream to rely on. `RespondToAsk` finishes the run
-itself, right where the failure that ends it actually happened.
+**Why does `RespondToAsk` call `UpdateStateWhenFinished()` directly instead of leaving it to `ExecuteCommand`?**
+The `NoCommandGeneratorException` case never reaches `ExecuteCommand`.
+With no command to execute, no downstream `finally` block exists to rely
+on, so `RespondToAsk` finishes the run where the failure happened.
 
 ## Related concepts
 
-- [outcomes.md](outcomes.md) — what a command handler actually returns,
+- [outcomes.md](outcomes.md) — what a command handler returns,
   and how `OutcomeKind` maps onto the state transitions this doc covers.
 - [artefacts.md](artefacts.md) — `CliWorkflowCommandProvider` builds the
   artefact list from the run's outcome history before a command factory
@@ -278,5 +300,10 @@ itself, right where the failure that ends it actually happened.
 - [0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md) —
   why `CreateNewRun` creates a DI scope per run and `CliWorkflowRun`
   disposes it in `UpdateStateWhenFinished`.
-- [cli-app-host.md](cli-app-host.md) — what drives `RespondToAsk`/
-  `MoveToNext` from outside: the host loop that calls `NextRun()`.
+- [0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md) —
+  why an unresolved ask at a reusable checkpoint returns declared
+  suggestions rather than silence.
+- [cli-app-host.md](cli-app-host.md) — what drives `RespondToAsk` and
+  `MoveToNext` from outside: the host loop calling `NextRun()`.
+- [cli-io.md](cli-io.md) — the seam a Ctrl+C arrives through, on its way
+  to `InterruptCurrentRun`.

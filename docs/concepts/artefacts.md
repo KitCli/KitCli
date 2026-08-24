@@ -2,20 +2,18 @@
 
 ## Premise
 
-A later command in the same run often needs something an earlier
-command produced — a page size set two commands ago, a filter chosen
-earlier, an aggregator a list command built. `Artefact` is the reusable
-form of that: the same data, made queryable by type and name across the
-whole run.
+A later command in the same run often needs something an earlier command
+produced: a page size set two commands ago, a filter chosen earlier, an
+aggregator a list command built. `Artefact` is that data made queryable
+by type and name across the whole run.
 
 ## Problem
 
-An [outcome](outcomes.md) is scoped to the command that returned it —
-nothing about it is addressable by a later command's factory. Something
-has to convert "what just happened" into "what's queryable, by type and
-name, across the whole run," without forcing every outcome to also be a
-well-typed, name-addressable value — even purely informational ones
-like `SayOutcome`, which have no reason to be looked up later.
+An [outcome](outcomes.md) belongs to the command that returned it, and no
+later factory can address it. Something must convert "what just happened"
+into "what's queryable across the run" — without forcing every outcome to
+become a well-typed, name-addressable value. Purely informational ones
+like `SayOutcome` have no reason to be looked up later.
 
 ## Solution
 
@@ -38,25 +36,32 @@ public class ThresholdArtefactFactory : ArtefactFactory<ThresholdOutcome>
 ```
 
 `ArtefactFactory<TOutcome>` (`Artefacts/ArtefactFactory.cs`) implements
-`IArtefactFactory.For(Outcome)` as `outcome is TOutcome` for you — you
-only implement `CreateArtefact`. Every `Artefact<TValue>` derives from
+`IArtefactFactory.For(Outcome)` as `outcome is TOutcome`, leaving you only
+`CreateArtefact`. Every `Artefact<TValue>` derives from
 `AnonymousArtefact(string Name)` and adds a typed `Value`.
 
-**Registration is automatic** — you don't call anything.
-`AddArtefactFactoriesForAssembly`
-(`Extensions/ArtefactServiceCollectionExtensions.cs`) reflection-scans
-the consumer's assembly for every class extending `ArtefactFactory<>`
-and registers it, alongside built-in ones (page size/number, the
-ran-command marker, aggregators, table builders — anything generic gets
-its closed generic factory built via `MakeGenericType` +
-`Activator.CreateInstance`). Write the three types above;
-registration is free.
+**Discovery is automatic; the call that starts it is not.** A registry
+calls `AddArtefactFactoriesForAssembly(assembly)`
+(`Extensions/ArtefactServiceCollectionExtensions.cs`) once per assembly.
+This is a *separate* call from `AddCommandsFromAssembly`, which registers
+commands, factories, and handlers but no artefact factories.
+
+That one call scans the assembly and registers:
+
+- every class extending `ArtefactFactory<>`, like `ThresholdArtefactFactory`
+  above,
+- an `AggregatorArtefactFactory<,>` for every closed `Aggregator<,>`,
+- a `TableBuilderArtefactFactory<,>` for every closed `TableBuilder<,>`.
+
+The generic ones get their closed type from `MakeGenericType` and
+`Activator.CreateInstance`. Four built-in factories register no matter what the
+assembly holds: page size, page number, the ran-command marker, and
+aggregator filters. Write the three types above and registration follows.
 
 ### Using artefacts in a later command
 
-`CliCommandFactory<TCliCommand>` (`Factories/CliCommandFactory.cs`) is
-the base class for command factories that need to inspect prior state.
-It exposes:
+`CliCommandFactory<TCliCommand>` (`Factories/CliCommandFactory.cs`) is the
+base class for command factories that inspect prior state. It exposes:
 
 ```csharp
 protected Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? name = null);
@@ -65,16 +70,16 @@ protected bool AnyArtefact<TArtefactType>(string? name);
 protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand;
 ```
 
-(Argument equivalents — `GetArgument<T>`, `GetRequiredArgument<T>`,
-`AnyArgument<T>` — work the same way over the current instruction's
-parsed arguments, not artefacts; see
-[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md).)
-All of these filter `Artefacts` (a `List<AnonymousArtefact>` the
-workflow engine attaches before your factory runs, via
-`Attach(instruction, artefacts)`) by type — and, if given, by `Name` —
-taking the **last** match. That "last wins" semantics matters: if a
-threshold was set twice in a run, later commands see the most recent
-one.
+The argument equivalents — `GetArgument<T>`, `GetRequiredArgument<T>`,
+`AnyArgument<T>` — work the same way over the current instruction's parsed
+arguments; see
+[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md).
+
+All of them filter `Artefacts` by type, then by `Name` if you give one,
+and take the **last** match. `Artefacts` is a `List<AnonymousArtefact>`
+the workflow engine attaches through `Attach(instruction, artefacts)`
+before your factory runs. "Last wins" matters: set a threshold twice in a
+run, and later commands see the second one.
 
 ```csharp
 public class FilteredListCommandFactory : CliCommandFactory<FilteredListCommand>
@@ -95,71 +100,76 @@ public class FilteredListCommandFactory : CliCommandFactory<FilteredListCommand>
 Command A's handler
   → returns Outcome[]  (see outcomes.md)
       → CliWorkflowRun records it in state history
-          → an ArtefactFactory<TOutcome> converts each Reusable outcome into an Artefact
+          → an ArtefactFactory<TOutcome> converts every outcome it claims into an Artefact
               → Command B's CliCommandFactory<T> queries artefacts by type/name
                   → Command B is constructed with that data
 ```
 
+`CliWorkflowCommandProvider` reruns that conversion over the run's whole
+outcome history on every command resolution. `OutcomeKind` plays no part:
+an outcome becomes an artefact when some registered factory's `For()`
+claims its type, and not otherwise.
+
 ## Constraints & tradeoffs
 
-**Two-stage model (Outcome → Artefact) instead of passing state
-directly.** An outcome is "what just happened, for this command's own
-consumers" (the IO writer, the workflow state machine); an artefact is
-"what's queryable by name/type across the whole run." Collapsing these
-into one type would force every outcome to also be a well-typed,
-name-addressable artefact, even outcomes that are purely informational.
+**Two stages, outcome then artefact, rather than passing state directly.**
+An outcome is what just happened, for this command's own consumers: the IO
+writer and the state machine. An artefact is what stays queryable by name
+and type across the run. Collapsing the two would force every outcome,
+informational ones included, to become a name-addressable artefact.
 
-**Reflection-based automatic registration over manual DI wiring.**
-Saves the boilerplate of registering every factory by hand, at the cost
-of relying on `Activator.CreateInstance` and assembly scanning —
-factories must have a parameterless constructor, and a factory that
-isn't in the scanned assembly silently isn't registered (no error at
-startup).
+**Reflection-based registration over manual DI wiring.** This saves
+registering every factory by hand, at the cost of `Activator.CreateInstance`
+and assembly scanning. Factories need a parameterless constructor. A
+factory registers silently — no startup error — when it sits outside a
+scanned assembly, or when the registry never calls
+`AddArtefactFactoriesForAssembly`. Either way, the first symptom is
+`GetRequiredArtefact` throwing at runtime.
 
-**"Last match wins" for `GetArtefact`/`GetArgument`, not "all matches."**
-Simple and matches the common case (most recent value for a repeated
-setting), but a factory that genuinely needs the *history* of a value
-(not just its latest) has to go around this API and inspect
-`State.AllOutcomeStateChanges()` directly.
+**"Last match wins" for `GetArtefact` and `GetArgument`, not "all
+matches."** This is simple and fits the common case, the most recent value
+of a repeated setting. A factory needing a value's whole *history* must
+bypass this API and read `State.AllOutcomeStateChanges()` directly.
 
 ## Questions & answers
 
-**When does an outcome need an artefact/factory pair, versus just being an outcome?**
-Only when a *later command's factory* needs to look it up. A one-off
-message or table that nothing else references doesn't need an
-artefact — `SayOutcome`/`TableOutcome` have no artefact factories today.
+**When does an outcome need an artefact and factory, rather than being an outcome alone?**
+Only when a *later command's factory* looks it up. A one-off message or
+table that nothing references needs no artefact; `SayOutcome` and
+`TableOutcome` have no artefact factories today.
 
 **Why does `GetRequiredArtefact` throw a bare `Exception` instead of something typed?**
-It does today — that's a known gap, not intentional design. Don't take
-the current exception type as a contract to catch against.
+It does today, as does `GetRequiredArgument` — a gap rather than a
+decision, given the typed `CliException` hierarchy already used elsewhere.
+Tracked as [#34](https://github.com/KitCli/KitCli/issues/34). Treat the
+current exception type as temporary, not a contract to catch against.
 
-**What happens if two artefact factories can produce the same artefact type?**
-`GetArtefact<T>` takes the *last* matching artefact in the list —
-whichever outcome produced it most recently in the run's history, not
-whichever factory registered "first."
+**What happens if two artefact factories produce the same artefact type?**
+`GetArtefact<T>` takes the *last* matching artefact in the list: whichever
+outcome produced it most recently, regardless of which factory registered
+first.
 
-**Where does the artefact list actually come from at runtime?**
-`CliWorkflowCommandProvider` builds it from the run's outcome history
-before attaching it to a factory — a command factory never constructs
-this list itself, only reads from it via the `CliCommandFactory<T>`
-base class helpers.
+**Where does the artefact list come from at runtime?**
+`CliWorkflowCommandProvider` builds it from the run's outcome history and
+attaches it to the factory. A command factory only reads that list,
+through the `CliCommandFactory<T>` helpers.
 
 ## Related concepts
 
-- [outcomes.md](outcomes.md) — what a command handler actually returns;
-  every artefact starts life as a `Reusable` outcome.
+- [outcomes.md](outcomes.md) — what a command handler returns. Every
+  artefact starts as an outcome of any kind; `Reusable` is the usual
+  choice, not a requirement.
 - [workflow-run-state-machine.md](workflow-run-state-machine.md) —
   `CliWorkflowCommandProvider` builds the artefact list from the run's
   outcome history before a factory runs.
 - [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) —
-  `GetArgument<T>`/`GetRequiredArgument<T>` work the same way as the
-  artefact helpers, over the current instruction's parsed arguments
-  instead.
+  `GetArgument<T>` and `GetRequiredArgument<T>` work like the artefact
+  helpers, over the current instruction's parsed arguments.
 - [command-registration.md](command-registration.md) — how the
   `CliCommandFactory<T>` reading these artefacts is itself resolved.
 - [0003-reflection-based-automatic-registration.md](../adr/0003-reflection-based-automatic-registration.md) —
-  why artefact factories are discovered by assembly scan rather than
-  registered by hand.
+  why an assembly scan discovers artefact factories instead of hand
+  registration.
 - [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
   why `GetArtefact`'s "last outcome wins" and factory resolution's "first
-  factory wins" are each instances of one broader pattern.
+  factory wins" are instances of one pattern.

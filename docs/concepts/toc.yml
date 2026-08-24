@@ -2,6 +2,10 @@
   href: command-registration.md
 - name: CliApp host loop
   href: cli-app-host.md
+- name: CLI I/O
+  href: cli-io.md
+- name: Outcome writing
+  href: outcome-writing.md
 - name: Instruction parsing pipeline
   href: instruction-parsing-pipeline.md
 - name: Outcomes

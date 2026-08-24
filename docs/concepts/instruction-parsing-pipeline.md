@@ -2,174 +2,192 @@
 
 ## Premise
 
-A KitCli command is invoked as one line of terminal input, e.g.
+A user invokes a KitCli command as one line of terminal input:
 
 ```
 /spare-money help --argumentOne hello world --argumentTwo 1
 ```
 
-Before any command handler runs, that raw string has to become a typed
-`Instruction` — a prefix, a name, an optional sub-name, and a list of
-typed arguments. `KitCli.Instructions` (and its `.Abstractions` project)
-owns turning free text into that structure; nothing downstream ever
-looks at the raw string again.
+Before any handler runs, that raw string must become a typed
+`Instruction`: a prefix, a name, an optional sub-name, and a list of
+typed arguments. `KitCli.Instructions` and its `.Abstractions` project
+own that conversion. Nothing downstream sees the raw string again.
 
 ## Problem
 
-A command handler needs its arguments as ready-to-use typed values — not
-a raw string it re-parses itself, and not according to a schema it has
-to declare up front for every command.
+A command handler needs its arguments as typed values, ready to use. It
+should neither re-parse a raw string nor declare a schema up front.
 
-Solving that means turning one line of loosely-structured free text (a
-prefix, a name, an optional sub-name, and an arbitrary number of
-`--name value` pairs) into a typed, addressable `Instruction`, without
-hand-rolling tokenizing/type-conversion logic per command, and without a
-schema-declaration step slowing down adding a new one.
+Meeting that means turning one line of loose free text — a prefix, a
+name, an optional sub-name, and any number of `--name value` pairs — into
+a typed, addressable `Instruction`, with no per-command tokenizing and no
+schema step to slow down adding a command.
 
 ## Solution
 
 `InstructionParser.Parse` (`Parsers/InstructionParser.cs`) runs three
-stages in order:
+stages in order.
 
 ### 1. Indexing
 
 `InstructionTokenIndexer.Index` (`Indexers/InstructionTokenIndexer.cs`)
 locates four token regions — `Prefix`, `Name`, `SubName`, `Arguments` —
-as start/end index pairs into the original string, without allocating
-any substrings yet.
+as start/end index pairs into the original string, allocating no
+substrings.
 
-It finds each one by a simple positional rule: the configured prefix
-character (default `/`) at position 0, the first space to end the name,
-the configured argument marker (default `--`) to start the arguments
-span, and everything left between the name and the arguments as the
-sub-name.
+Positional rules find each: the configured prefix character (default `/`)
+at position 0, the first space ending the name, the configured argument
+marker (default `--`) starting the arguments span, and whatever lies
+between the name and the arguments as the sub-name.
 
 ### 2. Extraction
 
-`InstructionTokenExtractor.Extract` (`Extraction/InstructionTokenExtractor.cs`)
-turns those index ranges into actual strings.
+`InstructionTokenExtractor.Extract`
+(`Extraction/InstructionTokenExtractor.cs`) turns those ranges into
+strings.
 
-The raw `Arguments` string then gets split further, into a
+The raw `Arguments` string then splits into a
 `Dictionary<string, string?>`: first on the argument prefix (`--`) to
 separate each `--name value` pair, then on the first space within each
-one to split the name from its value.
+pair to divide name from value. An argument written without a value
+(`--verbose`) takes a `null` value, which matters for typing below.
+
+One wrinkle: the indexer locates the arguments using the *configured*
+argument prefix, while the extractor splits them using the hard-coded
+`InstructionConstants.DefaultArgumentPrefix` (`--`). Configuring a
+different prefix therefore fails halfway through.
 
 ### 3. Typing
 
-Each argument's raw string value still needs a target type. There is no
-per-command schema for this — instead, every `IInstructionArgumentBuilder`
-(`Builders/`) declares:
+Each raw value still needs a target type, and no per-command schema
+supplies one. Instead every `IInstructionArgumentBuilder` (`Builders/`)
+declares:
 
 ```csharp
-bool For(string? argumentValue); // "can I claim this raw value?"
-AnonymousInstructionArgument Create(string name, string? value); // convert it
+bool For(string? argumentValue);                                                  // "can I claim this raw value?"
+AnonymousInstructionArgument Create(string argumentName, string? argumentValue);  // convert it
 ```
 
-`InstructionParser.Parse` picks the **first** registered builder whose
-`For` returns `true` for each argument's raw value. Registration order,
-from `ServiceCollectionExtensions.AddCliInstructionArgumentBuilders`
-(`Extensions/ServiceCollectionExtensions.cs`), is:
+For each argument, `InstructionParser.Parse` takes the **first**
+registered builder whose `For` returns `true`. Registration order, set by
+`ServiceCollectionExtensions.AddCliInstructionArgumentBuilders`
+(`Extensions/ServiceCollectionExtensions.cs`), runs:
 
 ```
 DirectoryInfo → Guid → String → Int → Decimal → DateOnly → Bool
 ```
 
-`BoolInstructionArgumentBuilder.For` unconditionally returns `true` — it
-is the fallback that only ever fires because every builder ahead of it
-gets first refusal.
+That order is deliberate. Each builder's `For` is narrow enough to leave
+the ones behind it their turn:
 
-Order here isn't a convenience, it's the entire contract: move a
-builder, and every argument value that used to be claimed by whatever
-was ahead of it starts being claimed by the new builder instead,
-silently.
+| Builder | Claims a value when |
+|---|---|
+| `DirectoryInfo` | it's a rooted path, or starts with `.` |
+| `Guid` | `Guid.TryParse` succeeds |
+| `String` | it contains at least one letter, and isn't `true`/`false` |
+| `Int` | `int.TryParse` succeeds |
+| `Decimal` | `decimal.TryParse` succeeds |
+| `DateOnly` | `DateTime.TryParse` succeeds |
+| `Bool` | always |
+
+`String` sits ahead of the numeric builders, which is why it tests for a
+letter. Without that test it would claim `--count 5`; with it, `5` falls
+through to `Int`.
+
+`BoolInstructionArgumentBuilder.For` returns `true` unconditionally. It
+serves as the fallback, reached only because every builder ahead of it
+gets first refusal. Its `Create` reads `true` or `false` when the value
+parses as one and returns `true` otherwise, which is what makes a bare
+`--verbose` flag work.
+
+Order is the whole contract, not a convenience. Move a builder and every
+value once claimed by the builder ahead of it silently changes type.
 
 ### Assembly
 
 Each accepted `(name, typed value)` pair becomes an
-`InstructionArgument<T>` (`Arguments/InstructionArgument.cs`) — a record
+`InstructionArgument<T>` (`Arguments/InstructionArgument.cs`), a record
 deriving from the untyped `AnonymousInstructionArgument`.
 
-`Parse` then wraps the prefix, name, sub-name, and argument list into one
+`Parse` wraps the prefix, name, sub-name, and argument list into one
 immutable `Instruction` record (`Instruction.cs`) — the single object
-every command factory and handler downstream actually consumes.
+every command factory and handler downstream consumes. Its four
+properties are `Prefix`, `Name`, `SubInstructionName` (the token regions
+above call this `SubName`), and `Arguments`.
 
 ## Constraints & tradeoffs
 
-**Type inference by testing the raw value against each builder in turn,
-not by a declared schema.** A command handler never has to declare
-"argument `dueDate` is a `DateOnly`" anywhere — it just asks for the
-typed argument by name and gets it.
+**Type inference by testing each raw value, not by a declared schema.** No
+handler declares that "argument `dueDate` is a `DateOnly`"; it asks for
+the typed argument by name and gets it.
 
-The cost is that an argument's type is entirely a property of what its
-raw string looks like, decided by whichever builder's `For()` returns
-`true` first — not a property of the command being invoked. This is why
-builder registration order is load-bearing: inserting a new builder in
-the wrong position changes the resolved type of existing commands'
-arguments without touching those commands at all.
+The cost: an argument's type reflects what its raw string looks like, not
+which command was invoked, and the first `For()` returning `true` settles
+it. That makes registration order load-bearing. Insert a builder in the
+wrong position and existing commands' arguments change type, though those
+commands never changed.
 
-**No escaping/quoting grammar in the tokenizer.** Splitting on a fixed
-argument prefix string (`--`) means that string can never appear
-literally inside an argument's value without corrupting extraction —
-this is a known, tracked gap, not an oversight to route around locally.
+**No escaping or quoting grammar in the tokenizer.** Splitting on a fixed
+`--` means that string can never appear inside a value without corrupting
+extraction. Tracked as
+[#39](https://github.com/KitCli/KitCli/issues/39).
 
 **Culture-sensitive builders.** `IntInstructionArgumentBuilder`,
-`DecimalInstructionArgumentBuilder`, and `DateOnlyInstructionArgumentBuilder`
-all parse with the current thread culture (`int.Parse`, `decimal.Parse`,
-`DateTime.Parse` with no `CultureInfo` argument), not
-`CultureInfo.InvariantCulture` — the same input can parse to a different
-value, or fail to parse at all, depending on the host machine's locale.
-Also a known, tracked gap.
+`DecimalInstructionArgumentBuilder`, and
+`DateOnlyInstructionArgumentBuilder` parse with the current thread culture
+— `int.Parse`, `decimal.Parse`, and `DateTime.Parse` with no `CultureInfo`
+argument — rather than `CultureInfo.InvariantCulture`. The same input can
+therefore yield a different value, or fail outright, depending on the host
+machine's locale. Tracked as
+[#22](https://github.com/KitCli/KitCli/issues/22).
 
 ## Questions & answers
 
 **How do I add a new argument type?**
-There's no supported extension point for this from consuming code today.
+Consuming code has no supported extension point today.
 `AddCliInstructionArgumentBuilders` is a private, fixed sequence of
 `.AddSingleton<IInstructionArgumentBuilder, ...>()` calls inside
-`KitCli.Instructions` itself — the only way to add a builder ahead of
-`BoolInstructionArgumentBuilder` is to edit that method directly, in the
-right position.
+`KitCli.Instructions`. Adding a builder ahead of
+`BoolInstructionArgumentBuilder` means editing that method directly, in
+the right position.
 
-Registering your own `IInstructionArgumentBuilder` from downstream
-consuming code doesn't achieve this: `IServiceCollection` resolves
-`IEnumerable<T>` in registration order, so anything added afterwards
-lands *after* Bool's unconditional `For` — and since Bool matches
-everything, a builder registered behind it would never be reached.
+Registering your own builder downstream cannot work.
+`IServiceCollection` resolves `IEnumerable<T>` in registration order, so
+anything added later lands behind Bool's unconditional `For`, and Bool
+matches everything. Tracked as
+[#9](https://github.com/KitCli/KitCli/issues/9).
 
 **What happens if two builders could both handle a value?**
-The first one registered wins outright — the second is never consulted,
-and there's no ambiguity error raised. This mirrors the same
-first-match-wins, registration-order-decides pattern used for command
-factory resolution elsewhere in KitCli; it isn't unique to argument
-typing.
+The one registered first wins outright. The second is never consulted,
+and nothing raises an ambiguity error. Command factory resolution follows
+the same first-match-wins rule; argument typing is not a special case.
 
-If you're adding a builder (per the answer above), the thing to check
-isn't just "does my `For` correctly identify my own type" — it's "does
-my `For` also accidentally return `true` for values a builder ahead of
-it was supposed to own," since that builder never gets a chance to
+When adding a builder, the question is not only whether your `For`
+identifies your own type. Ask also whether it returns `true` for values a
+builder ahead of it should own, because that builder never gets to
 object.
 
 **Where does an argument's name come from, if I want to look it up later?**
-Whatever the user actually typed after `--` in the terminal input —
-verbatim, with no declared schema behind it. There's no list anywhere of
-"arguments this command accepts" for the parser to check against.
+Whatever the user typed after `--`, verbatim, with no schema behind it. No
+list of "arguments this command accepts" exists for the parser to check
+against, and `DefaultInstructionValidator` checks only that a prefix and a
+name are present.
 
-The name a command factory looks up later (via `GetArgument<T>(name)`,
-see [artefacts.md](artefacts.md)) only resolves if the user happened to
-type that exact `--name`. Get the name wrong on either side — the
-terminal input or the lookup call — and nothing errors; the argument,
-or the lookup, is just silently absent.
+A factory's later lookup (`GetArgument<T>(name)`, see
+[artefacts.md](artefacts.md)) resolves only when the user typed that exact
+`--name`. Get the name wrong on either side and nothing errors: the
+argument, or the lookup, is silently absent.
 
 ## Related concepts
 
-- [artefacts.md](artefacts.md) — `GetArgument<T>`/`GetRequiredArgument<T>`
-  work the same way as the artefact-lookup helpers, over an
+- [artefacts.md](artefacts.md) — `GetArgument<T>` and
+  `GetRequiredArgument<T>` work like the artefact-lookup helpers, over an
   `Instruction`'s parsed arguments instead of the run's outcome history.
 - [workflow-run-state-machine.md](workflow-run-state-machine.md) — where
-  `InstructionParser.Parse`'s output actually gets consumed, as the
-  first step of `RespondToAsk`.
+  `InstructionParser.Parse`'s output is consumed, as the first step of
+  `RespondToAsk`.
 - [command-registration.md](command-registration.md) — how the parsed
-  `Instruction.Name` is turned into a command factory.
+  `Instruction.Name` becomes a command factory.
 - [0004-first-match-wins-resolution.md](../adr/0004-first-match-wins-resolution.md) —
-  why argument builder resolution and command/artefact factory resolution
-  all follow the same first-match-wins rule.
+  why argument builder resolution and command and artefact factory
+  resolution all follow one first-match-wins rule.

@@ -2,10 +2,9 @@
 
 ## Premise
 
-A command handler needs to tell KitCli two things after it runs: does
-the interaction continue, pause for another ask, or end — and what
-should the user actually see. `Outcome` is the single object every
-command handler returns to say both at once.
+After a command runs, its handler must tell KitCli two things: whether
+the interaction continues, pauses for another ask, or ends — and what the
+user should see. `Outcome` says both at once.
 
 ## Problem
 
@@ -32,64 +31,74 @@ public class MyCommandHandler : CliCommandHandler<MyCommand>
 }
 ```
 
-`FinishThisCommand()` just returns `[]` (an empty `OutcomeList`, itself
-a `List<Outcome>`) — every `By...` method appends one `Outcome` and
-returns `this`, so calls chain. `.End()` / `.EndAsync()` materialize the
-list to `Outcome[]` / `Task<Outcome[]>`.
+`FinishThisCommand()` returns an empty `OutcomeList`, itself a
+`List<Outcome>`. Every `By...` method appends one `Outcome` and returns
+`this`, so calls chain. `End()` and `EndAsync()` materialize the list to
+`Outcome[]` and `Task<Outcome[]>`.
 
 Every `Outcome` carries an `OutcomeKind` (`Outcome.cs`):
 
 | Kind | Meaning |
 |---|---|
 | `Anonymous` | No effect on the workflow run — e.g. a plain message. |
-| `Reusable` | The run continues; later commands may query this outcome via its artefact (see [artefacts.md](artefacts.md)). |
+| `Reusable` | The run continues, keeping its accumulated context for the next ask. |
 | `Final` | Ends the workflow run. |
 
-`Outcome.IsReusable` is just `Kind == OutcomeKind.Reusable`. The
-workflow engine looks only at the **last** outcome in the returned
-array to decide whether the run continues, pauses, or ends — see
-[workflow-run-state-machine.md](workflow-run-state-machine.md) for
-exactly how.
+`Outcome.IsReusable` is `Kind == OutcomeKind.Reusable`. To decide whether
+the run continues, pauses, or ends, the workflow engine reads the
+**last** outcome in the array and no other — see
+[workflow-run-state-machine.md](workflow-run-state-machine.md).
 
-Built-in outcomes span all three kinds — a few examples: `SayOutcome` /
-`TableOutcome` (`Anonymous` — just something to show), `PageSizeOutcome`
-/ `AggregatorOutcome` / `NextCliCommandOutcome` (`Reusable` — carry
-state a later command factory can query), `FinalSayOutcome` /
-`CliCommandNotFoundOutcome` (`Final` — end the run). `OutcomeList` has a
-`By...` method for each.
+`Kind` decides that and nothing else. Whether a later command can query
+an outcome depends on whether an artefact factory claims its type.
+`AggregatorFilterOutcome` is `Anonymous` and still becomes a queryable
+artefact. See [artefacts.md](artefacts.md).
+
+Built-in outcomes span all three kinds:
+
+| Kind | Outcomes |
+|---|---|
+| `Anonymous` | `SayOutcome`, `TableOutcome`, `SuggestionOutcome`, `AggregatorFilterOutcome`, `ReactionOutcome` |
+| `Reusable` | `PageSizeOutcome`, `PageNumberOutcome`, `AggregatorOutcome`, `TableBuilderOutcome`, `NextCliCommandOutcome`, `RanCliCommandOutcome` |
+| `Final` | `FinalSayOutcome`, `CliCommandNotFoundOutcome`, `NothingOutcome`, `ExceptionOutcome` |
+
+`OutcomeList` has a `By...` method for every outcome a handler raises
+itself. Three come from the engine instead, so they have none:
+`RanCliCommandOutcome` (prepended to every command's outcomes),
+`SuggestionOutcome`, and `ExceptionOutcome`.
 
 ## Constraints & tradeoffs
 
-**A fixed, closed taxonomy of three kinds.** `OutcomeKind` can't be
-extended with a fourth value — every new outcome type picks one of
-`Anonymous`/`Reusable`/`Final`. This keeps the workflow engine's
-next-state decision simple, at the cost of no room for a kind that
-behaves partway between two of them.
+**A closed taxonomy of three kinds.** Every new outcome type picks one of
+`Anonymous`, `Reusable`, or `Final`; `OutcomeKind` takes no fourth value.
+That keeps the engine's next-state decision simple, and leaves no room
+for a kind behaving partway between two others.
 
-**Duplication across a returned array is unhandled.** If a handler
-returns two `TableOutcome`s, or generally two outcomes of a kind a
-writer only expects one of, nothing merges or rejects them — see the
-`// TODO: Duplication handling` comment on `OutcomeList` itself. This is
-a known, open question left in the source, not documented behavior to
-rely on.
+**Duplication across a returned array is unhandled.** Return two
+`TableOutcome`s — or two outcomes of any kind a writer expects once — and
+nothing merges or rejects them. The `// TODO: Duplication handling`
+comment on `OutcomeList` marks this as an open question. No issue tracks
+it, so rely on neither behavior.
 
 ## Questions & answers
 
 **How do I make a command end the run?**
-Return a `Final`-kind outcome last — `ByFinallySaying(message)` is the
-common case, or build your own record deriving `Outcome(OutcomeKind.Final)`.
+Return a `Final`-kind outcome last. `ByFinallySaying(message)` covers the
+common case; otherwise derive your own record from
+`Outcome(OutcomeKind.Final)`.
 
 **Can the order I add outcomes in change what the run does next?**
-Yes — only the *last* outcome in the returned array is inspected to
-decide the run's next state (see
+Yes. Only the *last* outcome decides the run's next state (see
 [workflow-run-state-machine.md](workflow-run-state-machine.md)). Earlier
-ones in the same call still reach IO writers and artefact factories,
-just not the state decision.
+ones still reach IO writers and artefact factories.
 
-**Where do I look to understand what happens to an outcome after a handler returns it?**
-See [artefacts.md](artefacts.md) — an outcome itself is one-shot,
-scoped to the command that returned it; an artefact is the derived,
-queryable-by-later-commands form built from it.
+**What happens to an outcome after a handler returns it?**
+Two things. An `IOutcomeIoWriter` may display it (see
+[outcome-writing.md](outcome-writing.md)), and an artefact factory may
+convert it into something later commands can query (see
+[artefacts.md](artefacts.md)). The outcome itself is one-shot, scoped to
+the command that returned it; the artefact is the queryable form derived
+from it.
 
 ## Related concepts
 
@@ -97,6 +106,9 @@ queryable-by-later-commands form built from it.
   later commands in the same run can query it.
 - [workflow-run-state-machine.md](workflow-run-state-machine.md) — how
   the last outcome's `Kind` drives the run's state machine.
-- [aggregators.md](aggregators.md) — `AggregatorOutcome`/`AggregatorFilterOutcome`
-  are two of the built-in outcomes.
-- [tables.md](tables.md) — `TableOutcome`/`TableBuilderOutcome` are two more.
+- [aggregators.md](aggregators.md) — `AggregatorOutcome` and
+  `AggregatorFilterOutcome` are two of the built-in outcomes.
+- [tables.md](tables.md) — `TableOutcome` and `TableBuilderOutcome` are
+  two more.
+- [outcome-writing.md](outcome-writing.md) — which outcomes reach the
+  screen, which are silently unwritten, and why.

@@ -2,54 +2,57 @@
 
 ## Premise
 
-Everything documented in
-[workflow-run-state-machine.md](workflow-run-state-machine.md) explains how
-one `CliWorkflowRun` gets from an ask to an outcome. Something still has to
-sit outside that: source the ask (interactively, or from process args),
-decide when to fetch a new ask versus continue an existing run (paging),
-write outcomes back out, and give a consuming application hooks into all of
-that without editing the loop itself. `CliApp` (`KitCli/CliApp.cs`) is the
-shared shell for that; two subclasses — `TerminalCliApp` and `ArgsCliApp`
-(both in `KitCli/`) — supply the two different ways of driving it.
+[workflow-run-state-machine.md](workflow-run-state-machine.md) covers how
+one `CliWorkflowRun` gets from an ask to an outcome. Something must sit
+outside that run: source the ask, decide whether to fetch a new one or
+continue an existing run, hand the outcomes to a writer, and give a
+consuming application hooks into all of it without editing the loop.
+`CliApp` (`KitCli/CliApp.cs`) is that shared shell. Two subclasses in
+`KitCli/` — `TerminalCliApp` and `ArgsCliApp` — supply the two ways of
+driving it.
 
-An app picks its mode once, by which of the two it extends — a single app
-class can't switch between them at runtime; see
+An app picks its mode by which subclass it extends, and cannot switch at
+runtime. See
 [0005-args-driven-cli-app.md](../adr/0005-args-driven-cli-app.md) for why
-that's a deliberate compile-time choice rather than a flag `CliApp.Run`
-branches on.
+a compile-time choice beats a flag `Run` branches on.
 
 ## Problem
 
-A host loop needs to:
+A host loop must:
 
-- Keep running until the workflow stops, without the loop itself knowing
-  *why* it stopped (or, for a one-shot invocation, stop itself after
-  exactly one run without touching workflow-run state directly).
-- Tell `MovePastAsk` runs (paging, multi-step continuations) apart from
-  runs that need a fresh ask, and drive each one differently.
-- Turn an `Outcome[]` into actual output, when different outcome types need
-  different rendering.
-- Let a consuming application observe or react at each stage (session
-  start, run created, run started, run complete, session end) without
-  forking the loop per application.
-- React to a user-cancelled session (e.g. Ctrl+C) by stopping cleanly
-  rather than leaving the process in a partial state.
+- Run until the workflow stops, without knowing *why* it stopped. A
+  one-shot invocation must instead stop itself after exactly one run,
+  without touching workflow-run state.
+- Tell `MovePastAsk` runs — paging, multi-step continuations — from runs
+  needing a fresh ask, and drive each differently.
+- Let a consuming application observe each stage — session start, run
+  created, run started, run complete, session end — without forking the
+  loop per application.
+- Answer a cancelled session by stopping cleanly, leaving no partial state
+  behind.
 
 ## Solution
 
 ### `CliApp`: the shared shell
 
-`CliApp` itself owns only what both modes need: the `Workflow`/`Io`
-references, `SetUpEventHandlers` (the `Io.OnCancel` wiring), `WriteOutcomes`,
-and the six lifecycle hooks described below. It has no `Run` method and no
-loop of its own — each subclass supplies that.
+`CliApp` owns what both modes need: the `Workflow` and `Io` references,
+`SetUpEventHandlers` (the `Io.OnCancel` wiring, see
+[cli-io.md](cli-io.md)), `WriteOutcomes` (see
+[outcome-writing.md](outcome-writing.md)), and the six lifecycle hooks
+below. It declares no `Run` method and no loop; each subclass supplies
+that.
 
 ### `TerminalCliApp`: the interactive loop
 
-`TerminalCliApp.Run(List<IOutcomeIoWriter> outcomeIoWriters)` is the
-entry point for an interactive session:
+`TerminalCliApp.Run(List<IOutcomeIoWriter> outcomeIoWriters, string[]? args = null)`
+starts an interactive session. It ignores `args`; the parameter exists so
+`CliAppBuilder` can call either subclass's `Run` the same way:
 
 ```csharp
+OnSessionStart();
+Io.Pause();
+SetUpEventHandlers();
+
 while (Workflow.Status != CliWorkflowStatus.Stopped)
 {
     var run = Workflow.NextRun();
@@ -63,32 +66,31 @@ while (Workflow.Status != CliWorkflowStatus.Stopped)
 OnSessionEnd(Workflow.Runs);
 ```
 
-The loop condition only ever checks `Status`, not `CancellationToken`
-directly — `Workflow.InterruptCurrentRun()` (what a Ctrl+C ends up calling;
-see the `ICliIo` section below) flips `Status` to `Stopped` as part of
-requesting cancellation, so `Status` alone is always an accurate,
-immediately up to date answer to "should the loop keep going," whether the
-session ended via `/exit` or via Ctrl+C. See
-[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
-for why that relationship is one-directional — cancelling always stops, but
-stopping never cancels.
+The loop condition reads `Status` and never the `CancellationToken`.
+`Workflow.InterruptCurrentRun()`, which a Ctrl+C reaches through the
+`ICliIo` wiring (see [cli-io.md](cli-io.md)), flips `Status` to `Stopped`
+as it requests cancellation. `Status` alone therefore answers "should the
+loop keep going" accurately, whether the session ended by `/exit` or by
+Ctrl+C.
 
 `Workflow.NextRun()` (see
 [workflow-run-state-machine.md](workflow-run-state-machine.md)) hands back
-either the one in-progress run or a freshly created one — `TerminalCliApp`
-doesn't decide which; it only reacts to what it gets.
+either the one in-progress run or a fresh one. `TerminalCliApp` reacts to
+what it gets; it never chooses.
 
 ### `ArgsCliApp`: one-shot from process args
 
-`ArgsCliApp.Run(List<IOutcomeIoWriter> outcomeIoWriters, string[] args)` is
-the entry point for a non-interactive, single-command invocation — the
-shape that lets a KitCli app be run as `myapp /command --flag value`
-instead of only through an interactive prompt. It joins `args` into one ask
-string, feeds it through the exact same `RespondToAsk` pipeline an
-interactive ask would use, then stops the workflow once that single run
-completes:
+`ArgsCliApp.Run(List<IOutcomeIoWriter> outcomeIoWriters, string[] args)`
+runs a single command without a prompt, letting a KitCli app be invoked as
+`myapp /command --flag value`. It joins `args` into one ask, feeds that
+through the same `RespondToAsk` pipeline an interactive ask uses, then
+stops the workflow:
 
 ```csharp
+OnSessionStart();
+Io.Pause();
+SetUpEventHandlers();
+
 var run = Workflow.NextRun();
 OnRunCreated(run);
 var ask = string.Join(" ", args);
@@ -98,215 +100,141 @@ var outcomes = await runTask;
 WriteOutcomes(outcomes, outcomeIoWriters);
 OnRunComplete(run, outcomes);
 Workflow.Stop();
+OnSessionEnd(Workflow.Runs);
 ```
 
-Same as `TerminalCliApp`'s `ExecuteRunOperation`, `OnRunStarted` fires right
-after `RespondToAsk` is called but before it's awaited — a hook can still
-show a "working…" indicator concurrently with the run executing.
+As in `TerminalCliApp`, `OnRunStarted` fires after `RespondToAsk` is
+called but before it is awaited, so a hook can show a "working…" indicator
+while the run executes.
 
-Two things worth calling out:
+Three points deserve attention:
 
-- It calls `Workflow.Stop()` — the same public method `ExitCliCommandHandler`
-  calls — rather than reaching into `run.State` to force
-  `ReachedFinalOutcome`. `CliApp` (and its subclasses) are never allowed to
-  mutate a run's own state; only `CliWorkflowRun` does that (see
+- It calls `Workflow.Stop()`, the same public method
+  `ExitCliCommandHandler` calls, rather than reaching into `run.State` to
+  force `ReachedFinalOutcome`. `CliApp` and its subclasses never mutate a
+  run's state; only `CliWorkflowRun` does (see
   [workflow-run-state-machine.md](workflow-run-state-machine.md)).
-- `Workflow.Stop()` is called unconditionally after the one `RespondToAsk`
-  call, regardless of what state the run actually reached. If the seeded
-  ask resolves to a multi-step command (one that would normally need
-  `MoveToNext()` to continue), `ArgsCliApp` doesn't drive that — it stops
-  after the first step. One-shot invocation currently means exactly one
-  command, not an automated multi-turn sequence.
-- `ArgsCliApp` doesn't pass a `CancellationToken` into `RespondToAsk` — it
-  doesn't need to. `Workflow.NextRun()` already handed the run its
-  cancellation token at construction (see the `ICliIo` section below), so
-  cancelling mid-command reaches this run the same way it reaches
-  `TerminalCliApp`'s, with nothing extra for `ArgsCliApp` to wire up.
+- It calls `Workflow.Stop()` unconditionally, whatever state the run
+  reached. Should the ask resolve to a multi-step command needing
+  `MoveToNext()`, `ArgsCliApp` stops after the first step. One-shot
+  invocation means one command today, not an automated sequence.
+- It passes no `CancellationToken` into `RespondToAsk`, and needs none.
+  `Workflow.NextRun()` already handed the run its token at construction,
+  so cancelling mid-command reaches this run exactly as it reaches
+  `TerminalCliApp`'s.
 
-`CliAppBuilder.Run(string[]? args)` decides which subclass's `Run` to call
-based on the concrete `CliApp` resolved from DI and whether `args` were
-provided, throwing a specific `ArgumentException` if an `ArgsCliApp` is
-asked to run with no args (rather than silently doing nothing, or an
-opaque failure).
+### `CliAppBuilder`: choosing and starting the app
 
-It builds the service provider first, with both `ValidateScopes` and
-`ValidateOnBuild` on. `Run` resolves the `CliApp` and the
+`CliAppBuilder.Run(string[]? args)` picks the subclass's `Run` from the
+concrete `CliApp` resolved out of DI and whether `args` arrived. An
+`ArgsCliApp` asked to run with no args throws a specific
+`ArgumentException` rather than doing nothing or failing opaquely.
+
+It builds the service provider first, with `ValidateScopes` and
+`ValidateOnBuild` both on, then resolves the `CliApp` and the
 `IOutcomeIoWriter` list once, from the root provider, before any run
-starts — so anything reached from there is effectively a singleton for the
-app's lifetime, while command handlers get per-run instances from the
-run's own scope (see
+starts. Anything reached from there is a singleton for the app's lifetime,
+while command handlers get per-run instances from the run's own scope (see
 [workflow-run-state-machine.md](workflow-run-state-machine.md)). The two
-validations make that boundary enforced rather than implied: a singleton
-that depends on a `Scoped` service fails at startup, naming both types,
-instead of silently capturing one instance and holding it.
+validations enforce that boundary: a singleton depending on a `Scoped`
+service fails at startup, naming both types, rather than silently
+capturing one instance and holding it.
 
 ### Ask vs. move-past-ask (`TerminalCliApp` only)
 
-`TerminalCliApp`'s private `ExecuteRunOperation` checks whether the run it was just handed already has
-a `MovePastAsk` state change recorded. If so, it calls `run.MoveToNext()`
-directly — no `Io.AskAsync()` call, because the run has queued-up work from a
-prior outcome (e.g. "show the next page") and doesn't need fresh input. If
-not, it calls `Io.AskAsync(Workflow.CancellationToken)` for a new ask and
-passes the result into `run.RespondToAsk(ask)`. Neither `MoveToNext` nor
-`RespondToAsk` takes a `CancellationToken` parameter — the run already has
-one, from when `CliWorkflow` constructed it (see the `ICliIo` section
-below).
+`TerminalCliApp`'s private `ExecuteRunOperation` checks the run it was
+handed for a recorded `MovePastAsk` state change.
 
-`OnRunStarted`/`OnMovingPastAsk` fire *after* the run's task has been
-started but *before* it's awaited — same reasoning as
-`ExecuteCommand`/`RespondToAsk` in the workflow run itself: a hook here can
-show a "working…" indicator concurrently with the run actually executing,
-rather than only after it finishes.
+If it finds one, it calls `run.MoveToNext()` and asks for no input: a
+prior outcome already queued the work, such as "show the next page."
 
-Once either call returns, `ExecuteRunOperation` checks the resulting
-outcomes for an `ExceptionOutcome` — the marker a run's `Exceptional`
-status carries (see
-[workflow-run-state-machine.md](workflow-run-state-machine.md)). If one is
-present, it rethrows the original exception via `ExceptionDispatchInfo`,
-preserving the original stack trace, ending the whole `Run` loop rather
-than continuing to the next ask. This is deliberate: `Exceptional` means a
-command failed in a way the app didn't account for, so it's treated as
-loud and session-ending, unlike `InvalidAsk` (a mistyped or unrecognized
-command) or `ReachedFinalOutcome`, both of which just let the loop
-continue to the next ask as normal.
+If it finds none, it calls `Io.AskAsync(Workflow.CancellationToken)` and
+passes the result to `run.RespondToAsk(ask)`. Neither `MoveToNext` nor
+`RespondToAsk` takes a `CancellationToken`; `CliWorkflow` gave the run one
+at construction.
 
-### Writing outcomes
+`OnRunStarted` and `OnMovingPastAsk` fire *after* the run's task starts
+but *before* it is awaited, matching `ExecuteCommand` and `RespondToAsk`
+inside the run. A hook can show a "working…" indicator while the run
+executes, rather than after it finishes.
 
-```csharp
-private void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
-{
-    foreach (var outcome in outcomes)
-    {
-        var writer = outcomeIoWriters.FirstOrDefault(w => w.CanWriteFor(outcome));
-        writer?.Write(outcome);
-    }
-}
-```
+Once either call returns, `ExecuteRunOperation` looks through the outcomes
+for an `ExceptionOutcome`, the marker an `Exceptional` run carries (see
+[workflow-run-state-machine.md](workflow-run-state-machine.md)). Finding
+one, it rethrows the original exception through `ExceptionDispatchInfo`,
+preserving the stack trace and ending the whole loop. That is deliberate.
+`Exceptional` means a command failed in a way the app never accounted for,
+so it ends the session loudly — unlike `InvalidAsk` (a typo or unknown
+command) and `ReachedFinalOutcome`, which both let the loop continue.
 
-Each outcome in the array is matched against the writer list independently,
-taking the **first** `IOutcomeIoWriter` whose `CanWriteFor` returns `true`
-— the same first-match-wins, registration-order-decides pattern used for
-instruction argument builders (see
-[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md)) and
-command/artefact factory resolution (see
-[command-registration.md](command-registration.md)). If nothing matches,
-that outcome is silently not written — there's no default/fallback writer,
-unlike `BoolInstructionArgumentBuilder`'s role for arguments.
-
-### The `ICliIo` abstraction
-
-`CliApp` never touches `Console` directly. `ICliIo`
-(`KitCli.Abstractions/Io/ICliIo.cs`) is the seam:
-
-```csharp
-public interface ICliIo
-{
-    Task<string?> AskAsync(CancellationToken cancellationToken);
-    void Pause();
-    void Say(string something);
-    void SetTitle(string title);
-    void OnCancel(Action cancel);
-}
-```
-
-`TerminalCliApp.Run` calls `Io.Pause()` once before the loop starts and
-again after every iteration — giving a host implementation a place to, e.g.,
-wait for a keypress between commands (`ArgsCliApp.Run` calls it only once,
-since there's no loop to pace). `SetUpEventHandlers` — defined on the shared
-`CliApp` base and called by both subclasses — wires `Io.OnCancel` once, at
-the top of `Run`, to `Workflow.InterruptCurrentRun`. Nothing else happens on
-that cancel-thread callback: no workflow mutation beyond that one call, no
-`OnSessionEnd`, no `Environment.Exit`. `CliIo`'s `Console.CancelKeyPress`
-handler sets `e.Cancel = true` so .NET's own default abrupt termination
-doesn't race the app's own shutdown.
-
-The cancellation token itself lives on `ICliWorkflow`, not `CliApp` — see
-[workflow-run-state-machine.md](workflow-run-state-machine.md) for how
-`CliWorkflow` owns and hands it to each `CliWorkflowRun` at construction,
-the same way it hands over each run's `IServiceScope`. `CliApp` only ever
-reads `Workflow.CancellationToken` directly in one place: passing it into
-`Io.AskAsync`, since sourcing an ask is the one cancellable operation that
-happens outside any run. See
-[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
-for the full reasoning, including why this replaced an earlier
-`Environment.Exit`-based shutdown.
-
-`CliIo.AskAsync` can't actually cancel a blocked `Console.ReadLine()` — it
-races the read against the cancellation token and returns `null` if
-cancellation wins, abandoning the still-blocked read on a background thread
-rather than waiting on it.
+Only `TerminalCliApp` rethrows, and it rethrows before `WriteOutcomes`
+runs. In `ArgsCliApp` the same outcome reaches a writer and prints (see
+[outcome-writing.md](outcome-writing.md)).
 
 ### Lifecycle hooks
 
-Six `protected virtual` no-op hooks let a consuming application observe the
-loop without overriding `Run` itself: `OnSessionStart`, `OnRunCreated`,
+Six `protected virtual` no-op hooks let a consuming application observe
+the loop without overriding `Run`: `OnSessionStart`, `OnRunCreated`,
 `OnRunStarted`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd`. Each
-fires at a fixed point in the loop above; none of them can alter control
-flow — they're for side effects only (progress indicators, logging,
-telemetry), matching the same reasoning as `CliWorkflowRunState`'s history
-being the only place state actually changes.
+fires at a fixed point above. None alters control flow; they exist for
+side effects — progress indicators, logging, telemetry.
+
+In an interactive session every hook can fire many times. In a one-shot
+invocation five fire once each, and `OnMovingPastAsk` never fires, because
+an args app never continues a run past its ask.
 
 ## Constraints & tradeoffs
 
-**Run-mode is a compile-time choice, not a runtime one.** Which subclass an
-app extends decides whether it's args-driven or terminal-driven, for the
-life of that class — there's no single `CliApp` an app author writes once
-that flexibly supports both depending on how it happens to be launched. See
+**Run-mode is a compile-time choice.** The subclass an app extends decides
+args-driven or terminal-driven for the life of that class. No single
+`CliApp` supports both depending on how it was launched. See
 [0005-args-driven-cli-app.md](../adr/0005-args-driven-cli-app.md) for the
-alternatives considered and why this was chosen anyway.
+alternatives weighed.
 
-**Neither `Run` is sealed.** A consuming application *can* override the
-whole loop instead of using the hooks, but doing so takes on reimplementing
-`NextRun`/`MovePastAsk` routing and outcome-writing correctly — the hooks
-exist so that's rarely necessary.
+**Neither `Run` is sealed.** A consuming application may override the whole
+loop instead of using the hooks, but then owns the `NextRun` and
+`MovePastAsk` routing and the outcome writing. The hooks exist to make
+that unnecessary.
 
-**A command handler that ignores its `CancellationToken` still runs to
-completion on Ctrl+C.** Cooperative cancellation only interrupts handlers
-that actually check the token `ISender.Send` passes them — see
+**A command handler ignoring its `CancellationToken` still runs to
+completion on Ctrl+C.** Cooperative cancellation interrupts only handlers
+that check the token `ISender.Send` passes them. See
 [0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md).
 
-**No hook can prevent or redirect a transition.** All six are `void`; none
-receive a way to signal "don't continue" or "run something else instead."
-This mirrors the reasoning already documented for
-`CliWorkflowRun`'s hooks in the SpendfulnessCli-era design (unstructured
-mutation of flow control makes the loop harder to reason about) — kept
-here for the same reason, not by omission.
+**No hook can prevent or redirect a transition.** All six return `void`
+and receive no way to signal "don't continue" or "run something else."
+Flow control stays in `Run` and the run's state machine, leaving one place
+to read to know what happens next.
 
 ## Questions & answers
 
-**How does `TerminalCliApp` know whether to call `Ask()` or `MoveToNext()`?**
-It checks the run's own state history for a prior `MovePastAsk` change —
-`TerminalCliApp` never tracks this itself; the run is the source of truth
-(see [workflow-run-state-machine.md](workflow-run-state-machine.md)).
-`ArgsCliApp` doesn't have this question to answer at all — it only ever
-calls `RespondToAsk` once, never `MoveToNext`.
+**How does `TerminalCliApp` know whether to call `AskAsync()` or `MoveToNext()`?**
+It reads the run's state history for a prior `MovePastAsk` change. The run
+is the source of truth; `TerminalCliApp` tracks nothing itself (see
+[workflow-run-state-machine.md](workflow-run-state-machine.md)).
+`ArgsCliApp` never faces the question, calling `RespondToAsk` once and
+`MoveToNext` never.
 
-**What happens if two `IOutcomeIoWriter`s both claim the same outcome?**
-The first one in `outcomeIoWriters` (as passed into `Run`) wins; the rest
-are never consulted for that outcome. There's no registration-based
-ordering here the way there is for instruction argument builders or
-artefact factories — the caller of `Run` controls the list's order
-directly.
+**Why call `Io.Pause()` before the loop as well as after every iteration?**
+So an implementation gets a pause point before the first prompt and after
+every later one, with no special case for the first iteration.
 
-**Can a custom `IOutcomeIoWriter` depend on a `Scoped` service?**
-No. Writers are registered as singletons and resolved once from the root
-provider, so they'd capture a single instance rather than tracking the
-per-run one. `CliAppBuilder.Run`'s provider validation rejects this at
-startup. A writer that needs I/O should take `ICliIo`; one that needs
-per-run data should read it off the `Outcome` it's handed.
+**Which hook should do expensive setup a run depends on?**
+None of them. `OnRunStarted` and `OnMovingPastAsk` run while the run
+executes, and the rest cannot delay it either. Setup a command depends on
+belongs in the command's factory or handler.
 
-**Why does `Io.Pause()` get called both before the loop and after every
-iteration, rather than just once per iteration?**
-So an implementation gets a pause point both before the very first prompt
-and after every subsequent one — without needing special-casing for "is
-this the first iteration."
+**Can I run several workflows from one app?**
+No. `CliAppBuilder` resolves one `CliApp`, which holds one `ICliWorkflow`,
+and `NextRun()` assumes a single active run (see
+[workflow-run-state-machine.md](workflow-run-state-machine.md)).
 
 ## Related concepts
 
 - [workflow-run-state-machine.md](workflow-run-state-machine.md) — what
-  `_workflow.NextRun()`, `RespondToAsk`, and `MoveToNext` actually do;
-  this doc only covers what drives them from the outside.
-- [command-registration.md](command-registration.md) — the same
-  first-match-wins resolution pattern used here for `IOutcomeIoWriter`.
-- [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) —
-  where `Io.AskAsync()`'s return value ends up being parsed.
+  `Workflow.NextRun()`, `RespondToAsk`, and `MoveToNext` do. This doc
+  covers only what drives them from outside.
+- [cli-io.md](cli-io.md) — the `ICliIo` seam behind `Io.AskAsync` and
+  `Io.Pause`, and how a Ctrl+C reaches `SetUpEventHandlers`.
+- [outcome-writing.md](outcome-writing.md) — what `WriteOutcomes` does
+  with the array each run returns.

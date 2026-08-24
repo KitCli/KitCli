@@ -2,18 +2,15 @@
 
 ## What this is for
 
-Sometimes one user ask should drive several commands in sequence —
-run a multi-step wizard, or hand off from a "list" command straight
-into "show details for the first result" — without asking the user to
-type each step themselves. `ByMovingToCommand` queues up the next
-command from inside a handler; KitCli runs it automatically, no fresh
-input required.
+One ask should sometimes drive several commands in sequence: a multi-step
+wizard, or a "list" command handing off to "show details for the first
+result", without the user typing each step. `ByMovingToCommand` queues the
+next command from inside a handler, and KitCli runs it with no fresh input.
 
 ## How to do it
 
-Return `ByMovingToCommand(nextCommand)` as the **last** call before
-`.EndAsync()`. Whatever handler runs next receives that command
-directly:
+Call `ByMovingToCommand(nextCommand)` **last**, before `.EndAsync()`. The
+next handler receives that command directly:
 
 ```csharp
 public class StartWizardCliCommandHandler : CliCommandHandler<StartWizardCliCommand>
@@ -52,51 +49,44 @@ public class WizardStepTwoCliCommandHandler : CliCommandHandler<WizardStepTwoCli
 }
 ```
 
-Typing the ask that resolves to `StartWizardCliCommand` runs all
-three handlers in one turn — the user only typed once. Chain as many
-steps as you need; each handler just needs its own
-`ByMovingToCommand(...)` call to keep going, and a normal
-`ByFinallySaying(...)` (or any `Final`-kind outcome) on the last one
-to stop.
+One ask resolving to `StartWizardCliCommand` runs all three handlers. Each
+step runs on its own pass of the host loop, so output appears in order
+rather than at the end. Chain as many steps as you need: every handler
+needs its own `ByMovingToCommand(...)` to keep going, and the last needs
+`ByFinallySaying(...)`, or any `Final`-kind outcome, to stop.
 
-**End every chain with a `Final`-kind outcome.** If the last handler
-in a chain doesn't end with one, KitCli treats the run as still
-"reusable" and waits for something else to move it forward — see
-[reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md)
-for what decides that.
+**End every chain with a `Final`-kind outcome.** Without one, KitCli
+treats the run as reusable and waits for something else to move it
+forward. See
+[reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md).
 
 ## Common mistakes
 
-**Forgetting the final step needs to actually end the run.** A chain
-that ends on `ByMovingToCommand(...)` with nothing after it just
-queues up one more step — eventually something in the chain has to
-call `ByFinallySaying(...)` (or another `Final` outcome) instead, or
-the run never reaches completion.
+**Ending the chain on `ByMovingToCommand(...)`.** That queues one more
+step rather than finishing. Somewhere in the chain a handler must call
+`ByFinallySaying(...)`, or return another `Final` outcome, or the run
+never completes.
 
-**Expecting a one-shot CLI invocation to run a whole chain
-automatically.** A one-shot invocation (`dotnet run -- /start-wizard`,
-built on `ArgsCliApp`) only ever runs the *first* command the ask
-resolves to — it doesn't drive subsequent chained steps the way the
-interactive terminal app does. If your command needs to run to
-completion in a single one-shot call, don't rely on chaining; do the
-work in one handler instead.
+**Expecting a one-shot invocation to run a whole chain.** A one-shot
+invocation — `dotnet run -- /start-wizard`, built on `ArgsCliApp` — runs
+only the *first* command the ask resolves to, never the chained steps an
+interactive terminal app would drive. To finish the work in a single
+one-shot call, do it in one handler instead of chaining.
 
-**Mutating shared state across steps instead of passing it through the
-chain.** Build the next command with whatever data it needs
-(`new WizardStepTwoCliCommand(collectedValue)`), or read it back via an
-artefact if an earlier step's outcome was `Reusable` — don't reach for
-a static/singleton to smuggle state between handlers.
+**Mutating shared state across steps instead of passing it down the
+chain.** Build the next command with the data it needs
+(`new WizardStepTwoCliCommand(collectedValue)`), or read it back through
+an artefact when an earlier step's outcome was `Reusable`. Never smuggle
+state between handlers in a static or singleton.
 
 ## Learn more
 
 - [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
-  what "reusable" means and how a chain of commands maps onto the
-  run's state underneath.
+  what "reusable" means, and how a chain maps onto the run's state.
 - [docs/concepts/outcomes.md](../concepts/outcomes.md) — the full
-  `Outcome`/`OutcomeKind` model this guide only shows one slice of.
+  `Outcome` and `OutcomeKind` model this guide shows one slice of.
 - [docs/concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
-  exactly how `NextCliCommandOutcome` drives the run's internal state
-  machine.
-- [docs/concepts/artefacts.md](../concepts/artefacts.md) — how to pass
-  data from an earlier step to a later one without threading it
-  through every command's constructor.
+  how `NextCliCommandOutcome` drives the run's state machine.
+- [docs/concepts/artefacts.md](../concepts/artefacts.md) — passing data
+  from an earlier step to a later one without threading it through every
+  constructor.

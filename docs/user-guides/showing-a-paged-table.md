@@ -2,17 +2,21 @@
 
 ## What this is for
 
-Showing a list as a table — with named columns, filtering, sorting,
-and "next page" support that doesn't redo all the setup — is a common
-enough shape that KitCli has a dedicated pipeline for it. This is how
-to wire one up.
+Showing a list as a table — named columns, filtering, sorting, and "next
+page" support that skips the setup a second time — is common enough that
+KitCli gives it a dedicated pipeline. This is how to wire one up.
 
 ## How to do it
 
 Four pieces, then a command that builds and shows the table.
 
-**1. An aggregator** — turns your raw source data into the rows the
-table will display:
+This assumes your registry calls `AddArtefactFactoriesForAssembly` (see
+[creating-a-registry.md](creating-a-registry.md)). That call registers the
+artefact factories for the aggregator and table builder below; without it,
+the "next page" step cannot find the remembered builder.
+
+**1. An aggregator**, turning raw source data into the rows the table
+displays:
 
 ```csharp
 public record ExpenseRow(string Category, decimal TotalCost);
@@ -27,7 +31,7 @@ public record ExpenseAggregator(IEnumerable<Expense> Source)
 }
 ```
 
-**2. A column map** — names the columns from the aggregated row shape:
+**2. A column map**, naming the columns from the row shape:
 
 ```csharp
 public class ExpenseTableMap : TableMap<ExpenseRow>
@@ -40,8 +44,8 @@ public class ExpenseTableMap : TableMap<ExpenseRow>
 }
 ```
 
-**3. A table builder subclass** — exists purely to give the
-source/row-type pairing a distinct type:
+**3. A table builder subclass**, giving the source and row-type pairing a
+distinct type:
 
 ```csharp
 public class ExpenseTableBuilder : TableBuilder<Expense, ExpenseRow>;
@@ -76,15 +80,15 @@ public class ListExpensesCliCommandHandler : CliCommandHandler<ListExpensesCliCo
 }
 ```
 
-`BeforeAggregation` runs on the raw source before your aggregation
-logic; `AfterAggregation` runs on the aggregated rows after it —
-reach for whichever matches what you're filtering or sorting.
+`BeforeAggregation` runs on the raw source, ahead of your aggregation
+logic; `AfterAggregation` runs on the aggregated rows. Reach for whichever
+matches what you are filtering or sorting.
 
 ### Letting the user page through it
 
-`ByRememberingHowToBuildTable` is what makes "next page" possible
-without re-supplying the aggregator or column map — a later command
-just reads the remembered builder back as an artefact:
+`ByRememberingHowToBuildTable` makes "next page" possible without
+re-supplying the aggregator or column map. A later command reads the
+remembered builder back as an artefact:
 
 ```csharp
 public class NextExpensePageCliCommandFactory : PagedCliCommandFactory<NextExpensePageCliCommand>
@@ -119,42 +123,48 @@ public class NextExpensePageCliCommandHandler : CliCommandHandler<NextExpensePag
 }
 ```
 
-`PagedCliCommandFactory<T>`'s `GetPaging()` helper reads page
-size/number from the current ask's arguments first, falling back to
-the remembered artefact, then a default of 20/1 — so `/next-page
---page-number 3` and a bare `/next-page` (reusing whatever page you
-were already on) both work through the same factory.
+`PagedCliCommandFactory<T>`'s `GetPaging()` reads page size and number
+from the current ask's arguments, falls back to the remembered artefact,
+then defaults to 20 and 1. So `/next-page --pageNumber 3` and a bare
+`/next-page`, reusing the page you were on, both work through one factory.
+
+The argument names are `pageNumber` and `pageSize`, camelCase, as declared
+on `PagedCliCommand<,>.ArgumentNames`. `--page-number` is a different
+argument, and is ignored.
 
 ## Common mistakes
 
-**Skipping `WithMap<TMap>()`.** There's no default that maps every
-property automatically — `Build()` throws if a map hasn't been set,
-even for a table with no special column names.
+**Skipping `WithMap<TMap>()`.** No default maps every property for you.
+`Build()` throws when no map is set, even for a table with no special
+column names.
 
-**Sorting or filtering after `Build()` instead of via
-`BeforeAggregation`/`AfterAggregation`.** A built `Table` is a plain
-`Columns`/`Rows` pair with no further pipeline — all filtering and
-sorting has to happen on the aggregator before you call `Build()`.
+**Mapping only the columns you want shown.** `Build()` looks up *every*
+public property of the row type, so an unmapped one throws
+`KeyNotFoundException` rather than hiding that column. Give `ExpenseRow` a
+`RawTotal` property and `ExpenseTableMap` needs a `Map(...)` call for it
+too. To keep something off the table, keep it off the row type.
 
-**Rebuilding the aggregator and map by hand for "next page" instead
-of remembering the `TableBuilder`.** The whole point of
-`ByRememberingHowToBuildTable` is that a later command doesn't need
-to reconstruct any of this — if you find yourself passing the
-aggregator and map into a second command's constructor, you're
-redoing what the remembered artefact already gives you.
+**Sorting or filtering after `Build()`.** A built `Table` is a plain
+`Columns` and `Rows` pair with no pipeline left. Filter and sort on the
+aggregator, through `BeforeAggregation` or `AfterAggregation`, before
+calling `Build()`.
+
+**Rebuilding the aggregator and map by hand for "next page".**
+`ByRememberingHowToBuildTable` exists so a later command reconstructs
+none of it. Passing the aggregator and map into a second command's
+constructor redoes what the remembered artefact already gives you.
 
 ## Learn more
 
 - [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
-  the general pattern `ByRememberingHowToBuildTable` is one instance
-  of.
-- [docs/concepts/aggregators.md](../concepts/aggregators.md) — the
-  full `Aggregator<TSource, TAggregate>` pipeline (`BeforeAggregation`
-  /`DoAggregation`/`AfterAggregation`/paging) underneath step 1.
-- [docs/concepts/tables.md](../concepts/tables.md) — how `TableMap`
-  and `TableBuilder` actually turn aggregated rows into a rendered
-  `Table`, and known gaps (no default column mapping, no value
-  formatting hook) worth knowing about before you rely on either.
+  the general pattern behind `ByRememberingHowToBuildTable`.
+- [docs/concepts/aggregators.md](../concepts/aggregators.md) — the full
+  `Aggregator<TSource, TAggregate>` pipeline beneath step 1:
+  `BeforeAggregation`, `DoAggregation`, `AfterAggregation`, paging.
+- [docs/concepts/tables.md](../concepts/tables.md) — how `TableMap` and
+  `TableBuilder` turn aggregated rows into a rendered `Table`, plus the
+  known gaps — no default column mapping, no value formatting hook — to
+  weigh before relying on either.
 - [docs/concepts/artefacts.md](../concepts/artefacts.md) — how a
   remembered `TableBuilder` is retrieved by a later command, the same
   way any other artefact is.
