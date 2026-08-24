@@ -21,16 +21,15 @@ building.
 
 ## Recommendation
 
-Split this into two tickets, in this order:
+Split into two tickets, in this order:
 
-1. **Decide the replay policy first.** Write this as ADR, not code: when
-   a run resumes after `Exceptional`, does the command that was running
-   at the time re-execute, or does resume start from the next step? This
-   determines whether resuming can duplicate side effects (e.g. a
-   `_publisher.Publish` that already fired). Nothing else here should be
-   built until this is answered.
-2. **Then build persistence + `/resume` as its own ticket**, once (1) is
-   settled, covering:
+1. **#122 — decide the replay policy first.** Write this as an ADR, not
+   code: when a run resumes after `Exceptional`, does the command that
+   was running at the time re-execute, or does resume start from the
+   next step? This determines whether resuming can duplicate side
+   effects (e.g. a `_publisher.Publish` that already fired). Nothing
+   else here should be built until this is answered.
+2. **#123 — build persistence + `/resume`**, blocked on #122, covering:
    - A rehydration path for `CliWorkflowRunState` that trusts persisted
      data directly, bypassing the normal `ChangeTo` transition
      validation (since replaying history through `ChangeTo` would
