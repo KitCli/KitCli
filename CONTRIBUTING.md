@@ -94,12 +94,16 @@ its own if the decision precedes the implementation).
 
 ## Concepts
 
-A [concept doc](docs/concepts/) explains how a subsystem works today —
-narrative, examples, a Q&A — the opposite of an ADR's terse
-decision-record shape. Write one for a subsystem a consumer would
+A [concept doc](docs/concepts/) explains how a subsystem works today, to
+someone confused about it. Write one for a subsystem a consumer would
 reasonably need onboarding to (the outcome/artefact pipeline, the
 instruction-parsing pipeline, the workflow state machine), not for
 something a docstring already covers.
+
+**Keep them short — under 60 lines.** Past 100 the doc holds either two
+concepts or reference material, and reference material belongs in source
+XML docs where docfx surfaces it. Lead with the answer instead of building
+up to it, and don't append a Q&A that re-answers the body.
 
 Copy [`docs/concepts/0000-template.md`](docs/concepts/0000-template.md).
 Verify every class/method name and signature against the actual source

@@ -10,7 +10,9 @@ Style:
   down. A stale sample is worse than none, because nothing flags it wrong.
 - State decisions as rules ("use X when Y"), never as narrated internals
   ("this works because the framework does Z").
-- Keep it short. A section needing a concept doc's depth belongs in one.
+- Keep it short. Under 60 lines. A section needing a concept doc's depth
+  belongs in one.
+- Don't restate in "Common mistakes" what "How to do it" already said.
 -->
 
 # Title
