@@ -297,13 +297,14 @@ Every squash-merged PR that changes behavior gets a line in
 [`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`, in [Keep a
 Changelog](https://keepachangelog.com/) format.
 
-**To cut a release**, run the release CLI — itself a KitCli app — from the
-repo root:
+Releasing has two halves: you decide the version numbers, and CI does
+everything else.
+
+**1. Bump the versions** with the release CLI, itself a KitCli app:
 
 ```bash
-dotnet run --project KitCli.Tooling.Release -- /release --dry-run   # report what would happen
-dotnet run --project KitCli.Tooling.Release -- /release             # bump, build, pack into nupkgs/
-dotnet run --project KitCli.Tooling.Release -- /release --publish   # ...and push to NuGet
+dotnet run --project KitCli.Tooling.Release -- /release --dry-run   # report what would change
+dotnet run --project KitCli.Tooling.Release -- /release             # write the bumps
 ```
 
 It finds every csproj carrying both `<PackageId>` and `<Version>`, orders
@@ -311,24 +312,37 @@ them dependencies-first, and bumps a project when that project changed
 since its own last release, or when anything it references is being
 bumped. "Last release" comes from pickaxe-searching git history for the
 commit that set the currently-committed `<Version>`, so no tags are
-involved. It then builds the solution in Release, packs each bumped
-project, and with `--publish` pushes using `--skip-duplicate`. The API key
-comes from `NUGET_API_KEY`, or `~/.kitcli/nuget-api-key`.
+involved. Pass `--publish` to pack and push from your machine instead of
+letting CI do it — reserve that for a broken pipeline.
 
-**Do these by hand — the tool does none of them:** run `dotnet test`,
-update `CHANGELOG.md`, tag the commit, create a GitHub Release.
+**It only ever bumps the patch number**, whatever the change was — see
+[#127](https://github.com/KitCli/KitCli/issues/127).
 
-**It only ever bumps the patch number.** A `feat`, or a breaking change,
-releases as a patch like anything else, so a version says nothing about
-the size of what changed.
+**2. Merge the bumps to `main`.** The `publish` job in
+[`ci.yml`](.github/workflows/ci.yml) then does the rest, automatically, on
+every push to `main`. There is no separate publish workflow and nothing to
+trigger by hand.
 
-**Packages no longer ship in lockstep.** Only what changed gets a new
-version, so someone upgrading the umbrella package still receives
-lower-level fixes through its dependencies. That is the tool's deliberate
-design and it replaces this file's former "one version number, always"
-policy — the drift on
-[#58](https://github.com/KitCli/KitCli/issues/58) is now the intended
-behaviour rather than an accident. Which model is right is owed an ADR.
+It reads `<Version>` from `KitCli/KitCli.csproj` and stops immediately if
+`v{version}` is already tagged, which is what makes every ordinary push to
+`main` a no-op. Otherwise it restores, builds, tests, exchanges a GitHub
+OIDC token for a one-hour NuGet key (requiring a `NUGET_USER` secret, not a
+stored API key), then packs and pushes all 9 packages in dependency order,
+each at its own committed version, with `--skip-duplicate`. Finally it cuts
+`CHANGELOG.md`, tags the commit, creates a GitHub Release from the
+`[Unreleased]` notes, and opens an auto-merging PR for the changelog edit,
+since `main` is protected.
+
+So a release is: bump, merge, watch. The tag is the interlock — nothing
+publishes twice.
+
+**Packages do not ship in lockstep.** Only what changed gets a new version,
+so someone upgrading the umbrella still receives lower-level fixes through
+its dependencies. That replaces this file's former "one version number,
+always" policy, making the drift on
+[#58](https://github.com/KitCli/KitCli/issues/58) intended rather than
+accidental. Which model is right is owed an ADR —
+[#128](https://github.com/KitCli/KitCli/issues/128).
 
 ## Code style
 
