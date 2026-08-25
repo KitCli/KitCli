@@ -64,7 +64,7 @@ public class HelloRegistry : ICliAppRegistry
 ```csharp
 // Program.cs
 var app = new CliAppBuilder()
-    .WithBasicTerminalApp()
+    .WithBasicApp()
     .WithRegistry<HelloRegistry>();
 
 await app.Run();
@@ -104,8 +104,8 @@ CI runs those three steps on every PR and every push to `main`, across all
 six test projects. To see the framework running, start a playground app:
 
 ```bash
-dotnet run --project KitCli.Playground.App.Terminal     # interactive
-dotnet run --project KitCli.Playground.App.Args -- /echo --name Alex   # one-shot
+dotnet run --project KitCli.Playground.App                # interactive
+dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # headless
 ```
 
 ## Documentation
@@ -117,8 +117,8 @@ dotnet run --project KitCli.Playground.App.Args -- /echo --name Alex   # one-sho
   [writing a basic command](docs/user-guides/0001-writing-a-basic-command.md),
   [reading command arguments](docs/user-guides/0005-reading-command-arguments.md),
   [exiting the app](docs/user-guides/0012-exiting-the-app.md),
-  [creating a terminal app](docs/user-guides/0003-creating-a-terminal-app.md),
-  [creating an args app](docs/user-guides/0002-creating-an-args-app.md),
+  [creating an interactive app](docs/user-guides/0003-creating-an-interactive-app.md),
+  [creating a headless app](docs/user-guides/0002-creating-a-headless-app.md),
   [creating a registry](docs/user-guides/0004-creating-a-registry.md),
   [chaining commands](docs/user-guides/0007-chaining-commands.md),
   [remembering state across asks](docs/user-guides/0010-reusable-outcomes-and-the-workflow-run.md),

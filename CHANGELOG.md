@@ -6,6 +6,29 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Fixed
+
+- A headless (formerly args) invocation now runs a chained command's every
+  step, instead of running the first and exiting 0
+  ([#167](https://github.com/KitCli/KitCli/issues/167)). `ExecuteRunOperation`
+  drives the run past each queued step, so a chain arrives whole under
+  either host.
+- A run that reached a reusable checkpoint no longer crashes with
+  `ImpossibleStateChangeException` when the input ends. A session with no
+  ask left ends instead of responding to a null one.
+
+### Changed
+
+- **Breaking:** `TerminalCliApp` is gone — `CliApp` is the interactive app.
+  Subclass it directly.
+- **Breaking:** `ArgsCliApp` is now `HeadlessCliApp`, `BasicTerminalCliApp`
+  is `BasicCliApp`, and `CliAppBuilder.WithBasicTerminalApp()` is
+  `WithBasicApp()`. See
+  [0013-merge-the-hosts-and-name-the-variant-headless.md](docs/adr/0013-merge-the-hosts-and-name-the-variant-headless.md).
+- A headless app rethrows an `ExceptionOutcome` as an interactive one
+  always has, so a throwing handler ends the process non-zero rather than
+  at 0.
+
 ## [2.0.0] - 2026-08-25
 
 ### Added

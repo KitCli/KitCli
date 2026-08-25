@@ -1,16 +1,19 @@
+using System.Runtime.ExceptionServices;
 using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Workflow.Abstractions;
 
 namespace KitCli;
 
 /// <summary>
-/// Shared shell for a KitCli host loop. Owns the <see cref="ICliWorkflow"/>/<see cref="ICliIo"/>
-/// references, cancellation wiring, and outcome writing that both <see cref="TerminalCliApp"/> and
-/// <see cref="ArgsCliApp"/> need, plus a set of lifecycle hooks a consuming application can override
-/// to observe the loop without reimplementing it. <see cref="CliApp"/> itself defines no <c>Run</c>
-/// method or loop — each subclass supplies that.
+/// A KitCli app: an interactive session that asks the user for something, runs it to the end, and asks
+/// again, until a command stops the workflow or the input ends. Running an ask to the end means every
+/// step the run queues behind it too — a chained command, another page of a table.
+/// <see cref="HeadlessCliApp"/> overrides <see cref="Run"/> to run a single ask with nobody to prompt.
+/// A set of <c>protected virtual</c> hooks lets a consuming application observe a run without
+/// reimplementing any of this.
 /// </summary>
 public abstract class CliApp
 {
@@ -32,8 +35,101 @@ public abstract class CliApp
     }
 
     /// <summary>
+    /// Runs the session: asks the user for something, executes it, and asks again, until a command
+    /// stops the workflow or <see cref="ICliIo.AskAsync"/> reports the end of the input.
+    /// </summary>
+    /// <param name="outcomeIoWriters">The writers used to render each run's outcomes.</param>
+    /// <param name="args">The process args, for an app whose ask comes from them; unused here.</param>
+    /// <returns>A task that completes once the session has ended.</returns>
+    public virtual async Task Run(List<IOutcomeIoWriter> outcomeIoWriters, string[]? args = null)
+    {
+        OnSessionStart();
+
+        Io.Pause();
+
+        SetUpEventHandlers();
+
+        while (Workflow.Status != CliWorkflowStatus.Stopped)
+        {
+            var ask = await Io.AskAsync(Workflow.CancellationToken);
+
+            if (ask is null)
+            {
+                break;
+            }
+
+            await ExecuteRunOperation(ask, outcomeIoWriters);
+        }
+
+        OnSessionEnd(Workflow.Runs);
+    }
+
+    /// <summary>
+    /// Responds to one ask via <see cref="ICliWorkflowRun.RespondToAsk"/>, then keeps moving the run
+    /// past each step it queues via <see cref="ICliWorkflowRun.MoveToNext"/> — a chained command,
+    /// another page of a table — writing the outcomes of each. Returns once the run has nothing
+    /// queued, which is what makes a chain arrive whole whether or not anyone can be asked again.
+    /// </summary>
+    /// <param name="ask">The ask to respond to.</param>
+    /// <param name="outcomeIoWriters">The writers used to render the outcomes.</param>
+    /// <returns>The outcomes of the last step the run took.</returns>
+    protected async Task<Outcome[]> ExecuteRunOperation(string ask, List<IOutcomeIoWriter> outcomeIoWriters)
+    {
+        var run = Workflow.NextRun();
+
+        OnRunCreated(run);
+
+        var runTask = run.RespondToAsk(ask);
+
+        OnRunStarted(run, ask);
+
+        var outcomes = RethrowIfExceptional(await runTask);
+
+        WriteOutcomes(outcomes, outcomeIoWriters);
+
+        OnRunComplete(run, outcomes);
+
+        Io.Pause();
+
+        while (run.State.Changes[^1].To == ClIWorkflowRunStateStatus.MovePastAsk)
+        {
+            var movePastAskTask = run.MoveToNext();
+
+            OnMovingPastAsk(run);
+
+            outcomes = RethrowIfExceptional(await movePastAskTask);
+
+            WriteOutcomes(outcomes, outcomeIoWriters);
+
+            OnRunComplete(run, outcomes);
+
+            Io.Pause();
+        }
+
+        return outcomes;
+    }
+
+    /// <summary>
+    /// Rethrows the original exception behind an <see cref="ExceptionOutcome"/> so an unexpected
+    /// command failure ends the whole session, instead of silently continuing to the next ask or
+    /// exiting as though the work succeeded. Unlike an invalid ask, an <c>Exceptional</c> run means
+    /// something the app didn't account for happened, and that shouldn't be masked.
+    /// </summary>
+    private static Outcome[] RethrowIfExceptional(Outcome[] outcomes)
+    {
+        var exceptionOutcome = outcomes.OfType<ExceptionOutcome>().SingleOrDefault();
+
+        if (exceptionOutcome is not null)
+        {
+            ExceptionDispatchInfo.Capture(exceptionOutcome.Exception).Throw();
+        }
+
+        return outcomes;
+    }
+
+    /// <summary>
     /// Wires <see cref="ICliIo.OnCancel"/> so a cancellation request (e.g. Ctrl+C) calls
-    /// <see cref="ICliWorkflow.InterruptCurrentRun"/>. Called once, at the top of a subclass's <c>Run</c>.
+    /// <see cref="ICliWorkflow.InterruptCurrentRun"/>. Called once, at the top of <see cref="Run"/>.
     /// </summary>
     protected void SetUpEventHandlers()
     {
@@ -47,7 +143,7 @@ public abstract class CliApp
     /// </summary>
     /// <param name="outcomes">The outcomes produced by a completed run.</param>
     /// <param name="outcomeIoWriters">The writers to match against, tried in list order.</param>
-    protected void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
+    private void WriteOutcomes(Outcome[] outcomes, List<IOutcomeIoWriter> outcomeIoWriters)
     {
         foreach (var outcome in outcomes)
         {
@@ -87,7 +183,7 @@ public abstract class CliApp
 
     /// <summary>
     /// Called when a run continues past a queued <c>MovePastAsk</c> state change instead of sourcing a
-    /// fresh ask (terminal-mode paging/continuation). No-op by default.
+    /// fresh ask — paging in an interactive session, a chained step in either. No-op by default.
     /// </summary>
     /// <param name="run">The run that is moving past its ask.</param>
     protected virtual void OnMovingPastAsk(ICliWorkflowRun run)

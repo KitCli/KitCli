@@ -22,7 +22,7 @@ public class MyAppRegistry : ICliAppRegistry
 ```csharp
 // Program.cs
 var app = new CliAppBuilder()
-    .WithBasicTerminalApp()
+    .WithBasicApp()
     .WithRegistry<MyAppRegistry>();
 
 await app.Run();
@@ -87,7 +87,7 @@ public class MyConfiguredRegistry : IConfigurableCliAppRegistry<MySettings>
 ```csharp
 // Program.cs
 var app = new CliAppBuilder()
-    .WithBasicTerminalApp()
+    .WithBasicApp()
     .WithJsonSettings("appsettings.json")
     .WithRegistry<MySettings, MyConfiguredRegistry>();
 

@@ -2,9 +2,9 @@ using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Workflow.Abstractions;
 
-namespace KitCli.Playground.App.Args;
+namespace KitCli.Playground.App.Headless;
 
-public class TestCliApp(ICliWorkflow workflow, ICliIo io) : ArgsCliApp(workflow, io)
+public class TestCliApp(ICliWorkflow workflow, ICliIo io) : HeadlessCliApp(workflow, io)
 {
     protected override void OnSessionStart()
     {
