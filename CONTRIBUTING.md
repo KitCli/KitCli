@@ -167,6 +167,11 @@ Use the matching [issue template](.github/ISSUE_TEMPLATE/). No triage
 meeting exists; an issue without an area label after about a week is fair
 game to close as stale.
 
+**Area is about behaviour, not files.** Pick the area whose behaviour the
+change alters, not every project the diff touches. Work that adds a type
+in `Commands.Abstractions` so the workflow can construct commands
+differently is `area:workflow`.
+
 **Titles follow the stage the work is at:**
 
 - **Idea-stage** (unvalidated, pre-WAG) — plain-language problem
@@ -215,6 +220,11 @@ commitments to defend.
    cleanly-titled delivery ticket for the build. Never retitle or reuse
    the spike issue in place. That new ticket is sized in a normal
    refinement pass, not by the spike.
+
+   On new complexity found, the issue that prompted the spike stays open
+   as the parent and the build hangs off it as sub-issues, in delivery
+   order. The spike issue still closes — it answered its question — and
+   is still never reused.
 6. **Tickets with Estimates** — leaf tickets get `Estimate` (Fibonacci
    points, not time) on their domain board; the parent story tracks the
    outcome, not the effort. Re-estimate only on genuine scope change, not
