@@ -35,11 +35,15 @@ transient`) — factories are singletons holding mutable `Attach` state.
    `NextCliCommandTypeOutcome` alongside `NextCliCommandOutcome`, and add
    `ByMovingToCommand<TCommand>()`. Resolution goes through
    `CliWorkflowCommandProvider`, called from inside `ExecuteCommand`'s existing
-   try block so a resolution failure lands as `Exceptional`. Both overloads
-   stay — the instance one remains valid for a command that takes its data by
-   constructor — so this slice is additive and nothing migrates.
+   try block so a resolution failure lands as `Exceptional`. The provider's new
+   method is a **default interface member** defaulting to a throw, so
+   `ICliWorkflowCommandProvider` gains it without breaking external
+   implementers. Both overloads stay — the instance one remains valid for a
+   command that takes its data by constructor — so this slice is additive and
+   nothing migrates.
 4. **Re-file #124's selection change** against per-outcome consumption rather
-   than the per-command predicate it currently proposes.
+   than the per-command predicate it currently proposes, and decide the
+   multiple-hop guard in the same slice — the two are the same decision.
 5. **Update the docs** — `chaining-commands.md`, `artefacts.md`, `outcomes.md`,
    `workflow-run-state-machine.md` — leading with `ByMovingToCommand<TCommand>()`
    as the recommended path, and keeping the instance overload documented as the
@@ -102,6 +106,32 @@ ask about later.
   enums is so the key can be a constant in a `[FromKeyedServices]` attribute,
   which does not apply here — KitCli resolves through `GetKeyedServices` at
   runtime.
+- **A guard against a second queued hop belongs in the run, not
+  `OutcomeList`.** Every `By...` method funnels through `ByResultingIn`, so a
+  check there catches fluent use — but `OutcomeList` derives from
+  `List<Outcome>`, whose `Add` and `AddRange` are public and non-virtual, so
+  any invariant the builder enforces is bypassable by a caller adding
+  directly. A complete guard means either sealing that inheritance, which is
+  breaking, or enforcing in `CliWorkflowRun` where the full outcome history is
+  visible. The guard is also **the same decision as #124's selection change**:
+  earliest-unconsumed selection makes multiple queued hops legal, so a guard
+  written before that slice is a rule the next slice deletes. When it is
+  written it should throw `CliCommandException` with a
+  `CliCommandExceptionCode` rather than a bare `Exception` — see #34. There is
+  no logging abstraction anywhere in the solution, so there is no quieter
+  channel than throwing available.
+- **Adding to `ICliWorkflowCommandProvider` need not break anyone, so the
+  version question does not arise.** All projects target `net10.0`, and
+  Microsoft documents default interface members as the supported way to add a
+  member to a shipped interface without breaking implementers. A default that
+  throws `NotSupportedException` surfaces through `ExecuteCommand` as
+  `Exceptional`, matching the failure model established above. That keeps the
+  change additive, so `KitCli.Workflow.Commands` rides a patch bump — which is
+  all the release CLI can express in any case (#127). The alternative, a
+  separate interface resolved in `CliWorkflow.CreateNewRun`, would add another
+  parameter to `CliWorkflowRun`'s public constructor, trading a break on
+  `KitCli.Workflow.Commands` for one on `KitCli.Workflow` plus eight test call
+  sites.
 - **A command with constructor parameters and no dedicated
   `CliCommandFactory<T>` gets no factory registered at all**, and this cannot
   be caught at compile time — a `new()` constraint on `TCommand` would exclude
@@ -132,14 +162,25 @@ ask about later.
   — registration by derived name, shorthand and aliases; `:66-71` —
   auto-registration skipping any command without a parameterless constructor.
 - `KitCli.Workflow.Commands/KitCli.Workflow.Commands.csproj:11-12` —
-  `PackageId`, `Version` 1.0.10.
+  `PackageId`, `Version` 1.0.10; `<TargetFramework>net10.0</TargetFramework>`
+  across every project.
+- `KitCli.Commands.Abstractions/Outcomes/OutcomeList.cs:15` — `OutcomeList`
+  derives from `List<Outcome>`; every `By...` method routes through
+  `ByResultingIn`, and no member of `Outcomes/` throws today.
+- `KitCli.Workflow/CliWorkflow.cs` `CreateNewRun` — resolves each dependency
+  from the run's scope and passes it to `CliWorkflowRun`'s constructor;
+  `new CliWorkflowRun(` appears at eight call sites across the test projects.
+- No `ILogger` reference exists anywhere in the solution.
+- [Safely update interfaces using default interface methods](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)
+  — Microsoft's guidance on the technique.
 
 ## Open questions
 
-- Should `OutcomeList` reject a second next-command outcome in one list, so
-  #124's silent drop becomes loud even before the selection change lands?
-- Does adding a member to `ICliWorkflowCommandProvider` warrant a major
-  version bump, given the release tooling only ever bumps patch (#127)?
+None. The three questions this spike opened were worked through and are
+recorded above: both `ByMovingToCommand` overloads coexist with the docs
+leading on the generic one, the multiple-hop guard is the same decision as
+#124's selection change and belongs in the run, and the interface addition
+ships as a default interface member so no version question arises.
 
 ## Out of scope
 
