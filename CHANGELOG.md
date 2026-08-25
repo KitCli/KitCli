@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-25
+
 ### Added
 
 - `ByMovingToCommand<TCommand>(arguments)` — chain by naming the next command's
