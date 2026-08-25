@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-08-25
+
 ### Fixed
 
 - A headless (formerly args) invocation now runs a chained command's every
