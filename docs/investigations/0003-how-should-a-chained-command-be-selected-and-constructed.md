@@ -7,25 +7,27 @@
 
 ## Verdict
 
-No new complexity. The parts are already here.
+New complexity. #147 was filed as an overload on `OutcomeList`. It is five
+tickets, an ADR, a prerequisite and a blocker.
 
-A factory needs an instruction and the run's artefacts. The run holds both. A
-factory that cannot build the next command has failed at engineering time, not
-at user time, so it belongs on the `Running → Exceptional` edge that
-`ExecuteCommand` already takes for every failure. No new status, no new
-transition row.
+The design questions all have answers now, and they are below. Answering them
+removed uncertainty, not size. Building this means a new outcome type, a shared
+abstraction over two of them, a default interface member on a shipped
+interface, a second factory key, three call-site changes in `CliWorkflowRun`,
+four rewritten guides, and #124 re-filed against a predicate it does not
+currently propose. None of it is hard. There is a lot of it.
 
-The new outcome carries a type and nothing else. It must be a sibling of
-`NextCliCommandOutcome` rather than a subclass, which widens three call sites
-in `CliWorkflowRun` by a line each.
+Two constraints sit outside the work itself. #11 leaves `MoveToNext()`'s happy
+path untested, and every ticket below edits that path. #142 has to land first,
+because factories are singletons holding mutable `Attach` state.
 
-One thing has to be specified rather than assumed: what counts as consumed
-once #124 lands. Track it on the queued outcome, not on the command.
+The SWAG of 0.25 months on #147 predates all of this. It stands as filed;
+`Validated Estimate (months)` is the field that should carry what the spike
+learned.
 
 ## Recommendation
 
-Close the spike. Carry the work in five tickets, in this order. All of them sit
-behind #142, because factories are singletons holding mutable `Attach` state.
+Break #147 into five tickets, in this order. All of them sit behind #142.
 
 1. Test `MoveToNext()`'s happy path, the remaining half of #11. Every step
    below edits that path and nothing covers it.
@@ -142,10 +144,13 @@ why two ways to queue a command exist.
 
 ## Open questions
 
-None. Three opened during the spike and all three closed: both overloads
-survive with the docs leading on the generic one, the multiple-hop guard is
-#124's decision and belongs in the run, and the interface addition ships as a
-default interface member.
+No design questions remain. Three opened during the spike and all three closed:
+both overloads survive with the docs leading on the generic one, the
+multiple-hop guard is #124's decision and belongs in the run, and the interface
+addition ships as a default interface member.
+
+What remains is procedural. A "new complexity" verdict has no agreed procedure
+in CONTRIBUTING, which specifies only the "no new complexity" branch.
 
 ## Out of scope
 
