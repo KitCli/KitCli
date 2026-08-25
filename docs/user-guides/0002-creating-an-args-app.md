@@ -1,11 +1,11 @@
-# Creating an args app
+# 0002. Creating an args app
 
 ## What this is for
 
 An args app runs one command per process invocation, driven from `argv` —
 `dotnet run -- /greet --name Alex` — then exits. Use it for scripting, CI,
 or anything called once. For a session someone sits in, see
-[creating-a-terminal-app.md](creating-a-terminal-app.md).
+[0003-creating-a-terminal-app.md](0003-creating-a-terminal-app.md).
 
 ## How to do it
 
@@ -33,7 +33,7 @@ that a terminal app's `/greet --name Alex` would.
 
 The lifecycle hooks a terminal app offers work here too — `OnSessionStart`,
 `OnRunComplete`, and the rest (see
-[creating-a-terminal-app.md](creating-a-terminal-app.md)) — for observing
+[0003-creating-a-terminal-app.md](0003-creating-a-terminal-app.md)) — for observing
 or logging the single run. Five of the six fire, each once.
 `OnMovingPastAsk` never fires, because an args app never continues a run
 past its ask.
@@ -43,7 +43,7 @@ past its ask.
 **Expecting a chained command to finish in one invocation.** An args app
 calls `RespondToAsk` once and stops. Should the resolved command queue a
 next step with `ByMovingToCommand` (see
-[chaining-commands.md](chaining-commands.md)), that step never runs. When
+[0007-chaining-commands.md](0007-chaining-commands.md)), that step never runs. When
 a one-shot invocation must do several things, do them in one handler.
 
 **Calling `app.Run()` with no arguments.** `ArgsCliApp` needs at least
@@ -56,10 +56,10 @@ ask.
 
 ## Learn more
 
-- [creating-a-terminal-app.md](creating-a-terminal-app.md) — the
+- [0003-creating-a-terminal-app.md](0003-creating-a-terminal-app.md) — the
   interactive alternative, and the hooks both modes share.
-- [chaining-commands.md](chaining-commands.md) — why chained commands stop
+- [0007-chaining-commands.md](0007-chaining-commands.md) — why chained commands stop
   short in a one-shot invocation.
-- [docs/concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
+- [docs/concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — what
   `ArgsCliApp.Run` does, and why the choice between it and
   `TerminalCliApp` is made at compile time.

@@ -1,20 +1,20 @@
 - name: Command registration
-  href: command-registration.md
+  href: 0001-command-registration.md
 - name: CliApp host loop
-  href: cli-app-host.md
+  href: 0002-cli-app-host.md
 - name: CLI I/O
-  href: cli-io.md
+  href: 0003-cli-io.md
 - name: Outcome writing
-  href: outcome-writing.md
+  href: 0004-outcome-writing.md
 - name: Instruction parsing pipeline
-  href: instruction-parsing-pipeline.md
+  href: 0005-instruction-parsing-pipeline.md
 - name: Outcomes
-  href: outcomes.md
+  href: 0006-outcomes.md
 - name: Aggregators
-  href: aggregators.md
+  href: 0007-aggregators.md
 - name: Artefacts
-  href: artefacts.md
+  href: 0008-artefacts.md
 - name: Tables
-  href: tables.md
+  href: 0009-tables.md
 - name: Workflow run state machine
-  href: workflow-run-state-machine.md
+  href: 0010-workflow-run-state-machine.md

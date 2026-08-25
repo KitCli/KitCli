@@ -1,8 +1,8 @@
-# Remembering your own state
+# 0009. Remembering your own state
 
 ## What this is for
 
-[Remembering state across asks](reusable-outcomes-and-the-workflow-run.md)
+[Remembering state across asks](0010-reusable-outcomes-and-the-workflow-run.md)
 covers the built-in `Reusable` outcomes: page size, filters, and the rest.
 Sooner or later you need something of your own — a selected account, a
 chosen budget ID, anything a later command in the same run should read
@@ -74,7 +74,7 @@ must call `AddArtefactFactoriesForAssembly(assembly)`, separate from
 that one call, every `ArtefactFactory<>` subclass in the assembly is found
 and registered alongside the built-ins, and you name
 `SelectedAccountArtefactFactory` nowhere. See
-[creating-a-registry.md](creating-a-registry.md).
+[0004-creating-a-registry.md](0004-creating-a-registry.md).
 
 ## Common mistakes
 
@@ -99,13 +99,13 @@ returns whichever was set most recently.
 
 ## Learn more
 
-- [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
+- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   the built-in `Reusable` outcomes this pattern generalizes.
-- [reading-command-arguments.md](reading-command-arguments.md) —
+- [0005-reading-command-arguments.md](0005-reading-command-arguments.md) —
   `GetArgument` and `GetRequiredArgument`, for the current ask's arguments
   rather than a prior command's state.
-- [docs/concepts/artefacts.md](../concepts/artefacts.md) — the mechanics
+- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — the mechanics
   beneath: registration, "last match wins" lookup, and where a factory's
   artefact list comes from at runtime.
-- [docs/concepts/outcomes.md](../concepts/outcomes.md) — the full
+- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
   `Outcome` and `OutcomeKind` model a custom outcome plugs into.
