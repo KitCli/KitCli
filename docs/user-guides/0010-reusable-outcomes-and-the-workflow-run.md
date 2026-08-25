@@ -1,4 +1,4 @@
-# Remembering state across separate asks
+# 0010. Remembering state across separate asks
 
 ## What this is for
 
@@ -32,7 +32,7 @@ the page size with it.
 When the user's next ask resolves to a command whose factory needs that
 page size, read it with `GetArtefact<int>` or `GetRequiredArtefact<int>`
 inside a `CliCommandFactory<T>`; see
-[docs/concepts/artefacts.md](../concepts/artefacts.md) for the API.
+[docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) for the API.
 `OutcomeList` carries a `By...` method for each built-in reusable outcome:
 `ByRememberingPageSize`, `ByRememberingPageNumber`, `ByRememberingFilter`,
 `ByAggregating`, and more.
@@ -41,7 +41,7 @@ inside a `CliCommandFactory<T>`; see
 
 Some reusable state should drive the *very next* step at once, with no
 input from the user. `ByMovingToCommand(nextCommand)` does that; see
-[chaining-commands.md](chaining-commands.md). The distinction that matters
+[0007-chaining-commands.md](0007-chaining-commands.md). The distinction that matters
 here:
 
 | You return... | What happens next |
@@ -74,13 +74,13 @@ in a run.
 
 ## Learn more
 
-- [chaining-commands.md](chaining-commands.md) — the "continue without a
+- [0007-chaining-commands.md](0007-chaining-commands.md) — the "continue without a
   fresh ask" half of this picture.
-- [docs/concepts/outcomes.md](../concepts/outcomes.md) — the full
+- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
   `Outcome` and `OutcomeKind` taxonomy.
-- [docs/concepts/artefacts.md](../concepts/artefacts.md) — how a
+- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
   `Reusable` outcome becomes something a later factory can query, and the
   "last match wins" rule governing it.
-- [docs/concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
+- [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
   the state machine beneath: `ReachedReusableOutcome` against
   `MovePastAsk`, and what keeps a run going.

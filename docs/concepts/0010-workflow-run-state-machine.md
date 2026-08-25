@@ -1,4 +1,4 @@
-# Workflow run state machine
+# 0010. Workflow run state machine
 
 A run is one arc from an ask to a final outcome, across as many commands as
 that takes. `CliWorkflowRun` enforces it as a state machine: an append-only
@@ -54,5 +54,5 @@ the moves the last command declared via `[CliNextCommandIs]`, as
 
 ## See also
 
-[outcomes.md](outcomes.md) · [cli-app-host.md](cli-app-host.md) ·
+[0006-outcomes.md](0006-outcomes.md) · [0002-cli-app-host.md](0002-cli-app-host.md) ·
 [0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md)

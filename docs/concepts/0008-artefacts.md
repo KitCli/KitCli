@@ -1,4 +1,4 @@
-# Artefacts
+# 0008. Artefacts
 
 An outcome belongs to the command that returned it. An artefact is that
 same data made queryable by type and name across the whole run, so a later
@@ -46,5 +46,5 @@ despite a typed `CliException` hierarchy existing. Tracked as
 
 ## See also
 
-[outcomes.md](outcomes.md) · [command-registration.md](command-registration.md) ·
-[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md)
+[0006-outcomes.md](0006-outcomes.md) · [0001-command-registration.md](0001-command-registration.md) ·
+[0005-instruction-parsing-pipeline.md](0005-instruction-parsing-pipeline.md)

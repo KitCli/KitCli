@@ -1,4 +1,4 @@
-# Running side effects with command reactions
+# 0008. Running side effects with command reactions
 
 ## What this is for
 
@@ -56,7 +56,7 @@ command handler needs no idea how many exist — zero, one, or several.
 
 **Using a reaction to produce something the user should see.** A reaction
 is a side effect and never reaches an `IOutcomeIoWriter` (see
-[docs/concepts/outcome-writing.md](../concepts/outcome-writing.md)). Anything forming
+[docs/concepts/0004-outcome-writing.md](../concepts/0004-outcome-writing.md)). Anything forming
 part of the response to the ask is an `Outcome`: `BySaying`,
 `ByShowingTable`, and the rest.
 
@@ -65,7 +65,7 @@ handler returns `Task`, not `Task<Outcome[]>`, and its result is
 discarded; no path leads from a reaction back into the run. When a later
 command must read something, use a `Reusable` outcome and an artefact —
 see
-[reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md).
+[0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md).
 
 **Assuming a reaction can't break the command that raised it.** It can.
 Reaction handlers are awaited before the command's outcomes return, inside
@@ -79,11 +79,11 @@ isolation between handlers for the same reaction. Design around neither.
 
 ## Learn more
 
-- [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
+- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   the pattern to use when a later command must read state.
-- [docs/concepts/outcomes.md](../concepts/outcomes.md) — how `ByReacting`
+- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — how `ByReacting`
   fits the outcome model. A reaction outcome is `Anonymous`-kind and
   leaves the run's state machine alone.
-- [docs/concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
+- [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
   where reactions are published (`ExecuteCommand`, via `IPublisher`), and
   what an exception there does to the run.

@@ -51,8 +51,8 @@ Break #147 into four tickets, in this order. All of them wait on #142.
 3. Rewrite #124's selection rule around the queued outcome rather than the
    command, and settle the multiple-hop guard in the same ticket. They are one
    decision.
-4. Rewrite `chaining-commands.md`, `artefacts.md`, `outcomes.md` and
-   `workflow-run-state-machine.md` to teach the new method first.
+4. Rewrite `0007-chaining-commands.md`, `0008-artefacts.md`, `0006-outcomes.md`
+   and `0010-workflow-run-state-machine.md` to teach the new method first.
 
 Ticket 2 needs an ADR. It changes the shape of published API, and someone will
 later ask why there are two ways to queue a command.

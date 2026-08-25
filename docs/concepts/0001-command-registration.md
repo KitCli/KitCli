@@ -1,4 +1,4 @@
-# Command registration
+# 0001. Command registration
 
 `AddCommandsFromAssembly` scans an assembly and wires every `CliCommand`
 to a name, a factory, and a MediatR handler. You register nothing by hand,
@@ -45,6 +45,6 @@ ask resolves there, not at startup. Tracked as
 
 ## See also
 
-[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) ·
-[artefacts.md](artefacts.md) ·
+[0005-instruction-parsing-pipeline.md](0005-instruction-parsing-pipeline.md) ·
+[0008-artefacts.md](0008-artefacts.md) ·
 [0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md)

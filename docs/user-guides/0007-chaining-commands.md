@@ -1,4 +1,4 @@
-# Chaining commands together
+# 0007. Chaining commands together
 
 ## What this is for
 
@@ -58,7 +58,7 @@ needs its own `ByMovingToCommand(...)` to keep going, and the last needs
 **End every chain with a `Final`-kind outcome.** Without one, KitCli
 treats the run as reusable and waits for something else to move it
 forward. See
-[reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md).
+[0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md).
 
 ## Common mistakes
 
@@ -81,12 +81,12 @@ state between handlers in a static or singleton.
 
 ## Learn more
 
-- [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
+- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   what "reusable" means, and how a chain maps onto the run's state.
-- [docs/concepts/outcomes.md](../concepts/outcomes.md) — the full
+- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
   `Outcome` and `OutcomeKind` model this guide shows one slice of.
-- [docs/concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
+- [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
   how `NextCliCommandOutcome` drives the run's state machine.
-- [docs/concepts/artefacts.md](../concepts/artefacts.md) — passing data
+- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — passing data
   from an earlier step to a later one without threading it through every
   constructor.

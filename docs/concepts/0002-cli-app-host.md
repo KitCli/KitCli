@@ -1,4 +1,4 @@
-# CliApp host loop
+# 0002. CliApp host loop
 
 `CliApp` is the shell around a workflow: it sources asks, drives runs, and
 hands the outcomes to a writer. Two subclasses supply the loop —
@@ -56,5 +56,5 @@ startup**, naming both types, instead of silently capturing one.
 
 ## See also
 
-[workflow-run-state-machine.md](workflow-run-state-machine.md) ·
-[cli-io.md](cli-io.md) · [outcome-writing.md](outcome-writing.md)
+[0010-workflow-run-state-machine.md](0010-workflow-run-state-machine.md) ·
+[0003-cli-io.md](0003-cli-io.md) · [0004-outcome-writing.md](0004-outcome-writing.md)

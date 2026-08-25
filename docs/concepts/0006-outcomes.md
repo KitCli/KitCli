@@ -1,4 +1,4 @@
-# Outcomes
+# 0006. Outcomes
 
 Every command handler returns `Outcome[]`. Each outcome says one of two
 things: show the user this, or change what the run does next.
@@ -39,5 +39,5 @@ nothing merges or rejects them. No issue tracks it.
 
 ## See also
 
-[artefacts.md](artefacts.md) · [outcome-writing.md](outcome-writing.md) ·
-[workflow-run-state-machine.md](workflow-run-state-machine.md)
+[0008-artefacts.md](0008-artefacts.md) · [0004-outcome-writing.md](0004-outcome-writing.md) ·
+[0010-workflow-run-state-machine.md](0010-workflow-run-state-machine.md)

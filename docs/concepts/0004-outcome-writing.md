@@ -1,4 +1,4 @@
-# Outcome writing
+# 0004. Outcome writing
 
 An `IOutcomeIoWriter` turns one outcome into output. `CliApp.WriteOutcomes`
 matches each outcome against the writer list and takes the **first** whose
@@ -49,5 +49,5 @@ An `ExceptionOutcome` prints in an args app but not an interactive one:
 
 ## See also
 
-[outcomes.md](outcomes.md) · [cli-io.md](cli-io.md) ·
-[cli-app-host.md](cli-app-host.md)
+[0006-outcomes.md](0006-outcomes.md) · [0003-cli-io.md](0003-cli-io.md) ·
+[0002-cli-app-host.md](0002-cli-app-host.md)

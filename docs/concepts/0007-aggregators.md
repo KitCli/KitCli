@@ -1,4 +1,4 @@
-# Aggregators
+# 0007. Aggregators
 
 `Aggregator<TSource, TAggregate>` is the filter-project-sort-page pipeline
 that every list command needs, as one reusable object. Subclass it,
@@ -22,8 +22,8 @@ filters aggregated rows, and **paging always happens last**.
 
 Remember an aggregator across commands with `ByAggregating(aggregator)`;
 `AggregatorArtefactFactory` makes it queryable (see
-[artefacts.md](artefacts.md)). To re-run one with different paging, though,
-remember a `TableBuilder` instead — see [tables.md](tables.md).
+[0008-artefacts.md](0008-artefacts.md)). To re-run one with different paging, though,
+remember a `TableBuilder` instead — see [0009-tables.md](0009-tables.md).
 
 `AggregatorFilter` is a separate labelled record recording *which* filter a
 command applied. `Aggregator` never reads it; nothing ties it back to the
@@ -37,5 +37,5 @@ needs a subclass. Tracked as
 
 ## See also
 
-[tables.md](tables.md) · [outcomes.md](outcomes.md) ·
-[artefacts.md](artefacts.md)
+[0009-tables.md](0009-tables.md) · [0006-outcomes.md](0006-outcomes.md) ·
+[0008-artefacts.md](0008-artefacts.md)

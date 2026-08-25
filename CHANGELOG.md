@@ -33,7 +33,7 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   warned. The provider is now built with `ValidateScopes` and
   `ValidateOnBuild` on, so this fails at startup, naming the singleton and
   the scoped service it can't consume. See
-  [cli-app-host.md](docs/concepts/cli-app-host.md).
+  [0002-cli-app-host.md](docs/concepts/0002-cli-app-host.md).
 
 ## [1.0.12] - 2026-08-23
 
@@ -60,13 +60,13 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   `NextRun()` now checks `Finished` (not just `ReachedFinalOutcome`)
   before reusing a run, and every terminal path drives the run all the
   way to `Finished` before returning. See
-  [workflow-run-state-machine.md](docs/concepts/workflow-run-state-machine.md).
+  [0010-workflow-run-state-machine.md](docs/concepts/0010-workflow-run-state-machine.md).
 
 ### Changed
 
 - A command handler that throws an unhandled exception now ends the whole
   interactive session instead of silently continuing to the next ask. See
-  [cli-app-host.md](docs/concepts/cli-app-host.md).
+  [0002-cli-app-host.md](docs/concepts/0002-cli-app-host.md).
 
 ## [1.0.11] - 2026-08-22
 
