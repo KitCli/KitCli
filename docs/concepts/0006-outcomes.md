@@ -23,6 +23,10 @@ list of them.
 | `Reusable` | continues, keeping context for the next ask | `PageSizeOutcome`, `NextCliCommandOutcome` |
 | `Final` | ends it | `FinalSayOutcome`, `NothingOutcome` |
 
+`NextCliCommandOutcome` is abstract, and is what `ByMovingToCommand` appends:
+`SpecifiedNextCliCommandOutcome` when a handler names a type, and
+`ProvidedNextCliCommandOutcome` when it hands over a command it built.
+
 **Only the last outcome decides the run's next state.** That is the rule
 people get wrong: end on `ByFinallySaying` after remembering something and
 the run ends, discarding what you just saved. Put the reusable outcome

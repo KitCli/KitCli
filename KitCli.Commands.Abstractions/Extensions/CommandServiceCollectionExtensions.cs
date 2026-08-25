@@ -78,7 +78,7 @@ public static class CommandServiceCollectionExtensions
         {
             var specificCommandName = CliCommand.StripCommandName(commandImplementationType.Name);
             
-            var commandName = specificCommandName.ToLowerSplitString(InstructionConstants.DefaultCommandNameSeparator);
+            var commandName = CliCommand.GetInstructionName(commandImplementationType);
             var shorthandCommandName = specificCommandName.ToLowerTitleCharacters();
         
             services

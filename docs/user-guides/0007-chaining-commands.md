@@ -4,39 +4,33 @@
 
 One ask should sometimes drive several commands in sequence: a multi-step
 wizard, or a "list" command handing off to "show details for the first
-result", without the user typing each step. `ByMovingToCommand` queues the
-next command from inside a handler, and KitCli runs it with no fresh input.
+result", without the user typing each step. `ByMovingToCommand` says which
+command runs next from inside a handler, and KitCli runs it with no fresh
+input.
 
 ## How to do it
 
-Call `ByMovingToCommand(nextCommand)` **last**, before `.EndAsync()`. The
-next handler receives that command directly:
+Call `ByMovingToCommand<TCommand>()` **last**, before `.EndAsync()`. Name
+the next command's type; its `ICliCommandFactory` builds it when the run
+gets there:
 
 ```csharp
 public class StartWizardCliCommandHandler : CliCommandHandler<StartWizardCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(StartWizardCliCommand command, CancellationToken ct)
-    {
-        var nextCommand = new WizardStepOneCliCommand();
-
-        return FinishThisCommand()
+        => FinishThisCommand()
             .BySaying("Starting the wizard...")
-            .ByMovingToCommand(nextCommand)
+            .ByMovingToCommand<WizardStepOneCliCommand>()
             .EndAsync();
-    }
 }
 
 public class WizardStepOneCliCommandHandler : CliCommandHandler<WizardStepOneCliCommand>
 {
     public override Task<Outcome[]> HandleCommand(WizardStepOneCliCommand command, CancellationToken ct)
-    {
-        var nextCommand = new WizardStepTwoCliCommand();
-
-        return FinishThisCommand()
+        => FinishThisCommand()
             .BySaying("Step one done.")
-            .ByMovingToCommand(nextCommand)
+            .ByMovingToCommand<WizardStepTwoCliCommand>()
             .EndAsync();
-    }
 }
 
 public class WizardStepTwoCliCommandHandler : CliCommandHandler<WizardStepTwoCliCommand>
@@ -51,14 +45,46 @@ public class WizardStepTwoCliCommandHandler : CliCommandHandler<WizardStepTwoCli
 
 One ask resolving to `StartWizardCliCommand` runs all three handlers. Each
 step runs on its own pass of the host loop, so output appears in order
-rather than at the end. Chain as many steps as you need: every handler
-needs its own `ByMovingToCommand(...)` to keep going, and the last needs
-`ByFinallySaying(...)`, or any `Final`-kind outcome, to stop.
+rather than at the end. Every handler needs its own `ByMovingToCommand`
+to keep going, and the last needs `ByFinallySaying(...)`, or any
+`Final`-kind outcome, to stop.
 
 **End every chain with a `Final`-kind outcome.** Without one, KitCli
 treats the run as reusable and waits for something else to move it
 forward. See
 [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md).
+
+## Giving the next command its data
+
+Because a factory builds it, the next command can read everything the run
+has gathered — see
+[docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md). For what
+*this* handler decides, pass arguments:
+
+```csharp
+return FinishThisCommand()
+    .ByMovingToCommand<ShowBalanceCliCommand>(
+        new NextCliCommandArgument<int>("limit", 10))
+    .EndAsync();
+```
+
+`ShowBalanceCliCommandFactory` reads that with `GetRequiredArgument<int>("limit")`,
+exactly as if the user had typed it.
+
+**A command with constructor arguments needs a factory of its own.** KitCli
+only auto-registers one for a command it can build with `new`, so chaining
+to a command that has neither fails when the chain arrives, not when you
+write it.
+
+## Chaining to a command you built yourself
+
+`ByMovingToCommand(command)` takes an instance instead. Its factory never
+runs, so it sees none of the above — reach for it only when the command
+takes its data by constructor and you already have all of it:
+
+```csharp
+.ByMovingToCommand(new WizardStepTwoCliCommand(collectedValue))
+```
 
 ## Common mistakes
 
@@ -73,11 +99,10 @@ only the *first* command the ask resolves to, never the chained steps an
 interactive terminal app would drive. To finish the work in a single
 one-shot call, do it in one handler instead of chaining.
 
-**Mutating shared state across steps instead of passing it down the
-chain.** Build the next command with the data it needs
-(`new WizardStepTwoCliCommand(collectedValue)`), or read it back through
-an artefact when an earlier step's outcome was `Reusable`. Never smuggle
-state between handlers in a static or singleton.
+**Mutating shared state across steps.** Pass data down the chain as an
+argument, or read it back through an artefact when an earlier step's
+outcome was `Reusable`. Never smuggle state between handlers in a static
+or singleton.
 
 ## Learn more
 
@@ -90,3 +115,5 @@ state between handlers in a static or singleton.
 - [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — passing data
   from an earlier step to a later one without threading it through every
   constructor.
+- [docs/adr/0011-chain-to-a-command-by-type.md](../adr/0011-chain-to-a-command-by-type.md) —
+  why there are two ways to name the next command.

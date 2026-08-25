@@ -6,6 +6,20 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- `ByMovingToCommand<TCommand>(arguments)` — chain by naming the next command's
+  type; its factory builds it from the run's artefacts and any
+  `NextCliCommandArgument<TValue>`s you pass.
+  See [0011-chain-to-a-command-by-type.md](docs/adr/0011-chain-to-a-command-by-type.md).
+- `CliCommand.GetInstructionName(Type)` — a command's instruction name,
+  without needing an instance of it.
+
+### Changed
+
+- **Breaking:** `NextCliCommandOutcome` is now a base type — construct
+  `ProvidedNextCliCommandOutcome` instead. Matching on it is unaffected.
+
 ## [1.0.13] - 2026-08-24
 
 ### Fixed

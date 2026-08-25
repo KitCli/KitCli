@@ -51,6 +51,21 @@ public class CommandServiceCollectionExtensionsTests
         });
     }
 
+    [Test]
+    public void GivenArgumentFreeCommand_WhenAddCommandsFromAssembly_ThenFactoryIsResolvableByTheNameDerivedFromItsType()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var instructionName = CliCommand.GetInstructionName(typeof(RegistrationExampleCliCommand));
+
+        // Act
+        services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        Assert.That(provider.GetKeyedService<ICliCommandFactory>(instructionName), Is.Not.Null);
+    }
+
     private record DedicatedFactoryCliCommand : CliCommand;
 
     private class DedicatedFactoryCliCommandFactory : CliCommandFactory<DedicatedFactoryCliCommand>
