@@ -6,11 +6,12 @@ namespace KitCli.Commands.Abstractions.Tests.Outcomes;
 
 /// <summary>
 /// Covers the two ways a handler chains to a command: by type, leaving construction to that command's
-/// factory, and by instance, for a command that takes its data by constructor.
+/// factory, and by instance, for a command that takes its data by constructor. The rest of
+/// <see cref="OutcomeList"/>'s builder methods have no tests yet.
 /// </summary>
 // TODO: Just put it in OutcomeListTests?
 [TestFixture]
-public class OutcomeListMovingToCommandTests
+public class OutcomeListTests
 {
     private record TestNextCliCommand : CliCommand;
 
