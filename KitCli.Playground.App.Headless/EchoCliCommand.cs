@@ -3,7 +3,7 @@ using KitCli.Commands.Abstractions.Factories;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 
-namespace KitCli.Playground.App.Args;
+namespace KitCli.Playground.App.Headless;
 
 public record EchoCliCommand(string Text) : CliCommand;
 

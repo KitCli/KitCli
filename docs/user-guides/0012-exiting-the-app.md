@@ -7,7 +7,7 @@ That comes built in.
 
 ## How to do it
 
-Nothing to write. Any app built with `WithBasicTerminalApp()` or
+Nothing to write. Any app built with `WithBasicApp()` or
 `WithApp<TCliApp>()` registers an exit command already: type `/exit`, or
 the shorthand `/e`, and the session ends cleanly.
 
@@ -40,7 +40,7 @@ ending the run leaves the host loop free to create another.
 ## Common mistakes
 
 **Assuming a `Final` outcome alone stops the app.** It ends the *current
-run*. In an interactive terminal app the host loop then starts a new run
+run*. In an interactive app the host loop then starts a new run
 and asks again, unless you also call `ICliWorkflow.Stop()`.
 
 **Reaching for `Environment.Exit`, or throwing, to end the session.** Both

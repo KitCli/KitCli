@@ -47,9 +47,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Commands", "KitCli.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground.Scenarios", "KitCli.Playground.Scenarios\KitCli.Playground.Scenarios.csproj", "{4DF6A9EA-D653-42FF-B382-52FCB0BAC64A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground.App.Terminal", "KitCli.Playground.App.Terminal\KitCli.Playground.App.Terminal.csproj", "{F81169CE-6028-4A76-AB6A-277B5C4C1DF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground.App", "KitCli.Playground.App\KitCli.Playground.App.csproj", "{F81169CE-6028-4A76-AB6A-277B5C4C1DF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground.App.Args", "KitCli.Playground.App.Args\KitCli.Playground.App.Args.csproj", "{5EC6867B-D955-4469-87AD-F96B76E1A85A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Playground.App.Headless", "KitCli.Playground.App.Headless\KitCli.Playground.App.Headless.csproj", "{5EC6867B-D955-4469-87AD-F96B76E1A85A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCli.Tooling.Release", "KitCli.Tooling.Release\KitCli.Tooling.Release.csproj", "{DEC1A020-0946-40ED-83ED-E85CBFCC8A38}"
 EndProject

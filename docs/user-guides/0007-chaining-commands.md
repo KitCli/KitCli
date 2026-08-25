@@ -93,11 +93,11 @@ step rather than finishing. Somewhere in the chain a handler must call
 `ByFinallySaying(...)`, or return another `Final` outcome, or the run
 never completes.
 
-**Expecting a one-shot invocation to run a whole chain.** A one-shot
-invocation — `dotnet run -- /start-wizard`, built on `ArgsCliApp` — runs
-only the *first* command the ask resolves to, never the chained steps an
-interactive terminal app would drive. To finish the work in a single
-one-shot call, do it in one handler instead of chaining.
+**Expecting the chain to pause for input.** Every step runs back to back,
+with no ask in between. A step that needs something from the user has to
+be reached by a fresh ask, not by `ByMovingToCommand` — and in a headless
+app there is no fresh ask at all (see
+[0002-creating-a-headless-app.md](0002-creating-a-headless-app.md)).
 
 **Mutating shared state across steps.** Pass data down the chain as an
 argument, or read it back through an artefact when an earlier step's

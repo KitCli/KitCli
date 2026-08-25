@@ -10,7 +10,7 @@ namespace KitCli;
 
 /// <summary>
 /// Fluent builder for assembling and running a KitCli app: picks the concrete <see cref="CliApp"/>
-/// (and therefore terminal- or args-driven mode), wires up optional configuration sources, registers
+/// (and therefore whether it is interactive or headless), wires up optional configuration sources, registers
 /// command registries, and resolves and runs the built app.
 /// </summary>
 public class CliAppBuilder
@@ -26,20 +26,20 @@ public class CliAppBuilder
     private IConfigurationRoot? _configuration;
 
     /// <summary>
-    /// Configures this app to run as a <see cref="BasicTerminalCliApp"/> — the default interactive app
-    /// with no lifecycle hooks overridden.
+    /// Configures this app to run as a <see cref="BasicCliApp"/> — the default interactive app with no
+    /// lifecycle hooks overridden.
     /// </summary>
     /// <returns>This builder, for chaining.</returns>
-    public CliAppBuilder WithBasicTerminalApp()
+    public CliAppBuilder WithBasicApp()
     {
-        _services.AddCli<BasicTerminalCliApp>();
+        _services.AddCli<BasicCliApp>();
 
         return this;
     }
 
     /// <summary>
     /// Configures this app to run as <typeparamref name="TCliApp"/> — use this to run a custom
-    /// <see cref="TerminalCliApp"/> or <see cref="ArgsCliApp"/> subclass instead of the basic terminal app.
+    /// <see cref="CliApp"/> or <see cref="HeadlessCliApp"/> subclass instead of the basic app.
     /// </summary>
     /// <typeparam name="TCliApp">The concrete <see cref="CliApp"/> subclass to run.</typeparam>
     /// <returns>This builder, for chaining.</returns>
@@ -152,19 +152,19 @@ public class CliAppBuilder
     }
 
     /// <summary>
-    /// Builds the service provider, resolves the registered <see cref="CliApp"/>, and dispatches to
-    /// its <see cref="ArgsCliApp.Run"/> or <see cref="TerminalCliApp.Run"/> depending on its concrete
-    /// type and whether <paramref name="args"/> were provided.
+    /// Builds the service provider, resolves the registered <see cref="CliApp"/>, and runs it through
+    /// <see cref="CliApp.Run"/>, passing <paramref name="args"/> for an app that sources its ask from
+    /// them.
     /// </summary>
-    /// <param name="args">The process args to run an <see cref="ArgsCliApp"/> with; ignored by a <see cref="TerminalCliApp"/>.</param>
-    /// <returns>The running task for the resolved app's <c>Run</c> call.</returns>
+    /// <param name="args">The process args to run a <see cref="HeadlessCliApp"/> with; ignored by an interactive app.</param>
+    /// <returns>The running task for the resolved app's <see cref="CliApp.Run"/> call.</returns>
     /// <exception cref="AggregateException">
     /// Thrown at startup if any registered service can't be constructed, or if a singleton depends on a
     /// <c>Scoped</c> service — the provider is built with both validations on.
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// Thrown if the resolved app is an <see cref="ArgsCliApp"/> and no <paramref name="args"/> were
-    /// provided, or if it is neither an <see cref="ArgsCliApp"/> nor a <see cref="TerminalCliApp"/>.
+    /// Thrown if the resolved app is a <see cref="HeadlessCliApp"/> and no <paramref name="args"/> were
+    /// provided — it has no way to ask for one.
     /// </exception>
     public Task Run(string[]? args = null)
     {
@@ -178,27 +178,17 @@ public class CliAppBuilder
             .GetServices<IOutcomeIoWriter>()
             .ToList();
 
-        var cliAppName = cliApp.GetType().Name;
         var argsProvided = args is { Length: > 0 };
 
-        if (cliApp is ArgsCliApp && !argsProvided)
+        if (cliApp is HeadlessCliApp && !argsProvided)
         {
-            var noArgsMessage = $"{cliAppName} is an ArgsCliApp and requires at least one argument to run — none were provided.";
+            var cliAppName = cliApp.GetType().Name;
+            var noArgsMessage = $"{cliAppName} is a HeadlessCliApp and requires at least one argument to run — none were provided.";
+
             throw new ArgumentException(noArgsMessage);
         }
 
-        if (cliApp is ArgsCliApp argsCliAppToRun && argsProvided)
-        {
-            return argsCliAppToRun.Run(outcomeIoWriters, args!);
-        }
-
-        if (cliApp is TerminalCliApp terminalCliApp)
-        {
-            return terminalCliApp.Run(outcomeIoWriters);
-        }
-
-        var unknownAppMessage = $"{cliAppName} is neither an ArgsCliApp nor a TerminalCliApp — unable to determine how to run it.";
-        throw new ArgumentException(unknownAppMessage);
+        return cliApp.Run(outcomeIoWriters, args);
     }
     
     private void SetUpConfigurationBuilder()

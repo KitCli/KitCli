@@ -32,8 +32,8 @@ To change how a built-in outcome renders, register your own writer ahead of
 `AddCli`, which runs `AddCommandAbstractions` internally. Anything added
 afterwards lands behind the built-ins and never wins.
 
-An `ExceptionOutcome` prints in an args app but not an interactive one:
-`TerminalCliApp` rethrows before `WriteOutcomes` runs.
+An `ExceptionOutcome` never prints: `CliApp` rethrows before
+`WriteOutcomes` runs, under either host.
 
 ## Gaps
 

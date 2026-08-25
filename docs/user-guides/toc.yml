@@ -1,9 +1,9 @@
 - name: Writing a basic command
   href: 0001-writing-a-basic-command.md
-- name: Creating an args app
-  href: 0002-creating-an-args-app.md
-- name: Creating a terminal app
-  href: 0003-creating-a-terminal-app.md
+- name: Creating a headless app
+  href: 0002-creating-a-headless-app.md
+- name: Creating an interactive app
+  href: 0003-creating-an-interactive-app.md
 - name: Creating a registry
   href: 0004-creating-a-registry.md
 - name: Reading command arguments
