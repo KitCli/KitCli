@@ -76,6 +76,36 @@ the model it serves is agreed:
   `ProjectChangeDetector` computes `{lastReleaseCommit}..HEAD` per project to
   answer "did this change", and that is the same range whose subjects a
   cross-check needs.
+- **Microsoft does not derive the major from breakage.**
+  `Microsoft.Extensions.DependencyInjection` and `Microsoft.EntityFrameworkCore`
+  publish majors 1, 2, 3, 5, 6, 7, 8, 9, 10 — the annual .NET release train,
+  with 4 skipped to avoid colliding with .NET Framework 4.x. Their major tracks
+  the platform band, not the API diff this investigation proposes reading.
+- **Microsoft's advice to library authors is weaker than semver, and points
+  elsewhere.** [Versioning and .NET
+  libraries](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/versioning)
+  says only "CONSIDER using SemVer 2.0.0". The firmer rules sit on [Breaking
+  changes](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/breaking-changes):
+  "DO minimize breaking changes when developing a low-level .NET library",
+  "CONSIDER placing the ObsoleteAttribute on types and members that you intend
+  to remove", and "CONSIDER keeping types and methods with the ObsoleteAttribute
+  indefinitely in low and middle-level libraries". KitCli is a low-level library
+  by that page's own definition.
+- **A climbing major is a break-rate symptom, not a numbering defect.** Microsoft
+  sits at 10 by not removing public API; libraries that rename freely reach
+  Newtonsoft.Json 13, MediatR 14, AutoMapper 16. KitCli moved 1.0.13 to 3.0.0 in
+  roughly 36 hours. Deriving the level correctly, as recommended above, makes
+  that rate legible — it does not slow it. Only a deprecation policy does.
+- **Deprecation would have downgraded most of ADR 0013.** `TerminalCliApp`,
+  `ArgsCliApp`, `BasicTerminalCliApp` and `WithBasicTerminalApp()` could each
+  have stayed as an `[Obsolete]` forwarder, leaving a minor. `ExecuteRunOperation`
+  is the exception: its `protected` signature changed, which breaks a subclass
+  override with or without the shims.
+- **Three docs disagree about the model today.** `CHANGELOG.md`'s header says
+  "All 9 packages version together" and `CLAUDE.md` says the projects "publish as
+  a single, unified-version set"; `CONTRIBUTING.md#versioning--releases` says they
+  do not ship in lockstep, and the committed versions agree with it. Whichever way
+  #128 lands, two of the three need rewriting.
 
 ## Evidence
 
@@ -114,6 +144,20 @@ Bumping (changed, or depends on something that changed):
   - KitCli.Workflow               - KitCli
 ```
 
+Stable majors published by comparable packages, from the NuGet flat container:
+
+```
+$ curl -s https://api.nuget.org/v3-flatcontainer/{id}/index.json \
+    | tr -d ' "\r\n' | sed 's/.*versions:\[//;s/\]}//' | tr ',' '\n' \
+    | awk -F'[.]' '!/-/ && NF>=3 {print $1}' | awk '!s[$0]++'
+
+microsoft.extensions.dependencyinjection   1 2 3 5 6 7 8 9 10
+microsoft.entityframeworkcore              1 2 3 5 6 7 8 9 10
+newtonsoft.json                            3 4 5 6 7 8 9 10 11 12 13
+mediatr                                    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+automapper                                 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+```
+
 ## Open questions
 
 - Does #128 land on per-package or lockstep? Every recommendation above assumes
@@ -125,6 +169,9 @@ Bumping (changed, or depends on something that changed):
   process decision this spike did not take.
 - Should the cross-checks fail the release or warn? Failing is stated above;
   nothing tested how often a legitimate disagreement occurs.
+- Should KitCli deprecate rather than remove, as Microsoft advises indefinitely
+  for low-level libraries? That is a policy decision this spike did not scope,
+  and it — not the bump level — governs how fast the major climbs.
 
 ## Out of scope
 
