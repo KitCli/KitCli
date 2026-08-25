@@ -20,3 +20,5 @@
   href: 0010-resolve-the-whole-run-from-its-scope.md
 - name: "0011. Chain to a command by type, and let its factory build it"
   href: 0011-chain-to-a-command-by-type.md
+- name: "0012. Derive each package's version bump from its public API diff"
+  href: 0012-derive-version-bumps-from-the-public-api-diff.md
