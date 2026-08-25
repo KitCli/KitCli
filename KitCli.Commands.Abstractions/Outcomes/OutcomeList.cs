@@ -4,7 +4,7 @@ using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
-using KitCli.Instructions.Abstractions;
+using KitCli.Commands.Abstractions.Arguments;
 
 namespace KitCli.Commands.Abstractions.Outcomes;
 
@@ -126,14 +126,13 @@ public class OutcomeList : List<Outcome>
 
     /// <summary>
     /// Appends a <see cref="SpecifiedNextCliCommandOutcome"/> naming the given command type as the next
-    /// one to run, along with arguments to put on the instruction the run builds for it — as though the
-    /// user had typed them. Use this for what the calling handler decides; the run's own artefacts reach
-    /// the factory either way.
+    /// one to run, along with arguments for that command's factory to read. Use this for what the calling
+    /// handler decides; the run's own artefacts reach the factory either way.
     /// </summary>
     /// <typeparam name="TCommand">The type of the command to move to.</typeparam>
     /// <param name="arguments">The arguments the next command's factory should see.</param>
     /// <returns>This list, for chaining.</returns>
-    public OutcomeList ByMovingToCommand<TCommand>(params AnonymousInstructionArgument[] arguments)
+    public OutcomeList ByMovingToCommand<TCommand>(params AnonymousNextCliCommandArgument[] arguments)
         where TCommand : CliCommand
         => ByResultingIn(new SpecifiedNextCliCommandOutcome(typeof(TCommand), [..arguments]));
 

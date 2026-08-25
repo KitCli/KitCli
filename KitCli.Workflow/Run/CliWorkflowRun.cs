@@ -208,7 +208,8 @@ public class CliWorkflowRun : ICliWorkflowRun
             {
                 Prefix = _instructionSettings.Prefix.ToString(),
                 Name = instructionName,
-                Arguments = [..specifiedNextCliCommandOutcome.Arguments]
+                Arguments = [..specifiedNextCliCommandOutcome.Arguments
+                    .Select(argument => argument.ToInstructionArgument())]
             };
 
             var allPriorOutcomes = AllPriorOutcomes();

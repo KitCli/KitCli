@@ -6,8 +6,7 @@ using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
 using KitCli.Commands.Abstractions.Tests.TestHelpers;
-using KitCli.Instructions.Abstractions;
-using KitCli.Instructions.Arguments;
+using KitCli.Commands.Abstractions.Arguments;
 using NUnit.Framework;
 
 namespace KitCli.Commands.Abstractions.Tests.Outcomes;
@@ -172,7 +171,7 @@ public class OutcomeListTests
     public void GivenArguments_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThem()
     {
         // Arrange
-        var limit = new InstructionArgument<int>("limit", 10);
+        var limit = new NextCliCommandArgument<int>("limit", 10);
 
         // Act
         var outcomes = new OutcomeList().ByMovingToCommand<TestNextCliCommand>(limit).End();
@@ -184,7 +183,7 @@ public class OutcomeListTests
         {
             Assert.That(outcome, Is.Not.Null);
             Assert.That(outcome!.SpecifiedCommandType, Is.EqualTo(typeof(TestNextCliCommand)));
-            Assert.That(outcome.Arguments, Is.EqualTo(new AnonymousInstructionArgument[] { limit }).AsCollection);
+            Assert.That(outcome.Arguments, Is.EqualTo(new AnonymousNextCliCommandArgument[] { limit }).AsCollection);
         });
     }
 

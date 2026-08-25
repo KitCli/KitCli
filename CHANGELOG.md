@@ -9,7 +9,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Added
 
 - `ByMovingToCommand<TCommand>(arguments)` — chain by naming the next command's
-  type; its factory builds it from the run's artefacts and any arguments you pass.
+  type; its factory builds it from the run's artefacts and any
+  `NextCliCommandArgument<TValue>`s you pass.
   See [0011-chain-to-a-command-by-type.md](docs/adr/0011-chain-to-a-command-by-type.md).
 - `CliCommand.GetInstructionName(Type)` — a command's instruction name,
   without needing an instance of it.

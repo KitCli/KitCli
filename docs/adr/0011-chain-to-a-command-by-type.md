@@ -19,8 +19,10 @@ whichever command a chain moves to is built like any other. The spike is
 ## Decision
 
 `ByMovingToCommand<TCommand>()` names the type. The run builds the command when the chain arrives.
-An overload takes arguments to put on that command's instruction, for what the calling handler
-decides rather than what the run gathered.
+An overload takes `NextCliCommandArgument<TValue>`s, for what the calling handler decides rather than
+what the run gathered. They are a command-layer type: nothing pretends the user typed them. The run
+puts them in the box a factory reads from when it builds the instruction — a change of container with
+one correct implementation, so a method on the argument rather than a registered converter.
 
 A chained command is an instruction — "now run `show-balance`" is what an instruction says, and
 factories are keyed by instruction name. `CliWorkflowRun` builds a fresh instruction from the

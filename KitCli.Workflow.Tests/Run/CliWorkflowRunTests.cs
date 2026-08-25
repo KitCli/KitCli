@@ -5,6 +5,7 @@ using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
+using KitCli.Commands.Abstractions.Arguments;
 using KitCli.Instructions.Abstractions;
 using KitCli.Instructions.Arguments;
 using KitCli.Instructions.Abstractions.Validators;
@@ -687,7 +688,7 @@ public class CliWorkflowRunTests
     public async Task GivenSpecifiedNextCommandWithArguments_WhenMoveToNext_ThenTheInstructionCarriesThem()
     {
         // Arrange
-        var limit = new InstructionArgument<int>("limit", 10);
+        var limit = new NextCliCommandArgument<int>("limit", 10);
 
         await RespondToAskWithNextOutcomes(
             new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand), [limit]));
@@ -703,11 +704,12 @@ public class CliWorkflowRunTests
         // Act
         _ = await _classUnderTest.MoveToNext();
 
-        // Assert - what the calling handler decided reaches the factory as an argument, so
-        // GetRequiredArgument finds it mid-chain.
+        // Assert - what the calling handler decided reaches the factory as an instruction argument, in
+        // the box GetRequiredArgument reads from, so it is found mid-chain.
         _cliWorkflowCommandProvider.Verify(
             provider => provider.GetCommand(
-                It.Is<Instruction>(instruction => instruction.Arguments.SequenceEqual(new[] { limit })),
+                It.Is<Instruction>(instruction => instruction.Arguments.SequenceEqual(
+                    new AnonymousInstructionArgument[] { new InstructionArgument<int>("limit", 10) })),
                 It.IsAny<List<Outcome>>()),
             Times.Once);
     }

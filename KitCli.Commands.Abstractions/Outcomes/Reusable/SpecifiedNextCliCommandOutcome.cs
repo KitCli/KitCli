@@ -1,4 +1,4 @@
-using KitCli.Instructions.Abstractions;
+using KitCli.Commands.Abstractions.Arguments;
 
 namespace KitCli.Commands.Abstractions.Outcomes.Reusable;
 
@@ -10,12 +10,12 @@ namespace KitCli.Commands.Abstractions.Outcomes.Reusable;
 /// </summary>
 /// <param name="SpecifiedCommandType">The type of the command to move to.</param>
 /// <param name="Arguments">
-/// Arguments to put on the instruction the run builds for it, as though the user had typed them. Empty
-/// when the handler passes none, in which case the factory has only artefacts to work from.
+/// Arguments the handler decided the next command should see. Empty when it passes none, in which case
+/// the factory has only artefacts to work from.
 /// </param>
 public record SpecifiedNextCliCommandOutcome(
     Type SpecifiedCommandType,
-    List<AnonymousInstructionArgument> Arguments) : NextCliCommandOutcome
+    List<AnonymousNextCliCommandArgument> Arguments) : NextCliCommandOutcome
 {
     /// <summary>Specifies the next command with no arguments.</summary>
     /// <param name="specifiedCommandType">The type of the command to move to.</param>

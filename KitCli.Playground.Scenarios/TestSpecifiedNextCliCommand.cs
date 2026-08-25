@@ -1,6 +1,6 @@
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Factories;
-using KitCli.Instructions.Arguments;
+using KitCli.Commands.Abstractions.Arguments;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Outcomes;
 
@@ -27,7 +27,7 @@ public class TestSpecifiedNextCliCommandHandler : CliCommandHandler<TestSpecifie
             .BySaying("Specified Next Command Ran (0)")
             .ByResultingIn(new TestOutcome("I was gathered by the run"))
             .ByMovingToCommand<TestSpecifiedNextResultCliCommand>(
-                new InstructionArgument<string>("said", "and I was passed as an argument"))
+                new NextCliCommandArgument<string>("said", "and I was passed as an argument"))
             .EndAsync();
 }
 
