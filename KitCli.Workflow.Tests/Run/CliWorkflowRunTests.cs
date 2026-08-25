@@ -6,6 +6,7 @@ using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Instructions.Abstractions;
+using KitCli.Instructions.Arguments;
 using KitCli.Instructions.Abstractions.Validators;
 using KitCli.Instructions.Parsers;
 using KitCli.Workflow.Abstractions;
@@ -666,22 +667,48 @@ public class CliWorkflowRunTests
             .Setup(mediator => mediator.Send(It.IsAny<TestFactoryBuiltCliCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([new NothingOutcome()]);
 
-        // A fresh instruction, not the originating ask: the chained command's factory reads the run's
-        // artefacts, not arguments the user typed at a different command.
-        var expectedInstruction = Instruction.Empty with
-        {
-            Prefix = "/",
-            Name = "test-factory-built"
-        };
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert - a fresh instruction, not the originating ask: the chained command's factory reads the
+        // run's artefacts, not arguments the user typed at a different command.
+        _cliWorkflowCommandProvider.Verify(
+            provider => provider.GetCommand(
+                It.Is<Instruction>(instruction
+                    => instruction.Prefix == "/"
+                       && instruction.Name == "test-factory-built"
+                       && instruction.SubInstructionName == string.Empty
+                       && instruction.Arguments.Count == 0),
+                It.Is<List<Outcome>>(outcomes => outcomes.OfType<RanCliCommandOutcome>().Any())),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GivenSpecifiedNextCommandWithArguments_WhenMoveToNext_ThenTheInstructionCarriesThem()
+    {
+        // Arrange
+        var limit = new InstructionArgument<int>("limit", 10);
+
+        await RespondToAskWithNextOutcomes(
+            new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand), [limit]));
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new TestFactoryBuiltCliCommand());
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<TestFactoryBuiltCliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
 
         // Act
         _ = await _classUnderTest.MoveToNext();
 
-        // Assert - this is the point of the feature: the factory sees what the run has gathered.
+        // Assert - what the calling handler decided reaches the factory as an argument, so
+        // GetRequiredArgument finds it mid-chain.
         _cliWorkflowCommandProvider.Verify(
             provider => provider.GetCommand(
-                expectedInstruction,
-                It.Is<List<Outcome>>(outcomes => outcomes.OfType<RanCliCommandOutcome>().Any())),
+                It.Is<Instruction>(instruction => instruction.Arguments.SequenceEqual(new[] { limit })),
+                It.IsAny<List<Outcome>>()),
             Times.Once);
     }
 

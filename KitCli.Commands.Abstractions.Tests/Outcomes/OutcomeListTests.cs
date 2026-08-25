@@ -6,6 +6,8 @@ using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
 using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
 using KitCli.Commands.Abstractions.Tests.TestHelpers;
+using KitCli.Instructions.Abstractions;
+using KitCli.Instructions.Arguments;
 using NUnit.Framework;
 
 namespace KitCli.Commands.Abstractions.Tests.Outcomes;
@@ -146,17 +148,44 @@ public class OutcomeListTests
         }).AsCollection);
     }
 
+    // Asserted member by member rather than against a whole outcome: the record carries a List, and a
+    // record's generated equality compares a List by reference, so two outcomes naming the same command
+    // are never equal. Instruction has the same semantics.
     [Test]
-    public void GivenCommandType_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThatTypeAndNoInstance()
+    public void GivenCommandType_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThatTypeAndNoArguments()
     {
         // Act
         var outcomes = new OutcomeList().ByMovingToCommand<TestNextCliCommand>().End();
 
         // Assert
-        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        var outcome = outcomes.Single() as SpecifiedNextCliCommandOutcome;
+
+        Assert.Multiple(() =>
         {
-            new SpecifiedNextCliCommandOutcome(typeof(TestNextCliCommand))
-        }).AsCollection);
+            Assert.That(outcome, Is.Not.Null);
+            Assert.That(outcome!.SpecifiedCommandType, Is.EqualTo(typeof(TestNextCliCommand)));
+            Assert.That(outcome.Arguments, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void GivenArguments_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThem()
+    {
+        // Arrange
+        var limit = new InstructionArgument<int>("limit", 10);
+
+        // Act
+        var outcomes = new OutcomeList().ByMovingToCommand<TestNextCliCommand>(limit).End();
+
+        // Assert
+        var outcome = outcomes.Single() as SpecifiedNextCliCommandOutcome;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(outcome, Is.Not.Null);
+            Assert.That(outcome!.SpecifiedCommandType, Is.EqualTo(typeof(TestNextCliCommand)));
+            Assert.That(outcome.Arguments, Is.EqualTo(new AnonymousInstructionArgument[] { limit }).AsCollection);
+        });
     }
 
     [Test]
@@ -188,10 +217,9 @@ public class OutcomeListTests
         var outcomes = new OutcomeList().ByMovingToCommand<TestParameterisedNextCliCommand>().End();
 
         // Assert
-        Assert.That(outcomes, Is.EqualTo(new Outcome[]
-        {
-            new SpecifiedNextCliCommandOutcome(typeof(TestParameterisedNextCliCommand))
-        }).AsCollection);
+        var outcome = outcomes.Single() as SpecifiedNextCliCommandOutcome;
+
+        Assert.That(outcome?.SpecifiedCommandType, Is.EqualTo(typeof(TestParameterisedNextCliCommand)));
     }
 
     [Test]

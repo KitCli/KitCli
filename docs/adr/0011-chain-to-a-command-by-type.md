@@ -19,6 +19,8 @@ whichever command a chain moves to is built like any other. The spike is
 ## Decision
 
 `ByMovingToCommand<TCommand>()` names the type. The run builds the command when the chain arrives.
+An overload takes arguments to put on that command's instruction, for what the calling handler
+decides rather than what the run gathered.
 
 A chained command is an instruction — "now run `show-balance`" is what an instruction says, and
 factories are keyed by instruction name. `CliWorkflowRun` builds a fresh instruction from the
@@ -46,7 +48,8 @@ existing name on the base leaves every `OfType<NextCliCommandOutcome>()` working
 ## Consequences
 
 - A chained command reads what the run gathered. Its data arrives as artefacts rather than through the previous handler's locals — a different data-passing model for chains.
-- The instruction carries a prefix and a name and nothing else, answering open question 3 on #147 as `Instruction.Empty` rather than the originating ask. A factory calling `GetRequiredArgument` cannot be chained to by type.
+- The instruction carries a prefix, a name, and whatever arguments the calling handler passed — never the originating ask's, answering open question 3 on #147 as `Instruction.Empty`. An argument the user typed was typed at the *first* command.
+- A chained factory therefore has two ways in: artefacts for what the run gathered, arguments for what the calling handler decided. The guides have to say which to reach for.
 - A command with constructor arguments and no `CliCommandFactory<T>` has no factory registered, so chaining to it throws `NoCommandGeneratorException` at runtime. No compiler check can catch it.
 - `new NextCliCommandOutcome(command)` no longer compiles; it becomes `new ProvidedNextCliCommandOutcome(command)`. Reading outcomes is unaffected.
 - `MoveToNext()` still takes the last one, so a handler that chains on twice loses the first. [#152](https://github.com/KitCli/KitCli/issues/152) rewrites that rule.

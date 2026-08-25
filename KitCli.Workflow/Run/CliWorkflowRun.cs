@@ -207,7 +207,8 @@ public class CliWorkflowRun : ICliWorkflowRun
             var instruction = Instruction.Empty with
             {
                 Prefix = _instructionSettings.Prefix.ToString(),
-                Name = instructionName
+                Name = instructionName,
+                Arguments = [..specifiedNextCliCommandOutcome.Arguments]
             };
 
             var allPriorOutcomes = AllPriorOutcomes();
