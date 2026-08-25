@@ -116,7 +116,8 @@ continuous input, workflow commands. **Skip it for** internal machinery
 with no consumer-facing API; that is a concept doc.
 
 Copy [`docs/user-guides/0000-template.md`](docs/user-guides/0000-template.md).
-Name by topic like concept docs, not numbered like ADRs. Verify every code
+Number sequentially (`000x-topic-in-kebab-case.md`), in the order a
+reader should meet them — `toc.yml` is that order. Verify every code
 sample against current source. **Keep them current**, in the same PR.
 
 ## Investigations

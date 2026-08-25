@@ -1,4 +1,4 @@
-# Showing a paged table
+# 0011. Showing a paged table
 
 ## What this is for
 
@@ -11,7 +11,7 @@ KitCli gives it a dedicated pipeline. This is how to wire one up.
 Four pieces, then a command that builds and shows the table.
 
 This assumes your registry calls `AddArtefactFactoriesForAssembly` (see
-[creating-a-registry.md](creating-a-registry.md)). That call registers the
+[0004-creating-a-registry.md](0004-creating-a-registry.md)). That call registers the
 artefact factories for the aggregator and table builder below; without it,
 the "next page" step cannot find the remembered builder.
 
@@ -156,15 +156,15 @@ constructor redoes what the remembered artefact already gives you.
 
 ## Learn more
 
-- [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
+- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   the general pattern behind `ByRememberingHowToBuildTable`.
-- [docs/concepts/aggregators.md](../concepts/aggregators.md) — the full
+- [docs/concepts/0007-aggregators.md](../concepts/0007-aggregators.md) — the full
   `Aggregator<TSource, TAggregate>` pipeline beneath step 1:
   `BeforeAggregation`, `DoAggregation`, `AfterAggregation`, paging.
-- [docs/concepts/tables.md](../concepts/tables.md) — how `TableMap` and
+- [docs/concepts/0009-tables.md](../concepts/0009-tables.md) — how `TableMap` and
   `TableBuilder` turn aggregated rows into a rendered `Table`, plus the
   known gaps — no default column mapping, no value formatting hook — to
   weigh before relying on either.
-- [docs/concepts/artefacts.md](../concepts/artefacts.md) — how a
+- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
   remembered `TableBuilder` is retrieved by a later command, the same
   way any other artefact is.

@@ -1,11 +1,11 @@
-# Creating a terminal app
+# 0003. Creating a terminal app
 
 ## What this is for
 
 A terminal app is the interactive mode: it asks the user for input, one
 line at a time, until they exit — what most CLI tools call a REPL. Use it
 for a session someone sits in. For a single one-shot invocation, see
-[creating-an-args-app.md](creating-an-args-app.md).
+[0002-creating-an-args-app.md](0002-creating-an-args-app.md).
 
 ## How to do it
 
@@ -22,7 +22,7 @@ await app.Run();
 
 Run it and it prompts in a loop, executing whatever command each line
 resolves to, until a command ends the session (see
-[exiting-the-app.md](exiting-the-app.md)).
+[0012-exiting-the-app.md](0012-exiting-the-app.md)).
 
 ### Hooking into the session lifecycle
 
@@ -64,7 +64,7 @@ nothing by default. Override only what you need.
 
 **Subclassing `TerminalCliApp` to change static output text.** To reword a
 built-in message, write an `IOutcomeIoWriter` (see
-[docs/concepts/outcome-writing.md](../concepts/outcome-writing.md)), not a
+[docs/concepts/0004-outcome-writing.md](../concepts/0004-outcome-writing.md)), not a
 lifecycle hook. Hooks govern *when* something happens, writers *how* an
 outcome renders.
 
@@ -84,9 +84,9 @@ that `TerminalCliApp.Run` already handles. Reach for a hook first.
 
 ## Learn more
 
-- [creating-an-args-app.md](creating-an-args-app.md) — the one-shot
+- [0002-creating-an-args-app.md](0002-creating-an-args-app.md) — the one-shot
   alternative.
-- [creating-a-registry.md](creating-a-registry.md) — wiring up the
+- [0004-creating-a-registry.md](0004-creating-a-registry.md) — wiring up the
   commands, and settings, a terminal app runs.
-- [docs/concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
+- [docs/concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — what
   `TerminalCliApp.Run` does each iteration, and when each hook fires.

@@ -1,4 +1,6 @@
-# Architectural review — 2026-07-25
+# 0001. Architectural review
+
+Date: 2026-07-25
 
 ## Summary
 

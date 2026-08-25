@@ -14,17 +14,17 @@ than one says yes.
 - `InstructionParser.Parse` picks the first `IInstructionArgumentBuilder`
   whose `For(argumentValue)` returns `true`, out of a fixed registration
   order ending in `BoolInstructionArgumentBuilder`'s unconditional `true`
-  (see [instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md)).
+  (see [0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md)).
 - `CliWorkflowCommandProvider.GetCommand` picks the first
   `ICliCommandFactory` (among those keyed under the resolved instruction
   name) whose `CanCreateWhen()` returns `true` (see
-  [command-registration.md](../concepts/command-registration.md)).
+  [0001-command-registration.md](../concepts/0001-command-registration.md)).
 - The same provider's `ConvertOutcomesToArtefacts` picks the first
   `IArtefactFactory` whose `For(outcome)` returns `true` (see
-  [artefacts.md](../concepts/artefacts.md)).
+  [0008-artefacts.md](../concepts/0008-artefacts.md)).
 - `CliApp.WriteOutcomes` picks the first `IOutcomeIoWriter` whose
   `CanWriteFor(outcome)` returns `true` (see
-  [cli-app-host.md](../concepts/cli-app-host.md)).
+  [0002-cli-app-host.md](../concepts/0002-cli-app-host.md)).
 
 Each of these was arrived at independently as each subsystem was built,
 but they all resolve the same way. That consistency is worth naming as a
@@ -49,7 +49,7 @@ second candidate that would also have said yes.
   into a runtime crash rather than a silent behavior change — a tradeoff
   KitCli hasn't made in either direction consistently (command factory
   registration *does* throw on type-level ambiguity at startup — see
-  [command-registration.md](../concepts/command-registration.md) — while
+  [0001-command-registration.md](../concepts/0001-command-registration.md) — while
   every other resolution point here doesn't).
 - **Explicit priority/ordering metadata on each candidate** — removes the
   registration-order dependency, but adds a second thing (the priority

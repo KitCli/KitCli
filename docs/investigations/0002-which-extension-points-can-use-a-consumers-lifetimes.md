@@ -33,7 +33,7 @@ order needs a joint planning pass; it is not implied by this document.
 ## What was established
 
 Permanent home for all of these is
-[microsoft-dependency-injection.md](../technology/microsoft-dependency-injection.md).
+[0001-microsoft-dependency-injection.md](../technology/0001-microsoft-dependency-injection.md).
 
 1. **Effective lifetime is `max(registered, holder's)`.** A dependency
    lives at least as long as whatever injected it. Registration is a

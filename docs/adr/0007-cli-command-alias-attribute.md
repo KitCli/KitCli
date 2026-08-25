@@ -8,7 +8,7 @@ Date: 2026-08-23
 A `CliCommand`'s instruction name is derived mechanically from its type
 name — strip the `Command` suffix, dash-split, lowercase — plus a
 shorthand derived from its uppercase letters (see
-[command-registration.md](../concepts/command-registration.md)). Renaming
+[0001-command-registration.md](../concepts/0001-command-registration.md)). Renaming
 the type is the only way to change either. That leaves no way to give a
 command a memorable or user-facing name that doesn't fit the
 PascalCase-to-dashed convention, or to give it more than one name, without
@@ -45,7 +45,7 @@ public record SpareMoneyCommand : CliCommand;
   because it would let a command override its *primary* name, not just add
   to it, which would break the guarantee that the full name is always
   predictable from the type name (see the "Questions & answers" section of
-  `command-registration.md`).
+  `0001-command-registration.md`).
 - **A single `Aliases` array on one attribute instance** — rejected in
   favor of a repeatable single-name attribute; `[CliCommandAlias("a")]
   [CliCommandAlias("b")]` reads better at the declaration site than
@@ -65,4 +65,4 @@ alone. Alias-to-name collisions across different command types fail at
 the same point full/shorthand-name collisions already do: silently, at
 first resolution, not at startup (see the existing "Registration-time
 failure for type-level ambiguity; runtime failure for name-level
-ambiguity" trade-off in `command-registration.md`).
+ambiguity" trade-off in `0001-command-registration.md`).

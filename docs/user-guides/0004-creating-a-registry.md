@@ -1,4 +1,4 @@
-# Creating a registry
+# 0004. Creating a registry
 
 ## What this is for
 
@@ -41,7 +41,7 @@ in any DI setup: `services.AddSingleton<...>()`, and so on.
 A *second*, separate call registers artefact factories;
 `AddCommandsFromAssembly` leaves them alone. Add it whenever a command in
 the assembly remembers state for a later command to read back (see
-[remembering-your-own-state.md](remembering-your-own-state.md)):
+[0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)):
 
 ```csharp
 public class MyAppRegistry : ICliAppRegistry
@@ -59,7 +59,7 @@ public class MyAppRegistry : ICliAppRegistry
 That call also picks up artefact factories for every `Aggregator` and
 `TableBuilder` subclass in the assembly, which is what makes a paged
 table's "next page" work (see
-[showing-a-paged-table.md](showing-a-paged-table.md)).
+[0011-showing-a-paged-table.md](0011-showing-a-paged-table.md)).
 
 ### When a registry needs settings
 
@@ -122,7 +122,7 @@ register instead.
 
 ## Learn more
 
-- [writing-a-basic-command.md](writing-a-basic-command.md) — what
+- [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — what
   `AddCommandsFromAssembly` finds and registers.
-- [docs/concepts/command-registration.md](../concepts/command-registration.md) —
+- [docs/concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   the full mechanics behind that call.

@@ -1,4 +1,4 @@
-# CLI I/O
+# 0003. CLI I/O
 
 `ICliIo` is the one seam through which a KitCli app reads input, writes
 output, and learns about Ctrl+C. Nothing else in the framework touches
@@ -45,5 +45,5 @@ runs to completion.
 
 ## See also
 
-[cli-app-host.md](cli-app-host.md) · [outcome-writing.md](outcome-writing.md) ·
+[0002-cli-app-host.md](0002-cli-app-host.md) · [0004-outcome-writing.md](0004-outcome-writing.md) ·
 [0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)

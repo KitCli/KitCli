@@ -35,7 +35,7 @@ and succeeds when it did not: correct in testing, broken on the last step.
 Neither mechanism is caught by `ValidateScopes`/`ValidateOnBuild`.
 Injecting `IServiceProvider` is legal at every lifetime, and instance
 registrations have no call site to validate. See
-[microsoft-dependency-injection.md](../technology/microsoft-dependency-injection.md).
+[0001-microsoft-dependency-injection.md](../technology/0001-microsoft-dependency-injection.md).
 
 ## Decision
 

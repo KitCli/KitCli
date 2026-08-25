@@ -1,4 +1,4 @@
-# Exiting the app
+# 0012. Exiting the app
 
 ## What this is for
 
@@ -49,9 +49,9 @@ session through `ICliWorkflow.Stop()`.
 
 ## Learn more
 
-- [docs/concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
+- [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
   the real `ExitCliCommandHandler` this example mirrors, and what a `Final`
   outcome does to a run's state.
-- [docs/concepts/cli-app-host.md](../concepts/cli-app-host.md) — the host
+- [docs/concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — the host
   loop reading `Workflow.Status` each iteration, and the `OnSessionEnd`
   hook firing once it stops.
