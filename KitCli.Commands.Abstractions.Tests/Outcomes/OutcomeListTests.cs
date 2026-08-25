@@ -1,27 +1,156 @@
+using KitCli.Abstractions.Aggregators;
+using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Outcomes;
+using KitCli.Commands.Abstractions.Outcomes.Anonymous;
+using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Outcomes.Reusable;
+using KitCli.Commands.Abstractions.Outcomes.Reusable.Page;
+using KitCli.Commands.Abstractions.Tests.TestHelpers;
 using NUnit.Framework;
 
 namespace KitCli.Commands.Abstractions.Tests.Outcomes;
 
 /// <summary>
-/// Covers the two ways a handler chains to a command: by type, leaving construction to that command's
-/// factory, and by instance, for a command that takes its data by constructor. The rest of
-/// <see cref="OutcomeList"/>'s builder methods have no tests yet.
+/// Covers every <see cref="OutcomeList"/> builder method: each appends one outcome of the right kind,
+/// carrying what it was given, in call order.
 /// </summary>
-// TODO: Just put it in OutcomeListTests?
 [TestFixture]
 public class OutcomeListTests
 {
-    private record TestNextCliCommand : CliCommand;
+    [Test]
+    public void GivenOutcome_WhenByResultingIn_ThenAppendsIt()
+    {
+        // Arrange
+        var outcome = new NothingOutcome();
+
+        // Act
+        var outcomes = new OutcomeList().ByResultingIn(outcome).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { outcome }).AsCollection);
+    }
+
+    [Test]
+    public void GivenSeveralOutcomes_WhenByResultingIn_ThenAppendsThemInOrder()
+    {
+        // Arrange
+        var first = new SayOutcome("first");
+        var second = new NothingOutcome();
+
+        // Act
+        var outcomes = new OutcomeList().ByResultingIn(first, second).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { first, second }).AsCollection);
+    }
+
+    [Test]
+    public void GivenMessage_WhenBySaying_ThenAppendsSayOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().BySaying("hello").End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new SayOutcome("hello") }).AsCollection);
+    }
+
+    [Test]
+    public void GivenSeveralMessages_WhenBySaying_ThenAppendsOneSayOutcomeEachInOrder()
+    {
+        // Act
+        var outcomes = new OutcomeList().BySaying("first", "second").End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new SayOutcome("first"),
+            new SayOutcome("second")
+        }).AsCollection);
+    }
+
+    [Test]
+    public void GivenTable_WhenByShowingTable_ThenAppendsTableOutcome()
+    {
+        // Arrange
+        var table = new Table(["Column"], [[1]]);
+
+        // Act
+        var outcomes = new OutcomeList().ByShowingTable(table).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new TableOutcome(table) }).AsCollection);
+    }
+
+    [Test]
+    public void GivenAggregator_WhenByAggregating_ThenAppendsAggregatorOutcome()
+    {
+        // Arrange
+        var aggregator = new TestAggregator();
+
+        // Act
+        var outcomes = new OutcomeList().ByAggregating(aggregator).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator)
+        }).AsCollection);
+    }
+
+    [Test]
+    public void GivenFilter_WhenByRememberingFilter_ThenAppendsAggregatorFilterOutcome()
+    {
+        // Arrange
+        var filter = new AggregatorFilter("Name", "equals", "payee");
+
+        // Act
+        var outcomes = new OutcomeList().ByRememberingFilter(filter).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new AggregatorFilterOutcome(filter) }).AsCollection);
+    }
+
+    [Test]
+    public void GivenPageSize_WhenByRememberingPageSize_ThenAppendsPageSizeOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByRememberingPageSize(25).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new PageSizeOutcome(25) }).AsCollection);
+    }
+
+    [Test]
+    public void GivenPageNumber_WhenByRememberingPageNumber_ThenAppendsPageNumberOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByRememberingPageNumber(3).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new PageNumberOutcome(3) }).AsCollection);
+    }
+
+    [Test]
+    public void GivenTableBuilder_WhenByRememberingHowToBuildTable_ThenAppendsTableBuilderOutcome()
+    {
+        // Arrange
+        var tableBuilder = new TestTableBuilder();
+
+        // Act
+        var outcomes = new OutcomeList().ByRememberingHowToBuildTable(tableBuilder).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new TableBuilderOutcome<TestAggregate, TestAggregate>(tableBuilder)
+        }).AsCollection);
+    }
 
     [Test]
     public void GivenCommandType_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThatTypeAndNoInstance()
     {
         // Act
-        var outcomes = new OutcomeList()
-            .ByMovingToCommand<TestNextCliCommand>()
-            .End();
+        var outcomes = new OutcomeList().ByMovingToCommand<TestNextCliCommand>().End();
 
         // Assert
         Assert.That(outcomes, Is.EqualTo(new Outcome[]
@@ -37,9 +166,7 @@ public class OutcomeListTests
         var nextCommand = new TestNextCliCommand();
 
         // Act
-        var outcomes = new OutcomeList()
-            .ByMovingToCommand(nextCommand)
-            .End();
+        var outcomes = new OutcomeList().ByMovingToCommand(nextCommand).End();
 
         // Assert
         Assert.That(outcomes, Is.EqualTo(new Outcome[]
@@ -76,5 +203,84 @@ public class OutcomeListTests
 
         // Assert - #152 selects the next command by outcome identity, which needs the two to stay separable.
         Assert.That(outcomes[0], Is.Not.SameAs(outcomes[1]));
+    }
+
+    [Test]
+    public void GivenReaction_WhenByReacting_ThenAppendsReactionOutcome()
+    {
+        // Arrange
+        var reaction = new TestCliCommandReaction("a command ran");
+
+        // Act
+        var outcomes = new OutcomeList().ByReacting(reaction).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new ReactionOutcome(reaction) }).AsCollection);
+    }
+
+    [Test]
+    public void WhenByFinallyDoingNothing_ThenAppendsNothingOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByFinallyDoingNothing().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new NothingOutcome() }).AsCollection);
+    }
+
+    [Test]
+    public void GivenMessage_WhenByFinallySaying_ThenAppendsFinalSayOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByFinallySaying("done").End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new FinalSayOutcome("done") }).AsCollection);
+    }
+
+    [Test]
+    public void WhenByFinallyNotFindingCommand_ThenAppendsCliCommandNotFoundOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByFinallyNotFindingCommand().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new CliCommandNotFoundOutcome() }).AsCollection);
+    }
+
+    [Test]
+    public void GivenChainedCalls_WhenEnd_ThenReturnsEveryOutcomeInCallOrder()
+    {
+        // Act
+        var outcomes = new OutcomeList()
+            .BySaying("working")
+            .ByRememberingPageSize(10)
+            .ByFinallySaying("done")
+            .End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new SayOutcome("working"),
+            new PageSizeOutcome(10),
+            new FinalSayOutcome("done")
+        }).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenChainedCalls_WhenEndAsync_ThenReturnsTheSameOutcomesAsEnd()
+    {
+        // Act
+        var outcomes = await new OutcomeList()
+            .BySaying("working")
+            .ByFinallyDoingNothing()
+            .EndAsync();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new SayOutcome("working"),
+            new NothingOutcome()
+        }).AsCollection);
     }
 }
