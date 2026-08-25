@@ -526,8 +526,6 @@ public class CliWorkflowRunTests
         Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
     }
 
-    // Documents today's selection rule: MoveToNext takes the *last* NextCliCommandOutcome, so a handler
-    // that chains on twice has the first silently dropped. Changing that rule is #152.
     [Test]
     public async Task GivenTwoProvidedNextCommands_WhenMoveToNext_SendsOnlyTheLastProvided()
     {
@@ -613,7 +611,7 @@ public class CliWorkflowRunTests
         // Act
         await RespondToAskWithNextOutcomes(new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand)));
 
-        // Assert - the run's guard finds a hop of either kind, not just one carrying an instance.
+        // Assert
         var expectedStateChangeTypes = new[]
         {
             ClIWorkflowRunStateStatus.Running,
@@ -648,7 +646,7 @@ public class CliWorkflowRunTests
         // Act
         _ = await _classUnderTest.MoveToNext();
 
-        // Assert - the command executed is the factory's, not one the previous handler built.
+        // Assert
         _sender.Verify(
             mediator => mediator.Send(factoryBuiltCommand, It.IsAny<CancellationToken>()),
             Times.Once);
@@ -671,8 +669,7 @@ public class CliWorkflowRunTests
         // Act
         _ = await _classUnderTest.MoveToNext();
 
-        // Assert - a fresh instruction, not the originating ask: the chained command's factory reads the
-        // run's artefacts, not arguments the user typed at a different command.
+        // Assert
         _cliWorkflowCommandProvider.Verify(
             provider => provider.GetCommand(
                 It.Is<Instruction>(instruction
@@ -704,8 +701,7 @@ public class CliWorkflowRunTests
         // Act
         _ = await _classUnderTest.MoveToNext();
 
-        // Assert - what the calling handler decided reaches the factory as an instruction argument, in
-        // the box GetRequiredArgument reads from, so it is found mid-chain.
+        // Assert
         _cliWorkflowCommandProvider.Verify(
             provider => provider.GetCommand(
                 It.Is<Instruction>(instruction => instruction.Arguments.SequenceEqual(
@@ -742,7 +738,7 @@ public class CliWorkflowRunTests
         // Act
         _ = await run.MoveToNext();
 
-        // Assert - the prefix is the app's configured one, not a hardcoded slash.
+        // Assert
         _cliWorkflowCommandProvider.Verify(
             provider => provider.GetCommand(
                 It.Is<Instruction>(instruction => instruction.Prefix == "!"),
@@ -763,7 +759,7 @@ public class CliWorkflowRunTests
         // Act
         var resultingOutcomes = await _classUnderTest.MoveToNext();
 
-        // Assert - an unbuildable hop is an engineering error, so it fails loudly rather than suggesting.
+        // Assert
         var expectedStateChangeTypes = new[]
         {
             ClIWorkflowRunStateStatus.Running,

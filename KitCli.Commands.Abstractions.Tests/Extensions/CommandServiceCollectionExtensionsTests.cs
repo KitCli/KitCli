@@ -51,8 +51,6 @@ public class CommandServiceCollectionExtensionsTests
         });
     }
 
-    // A chained hop names its command with CliCommand.GetInstructionName(Type) and lets the ordinary
-    // instruction path resolve it, so registration must key the factory under exactly that name.
     [Test]
     public void GivenArgumentFreeCommand_WhenAddCommandsFromAssembly_ThenFactoryIsResolvableByTheNameDerivedFromItsType()
     {
