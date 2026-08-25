@@ -147,9 +147,6 @@ public class OutcomeListTests
         }).AsCollection);
     }
 
-    // Asserted member by member rather than against a whole outcome: the record carries a List, and a
-    // record's generated equality compares a List by reference, so two outcomes naming the same command
-    // are never equal. Instruction has the same semantics.
     [Test]
     public void GivenCommandType_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThatTypeAndNoArguments()
     {
@@ -206,11 +203,9 @@ public class OutcomeListTests
     [Test]
     public void GivenCommandTypeWithNoParameterlessConstructor_WhenByMovingToCommand_ThenChainsToItAnyway()
     {
-        // Assert - TCommand is constrained to CliCommand and nothing more. A new() constraint would read
-        // as harmless and would exclude exactly the commands this overload exists for: the ones with
-        // constructor arguments, which only a factory can supply. GetConstructor(Type.EmptyTypes) is the
-        // same check AddCommandFactories makes before auto-registering a basic factory.
-        Assert.That(typeof(TestParameterisedNextCliCommand).GetConstructor(Type.EmptyTypes), Is.Null);
+        // Arrange
+        var commandTypeOnlyAFactoryCanBuild = typeof(TestParameterisedNextCliCommand);
+        var itsParameterlessConstructor = commandTypeOnlyAFactoryCanBuild.GetConstructor(Type.EmptyTypes);
 
         // Act
         var outcomes = new OutcomeList().ByMovingToCommand<TestParameterisedNextCliCommand>().End();
@@ -218,7 +213,11 @@ public class OutcomeListTests
         // Assert
         var outcome = outcomes.Single() as SpecifiedNextCliCommandOutcome;
 
-        Assert.That(outcome?.SpecifiedCommandType, Is.EqualTo(typeof(TestParameterisedNextCliCommand)));
+        Assert.Multiple(() =>
+        {
+            Assert.That(itsParameterlessConstructor, Is.Null);
+            Assert.That(outcome?.SpecifiedCommandType, Is.EqualTo(commandTypeOnlyAFactoryCanBuild));
+        });
     }
 
     [Test]
@@ -230,7 +229,7 @@ public class OutcomeListTests
             .ByMovingToCommand(new TestNextCliCommand())
             .End();
 
-        // Assert - CliWorkflowRun finds the next command by the shared base, so both overloads must carry it.
+        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(outcomes, Is.All.InstanceOf<NextCliCommandOutcome>());
@@ -247,7 +246,7 @@ public class OutcomeListTests
             .ByMovingToCommand<TestNextCliCommand>()
             .End();
 
-        // Assert - #152 selects the next command by outcome identity, which needs the two to stay separable.
+        // Assert
         Assert.That(outcomes[0], Is.Not.SameAs(outcomes[1]));
     }
 
