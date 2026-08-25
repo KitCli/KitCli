@@ -1,4 +1,4 @@
-# Tables
+# 0009. Tables
 
 `TableBuilder<TSource, TAggregate>` turns aggregated rows into named
 columns, and holds its own aggregator, map, and paging — so remembering the
@@ -43,5 +43,5 @@ order of `Map(...)` calls. Those decide each column's *name* only.
 
 ## See also
 
-[aggregators.md](aggregators.md) · [outcomes.md](outcomes.md) ·
-[artefacts.md](artefacts.md)
+[0007-aggregators.md](0007-aggregators.md) · [0006-outcomes.md](0006-outcomes.md) ·
+[0008-artefacts.md](0008-artefacts.md)

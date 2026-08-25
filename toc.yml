@@ -1,9 +1,9 @@
 - name: User guides
   href: docs/user-guides/
-  homepage: docs/user-guides/writing-a-basic-command.md
+  homepage: docs/user-guides/0001-writing-a-basic-command.md
 - name: Concepts
   href: docs/concepts/
-  homepage: docs/concepts/command-registration.md
+  homepage: docs/concepts/0001-command-registration.md
 - name: ADRs
   href: docs/adr/
   homepage: docs/adr/0001-mediatr-for-command-dispatch.md

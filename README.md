@@ -114,29 +114,29 @@ dotnet run --project KitCli.Playground.App.Args -- /echo --name Alex   # one-sho
   propose a change.
 - [`docs/user-guides/`](docs/user-guides/) — how to use a pattern in
   practice, without needing to know the machinery underneath:
-  [writing a basic command](docs/user-guides/writing-a-basic-command.md),
-  [reading command arguments](docs/user-guides/reading-command-arguments.md),
-  [exiting the app](docs/user-guides/exiting-the-app.md),
-  [creating a terminal app](docs/user-guides/creating-a-terminal-app.md),
-  [creating an args app](docs/user-guides/creating-an-args-app.md),
-  [creating a registry](docs/user-guides/creating-a-registry.md),
-  [chaining commands](docs/user-guides/chaining-commands.md),
-  [remembering state across asks](docs/user-guides/reusable-outcomes-and-the-workflow-run.md),
-  [command reactions](docs/user-guides/command-reactions.md),
-  [showing a paged table](docs/user-guides/showing-a-paged-table.md),
-  [remembering your own state](docs/user-guides/remembering-your-own-state.md),
-  and [gating a command with CanCreateWhen](docs/user-guides/gating-a-command-with-cancreatewhen.md).
+  [writing a basic command](docs/user-guides/0001-writing-a-basic-command.md),
+  [reading command arguments](docs/user-guides/0005-reading-command-arguments.md),
+  [exiting the app](docs/user-guides/0012-exiting-the-app.md),
+  [creating a terminal app](docs/user-guides/0003-creating-a-terminal-app.md),
+  [creating an args app](docs/user-guides/0002-creating-an-args-app.md),
+  [creating a registry](docs/user-guides/0004-creating-a-registry.md),
+  [chaining commands](docs/user-guides/0007-chaining-commands.md),
+  [remembering state across asks](docs/user-guides/0010-reusable-outcomes-and-the-workflow-run.md),
+  [command reactions](docs/user-guides/0008-command-reactions.md),
+  [showing a paged table](docs/user-guides/0011-showing-a-paged-table.md),
+  [remembering your own state](docs/user-guides/0009-remembering-your-own-state.md),
+  and [gating a command with CanCreateWhen](docs/user-guides/0006-gating-a-command-with-cancreatewhen.md).
 - [`docs/concepts/`](docs/concepts/) — how each subsystem works today:
-  [command registration](docs/concepts/command-registration.md),
-  [instruction parsing](docs/concepts/instruction-parsing-pipeline.md),
-  the [workflow state machine](docs/concepts/workflow-run-state-machine.md),
-  the [host loop](docs/concepts/cli-app-host.md),
-  [CLI I/O](docs/concepts/cli-io.md) and
-  [outcome writing](docs/concepts/outcome-writing.md),
-  [outcomes](docs/concepts/outcomes.md) and
-  [artefacts](docs/concepts/artefacts.md),
-  [aggregators](docs/concepts/aggregators.md) and
-  [tables](docs/concepts/tables.md).
+  [command registration](docs/concepts/0001-command-registration.md),
+  [instruction parsing](docs/concepts/0005-instruction-parsing-pipeline.md),
+  the [workflow state machine](docs/concepts/0010-workflow-run-state-machine.md),
+  the [host loop](docs/concepts/0002-cli-app-host.md),
+  [CLI I/O](docs/concepts/0003-cli-io.md) and
+  [outcome writing](docs/concepts/0004-outcome-writing.md),
+  [outcomes](docs/concepts/0006-outcomes.md) and
+  [artefacts](docs/concepts/0008-artefacts.md),
+  [aggregators](docs/concepts/0007-aggregators.md) and
+  [tables](docs/concepts/0009-tables.md).
 - [`docs/adr/`](docs/adr/) — architectural decisions and why.
 - [`docs/reviews/`](docs/reviews/) — past architectural reviews.
 

@@ -1,4 +1,4 @@
-# Writing a basic command
+# 0001. Writing a basic command
 
 ## What this is for
 
@@ -94,7 +94,7 @@ is unreachable when someone types its name.
 **Forgetting that `CanCreateWhen()` decides whether the command is offered
 at all, not only how it is built.** Returning `false` fails quietly: the
 instruction resolves to "no matching command." See
-[reading-command-arguments.md](reading-command-arguments.md) for the
+[0005-reading-command-arguments.md](0005-reading-command-arguments.md) for the
 arguments `CanCreateWhen` and `Create` read to decide.
 
 **Expecting the handler to see the raw ask.** Argument parsing finishes
@@ -103,12 +103,12 @@ factory or through its constructor, is all the handler sees.
 
 ## Learn more
 
-- [reading-command-arguments.md](reading-command-arguments.md) — using
+- [0005-reading-command-arguments.md](0005-reading-command-arguments.md) — using
   arguments from the current ask inside a factory.
-- [creating-a-registry.md](creating-a-registry.md) — wiring
+- [0004-creating-a-registry.md](0004-creating-a-registry.md) — wiring
   `AddCommandsFromAssembly` up for a real app, settings-driven registries
   included.
-- [docs/concepts/command-registration.md](../concepts/command-registration.md) —
+- [docs/concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   how a command's name and shorthand are derived, and how
   `AddCommandsFromAssembly` chooses between your factory and the automatic
   one.

@@ -1,24 +1,24 @@
 - name: Writing a basic command
-  href: writing-a-basic-command.md
+  href: 0001-writing-a-basic-command.md
 - name: Creating an args app
-  href: creating-an-args-app.md
+  href: 0002-creating-an-args-app.md
 - name: Creating a terminal app
-  href: creating-a-terminal-app.md
+  href: 0003-creating-a-terminal-app.md
 - name: Creating a registry
-  href: creating-a-registry.md
+  href: 0004-creating-a-registry.md
 - name: Reading command arguments
-  href: reading-command-arguments.md
+  href: 0005-reading-command-arguments.md
 - name: Gating a command with CanCreateWhen
-  href: gating-a-command-with-cancreatewhen.md
+  href: 0006-gating-a-command-with-cancreatewhen.md
 - name: Chaining commands together
-  href: chaining-commands.md
+  href: 0007-chaining-commands.md
 - name: Running side effects with command reactions
-  href: command-reactions.md
+  href: 0008-command-reactions.md
 - name: Remembering your own state
-  href: remembering-your-own-state.md
+  href: 0009-remembering-your-own-state.md
 - name: Remembering state across separate asks
-  href: reusable-outcomes-and-the-workflow-run.md
+  href: 0010-reusable-outcomes-and-the-workflow-run.md
 - name: Showing a paged table
-  href: showing-a-paged-table.md
+  href: 0011-showing-a-paged-table.md
 - name: Exiting the app
-  href: exiting-the-app.md
+  href: 0012-exiting-the-app.md

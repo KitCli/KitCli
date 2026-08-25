@@ -1,4 +1,4 @@
-# Instruction parsing pipeline
+# 0005. Instruction parsing pipeline
 
 `InstructionParser.Parse` turns one line of terminal input into a typed
 `Instruction`. Nothing downstream sees the raw string again.
@@ -49,6 +49,6 @@ claimed by the one ahead of it silently changes type.
 
 ## See also
 
-[command-registration.md](command-registration.md) ·
-[artefacts.md](artefacts.md) ·
-[workflow-run-state-machine.md](workflow-run-state-machine.md)
+[0001-command-registration.md](0001-command-registration.md) ·
+[0008-artefacts.md](0008-artefacts.md) ·
+[0010-workflow-run-state-machine.md](0010-workflow-run-state-machine.md)

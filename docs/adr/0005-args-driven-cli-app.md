@@ -10,7 +10,7 @@ KitCli apps could only ever be driven interactively: `CliApp.Run` was a
 iteration. There was no way to invoke a command in one shot from process
 args (`myapp /command --flag value`) — `Program.cs` never read `args` at
 all, and nothing in `CliAppBuilder`/`CliApp` had a seam for it. See
-[cli-app-host.md](../concepts/cli-app-host.md) for how the interactive loop
+[0002-cli-app-host.md](../concepts/0002-cli-app-host.md) for how the interactive loop
 works today.
 
 ## Decision
@@ -63,7 +63,7 @@ to for its whole lifetime anyway.
 **Mutating `run.State` directly from `CliApp` to force `ReachedFinalOutcome`
 after one command.** Would have made `ArgsCliApp` a few lines shorter.
 Rejected outright — only `CliWorkflowRun` is allowed to change its own
-state; see [workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md).
+state; see [0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md).
 `Workflow.Stop()` was used instead — the same public method
 `ExitCliCommandHandler` already calls.
 
@@ -71,7 +71,7 @@ state; see [workflow-run-state-machine.md](../concepts/workflow-run-state-machin
 creating runs**, called directly from `ArgsCliApp` instead of going through
 `NextRun()`. Tried during implementation, then reverted: it bypassed
 `NextRun()`'s reuse-or-create logic and the single-active-run invariant
-documented in workflow-run-state-machine.md ("the only caller of `NextRun()`
+documented in 0010-workflow-run-state-machine.md ("the only caller of `NextRun()`
 is `CliApp.Run`'s own loop"). `ArgsCliApp` goes through `Workflow.NextRun()`
 like `TerminalCliApp` does.
 

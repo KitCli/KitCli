@@ -1,4 +1,4 @@
-# Reading command arguments
+# 0005. Reading command arguments
 
 ## What this is for
 
@@ -64,7 +64,7 @@ numeric is typed numeric, whatever the argument is called.
 
 You never parse a raw value yourself. Consuming code cannot add a type
 beyond this list today; see
-[docs/concepts/instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md)
+[docs/concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md)
 for why.
 
 ## Common mistakes
@@ -91,11 +91,11 @@ up.
 
 ## Learn more
 
-- [writing-a-basic-command.md](writing-a-basic-command.md) — where a
+- [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — where a
   factory fits into a command, and when you need one.
-- [docs/concepts/instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md) —
+- [docs/concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md) —
   how a raw ask becomes the typed arguments these helpers read, and the
   full list of built-in `IInstructionArgumentBuilder`s.
-- [docs/concepts/artefacts.md](../concepts/artefacts.md) — `GetArtefact`
+- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — `GetArtefact`
   and `GetRequiredArtefact`, the equivalents for state from *prior*
   commands in the same run.

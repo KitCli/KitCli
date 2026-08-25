@@ -31,11 +31,11 @@ what it finds, instead of asking the consumer to list them:
   it to a `CliCommandFactory<>` subtype (or falls back to
   `BasicCliCommandFactory<>`), then registers MediatR handlers from the
   same assembly via `RegisterServicesFromAssembly` (see
-  [command-registration.md](../concepts/command-registration.md)).
+  [0001-command-registration.md](../concepts/0001-command-registration.md)).
 - `AddArtefactFactoriesForAssembly` finds every `ArtefactFactory<>` subtype
   and registers it, building closed generic types via `MakeGenericType` +
   `Activator.CreateInstance` for generic ones (see
-  [artefacts.md](../concepts/artefacts.md)).
+  [0008-artefacts.md](../concepts/0008-artefacts.md)).
 
 ## Alternatives considered
 
@@ -46,7 +46,7 @@ what it finds, instead of asking the consumer to list them:
   isn't.
 - **Keyed DI registration driven by an explicit name argument at
   registration time** — closer to what command factories still do today
-  (see [command-registration.md](../concepts/command-registration.md)),
+  (see [0001-command-registration.md](../concepts/0001-command-registration.md)),
   but requires the registration call site to know the key up front, which
   reflection-based discovery derives automatically from the type instead.
 
@@ -59,6 +59,6 @@ anything discovered this way, and a class that exists in an assembly the
 caller never told KitCli to scan silently isn't registered — there's no
 startup error naming what was missed, only an absence a consumer has to
 notice at runtime (see the "Constraints & tradeoffs" sections of
-[artefacts.md](../concepts/artefacts.md) and
-[command-registration.md](../concepts/command-registration.md) for the
+[0008-artefacts.md](../concepts/0008-artefacts.md) and
+[0001-command-registration.md](../concepts/0001-command-registration.md) for the
 concrete failure shapes this produces in each subsystem).

@@ -1,4 +1,4 @@
-# Gating a command with CanCreateWhen
+# 0006. Gating a command with CanCreateWhen
 
 ## What this is for
 
@@ -75,12 +75,12 @@ command type. For genuinely different behavior, branch inside one
 
 ## Learn more
 
-- [writing-a-basic-command.md](writing-a-basic-command.md) — when you need
+- [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — when you need
   a factory, versus the automatic one.
-- [reading-command-arguments.md](reading-command-arguments.md) and
-  [reusable-outcomes-and-the-workflow-run.md](reusable-outcomes-and-the-workflow-run.md) —
+- [0005-reading-command-arguments.md](0005-reading-command-arguments.md) and
+  [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   the argument and artefact helpers available inside `CanCreateWhen` and
   `Create()`, alongside `SubCommandIs` and `LastCommandWas`.
-- [docs/concepts/command-registration.md](../concepts/command-registration.md) —
+- [docs/concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   how `CanCreateWhen` fits into command resolution: keyed DI narrows the
   candidates, `CanCreateWhen` picks among them, first match wins.
