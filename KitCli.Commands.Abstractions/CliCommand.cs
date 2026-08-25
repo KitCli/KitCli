@@ -23,7 +23,17 @@ public record CliCommand : IRequest<Outcome[]>
     /// </summary>
     /// <returns>The instruction name derived from this command's type.</returns>
     public string GetInstructionName()
-        => GetType().Name
+        => GetInstructionName(GetType());
+
+    /// <summary>
+    /// Derives the dashed instruction name a command type responds to, without needing an instance of it.
+    /// This is the key its factory is registered under, and the name the workflow run puts in the
+    /// instruction it builds when a handler chains to that type.
+    /// </summary>
+    /// <param name="commandType">The command type to derive a name from.</param>
+    /// <returns>The instruction name derived from <paramref name="commandType"/>.</returns>
+    public static string GetInstructionName(Type commandType)
+        => commandType.Name
             .ReplaceCommandSuffix()
             .ToLowerSplitString(InstructionConstants.DefaultCommandNameSeparator);
 

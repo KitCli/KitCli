@@ -112,12 +112,27 @@ public class OutcomeList : List<Outcome>
         => ByResultingIn(new TableBuilderOutcome<TSource, TAggregate>(tableBuilder));
 
     /// <summary>
-    /// Appends a <see cref="NextCliCommandOutcome"/> remembering the given command as the next one to run.
+    /// Appends a <see cref="SpecifiedNextCliCommandOutcome"/> naming the given command type as the next
+    /// one to run. The command is not built here: the run resolves it through its
+    /// <c>ICliCommandFactory</c> when it gets there, so the factory sees the run's accumulated
+    /// artefacts — the same construction path an instruction-resolved command takes.
+    /// </summary>
+    /// <typeparam name="TCommand">The type of the command to move to.</typeparam>
+    /// <returns>This list, for chaining.</returns>
+    public OutcomeList ByMovingToCommand<TCommand>()
+        where TCommand : CliCommand
+        => ByResultingIn(new SpecifiedNextCliCommandOutcome(typeof(TCommand)));
+
+    /// <summary>
+    /// Appends a <see cref="ProvidedNextCliCommandOutcome"/> remembering the given command as the next one to run.
+    /// The command is built here, by the calling handler, so its factory never runs and never sees the
+    /// run's artefacts. Prefer <see cref="ByMovingToCommand{TCommand}()"/> unless the next command takes
+    /// its data by constructor.
     /// </summary>
     /// <param name="nextCommand">The command to move to.</param>
     /// <returns>This list, for chaining.</returns>
     public OutcomeList ByMovingToCommand(CliCommand nextCommand)
-        => ByResultingIn(new NextCliCommandOutcome(nextCommand));
+        => ByResultingIn(new ProvidedNextCliCommandOutcome(nextCommand));
 
     /// <summary>
     /// Appends a <see cref="ReactionOutcome"/> carrying the given reaction, published as a side effect.

@@ -1,7 +1,8 @@
 namespace KitCli.Commands.Abstractions.Outcomes.Reusable;
 
 /// <summary>
-/// Remembers which command should run next.
+/// Remembers that another command should run next. Which of the two kinds a handler returns is the
+/// handler's choice, made when it calls <c>ByMovingToCommand</c>: see
+/// <see cref="ProvidedNextCliCommandOutcome"/> and <see cref="SpecifiedNextCliCommandOutcome"/>.
 /// </summary>
-/// <param name="NextCommand">The command to move to.</param>
-public record NextCliCommandOutcome(CliCommand NextCommand) : Outcome(OutcomeKind.Reusable);
+public abstract record NextCliCommandOutcome() : Outcome(OutcomeKind.Reusable);

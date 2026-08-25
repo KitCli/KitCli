@@ -31,6 +31,11 @@ public class CliWorkflowRunTests
 
     private record TestChainedToCliCommand(string Name) : CliCommand;
 
+    private record TestFactoryBuiltCliCommand : CliCommand;
+
+    private static readonly Instruction OriginatingInstruction =
+        new("/", "some-valid-ask", "with-detail", []);
+
     private static readonly IOptions<InstructionSettings> DefaultInstructionSettings =
         Options.Create(new InstructionSettings());
 
@@ -424,7 +429,7 @@ public class CliWorkflowRunTests
         var nextCommand = new TestChainedToCliCommand("next");
 
         // Act
-        await RespondToAskQueueing(nextCommand);
+        await RespondToAskWithNextCommands(nextCommand);
 
         // Assert
         var expectedStateChangeTypes = new[]
@@ -441,12 +446,12 @@ public class CliWorkflowRunTests
     }
 
     [Test]
-    public async Task GivenQueuedNextCommand_WhenMoveToNext_SendsThatCommand()
+    public async Task GivenProvidedNextCommand_WhenMoveToNext_SendsThatCommand()
     {
         // Arrange
         var nextCommand = new TestChainedToCliCommand("next");
 
-        await RespondToAskQueueing(nextCommand);
+        await RespondToAskWithNextCommands(nextCommand);
 
         _sender
             .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
@@ -462,13 +467,13 @@ public class CliWorkflowRunTests
     }
 
     [Test]
-    public async Task GivenQueuedNextCommand_WhenMoveToNext_ReturnsRanCommandOutcomeThenItsOutcomes()
+    public async Task GivenProvidedNextCommand_WhenMoveToNext_ReturnsRanCommandOutcomeThenItsOutcomes()
     {
         // Arrange
         var nextCommand = new TestChainedToCliCommand("next");
         var nothingOutcome = new NothingOutcome();
 
-        await RespondToAskQueueing(nextCommand);
+        await RespondToAskWithNextCommands(nextCommand);
 
         _sender
             .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
@@ -488,12 +493,12 @@ public class CliWorkflowRunTests
     }
 
     [Test]
-    public async Task GivenQueuedNextCommand_WhenMoveToNext_ReEntersRunningThenFinishes()
+    public async Task GivenProvidedNextCommand_WhenMoveToNext_ReEntersRunningThenFinishes()
     {
         // Arrange
         var nextCommand = new TestChainedToCliCommand("next");
 
-        await RespondToAskQueueing(nextCommand);
+        await RespondToAskWithNextCommands(nextCommand);
 
         _sender
             .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
@@ -519,16 +524,16 @@ public class CliWorkflowRunTests
         Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
     }
 
-    // Documents today's selection rule: MoveToNext takes the *last* queued NextCliCommandOutcome,
-    // so a handler that queues two hops has the first silently dropped. Changing that rule is #152.
+    // Documents today's selection rule: MoveToNext takes the *last* NextCliCommandOutcome, so a handler
+    // that chains on twice has the first silently dropped. Changing that rule is #152.
     [Test]
-    public async Task GivenTwoQueuedNextCommands_WhenMoveToNext_SendsOnlyTheLastQueued()
+    public async Task GivenTwoProvidedNextCommands_WhenMoveToNext_SendsOnlyTheLastProvided()
     {
         // Arrange
-        var firstQueuedCommand = new TestChainedToCliCommand("first queued");
-        var lastQueuedCommand = new TestChainedToCliCommand("last queued");
+        var firstProvidedCommand = new TestChainedToCliCommand("first provided");
+        var lastProvidedCommand = new TestChainedToCliCommand("last provided");
 
-        await RespondToAskQueueing(firstQueuedCommand, lastQueuedCommand);
+        await RespondToAskWithNextCommands(firstProvidedCommand, lastProvidedCommand);
 
         _sender
             .Setup(mediator => mediator.Send(It.IsAny<TestChainedToCliCommand>(), It.IsAny<CancellationToken>()))
@@ -539,19 +544,19 @@ public class CliWorkflowRunTests
 
         // Assert
         _sender.Verify(
-            mediator => mediator.Send(lastQueuedCommand, It.IsAny<CancellationToken>()),
+            mediator => mediator.Send(lastProvidedCommand, It.IsAny<CancellationToken>()),
             Times.Once);
 
         _sender.Verify(
-            mediator => mediator.Send(firstQueuedCommand, It.IsAny<CancellationToken>()),
+            mediator => mediator.Send(firstProvidedCommand, It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
     [Test]
-    public async Task GivenNothingQueued_WhenMoveToNext_ReturnsNothingOutcome()
+    public async Task GivenNoNextCommand_WhenMoveToNext_ReturnsNothingOutcome()
     {
         // Arrange
-        ArrangeRunAtMovePastAskWithNothingQueued();
+        ArrangeRunAtMovePastAskWithNoNextCommand();
 
         // Act
         var resultingOutcomes = await _classUnderTest.MoveToNext();
@@ -561,10 +566,10 @@ public class CliWorkflowRunTests
     }
 
     [Test]
-    public async Task GivenNothingQueued_WhenMoveToNext_NeverSendsACommand()
+    public async Task GivenNoNextCommand_WhenMoveToNext_NeverSendsACommand()
     {
         // Arrange
-        ArrangeRunAtMovePastAskWithNothingQueued();
+        ArrangeRunAtMovePastAskWithNoNextCommand();
 
         // Act
         _ = await _classUnderTest.MoveToNext();
@@ -576,10 +581,10 @@ public class CliWorkflowRunTests
     }
 
     [Test]
-    public async Task GivenNothingQueued_WhenMoveToNext_ChangesStateToInvalidMovePastAskThenFinished()
+    public async Task GivenNoNextCommand_WhenMoveToNext_ChangesStateToInvalidMovePastAskThenFinished()
     {
         // Arrange
-        ArrangeRunAtMovePastAskWithNothingQueued();
+        ArrangeRunAtMovePastAskWithNoNextCommand();
 
         // Act
         _ = await _classUnderTest.MoveToNext();
@@ -600,17 +605,176 @@ public class CliWorkflowRunTests
         Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
     }
 
+    [Test]
+    public async Task GivenSpecifiedNextCommand_WhenRespondToAsk_StateChangesToMovePastAsk()
+    {
+        // Act
+        await RespondToAskWithNextOutcomes(new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand)));
+
+        // Assert - the run's guard finds a hop of either kind, not just one carrying an instance.
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenSpecifiedNextCommand_WhenMoveToNext_SendsTheCommandTheFactoryBuilt()
+    {
+        // Arrange
+        var factoryBuiltCommand = new TestFactoryBuiltCliCommand();
+
+        await RespondToAskWithNextOutcomes(new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand)));
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(
+                It.Is<Instruction>(instruction => instruction.Name == "test-factory-built"),
+                It.IsAny<List<Outcome>>()))
+            .Returns(factoryBuiltCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(factoryBuiltCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert - the command executed is the factory's, not one the previous handler built.
+        _sender.Verify(
+            mediator => mediator.Send(factoryBuiltCommand, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GivenSpecifiedNextCommand_WhenMoveToNext_ResolvesAFreshInstructionNamingThatTypeWithPriorOutcomes()
+    {
+        // Arrange
+        await RespondToAskWithNextOutcomes(new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand)));
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new TestFactoryBuiltCliCommand());
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<TestFactoryBuiltCliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
+
+        // A fresh instruction, not the originating ask: the chained command's factory reads the run's
+        // artefacts, not arguments the user typed at a different command.
+        var expectedInstruction = Instruction.Empty with
+        {
+            Prefix = "/",
+            Name = "test-factory-built"
+        };
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert - this is the point of the feature: the factory sees what the run has gathered.
+        _cliWorkflowCommandProvider.Verify(
+            provider => provider.GetCommand(
+                expectedInstruction,
+                It.Is<List<Outcome>>(outcomes => outcomes.OfType<RanCliCommandOutcome>().Any())),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GivenNonDefaultPrefix_WhenMoveToNextToASpecifiedCommand_ThenTheInstructionUsesThatPrefix()
+    {
+        // Arrange
+        var run = new CliWorkflowRun(
+            _cliWorkflowRunState,
+            _scope.Object,
+            _cliInstructionParser.Object,
+            _cliInstructionValidator.Object,
+            _cliWorkflowCommandProvider.Object,
+            Options.Create(new InstructionSettings { Prefix = '!' }),
+            _sender.Object,
+            _publisher.Object);
+
+        await RespondToAskWithNextOutcomes(
+            new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand)));
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new TestFactoryBuiltCliCommand());
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<TestFactoryBuiltCliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
+
+        // Act
+        _ = await run.MoveToNext();
+
+        // Assert - the prefix is the app's configured one, not a hardcoded slash.
+        _cliWorkflowCommandProvider.Verify(
+            provider => provider.GetCommand(
+                It.Is<Instruction>(instruction => instruction.Prefix == "!"),
+                It.IsAny<List<Outcome>>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GivenSpecifiedNextCommandTheFactoryCannotBuild_WhenMoveToNext_RunBecomesExceptional()
+    {
+        // Arrange
+        await RespondToAskWithNextOutcomes(new SpecifiedNextCliCommandOutcome(typeof(TestFactoryBuiltCliCommand)));
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Throws<NoCommandGeneratorException>();
+
+        // Act
+        var resultingOutcomes = await _classUnderTest.MoveToNext();
+
+        // Assert - an unbuildable hop is an engineering error, so it fails loudly rather than suggesting.
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.Exceptional,
+            ClIWorkflowRunStateStatus.Finished,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+            Assert.That(resultingOutcomes.FirstOrDefault(), Is.InstanceOf<ExceptionOutcome>());
+        });
+    }
+
     /// <summary>
-    /// Drives the run through one ask whose handler queues the given commands, leaving it at
+    /// Drives the run through one ask whose handler provides the given commands, leaving it at
     /// <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/> with those commands waiting.
     /// </summary>
-    private async Task RespondToAskQueueing(params CliCommand[] nextCommands)
+    private Task RespondToAskWithNextCommands(params CliCommand[] nextCommands)
+        => RespondToAskWithNextOutcomes(nextCommands
+            .Select(NextCliCommandOutcome (nextCommand) => new ProvidedNextCliCommandOutcome(nextCommand))
+            .ToArray());
+
+    /// <summary>
+    /// Drives the run through one ask whose handler returns the given next-command outcomes, leaving it
+    /// at <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/>. Works for either kind.
+    /// </summary>
+    private async Task RespondToAskWithNextOutcomes(params NextCliCommandOutcome[] nextOutcomes)
     {
         var firstCommand = new TestChainingCliCommand();
 
         _cliInstructionParser
             .Setup(parser => parser.Parse(It.IsAny<string>()))
-            .Returns(new Instruction("/", "some-valid-ask", null, []));
+            .Returns(OriginatingInstruction);
 
         _cliInstructionValidator
             .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
@@ -622,19 +786,17 @@ public class CliWorkflowRunTests
 
         _sender
             .Setup(mediator => mediator.Send(firstCommand, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(nextCommands
-                .Select(Outcome (nextCommand) => new NextCliCommandOutcome(nextCommand))
-                .ToArray());
+            .ReturnsAsync(nextOutcomes.ToArray<Outcome>());
 
         _ = await _classUnderTest.RespondToAsk("some valid ask");
     }
 
     /// <summary>
-    /// Puts the run at <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/> with no queued command, which
+    /// Puts the run at <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/> with no next command, which
     /// a run never reaches on its own - the guard only fires for a caller invoking
     /// <see cref="CliWorkflowRun.MoveToNext"/> out of step with the run's real history.
     /// </summary>
-    private void ArrangeRunAtMovePastAskWithNothingQueued()
+    private void ArrangeRunAtMovePastAskWithNoNextCommand()
     {
         _cliWorkflowRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);
         _cliWorkflowRunState.ChangeTo(ClIWorkflowRunStateStatus.MovePastAsk);

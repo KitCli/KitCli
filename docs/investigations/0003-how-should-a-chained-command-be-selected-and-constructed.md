@@ -1,6 +1,12 @@
 # 0003. How should a chained command be selected and constructed?
 
 - **Status:** In Review
+- **Superseded in part by** [ADR 0011](../adr/0011-chain-to-a-command-by-type.md):
+  the finding below that `ICliWorkflowCommandProvider` should gain a
+  type-resolving method as a default interface member was not built. A chained
+  hop is written as an instruction naming the command instead, so the existing
+  `GetCommand` resolves it and the provider is untouched. Every other finding
+  here stands.
 - **Spike:** #148
 - **Time-box:** 30 minutes
 - **Date:** 2026-08-25

@@ -139,7 +139,20 @@ public class CliWorkflowRun : ICliWorkflowRun
             .OfType<NextCliCommandOutcome>()
             .Last();
 
-        return await ExecuteCommand(nextOutcome.NextCommand);
+        CliCommand command;
+        try
+        {
+            command = GetNextCommandToMoveTo(nextOutcome);
+        }
+        catch (Exception exception)
+        {
+            State.ChangeTo(ClIWorkflowRunStateStatus.Exceptional);
+            UpdateStateWhenFinished();
+
+            return [new ExceptionOutcome(exception)];
+        }
+
+        return await ExecuteCommand(command);
     }
 
     private async Task<Outcome[]> ExecuteCommand(CliCommand command)
@@ -175,6 +188,35 @@ public class CliWorkflowRun : ICliWorkflowRun
         => AllPriorOutcomes()
             .OfType<NextCliCommandOutcome>()
             .Any();
+
+    /// <summary>
+    /// The command to run next. A provided outcome already carries one; a specified outcome names a type,
+    /// which the run puts in a fresh instruction and resolves like any other, so its factory sees the
+    /// run's artefacts.
+    /// </summary>
+    private CliCommand GetNextCommandToMoveTo(NextCliCommandOutcome nextOutcome)
+    {
+        if (nextOutcome is ProvidedNextCliCommandOutcome providedNextCliCommandOutcome)
+        {
+            return providedNextCliCommandOutcome.ProvidedCommand;
+        }
+
+        if (nextOutcome is SpecifiedNextCliCommandOutcome specifiedNextCliCommandOutcome)
+        {
+            var instructionName = CliCommand.GetInstructionName(specifiedNextCliCommandOutcome.SpecifiedCommandType);
+            var instruction = Instruction.Empty with
+            {
+                Prefix = _instructionSettings.Prefix.ToString(),
+                Name = instructionName
+            };
+
+            var allPriorOutcomes = AllPriorOutcomes();
+
+            return _workflowCommandProvider.GetCommand(instruction, allPriorOutcomes);
+        }
+
+        throw new NotSupportedException($"Cannot resolve a command from '{nextOutcome.GetType().Name}'.");
+    }
 
     private Task TriggerCommandReactions(Outcome[] outcomes)
     {

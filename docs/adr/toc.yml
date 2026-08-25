@@ -16,3 +16,7 @@
   href: 0008-suggest-next-commands-attribute.md
 - name: "0009. Transport typed payloads in non-generic envelopes, never dynamic"
   href: 0009-non-generic-envelopes-over-dynamic.md
+- name: "0010. Resolve the whole run from its scope"
+  href: 0010-resolve-the-whole-run-from-its-scope.md
+- name: "0011. Chain to a command by type, and let its factory build it"
+  href: 0011-chain-to-a-command-by-type.md
