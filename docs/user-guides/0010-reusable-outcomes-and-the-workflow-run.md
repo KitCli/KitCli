@@ -40,14 +40,14 @@ inside a `CliCommandFactory<T>`; see
 ### Continuing without a fresh ask
 
 Some reusable state should drive the *very next* step at once, with no
-input from the user. `ByMovingToCommand(nextCommand)` does that; see
+input from the user. `ByMovingToCommand<TCommand>()` does that; see
 [0007-chaining-commands.md](0007-chaining-commands.md). The distinction that matters
 here:
 
 | You return... | What happens next |
 |---|---|
 | A plain `Reusable` outcome (e.g. `ByRememberingPageSize`) | The run waits for the user's next ask, which can see this outcome as an artefact. |
-| `ByMovingToCommand(nextCommand)` | The run executes `nextCommand` too, in the same turn, with no ask. |
+| `ByMovingToCommand<TCommand>()` | The run builds a `TCommand` through its factory and executes it too, in the same turn, with no ask. |
 | A `Final` outcome (e.g. `ByFinallySaying`) | The run ends. |
 
 ## Common mistakes
