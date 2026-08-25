@@ -7,133 +7,136 @@
 
 ## Verdict
 
-**New complexity.** Routing `MoveToNext()` through `ICliCommandFactory` is
-reachable — the instruction and artefacts a factory needs are both already
-available at that point — but three things sit underneath it that neither #147
-nor #124 accounts for. The run's state machine has **no representable outcome
-for a chained move that fails to resolve**: `MoveToNext()` enters `Running`
-before dispatch, and `Running` has no edge to `InvalidMovePastAsk`, so a
-missing or unwilling factory can only surface as `Exceptional`. Selection and
-construction **do not compose as proposed**: #124's "no matching
-`RanCliCommandOutcome` yet" predicate degrades from instance identity to type
-equality the moment #147's outcome carries a type, which silently breaks any
-chain visiting the same command type twice. And the "must have a factory"
-precondition **cannot be enforced at compile time** without a `new()`
-constraint that excludes precisely the factory-backed commands the feature
-exists for. This is a milestone-shaped change to the run's state machine, not
-an overload on `OutcomeList`.
+**No new complexity.** Routing `MoveToNext()` through `ICliCommandFactory` is
+buildable with the machinery already present. The instruction a factory needs
+is reachable from the run's own state, artefact conversion already happens
+inside `CliWorkflowCommandProvider`, and a factory that cannot construct the
+next command is an engineering error rather than a user one — so it belongs on
+the existing `Running → Exceptional` edge, which `ExecuteCommand` already
+routes every failure down. No new status, no new transition row. Carrying the
+command type in a **new sibling outcome** rather than changing
+`NextCliCommandOutcome` keeps the instance API intact and costs three one-line
+call-site changes in `CliWorkflowRun`. The one thing that genuinely has to be
+specified rather than assumed is what "already consumed" means when #124's
+selection change lands, and that has a cleaner answer than either issue
+proposed: track consumption per queued **outcome**, not per command.
 
 ## Recommendation
 
-Do not build #147 or #124 as filed. Slice the work as:
+Close this spike and carry the work in fresh delivery tickets, in this order.
+Everything here sits behind #142 (`register ICliCommandFactory as keyed
+transient`) — factories are singletons holding mutable `Attach` state.
 
-1. **Cover `MoveToNext()`'s happy path** (#11's remaining half). Everything
-   below changes that path; it currently has no test.
-2. **Decide the failure semantics first**, as an ADR. A chained move that
-   cannot resolve needs either a new status pair plus transition rows, or an
-   explicit decision that it is `Exceptional`. This blocks both features and
-   is the largest single unknown.
-3. **Add `Type`-keyed factory registration** — additive, one line in
-   `AddCommandFactory`, independently testable.
-4. **Add the type-carrying outcome and route `MoveToNext()` through the
-   provider**, once 2 and 3 land.
-5. **Re-file #124 against the resulting model**, since its selection predicate
-   has to be specified in terms of whatever 4 produces.
+1. **Cover `MoveToNext()`'s happy path** — the remaining half of #11. Every
+   step below modifies that path and it currently has no test.
+2. **Register command factories under a `Type` key**, additively, in
+   `AddCommandFactory`. Independently testable, no behaviour change.
+3. **Introduce a shared abstraction over "the next command is queued"**, add
+   `NextCliCommandTypeOutcome` alongside `NextCliCommandOutcome`, and add
+   `ByMovingToCommand<TCommand>()`. Resolution goes through
+   `CliWorkflowCommandProvider`, called from inside `ExecuteCommand`'s existing
+   try block so a resolution failure lands as `Exceptional`.
+4. **Re-file #124's selection change** against per-outcome consumption rather
+   than the per-command predicate it currently proposes.
+5. **Update the docs** — `chaining-commands.md`, `artefacts.md`, `outcomes.md`,
+   `workflow-run-state-machine.md`.
 
-Steps 2 and 4 need an ADR each: step 2 decides a state-machine rule, step 4
-changes public API shape on a shipped package.
+Step 3 needs an ADR: it adds a member to `ICliWorkflowCommandProvider`, which
+ships in `KitCli.Workflow.Commands`, and that is a breaking change for any
+external implementer.
 
 ## What was established
 
+- **A chained move that cannot resolve is `Exceptional`, and needs no new
+  state.** `SuggestNextCommands` exists so a *user* who types something
+  unresolvable mid-flow is offered the declared moves. A chained hop is
+  declared by the engineer in code, so a missing or unwilling factory is a
+  programming error, not a user one. `Running → Exceptional` is already in
+  `PossibleStateChanges`, and `ExecuteCommand` already catches everything and
+  changes to it, surfacing the `NoCommandGeneratorException` message through
+  `ExceptionOutcome`. Resolution must therefore happen inside that try block.
+- **A sibling outcome carrying the type is safe on the writer path.** No
+  `IOutcomeIoWriter` matches `NextCliCommandOutcome` — every `CanWriteFor` is
+  an exact-type check against some other outcome — and `CliApp.WriteOutcomes`
+  silently skips an outcome with no writer. The first-match-wins interception
+  hazard that killed the `PauseOutcome`/`SuggestionOutcome` pairing in #106
+  does not apply to this outcome family.
+- **Sibling, not subclass.** `NextCliCommandOutcome(CliCommand NextCommand)`
+  has a required positional member, so a type-carrying subclass would have to
+  supply a fake instance to satisfy it. A sibling under a shared base or
+  interface avoids that, at the cost of broadening three call sites in
+  `CliWorkflowRun` — `MoveToNext` (`:139`), `IsValidMovePastAsk` (`:174-176`),
+  and `UpdateStateAfterOutcome` (`:199`).
+- **"Already consumed" should be tracked per queued outcome, not per
+  command.** Every `ByMovingToCommand` call produces a distinct outcome
+  object, so outcome identity distinguishes two hops to the same command type
+  where `RanCliCommandOutcome`'s command comparison — #124's proposed
+  predicate — cannot. Specifying it this way makes the type-carrying and
+  instance-carrying variants behave identically, including for a chain that
+  revisits a step.
 - **The originating instruction is available inside `MoveToNext()`.**
-  `State.Changes` is public and
-  `IInstructionCliWorkflowRunStateChange.Instruction` exposes the instruction
-  that started the run, so `Attach(instruction, artefacts)` can be given the
-  real instruction rather than `Instruction.Empty`. #147's question 3 is
-  answerable without new machinery.
-- **Artefact conversion needs no new API.** If resolution happens inside
+  `State.Changes` is public and `IInstructionCliWorkflowRunStateChange`
+  exposes `Instruction`, so `Attach(instruction, artefacts)` can receive the
+  real instruction rather than `Instruction.Empty`.
+- **Artefact conversion needs no new API.** With resolution inside
   `CliWorkflowCommandProvider`, `ConvertOutcomesToArtefacts` stays private and
-  the chained path gets the same artefacts the ask path gets. #147's question 4
-  dissolves, provided resolution is not lifted into `CliWorkflowRun`.
-- **`Type`-keyed registration is the unambiguous key.** `AddCommandFactory`
-  already registers each factory under a derived name, a shorthand, and every
-  alias; re-deriving a name from `TCommand` inherits every collision those
-  keys can have. Registering the `Type` as an additional key does not.
-- **The state machine cannot express a failed chained move.**
-  `PossibleStateChanges` allows `MovePastAsk → InvalidMovePastAsk`, but
-  `MoveToNext()` calls `State.ChangeTo(Running)` before dispatch, and there is
-  no `Running → InvalidMovePastAsk` edge. `RespondToAsk`'s
-  `NoCommandGeneratorException` fallback — which either finishes as
-  `InvalidAsk` or offers `SuggestNextCommands` — has no analogue reachable
-  from `MovePastAsk`, so a mid-chain resolution failure cannot suggest
-  next commands the way a mid-flow ask can.
-- **`InvalidMovePastAsk` already means something else.** It records a caller
-  invoking `MoveToNext()` out of step with the run's history, as
-  `CliWorkflowRunTerminalPathInvariantTests.ViaInvalidMovePastAsk` documents.
-  Reusing it for "the next command could not be constructed" conflates a
-  caller error with a resolution failure.
-- **Type-carrying outcomes break instance-identity selection.**
-  `RanCliCommandOutcome` carries the `CliCommand` instance. #124 proposes
-  selecting the earliest `NextCliCommandOutcome` with no matching
-  `RanCliCommandOutcome`; against a type that comparison cannot distinguish
-  two visits to the same command type, so a chain that revisits a step is
-  either stranded or re-runs.
-- **The precondition is unenforceable at compile time.** A command with
-  constructor parameters and no dedicated `CliCommandFactory<T>` gets no
-  factory registered at all. Constraining `TCommand` to `new()` would exclude
-  exactly the commands this feature targets, so "has a factory" can only fail
-  at runtime.
-- **`ICliWorkflowCommandProvider` ships in a published package.**
-  `KitCli.Workflow.Commands` 1.0.10 carries `PackageId`, so adding a member to
-  the interface breaks any external implementer.
+  the chained path sees the same artefacts the ask path sees. This only holds
+  if resolution is not lifted into `CliWorkflowRun`.
+- **`Type` is the unambiguous factory key.** `AddCommandFactory` registers each
+  factory under a derived name, a shorthand, and every alias, so re-deriving a
+  name from `TCommand` inherits every collision those keys can have. .NET
+  keyed DI accepts any object as a key; the usual preference for strings and
+  enums is so the key can be a constant in a `[FromKeyedServices]` attribute,
+  which does not apply here — KitCli resolves through `GetKeyedServices` at
+  runtime.
+- **A command with constructor parameters and no dedicated
+  `CliCommandFactory<T>` gets no factory registered at all**, and this cannot
+  be caught at compile time — a `new()` constraint on `TCommand` would exclude
+  exactly the factory-backed commands the feature exists for. Per the first
+  point, failing at runtime as `Exceptional` is the correct behaviour.
 
 ## Evidence
 
-- `KitCli.Workflow/Run/State/CliWorkflowRunState.cs:117-139` — the full
-  `PossibleStateChanges` table. `Running` has edges to `InvalidAsk`,
-  `Exceptional`, `ReachedReusableOutcome`, `MovePastAsk`, and
-  `ReachedFinalOutcome`; none to `InvalidMovePastAsk`.
-- `KitCli.Workflow/Run/CliWorkflowRun.cs:124-141` — `MoveToNext()` guards,
-  changes to `Running`, then takes `.Last()` of every `NextCliCommandOutcome`
-  and dispatches the instance directly, never touching
-  `ICliWorkflowCommandProvider`.
-- `KitCli.Workflow/Run/CliWorkflowRun.cs:100-118` — `RespondToAsk`'s
-  `NoCommandGeneratorException` fallback, reachable only on the ask path.
-- `KitCli.Workflow.Abstractions/Run/State/Change/IInstructionCliWorkflowRunStateChange.cs`
-  — public `Instruction` property.
-- `KitCli.Workflow.Commands/CliWorkflowCommandProvider.cs:22-58` — keyed
-  lookup by `instruction.Name`, `FirstOrDefault(CanCreateWhen)`, and the
-  private `ConvertOutcomesToArtefacts`.
-- `KitCli.Commands.Abstractions/Extensions/CommandServiceCollectionExtensions.cs:80-104`
-  — `AddCommandFactory` registering by derived name, shorthand, and aliases;
-  `:66-71` — auto-registration skipping any command without a parameterless
-  constructor.
+- `KitCli.Workflow/Run/State/CliWorkflowRunState.cs:117-139` —
+  `PossibleStateChanges`, including `Running → Exceptional` and
+  `Exceptional → Finished`.
+- `KitCli.Workflow/Run/CliWorkflowRun.cs:143-166` — `ExecuteCommand`'s
+  try/catch changing to `Exceptional` and returning `ExceptionOutcome`.
+- `KitCli.Workflow/Run/CliWorkflowRun.cs:124-141`, `:174-176`, `:199` — the
+  three `NextCliCommandOutcome` call sites.
+- `KitCli.Commands.Abstractions/Io/*.cs` — every `CanWriteFor` is an exact-type
+  check; none matches `NextCliCommandOutcome`.
+- `KitCli/CliApp.cs:50-59` — `WriteOutcomes`, `FirstOrDefault` then
+  `writer?.Write`, skipping unmatched outcomes.
 - `KitCli.Commands.Abstractions/Outcomes/Reusable/RanCliCommandOutcome.cs` —
   carries the `CliCommand` instance.
+- `KitCli.Workflow.Abstractions/Run/State/Change/IInstructionCliWorkflowRunStateChange.cs`
+  — public `Instruction` property.
+- `KitCli.Workflow.Commands/CliWorkflowCommandProvider.cs:22-58` — keyed lookup
+  by `instruction.Name`, `FirstOrDefault(CanCreateWhen)`, private
+  `ConvertOutcomesToArtefacts`.
+- `KitCli.Commands.Abstractions/Extensions/CommandServiceCollectionExtensions.cs:80-104`
+  — registration by derived name, shorthand and aliases; `:66-71` —
+  auto-registration skipping any command without a parameterless constructor.
 - `KitCli.Workflow.Commands/KitCli.Workflow.Commands.csproj:11-12` —
-  `PackageId` and `Version` 1.0.10.
+  `PackageId`, `Version` 1.0.10.
 
 ## Open questions
 
-- Does a failed chained move deserve its own status pair, or is `Exceptional`
-  the honest answer? Decided by the ADR in recommendation step 2.
-- Should a mid-chain resolution failure be able to offer `SuggestNextCommands`
-  the way a mid-flow ask can, and if so what transition permits it?
 - Does the instance overload of `ByMovingToCommand` stay, and which does the
   documentation recommend?
-- Can a chain legitimately revisit the same command type, and if so does
-  selection need per-hop identity rather than type equality?
-- Does #142 (`register ICliCommandFactory as keyed transient`) have to land
-  first, or only before the feature ships? Not examined inside the box.
+- Should `OutcomeList` reject a second next-command outcome in one list, so
+  #124's silent drop becomes loud even before the selection change lands?
+- Does adding a member to `ICliWorkflowCommandProvider` warrant a major
+  version bump, given the release tooling only ever bumps patch (#127)?
 
 ## Out of scope
 
-- The `[CliNextCommandIs]` attribute path and `SuggestNextCommands`, beyond
-  noting the fallback is unreachable from `MovePastAsk`.
+- The `[CliNextCommandIs]` attribute path and `SuggestNextCommands` beyond
+  establishing they are a user-facing affordance a chain does not need.
 - #124's second direction — a metadata-only attribute documenting a forward
-  chain — which does not touch runtime dispatch and can be decided separately.
-- Whether `ActivatorUtilities` could serve any part of this. Rejected on #147
-  before the spike, on the grounds that it bypasses `ICliCommandFactory`
-  entirely.
-- Any measurement of how the change behaves in Bright.DataTool.Cli, the
-  downstream app that prompted both issues.
+  chain — which does not touch runtime dispatch.
+- `ActivatorUtilities`, rejected on #147 before the spike because it bypasses
+  `ICliCommandFactory` entirely.
+- Any measurement against Bright.DataTool.Cli, the downstream app that
+  prompted both issues.
