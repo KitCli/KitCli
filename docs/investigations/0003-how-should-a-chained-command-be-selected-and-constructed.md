@@ -35,15 +35,22 @@ transient`) — factories are singletons holding mutable `Attach` state.
    `NextCliCommandTypeOutcome` alongside `NextCliCommandOutcome`, and add
    `ByMovingToCommand<TCommand>()`. Resolution goes through
    `CliWorkflowCommandProvider`, called from inside `ExecuteCommand`'s existing
-   try block so a resolution failure lands as `Exceptional`.
+   try block so a resolution failure lands as `Exceptional`. Both overloads
+   stay — the instance one remains valid for a command that takes its data by
+   constructor — so this slice is additive and nothing migrates.
 4. **Re-file #124's selection change** against per-outcome consumption rather
    than the per-command predicate it currently proposes.
 5. **Update the docs** — `chaining-commands.md`, `artefacts.md`, `outcomes.md`,
-   `workflow-run-state-machine.md`.
+   `workflow-run-state-machine.md` — leading with `ByMovingToCommand<TCommand>()`
+   as the recommended path, and keeping the instance overload documented as the
+   option for constructor-passed data. The guide's examples currently teach the
+   instance form exclusively.
 
 Step 3 needs an ADR: it adds a member to `ICliWorkflowCommandProvider`, which
 ships in `KitCli.Workflow.Commands`, and that is a breaking change for any
-external implementer.
+external implementer. The same ADR should record why both overloads coexist,
+since two ways to queue the next command is the kind of thing a reader will
+ask about later.
 
 ## What was established
 
@@ -61,12 +68,18 @@ external implementer.
   silently skips an outcome with no writer. The first-match-wins interception
   hazard that killed the `PauseOutcome`/`SuggestionOutcome` pairing in #106
   does not apply to this outcome family.
-- **Sibling, not subclass.** `NextCliCommandOutcome(CliCommand NextCommand)`
-  has a required positional member, so a type-carrying subclass would have to
-  supply a fake instance to satisfy it. A sibling under a shared base or
-  interface avoids that, at the cost of broadening three call sites in
-  `CliWorkflowRun` — `MoveToNext` (`:139`), `IsValidMovePastAsk` (`:174-176`),
-  and `UpdateStateAfterOutcome` (`:199`).
+- **The type-carrying outcome carries a type and nothing else.** No command
+  instance is constructed when the hop is queued; the factory creates the
+  instance at the moment the run moves to it, and that instance is what
+  `RanCliCommandOutcome` then records. This is the whole point of the feature —
+  an instance on the outcome is an instance the previous handler built, which
+  is the thing being removed.
+- **Which forces sibling, not subclass.**
+  `NextCliCommandOutcome(CliCommand NextCommand)` has a required positional
+  member, so a type-carrying subclass would have to fake an instance to satisfy
+  it. A sibling under a shared base or interface avoids that, at the cost of
+  broadening three call sites in `CliWorkflowRun` — `MoveToNext` (`:139`),
+  `IsValidMovePastAsk` (`:174-176`), and `UpdateStateAfterOutcome` (`:199`).
 - **"Already consumed" should be tracked per queued outcome, not per
   command.** Every `ByMovingToCommand` call produces a distinct outcome
   object, so outcome identity distinguishes two hops to the same command type
@@ -123,8 +136,6 @@ external implementer.
 
 ## Open questions
 
-- Does the instance overload of `ByMovingToCommand` stay, and which does the
-  documentation recommend?
 - Should `OutcomeList` reject a second next-command outcome in one list, so
   #124's silent drop becomes loud even before the selection change lands?
 - Does adding a member to `ICliWorkflowCommandProvider` warrant a major
