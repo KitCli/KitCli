@@ -21,6 +21,10 @@ list of them.
 |---|---|---|
 | `Anonymous` | none | `SayOutcome`, `TableOutcome`, `ReactionOutcome` |
 | `Reusable` | continues, keeping context for the next ask | `PageSizeOutcome`, `NextCliCommandOutcome` |
+
+`NextCliCommandOutcome` is abstract, and is what `ByMovingToCommand` appends:
+`SpecifiedNextCliCommandOutcome` when a handler names a type, and
+`ProvidedNextCliCommandOutcome` when it hands over a command it built.
 | `Final` | ends it | `FinalSayOutcome`, `NothingOutcome` |
 
 **Only the last outcome decides the run's next state.** That is the rule

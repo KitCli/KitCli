@@ -24,6 +24,12 @@ Read it back in a factory with `GetArtefact<T>(name)` or
 given, and take the **last** match. Set a value twice in a run and later
 commands see the second.
 
+**A chained command reads artefacts too.** A handler naming its successor
+with `ByMovingToCommand<TCommand>()` has that command built by its factory,
+attached to the same artefacts — so data reaches a chain through artefacts
+rather than through the previous handler's local variables. See
+[docs/user-guides/0007-chaining-commands.md](../user-guides/0007-chaining-commands.md).
+
 ## Registration takes a second call
 
 Your registry must call `AddArtefactFactoriesForAssembly(assembly)`.

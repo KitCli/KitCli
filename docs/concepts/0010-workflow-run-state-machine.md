@@ -21,7 +21,10 @@ loop is how a multi-turn or multi-page run keeps going.
 `UpdateStateAfterOutcome` reads the **last** outcome only:
 
 - none, or not reusable → `ReachedFinalOutcome`
-- a `NextCliCommandOutcome` → `MovePastAsk`, awaiting `MoveToNext()`
+- a `NextCliCommandOutcome` → `MovePastAsk`, awaiting `MoveToNext()`.
+  `MoveToNext()` then builds the command: a `SpecifiedNextCliCommandOutcome`
+  is resolved through its factory, and a factory that cannot build it moves
+  the run to `Exceptional` like any other failure
 - any other reusable outcome → `ReachedReusableOutcome`
 
 `UpdateStateWhenFinished` then checks whether the run ever reached one of
