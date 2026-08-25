@@ -9,6 +9,10 @@ namespace KitCli.Playground.Scenarios;
 // the next command: it names the type, and TestSpecifiedNextResultCliCommandFactory builds it when
 // the run gets there - reading the artefact this command produced, which a handler passing an
 // instance could only have passed by constructor.
+//
+// TestSpecifiedNextResultCliCommand has no parameterless constructor, which is the point: naming a
+// type does not restrict you to commands that can be built with new(). The factory is the
+// constructor, and it supplies the argument.
 
 public record TestSpecifiedNextCliCommand : CliCommand;
 

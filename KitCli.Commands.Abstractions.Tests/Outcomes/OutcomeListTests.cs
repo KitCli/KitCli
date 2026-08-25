@@ -176,6 +176,25 @@ public class OutcomeListTests
     }
 
     [Test]
+    public void GivenCommandTypeWithNoParameterlessConstructor_WhenByMovingToCommand_ThenChainsToItAnyway()
+    {
+        // Assert - TCommand is constrained to CliCommand and nothing more. A new() constraint would read
+        // as harmless and would exclude exactly the commands this overload exists for: the ones with
+        // constructor arguments, which only a factory can supply. GetConstructor(Type.EmptyTypes) is the
+        // same check AddCommandFactories makes before auto-registering a basic factory.
+        Assert.That(typeof(TestParameterisedNextCliCommand).GetConstructor(Type.EmptyTypes), Is.Null);
+
+        // Act
+        var outcomes = new OutcomeList().ByMovingToCommand<TestParameterisedNextCliCommand>().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new SpecifiedNextCliCommandOutcome(typeof(TestParameterisedNextCliCommand))
+        }).AsCollection);
+    }
+
+    [Test]
     public void GivenEitherOverload_WhenByMovingToCommand_ThenBothCarryAReusableOutcomeUnderTheSameBaseType()
     {
         // Act
