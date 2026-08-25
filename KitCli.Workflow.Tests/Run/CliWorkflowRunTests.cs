@@ -27,6 +27,10 @@ public class CliWorkflowRunTests
     [CliNextCommandIs("prev", "Show the previous page.")]
     private record TestReusableCommand : CliCommand;
 
+    private record TestChainingCliCommand : CliCommand;
+
+    private record TestChainedToCliCommand(string Name) : CliCommand;
+
     private static readonly IOptions<InstructionSettings> DefaultInstructionSettings =
         Options.Create(new InstructionSettings());
 
@@ -411,5 +415,228 @@ public class CliWorkflowRunTests
         };
 
         Assert.That(secondOutcomes, Is.EqualTo(expectedOutcomes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenValidAskWithNextCliCommandOutcome_WhenRespondToAsk_StateChangesToMovePastAsk()
+    {
+        // Arrange
+        var nextCommand = new TestChainedToCliCommand("next");
+
+        // Act
+        await RespondToAskQueueing(nextCommand);
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenQueuedNextCommand_WhenMoveToNext_SendsThatCommand()
+    {
+        // Arrange
+        var nextCommand = new TestChainedToCliCommand("next");
+
+        await RespondToAskQueueing(nextCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert
+        _sender.Verify(
+            mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GivenQueuedNextCommand_WhenMoveToNext_ReturnsRanCommandOutcomeThenItsOutcomes()
+    {
+        // Arrange
+        var nextCommand = new TestChainedToCliCommand("next");
+        var nothingOutcome = new NothingOutcome();
+
+        await RespondToAskQueueing(nextCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([nothingOutcome]);
+
+        // Act
+        var resultingOutcomes = await _classUnderTest.MoveToNext();
+
+        // Assert
+        var expectedOutcomes = new Outcome[]
+        {
+            new RanCliCommandOutcome(nextCommand),
+            nothingOutcome,
+        };
+
+        Assert.That(resultingOutcomes, Is.EqualTo(expectedOutcomes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenQueuedNextCommand_WhenMoveToNext_ReEntersRunningThenFinishes()
+    {
+        // Arrange
+        var nextCommand = new TestChainedToCliCommand("next");
+
+        await RespondToAskQueueing(nextCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedFinalOutcome,
+            ClIWorkflowRunStateStatus.Finished,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    // Documents today's selection rule: MoveToNext takes the *last* queued NextCliCommandOutcome,
+    // so a handler that queues two hops has the first silently dropped. Changing that rule is #152.
+    [Test]
+    public async Task GivenTwoQueuedNextCommands_WhenMoveToNext_SendsOnlyTheLastQueued()
+    {
+        // Arrange
+        var firstQueuedCommand = new TestChainedToCliCommand("first queued");
+        var lastQueuedCommand = new TestChainedToCliCommand("last queued");
+
+        await RespondToAskQueueing(firstQueuedCommand, lastQueuedCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<TestChainedToCliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new NothingOutcome()]);
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert
+        _sender.Verify(
+            mediator => mediator.Send(lastQueuedCommand, It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        _sender.Verify(
+            mediator => mediator.Send(firstQueuedCommand, It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
+    public async Task GivenNothingQueued_WhenMoveToNext_ReturnsNothingOutcome()
+    {
+        // Arrange
+        ArrangeRunAtMovePastAskWithNothingQueued();
+
+        // Act
+        var resultingOutcomes = await _classUnderTest.MoveToNext();
+
+        // Assert
+        Assert.That(resultingOutcomes.FirstOrDefault(), Is.InstanceOf<NothingOutcome>());
+    }
+
+    [Test]
+    public async Task GivenNothingQueued_WhenMoveToNext_NeverSendsACommand()
+    {
+        // Arrange
+        ArrangeRunAtMovePastAskWithNothingQueued();
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert
+        _sender.Verify(
+            mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
+    public async Task GivenNothingQueued_WhenMoveToNext_ChangesStateToInvalidMovePastAskThenFinished()
+    {
+        // Arrange
+        ArrangeRunAtMovePastAskWithNothingQueued();
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+            ClIWorkflowRunStateStatus.InvalidMovePastAsk,
+            ClIWorkflowRunStateStatus.Finished,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    /// <summary>
+    /// Drives the run through one ask whose handler queues the given commands, leaving it at
+    /// <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/> with those commands waiting.
+    /// </summary>
+    private async Task RespondToAskQueueing(params CliCommand[] nextCommands)
+    {
+        var firstCommand = new TestChainingCliCommand();
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(new Instruction("/", "some-valid-ask", null, []));
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(firstCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(firstCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(nextCommands
+                .Select(Outcome (nextCommand) => new NextCliCommandOutcome(nextCommand))
+                .ToArray());
+
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+    }
+
+    /// <summary>
+    /// Puts the run at <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/> with no queued command, which
+    /// a run never reaches on its own - the guard only fires for a caller invoking
+    /// <see cref="CliWorkflowRun.MoveToNext"/> out of step with the run's real history.
+    /// </summary>
+    private void ArrangeRunAtMovePastAskWithNothingQueued()
+    {
+        _cliWorkflowRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);
+        _cliWorkflowRunState.ChangeTo(ClIWorkflowRunStateStatus.MovePastAsk);
     }
 }
