@@ -5,10 +5,10 @@ Date: 2026-07-24
 
 ## Context
 
-A `CliWorkflowRun` resolves a concrete `CliCommand` instance dynamically via
-a reflection-driven `ICliCommandFactory`, then must route that runtime-typed
-object to the one `CliCommandHandler<TCliCommand>` that matches it, without
-a hand-written type switch growing per command.
+A run resolves a command at runtime, through a factory it found by
+reflection. It then has an object whose concrete type it does not know, and
+has to reach the one handler written for that type. Doing that by hand
+means a type switch that every command author has to edit.
 
 ## Decision
 
@@ -17,15 +17,14 @@ MediatR's open-generic `IRequestHandler<>` resolution.
 
 ## Alternatives considered
 
-- **Hand-written type switch / visitor** — doesn't scale as commands grow,
-  and puts dispatch logic in one file every command author has to touch.
-- **Direct DI resolution of `ICliCommandHandler<T>`** — equivalent to what
-  MediatR does internally, but without pipeline behavior support if that's
-  ever needed (logging, validation) later.
+- **Hand-written type switch or visitor** — puts dispatch in one file every
+  command author must touch, and grows with the command count.
+- **Direct DI resolution of `ICliCommandHandler<T>`** — what MediatR does
+  internally, minus the pipeline-behaviour seam if logging or validation is
+  ever wanted.
 
 ## Consequences
 
-Adds a real dependency (MediatR + MediatR.Contracts) to the dispatch path
-for what is, structurally, a single-request/no-notifications use case —
-heavier than strictly necessary, but it solves the actual type-erasure
-problem rather than being pure ceremony.
+Adds MediatR and MediatR.Contracts to the dispatch path for what is
+structurally a single-request use case — heavier than strictly necessary,
+but it solves the real type-erasure problem rather than being ceremony.

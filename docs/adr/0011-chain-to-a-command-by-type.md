@@ -3,56 +3,82 @@
 Status: Proposed
 Date: 2026-08-25
 
+Justified by
+[investigation 0003](../investigations/0003-how-should-a-chained-command-be-selected-and-constructed.md),
+the spike on [#148](https://github.com/KitCli/KitCli/issues/148).
+
 ## Context
 
-A handler can hand straight on to another command, so one thing the user typed runs several
-commands in a row. Today the handler builds that command itself, with
-`ByMovingToCommand(new ShowBalanceCliCommand(accountId))`.
+A handler can hand straight on to another command, so one thing the user
+typed runs several commands in a row. Until now the handler built that
+command itself, with `ByMovingToCommand(new ShowBalanceCliCommand(id))`.
 
-A command resolved from an instruction is built by an `ICliCommandFactory`, which is handed every
-artefact the run has gathered. A chained command is built from one handler's local variables. Only
-one of those two can see the run. [#147](https://github.com/KitCli/KitCli/issues/147) asks that
-whichever command a chain moves to is built like any other. The spike is
-[#148](https://github.com/KitCli/KitCli/issues/148), written up as
-[investigation 0003](../investigations/0003-how-should-a-chained-command-be-selected-and-constructed.md).
+A command resolved from an instruction is built by a factory, which is
+handed every artefact the run has gathered. A chained command was built
+from one handler's local variables. Only one of those two can see the run.
+[#147](https://github.com/KitCli/KitCli/issues/147) asks that whichever
+command a chain moves to is built like any other.
 
 ## Decision
 
-`ByMovingToCommand<TCommand>()` names the type. The run builds the command when the chain arrives.
-An overload takes `NextCliCommandArgument<TValue>`s, for what the calling handler decides rather than
-what the run gathered. They are a command-layer type: nothing pretends the user typed them. The run
-puts them in the box a factory reads from when it builds the instruction — a change of container with
-one correct implementation, so a method on the argument rather than a registered converter.
+`ByMovingToCommand<TCommand>()` names the type, and the run builds the
+command when the chain arrives. An overload takes
+`NextCliCommandArgument<TValue>`s, for what the calling handler decides
+rather than what the run gathered.
 
-A chained command is an instruction — "now run `show-balance`" is what an instruction says, and
-factories are keyed by instruction name. `CliWorkflowRun` builds a fresh instruction from the
-configured prefix and the name derived from the type, then resolves it through the `GetCommand`
-that already exists. `CliWorkflowCommandProvider` and `ICliWorkflowCommandProvider` are untouched.
-`CliCommand.GetInstructionName(Type)` derives that name, and `AddCommandFactory` now calls it too,
-so registration and lookup share one derivation.
+A chained hop *is* an instruction — "now run `show-balance`" is what an
+instruction says, and factories are keyed by instruction name. So
+`CliWorkflowRun` builds a fresh instruction from the configured prefix and
+the name derived from the type, then resolves it through the existing
+`GetCommand`. `CliWorkflowCommandProvider` is untouched.
+`CliCommand.GetInstructionName(Type)` derives that name, and
+`AddCommandFactory` now calls it too, so registration and lookup share one
+derivation.
 
-`NextCliCommandOutcome` becomes the abstract base of `ProvidedNextCliCommandOutcome`, carrying a
-command the handler built, and `SpecifiedNextCliCommandOutcome`, carrying a type. Keeping the
-existing name on the base leaves every `OfType<NextCliCommandOutcome>()` working.
-
-`MoveToNext` resolves in its own try/catch and hands `ExecuteCommand` a command, the way
-`RespondToAsk` already does, so a command the factory cannot build becomes an `Exceptional` run.
+`NextCliCommandOutcome` becomes the abstract base of
+`ProvidedNextCliCommandOutcome`, carrying a command the handler built, and
+`SpecifiedNextCliCommandOutcome`, carrying a type. Keeping the existing
+name on the base leaves every `OfType<NextCliCommandOutcome>()` working.
+`MoveToNext` resolves in its own try/catch, so a command the factory cannot
+build makes the run `Exceptional`.
 
 ## Alternatives considered
 
-- **`ActivatorUtilities.CreateInstance<TCommand>`** — bypasses the factory, which is the thing asked for.
-- **Keep the instance overload, document passing data through artefacts** — nothing makes the factory path happen.
-- **`GetCommand(Type, ...)` on the provider as a default interface member that throws**, per investigation 0003 — a second lookup path, and a published method whose body is a throw.
-- **Register factories under an extra `Type` key**, sliced as [#150](https://github.com/KitCli/KitCli/issues/150) — the full-name derivation already exists and does not collide.
-- **Suggest alternatives when a chained command will not build** — suggestion is for a person who guessed wrong; a chain is written by an engineer.
-- **Constrain `TCommand` to an empty constructor** — excludes exactly the commands this exists for.
+- **`ActivatorUtilities.CreateInstance<TCommand>`** — bypasses the factory,
+  which is the thing being asked for.
+- **Keep the instance overload and document passing data through
+  artefacts** — nothing makes the factory path happen.
+- **A type-resolving method on the provider as a default interface member
+  that throws**, per investigation 0003 — a second lookup path, and a
+  published method whose body is a throw.
+- **Register factories under an extra `Type` key**, sliced as
+  [#150](https://github.com/KitCli/KitCli/issues/150) — the full-name
+  derivation already exists and does not collide.
+- **Suggest alternatives when a chained command will not build** —
+  suggestion is for a person who guessed wrong; a chain is written by an
+  engineer.
+- **Constrain `TCommand` to an empty constructor** — excludes exactly the
+  commands this exists for.
 
 ## Consequences
 
-- A chained command reads what the run gathered. Its data arrives as artefacts rather than through the previous handler's locals — a different data-passing model for chains.
-- The instruction carries a prefix, a name, and whatever arguments the calling handler passed — never the originating ask's, answering open question 3 on #147 as `Instruction.Empty`. An argument the user typed was typed at the *first* command.
-- A chained factory therefore has two ways in: artefacts for what the run gathered, arguments for what the calling handler decided. The guides have to say which to reach for.
-- A command with constructor arguments and no `CliCommandFactory<T>` has no factory registered, so chaining to it throws `NoCommandGeneratorException` at runtime. No compiler check can catch it.
-- `new NextCliCommandOutcome(command)` no longer compiles; it becomes `new ProvidedNextCliCommandOutcome(command)`. Reading outcomes is unaffected.
-- `MoveToNext()` still takes the last one, so a handler that chains on twice loses the first. [#152](https://github.com/KitCli/KitCli/issues/152) rewrites that rule.
-- Factories stay singletons holding per-command `Attach` state, and this adds a second construction path through them. [#142](https://github.com/KitCli/KitCli/issues/142) remains open.
+- A chained command reads what the run gathered. Its data arrives as
+  artefacts rather than through the previous handler's locals.
+- The instruction carries a prefix, a name, and whatever arguments the
+  calling handler passed — never the originating ask's. An argument the
+  user typed was typed at the *first* command.
+- So a chained factory has two ways in: artefacts for what the run
+  gathered, arguments for what the calling handler decided. The guides have
+  to say which to reach for.
+- A command with constructor arguments and no factory of its own has no
+  factory registered, so chaining to it throws at runtime. No compiler
+  check can catch it.
+- `new NextCliCommandOutcome(command)` no longer compiles; it becomes
+  `new ProvidedNextCliCommandOutcome(command)`. Reading outcomes is
+  unaffected.
+- `MoveToNext()` still takes the last queued hop, so a handler that chains
+  on twice loses the first.
+  [#152](https://github.com/KitCli/KitCli/issues/152) rewrites that rule.
+- Factories stay singletons holding per-command `Attach` state, and this
+  adds a second construction path through them.
+  [#142](https://github.com/KitCli/KitCli/issues/142) remains open.

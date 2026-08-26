@@ -3,6 +3,10 @@
 Status: Accepted
 Date: 2026-08-22
 
+[ADR 0010](0010-resolve-the-whole-run-from-its-scope.md) proposes to
+supersede this. It keeps the per-run scope and extends it to the whole run;
+read it before relying on the lifetimes decided here.
+
 ## Context
 
 `CliAppBuilder.Run()` called `_services.BuildServiceProvider()` once and
@@ -16,8 +20,8 @@ run loop (confirmed by a repo-wide search for `CreateScope`/`IServiceScope`/
 
 The practical effect: a consumer registering a `Scoped` service — the
 documented default lifetime for `AddDbContext<T>()`, for example — got a
-single instance silently living for the whole process instead of one
-instance per unit of work. This surfaced as issue #71.
+single instance living for the whole process instead of one per unit of
+work, silently. This surfaced as issue #71.
 
 ## Decision
 
@@ -44,7 +48,7 @@ implementations, so it doesn't need to participate in the per-run scope.
 The actual per-run isolation guarantee comes from `ISender`/`IPublisher`
 being resolved from the run's scope, since that's what MediatR uses to
 resolve `IRequestHandler<T>` instances — and their constructor-injected
-dependencies — at `Send()` time.
+dependencies — at `Send()` time. That reasoning is what ADR 0010 revisits.
 
 ## Alternatives considered
 
