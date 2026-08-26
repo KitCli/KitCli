@@ -110,6 +110,10 @@ dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # hea
 
 ## Documentation
 
+Everything below is published as a site at
+[kitcli.github.io/KitCli](https://kitcli.github.io/KitCli/), which is the
+easiest way to read it.
+
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — conventions, branching, how to
   propose a change.
 - [`docs/user-guides/`](docs/user-guides/) — how to use a pattern in
