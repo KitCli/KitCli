@@ -369,6 +369,169 @@ table thead {
   color: var(--bs-secondary-color);
 }
 
+/* Roadmap. A two-column timeline hung off a central rail: entries alternate
+   sides on a wide screen and stack to the right of the rail on a narrow one,
+   so the same markup serves both. */
+.landing .tl-hero {
+  padding-bottom: 0;
+  margin-bottom: 1rem;
+}
+
+.tl-years {
+  position: sticky;
+  top: 60px;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: var(--landing-width);
+  margin: 0 auto 1.5rem;
+  padding: 0.6rem 1.5rem;
+  background: var(--bs-body-bg);
+}
+
+.tl-years > a {
+  padding: 0.2rem 1.1rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--bs-body-color);
+}
+
+.tl-years > a:hover {
+  color: var(--kit-accent);
+  border-color: var(--kit-accent);
+  text-decoration: none;
+}
+
+.timeline {
+  position: relative;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--kit-sweep);
+  opacity: 0.55;
+}
+
+.tl-year {
+  position: relative;
+  z-index: 2;
+  width: fit-content;
+  margin: 0 auto 1.75rem;
+  padding: 0.3rem 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+  background: var(--bs-body-bg);
+  font-size: 1.3rem;
+  scroll-margin-top: 8rem;
+}
+
+.tl-year:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+.tl-item {
+  position: relative;
+  width: 50%;
+  padding-right: 2.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.tl-item.tl-right {
+  margin-left: 50%;
+  padding-right: 0;
+  padding-left: 2.25rem;
+}
+
+/* The marker sits on the rail rather than on the card, so a card can grow
+   without dragging its dot off the line. */
+.tl-item::before {
+  content: "";
+  position: absolute;
+  top: 1.5rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--kit-accent);
+  box-shadow: 0 0 0 3px var(--bs-body-bg);
+  z-index: 2;
+}
+
+.tl-item.tl-left::before {
+  right: -0.425rem;
+}
+
+.tl-item.tl-right::before {
+  left: -0.425rem;
+}
+
+.tl-card {
+  position: relative;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+  box-shadow: 0 12px 24px -12px rgba(var(--kit-accent-rgb), 0.25);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.tl-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--kit-accent-rgb), 0.5);
+}
+
+/* A rotated square borrowing two of the card's borders points the card at its
+   marker. */
+.tl-card::after {
+  content: "";
+  position: absolute;
+  top: 1.6rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: var(--bs-body-bg);
+  transform: rotate(45deg);
+}
+
+.tl-left .tl-card::after {
+  right: -0.4rem;
+  border-top: 1px solid var(--bs-border-color);
+  border-right: 1px solid var(--bs-border-color);
+}
+
+.tl-right .tl-card::after {
+  left: -0.4rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-left: 1px solid var(--bs-border-color);
+}
+
+.tl-when {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--kit-accent);
+}
+
+.tl-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0.15rem 0 0.4rem;
+}
+
+.tl-card p {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   .showcase-code {
     grid-template-columns: 1fr;
@@ -376,5 +539,31 @@ table thead {
 
   .hero {
     padding-top: 2.5rem;
+  }
+
+  .timeline::before {
+    left: 0.5rem;
+  }
+
+  .tl-item,
+  .tl-item.tl-right {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 2rem;
+    padding-right: 0;
+  }
+
+  .tl-item.tl-left::before,
+  .tl-item.tl-right::before {
+    left: 0.075rem;
+  }
+
+  .tl-left .tl-card::after {
+    right: auto;
+    left: -0.4rem;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    border-left: 1px solid var(--bs-border-color);
   }
 }
