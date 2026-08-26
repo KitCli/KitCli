@@ -12,11 +12,11 @@ stands.
 - **37 findings**, all filed as GitHub issues: **7 high**, **16 medium**,
   **14 low**.
 - Every finding carries all three label axes (type/area/severity) per
-  [`CONTRIBUTING.md`](../../CONTRIBUTING.md) — the full list is always
+  [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md) — the full list is always
   queryable directly from GitHub:
   [open findings from this review](https://github.com/KitCli/KitCli/issues?q=is%3Aissue+created%3A2026-07-25).
-- This review is what the [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
-  operating model, [ADRs](../adr/), and [concept docs](../concepts/) in
+- This review is what the [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md)
+  operating model, [ADRs](../adr/0001-mediatr-for-command-dispatch.md), and [concept docs](../concepts/0001-command-registration.md) in
   this repo were built in direct response to — several of the doc/CI/test
   gaps below were fixed in the same pass that produced this review,
   before the corresponding finding was ever filed (noted where relevant).
@@ -108,4 +108,4 @@ session's work resolved them before filing was needed:
 
 Gated on ≥1,000 lines of `.cs` source changed **and** ≥6 months
 elapsed since this review — see
-[`.claude/skills/repo-operating-model/SKILL.md`](../../.claude/skills/repo-operating-model/SKILL.md#1-check-whether-a-full-review-is-actually-due).
+[`.claude/skills/repo-operating-model/SKILL.md`](https://github.com/KitCli/KitCli/blob/main/.claude/skills/repo-operating-model/SKILL.md#1-check-whether-a-full-review-is-actually-due).

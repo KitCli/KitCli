@@ -1,0 +1,10 @@
+- name: "0002. Which extension points can use a consumer's registered lifetimes?"
+  href: 0002-which-extension-points-can-use-a-consumers-lifetimes.md
+- name: "0003. How should a chained command be selected and constructed?"
+  href: 0003-how-should-a-chained-command-be-selected-and-constructed.md
+- name: "0004. Respect SEMVER in Release"
+  href: 0004-respect-semver-in-release.md
+- name: "0005. How much of the run loop can the two hosts share?"
+  href: 0005-how-much-of-the-run-loop-can-the-two-hosts-share.md
+- name: "0006. Should a command factory declare what it needs instead of overriding CanCreateWhen?"
+  href: 0006-should-a-command-factory-declare-what-it-needs.md

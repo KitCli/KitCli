@@ -78,7 +78,7 @@ No seam exists.
 shipped ahead of it, so a chain that hands on forever now leaves a headless
 invocation running rather than truncating silently. That trade is recorded in
 ADR 0013's consequences and in the chaining guide, and
-[`/test-unending-chain`](../../KitCli.Playground.Scenarios/TestUnendingChainCliCommand.cs)
+[`/test-unending-chain`](https://github.com/KitCli/KitCli/blob/main/KitCli.Playground.Scenarios/TestUnendingChainCliCommand.cs)
 demonstrates it. The blocker call stands: this is a worse failure than the one
 fixed, and it is live.
 

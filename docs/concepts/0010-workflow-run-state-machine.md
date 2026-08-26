@@ -8,13 +8,25 @@ inside a run and dies with it, and a run owns one DI scope.
 status changes, plus a fixed table of legal from/to pairs. Anything else
 throws `ImpossibleStateChangeException`.
 
-| From | To |
-|---|---|
-| `Created` | `InvalidAsk`, `Running` |
-| `Running` | `InvalidAsk`, `Exceptional`, `ReachedReusableOutcome`, `MovePastAsk`, `ReachedFinalOutcome` |
-| `ReachedReusableOutcome` | `Running` |
-| `MovePastAsk` | `Running`, `InvalidMovePastAsk` |
-| `InvalidAsk`, `Exceptional`, `InvalidMovePastAsk`, `ReachedFinalOutcome` | `Finished` |
+```mermaid
+stateDiagram-v2
+    [*] --> Created
+    Created --> InvalidAsk
+    Created --> Running
+    Running --> InvalidAsk
+    Running --> Exceptional
+    Running --> ReachedReusableOutcome
+    Running --> MovePastAsk
+    Running --> ReachedFinalOutcome
+    ReachedReusableOutcome --> Running
+    MovePastAsk --> Running
+    MovePastAsk --> InvalidMovePastAsk
+    InvalidAsk --> Finished
+    Exceptional --> Finished
+    InvalidMovePastAsk --> Finished
+    ReachedFinalOutcome --> Finished
+    Finished --> [*]
+```
 
 `ReachedReusableOutcome` and `MovePastAsk` loop back to `Running`. That
 loop is how a multi-turn or multi-page run keeps going.

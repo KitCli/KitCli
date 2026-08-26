@@ -1,0 +1,168 @@
+/* KitCli theme for the DocFX `modern` template.
+
+   The palette is sampled from the KitCli mark: the speech bubble runs from a
+   deep blue on the lower left to a bright green on the upper right, and the
+   wordmark picks out the two ends of that sweep. Text-bearing colours are the
+   darkened ends, which clear 4.5:1 against the body background in both themes;
+   the bright ends are reserved for the gradient rules and other non-text
+   accents. */
+
+:root {
+  --kit-blue: #0f6ad4;
+  --kit-blue-bright: #2eb2fe;
+  --kit-green: #2f7d1f;
+  --kit-green-bright: #9ce840;
+  --kit-sweep: linear-gradient(100deg, #1e90f8, #2ebdbe 45%, var(--kit-green-bright));
+
+  --kit-accent: var(--kit-blue);
+  --kit-accent-rgb: 15, 106, 212;
+  --kit-tip: var(--kit-green);
+
+  --bs-primary: var(--kit-blue);
+  --bs-primary-rgb: var(--kit-accent-rgb);
+  --bs-link-color: var(--kit-accent);
+  --bs-link-color-rgb: var(--kit-accent-rgb);
+  --bs-link-hover-color: #0b5299;
+  --bs-link-hover-color-rgb: 11, 82, 153;
+  --bs-code-color: #0b6ca8;
+}
+
+[data-bs-theme="dark"] {
+  --kit-accent: #6cc4ff;
+  --kit-accent-rgb: 108, 196, 255;
+  --kit-tip: #8ede4a;
+
+  --bs-link-hover-color: #a7dcff;
+  --bs-link-hover-color-rgb: 167, 220, 255;
+  --bs-code-color: #7fd1e8;
+}
+
+::selection {
+  background: rgba(var(--kit-accent-rgb), 0.22);
+}
+
+:focus-visible,
+.form-control:focus {
+  outline-color: var(--kit-accent);
+  border-color: var(--kit-accent);
+  box-shadow: 0 0 0 0.2rem rgba(var(--kit-accent-rgb), 0.25);
+}
+
+/* The gradient is the one loud thing the brand owns, so it appears only as a
+   hairline: under the header, under the page title, and above the footer. */
+body > header {
+  border-bottom: 0;
+  box-shadow: inset 0 -1px 0 var(--bs-border-color);
+}
+
+body > header::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--kit-sweep);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  gap: 0.5rem;
+}
+
+.navbar-brand > #logo {
+  height: 30px;
+  width: auto;
+}
+
+article > h1:first-of-type {
+  padding-bottom: 0.4rem;
+  border-bottom: 0;
+  position: relative;
+}
+
+article > h1:first-of-type::after {
+  content: "";
+  position: absolute;
+  inset: auto auto 0 0;
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--kit-sweep);
+}
+
+footer {
+  border-top: 0;
+  box-shadow: inset 0 1px 0 var(--bs-border-color);
+}
+
+/* Navigation: the current page is marked with the accent rather than a
+   background fill, so the table of contents stays quiet while scanning. */
+.toc li > a,
+.affix ul li a {
+  color: var(--bs-body-color);
+}
+
+.toc li > a:hover,
+.toc li.active > a,
+.affix ul li a:hover,
+.affix ul li.active > a {
+  color: var(--kit-accent);
+}
+
+.toc li.active > a,
+.affix ul li.active > a {
+  font-weight: 600;
+}
+
+.toc li.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--kit-accent);
+}
+
+#breadcrumb .breadcrumb-item a {
+  color: var(--bs-secondary-color);
+}
+
+#breadcrumb .breadcrumb-item a:hover {
+  color: var(--kit-accent);
+}
+
+/* Note and tip take the two ends of the sweep; the rest of the alert palette
+   is left alone so warnings and errors keep their conventional colours. */
+.alert-info {
+  --bs-alert-color: var(--kit-accent);
+  --bs-alert-link-color: var(--kit-accent);
+  --bs-alert-bg: rgba(var(--kit-accent-rgb), 0.08);
+  --bs-alert-border-color: rgba(var(--kit-accent-rgb), 0.3);
+}
+
+.alert-success {
+  --bs-alert-color: var(--kit-tip);
+  --bs-alert-link-color: var(--kit-tip);
+  --bs-alert-bg: rgba(92, 190, 68, 0.1);
+  --bs-alert-border-color: rgba(92, 190, 68, 0.35);
+}
+
+.alert {
+  border-left-width: 3px;
+}
+
+/* Code keeps the default syntax colours; only its frame is branded. */
+pre > code.hljs {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+
+table thead {
+  border-bottom: 2px solid rgba(var(--kit-accent-rgb), 0.4);
+}
+
+.next-article > div > a {
+  font-weight: 600;
+}

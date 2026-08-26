@@ -1,3 +1,5 @@
+- name: Overview
+  href: docs/README.md
 - name: User guides
   href: docs/user-guides/
   homepage: docs/user-guides/0001-writing-a-basic-command.md
@@ -7,6 +9,15 @@
 - name: ADRs
   href: docs/adr/
   homepage: docs/adr/0001-mediatr-for-command-dispatch.md
+- name: Investigations
+  href: docs/investigations/
+  homepage: docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md
+- name: Technology
+  href: docs/technology/
+  homepage: docs/technology/microsoft-dependency-injection.md
+- name: Reviews
+  href: docs/reviews/
+  homepage: docs/reviews/0001-architectural-review.md
 - name: API reference
   href: api/
   homepage: api/index.md
