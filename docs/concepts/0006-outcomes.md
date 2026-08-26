@@ -1,7 +1,9 @@
 # 0006. Outcomes
 
 Every command handler returns `Outcome[]`. Each outcome says one of two
-things: show the user this, or change what the run does next.
+things: show the user this, or change what the run does next. A handler
+returns them rather than printing or branching itself, so the run stays in
+charge of what happens after the command.
 
 ```csharp
 public override Task<Outcome[]> HandleCommand(MyCommand command, CancellationToken ct)
@@ -12,8 +14,7 @@ public override Task<Outcome[]> HandleCommand(MyCommand command, CancellationTok
 ```
 
 `FinishThisCommand()` starts an empty `OutcomeList`; each `By...` method
-appends one outcome and returns `this`. See the API reference for the full
-list of them.
+appends one outcome and returns `this`. The API reference lists them all.
 
 ## The three kinds
 
@@ -23,8 +24,8 @@ list of them.
 | `Reusable` | continues, keeping context for the next ask | `PageSizeOutcome`, `NextCliCommandOutcome` |
 | `Final` | ends it | `FinalSayOutcome`, `NothingOutcome` |
 
-`NextCliCommandOutcome` is abstract, and is what `ByMovingToCommand` appends:
-`SpecifiedNextCliCommandOutcome` when a handler names a type, and
+`NextCliCommandOutcome` is abstract, and is what `ByMovingToCommand`
+appends: `SpecifiedNextCliCommandOutcome` when a handler names a type, and
 `ProvidedNextCliCommandOutcome` when it hands over a command it built.
 
 **Only the last outcome decides the run's next state.** That is the rule

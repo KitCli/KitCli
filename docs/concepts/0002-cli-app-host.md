@@ -1,9 +1,12 @@
 # 0002. CliApp host loop
 
-`CliApp` is the shell around a workflow: it sources asks, drives runs, and
-hands the outcomes to a writer. It *is* the interactive app — ask the user
-for something, run it, ask again. `HeadlessCliApp` overrides `Run` for
-`myapp /command --flag value`, where nothing is attached to the input.
+Something has to fetch what the user typed, run it, and print what came
+back. That is the host. `CliApp` is it: the shell around a workflow.
+
+`CliApp` *is* the interactive app — ask, run, ask again. `HeadlessCliApp`
+overrides `Run` for `myapp /command --flag value`, where nothing is
+attached to the input. Both are abstract; `BasicCliApp` is the ready-made
+interactive one that `WithBasicApp()` gives you.
 
 ```csharp
 OnSessionStart();
@@ -22,12 +25,12 @@ OnSessionEnd(Workflow.Runs);
 
 `ExecuteRunOperation` responds to the ask, then keeps calling `MoveToNext()`
 while the run's latest state change is `MovePastAsk`, writing each step's
-outcomes as it goes. A chain arrives whole under either host.
+outcomes as it goes. That is why a chain arrives whole under either host.
 
 ## A headless session is one run, however far it gets
 
 `HeadlessCliApp.Run` opens the session, calls `ExecuteRunOperation` once
-with the process args joined into an ask, stops the workflow and ends.
+with the process args joined into an ask, stops the workflow, and ends.
 Chained steps run. What cannot happen is a *second* run, because nothing
 can be asked — so a run left waiting at a reusable checkpoint stops there,
 unfinished, its DI scope undisposed. Which class you extend decides the
@@ -37,12 +40,11 @@ mode for the life of the class, and `CliAppBuilder.Run` throws if a
 
 Six `protected virtual` hooks — `OnSessionStart`, `OnRunCreated`,
 `OnRunStarted`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd` — let an
-app observe without overriding `Run`. None redirects flow, and
+app watch a session without overriding `Run`. None redirects flow, and
 `OnRunStarted`/`OnMovingPastAsk` fire *while* the run executes, so they
 suit progress indicators rather than setup. All six fire under both hosts,
 `OnRunComplete` once per step rather than once per ask. An
-`ExceptionOutcome` is rethrown before its outcomes are written, ending the
-session.
+`ExceptionOutcome` is rethrown before its outcomes are written.
 
 ## Everything outside a run is a singleton
 

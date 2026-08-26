@@ -1,8 +1,9 @@
 # 0003. CLI I/O
 
-`ICliIo` is the one seam through which a KitCli app reads input, writes
-output, and learns about Ctrl+C. Nothing else in the framework touches
-`Console`.
+A framework that calls `Console` directly cannot be tested and cannot be
+hosted anywhere else. So KitCli calls it in exactly one class. `ICliIo` is
+the seam: everything a KitCli app reads, writes, or learns about Ctrl+C
+goes through it, and nothing else in the framework touches `Console`.
 
 ```csharp
 public interface ICliIo
@@ -16,18 +17,18 @@ public interface ICliIo
 ```
 
 `AddCliAbstractions` registers `CliIo`, the `Console`-backed default, as a
-singleton. Replace it to test what a command printed, or to host KitCli
-somewhere without a console.
+singleton. Replace it to assert on what a command printed, or to host
+KitCli somewhere with no console at all.
 
 ## Cancelling a blocked read
 
-`Console.ReadLine` cannot be cancelled once it blocks, so `AskAsync` races
-it against the token on a background thread and returns `null` if
-cancellation wins — abandoning the read where it stands rather than waiting
-for a keypress that may never come.
+`Console.ReadLine` cannot be cancelled once it blocks. So `AskAsync` runs
+it on a background thread, races it against the token, and returns `null`
+if cancellation wins — abandoning the read where it stands rather than
+waiting for a keypress that may never come.
 
-**`null` also means end-of-input**, and `RespondToAsk` treats both as
-`InvalidAsk`. A piped stream running dry ends a run like a Ctrl+C does.
+**`null` also means end-of-input**, and `RespondToAsk` treats both the same
+way. A piped stream running dry ends a run like a Ctrl+C does.
 
 ## What a Ctrl+C does
 
@@ -40,10 +41,10 @@ Console.CancelKeyPress
 
 `CliApp.SetUpEventHandlers` registers that action once and nothing else —
 no `OnSessionEnd`, no `Environment.Exit`. The token itself belongs to
-`ICliWorkflow`. Cancellation is cooperative: a handler ignoring its token
-runs to completion.
+`ICliWorkflow`. Cancellation is cooperative, so **a handler that ignores
+its token runs to completion.**
 
 ## See also
 
 [0002-cli-app-host.md](0002-cli-app-host.md) · [0004-outcome-writing.md](0004-outcome-writing.md) ·
-[0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
+[../adr/0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)

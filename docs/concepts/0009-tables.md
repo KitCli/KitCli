@@ -1,9 +1,9 @@
 # 0009. Tables
 
-`TableBuilder<TSource, TAggregate>` turns aggregated rows into named
-columns, and holds its own aggregator, map, and paging — so remembering the
-builder is enough for a later command to rebuild the table without
-re-supplying any of it.
+An aggregator gives you rows. A table needs those rows plus column names
+and a page. `TableBuilder<TSource, TAggregate>` holds all three — its own
+aggregator, map, and paging — so remembering the builder is enough for a
+later command to rebuild the table without re-supplying any of it.
 
 ```csharp
 var tableBuilder = new ExpenseTableBuilder()
