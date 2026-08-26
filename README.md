@@ -149,8 +149,10 @@ dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # hea
 [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning--releases) for how
 they're versioned and released.
 
-Versions have drifted apart rather than shipping in lockstep as intended —
-see [#58](https://github.com/KitCli/KitCli/issues/58).
+Packages do not ship in lockstep. Only what changed gets a new version, so
+upgrading the umbrella still delivers lower-level fixes through its
+dependencies. Whether that is the right model is owed an ADR —
+[#128](https://github.com/KitCli/KitCli/issues/128).
 
 ## Contributing
 
