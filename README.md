@@ -6,6 +6,9 @@ Commands/Outcomes/Artefacts/Workflow layers on top for state that
 carries across a session — page size, filters, "next page" — without
 each command hand-rolling it.
 
+Read the documentation at
+[kitcli.github.io/KitCli](https://kitcli.github.io/KitCli/).
+
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Quick start](#quick-start)
@@ -109,10 +112,6 @@ dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # hea
 ```
 
 ## Documentation
-
-Everything below is published as a site at
-[kitcli.github.io/KitCli](https://kitcli.github.io/KitCli/), which is the
-easiest way to read it.
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — conventions, branching, how to
   propose a change.
