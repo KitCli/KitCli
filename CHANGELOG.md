@@ -6,6 +6,12 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Fixed
+
+- Typing something that isn't a command, mid-run, no longer ends the app. A run
+  waiting at a reusable checkpoint keeps its place and suggests what would work
+  ([#182](https://github.com/KitCli/KitCli/issues/182)).
+
 ## [3.0.0] - 2026-08-25
 
 ### Fixed

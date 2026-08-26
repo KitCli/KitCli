@@ -425,6 +425,115 @@ public class CliWorkflowRunTests
     }
 
     [Test]
+    public async Task GivenEmptyAskAfterReachingReusableOutcome_WhenRespondToAsk_SuggestsThemAndKeepsItsPlace()
+    {
+        // Arrange
+        var ask = "some valid ask";
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
+
+        var aggregator = new TestListAggregator();
+        var reusableOutcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(instruction);
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new TestReusableCommand());
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([reusableOutcome]);
+
+        // Act - first ask reaches the reusable checkpoint.
+        _ = await _classUnderTest.RespondToAsk(ask);
+
+        // Act - second ask is empty, so no instruction is ever parsed.
+        var secondOutcomes = await _classUnderTest.RespondToAsk(string.Empty);
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+
+        var expectedOutcomes = new Outcome[]
+        {
+            new SuggestionOutcome("/next", "Show the next page."),
+            new SuggestionOutcome("/prev", "Show the previous page."),
+        };
+
+        Assert.That(secondOutcomes, Is.EqualTo(expectedOutcomes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenInstructionValidatorFailsAfterReachingReusableOutcome_WhenRespondToAsk_SuggestsThemAndKeepsItsPlace()
+    {
+        // Arrange
+        var ask = "some valid ask";
+        var instruction = new Instruction("/", "some-valid-ask", null, []);
+
+        var aggregator = new TestListAggregator();
+        var reusableOutcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(instruction);
+
+        _cliInstructionValidator
+            .SetupSequence(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true)
+            .Returns(false);
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new TestReusableCommand());
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([reusableOutcome]);
+
+        // Act - first ask reaches the reusable checkpoint.
+        _ = await _classUnderTest.RespondToAsk(ask);
+
+        // Act - second ask parses into an instruction the validator turns down.
+        var secondOutcomes = await _classUnderTest.RespondToAsk(ask);
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+
+        var expectedOutcomes = new Outcome[]
+        {
+            new SuggestionOutcome("/next", "Show the next page."),
+            new SuggestionOutcome("/prev", "Show the previous page."),
+        };
+
+        Assert.That(secondOutcomes, Is.EqualTo(expectedOutcomes).AsCollection);
+    }
+
+    [Test]
     public async Task GivenValidAskWithNextCliCommandOutcome_WhenRespondToAsk_StateChangesToMovePastAsk()
     {
         // Arrange

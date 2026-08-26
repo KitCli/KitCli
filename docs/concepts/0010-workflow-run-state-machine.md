@@ -37,11 +37,16 @@ it as still active.
 when none exists. `CreateNewRun()` gives each run its own DI scope and the
 workflow's cancellation token.
 
-## When an ask resolves to nothing
+## When an ask leads nowhere
 
-At a reusable checkpoint the run makes **zero** state changes and returns
-the moves the last command declared via `[CliNextCommandIs]`, as
-`SuggestionOutcome`s. Declaring none leaves a silent `NothingOutcome`. See
+An empty ask, one the validator turns down, and one naming no command it
+can build are one case: at a reusable checkpoint the run makes **zero**
+state changes and returns the moves the last command declared via
+`[CliNextCommandIs]`, as `SuggestionOutcome`s. Declaring none leaves a
+silent `NothingOutcome`. Elsewhere all three fail into `InvalidAsk` and
+finish — which is why the parked run keeps its place rather than taking a
+legal move out: `InvalidAsk` is terminal, so entering it would dispose the
+scope holding what the user is working against. See
 [0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
 
 ## Gaps

@@ -82,18 +82,14 @@ public class CliWorkflowRun : ICliWorkflowRun
     {
         if (!IsValidAsk(ask))
         {
-            State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            UpdateStateWhenFinished();
-            return [new NothingOutcome()];
+            return RejectAsk();
         }
 
         var instruction = _instructionParser.Parse(ask!);
 
         if (!_instructionValidator.IsValid(instruction))
         {
-            State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
-            UpdateStateWhenFinished();
-            return [new NothingOutcome()];
+            return RejectAsk();
         }
 
         var priorOutcomes = AllPriorOutcomes();
@@ -262,6 +258,24 @@ public class CliWorkflowRun : ICliWorkflowRun
             State.ChangeTo(ClIWorkflowRunStateStatus.Finished);
             _serviceScope.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Turns down an ask that never got as far as resolving a command. A run parked at a reusable
+    /// checkpoint keeps its place — it makes no state change and suggests what would work instead,
+    /// as it does for an ask naming no command. Any other run fails into <c>InvalidAsk</c> and finishes.
+    /// </summary>
+    private Outcome[] RejectAsk()
+    {
+        if (State.WasChangedTo(ClIWorkflowRunStateStatus.ReachedReusableOutcome))
+        {
+            return SuggestNextCommands(AllPriorOutcomes());
+        }
+
+        State.ChangeTo(ClIWorkflowRunStateStatus.InvalidAsk);
+        UpdateStateWhenFinished();
+
+        return [new NothingOutcome()];
     }
 
     private Outcome[] SuggestNextCommands(List<Outcome> priorOutcomes)

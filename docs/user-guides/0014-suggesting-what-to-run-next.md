@@ -54,12 +54,11 @@ fresh run that fails as silently as it always did.
 **Writing the prefix into the name.** `[CliNextCommandIs("/next", ...)]`
 renders as `//next`.
 
-**Relying on it to catch a typo.** It answers an ask that named no
-command it could build — including one gated off by `CanCreateWhen`
+**Expecting it only for a misspelled command.** Anything the parked run
+can't act on prints the suggestions: a name it can't resolve, a command
+gated off by `CanCreateWhen`
 ([0006-gating-a-command-with-cancreatewhen.md](0006-gating-a-command-with-cancreatewhen.md)),
-which prints the suggestions again. An ask that isn't an instruction at
-all — plain text, no prefix — crashes the app instead
-([#182](https://github.com/KitCli/KitCli/issues/182)).
+and plain text with no prefix at all.
 
 ## Learn more
 
