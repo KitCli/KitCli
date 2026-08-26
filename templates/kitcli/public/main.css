@@ -166,3 +166,215 @@ table thead {
 .next-article > div > a {
   font-weight: 600;
 }
+
+/* Landing page. `layout: landing` strips the table of contents, the affix and
+   the breadcrumb, and drops the padding on main, so the page owns its own
+   width and rhythm. */
+.landing {
+  --landing-width: 62rem;
+}
+
+.landing section {
+  padding: 0 1.5rem;
+  margin: 0 auto 5rem;
+  max-width: var(--landing-width);
+}
+
+.landing h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+}
+
+.hero {
+  text-align: center;
+  padding-top: 4rem;
+  padding-bottom: 1rem;
+}
+
+.hero-mark {
+  margin-bottom: 1.25rem;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  max-width: 15ch;
+  margin: 0 auto 1rem;
+  background: var(--kit-sweep);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-sub {
+  max-width: 52ch;
+  margin: 0 auto 2rem;
+  font-size: 1.05rem;
+  color: var(--bs-secondary-color);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.kit-btn {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.kit-btn:hover {
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.kit-btn-solid {
+  color: #fff;
+  background: var(--kit-sweep);
+  box-shadow: 0 1px 10px rgba(var(--kit-accent-rgb), 0.35);
+}
+
+.kit-btn-solid:hover {
+  color: #fff;
+  box-shadow: 0 3px 16px rgba(var(--kit-accent-rgb), 0.45);
+}
+
+.kit-btn-quiet {
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+}
+
+.kit-btn-quiet:hover {
+  color: var(--kit-accent);
+  border-color: var(--kit-accent);
+}
+
+.hero-install > code {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--bs-border-radius);
+  border: 1px dashed var(--bs-border-color);
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.showcase-head {
+  max-width: 60ch;
+  margin-bottom: 1.5rem;
+}
+
+.showcase-head > p {
+  color: var(--bs-secondary-color);
+  margin-bottom: 0;
+}
+
+.showcase-code {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* A grid item defaults to min-width:auto, so a wide code block widens its
+   track and pushes the whole page sideways. */
+.showcase-code > pre,
+.card-grid > * {
+  min-width: 0;
+}
+
+.showcase-code pre {
+  margin: 0;
+  height: 100%;
+}
+
+/* The template hides code overflow rather than scrolling it, which silently
+   truncates a long line instead of showing there is more. */
+.showcase-code pre > code {
+  overflow-x: auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.kit-card {
+  display: block;
+  padding: 1.25rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+/* The sweep is the hover state rather than a permanent stripe, so six cards
+   at rest stay quiet. */
+.kit-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--kit-sweep);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.kit-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--kit-accent-rgb), 0.5);
+  text-decoration: none;
+}
+
+.kit-card:hover::before {
+  opacity: 1;
+}
+
+.kit-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--kit-accent);
+}
+
+.kit-card-q {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.kit-card p:last-child {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: var(--bs-secondary-color);
+}
+
+.cards-footer {
+  margin-top: 2rem;
+  color: var(--bs-secondary-color);
+}
+
+@media (max-width: 768px) {
+  .showcase-code {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-top: 2.5rem;
+  }
+}
