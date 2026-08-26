@@ -250,7 +250,10 @@ commitments to defend.
 
    | Points | Reference | Shape |
    |---|---|---|
+   | 0.5 | [#175](https://github.com/KitCli/KitCli/pull/175) | 1 line, 1 file. A version string bumped for a release. Mechanical, nothing to decide. |
+   | 1 | [#129](https://github.com/KitCli/KitCli/pull/129) | 17 lines across 2 files. XML doc comments corrected on two types. No behaviour change, no tests. |
    | 2 | [#177](https://github.com/KitCli/KitCli/pull/177) | 37 lines across 3 files. One playground scenario and the two guides it changes. No new API, no decision. |
+   | 3 | [#112](https://github.com/KitCli/KitCli/pull/112) | 79 lines across 4 files. A new class in the release tool and the wiring for it. Behaviour change, no public API, no docs. |
    | 5 | [#126](https://github.com/KitCli/KitCli/pull/126) | 146 lines across 4 files. A behaviour fix with tests, a concept doc, a CHANGELOG line. No new API. |
    | 8 | [#107](https://github.com/KitCli/KitCli/pull/107) | 347 lines across 14 files. A new attribute, a new outcome and its writer, run-loop changes, tests, an ADR. |
    | 13 | [#154](https://github.com/KitCli/KitCli/pull/154) | 963 lines across 27 files. New public types in two packages, registration changes, test helpers, an ADR. |
