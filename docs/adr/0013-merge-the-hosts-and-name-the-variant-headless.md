@@ -3,6 +3,9 @@
 Status: Proposed
 Date: 2026-08-26
 
+Reverses [0005](0005-args-driven-cli-app.md). Informed by
+[investigation 0005](../investigations/0005-how-much-of-the-run-loop-can-the-two-hosts-share.md).
+
 ## Context
 
 [#167](https://github.com/KitCli/KitCli/issues/167): a one-shot invocation
@@ -34,15 +37,15 @@ behind #167. Prose may still say "a one-shot invocation".
 
 ## Alternatives considered
 
-- **An ask-source seam on `CliApp`** (`SourceAsk`, defaulting to none).
-  Made the base know about sourcing asks, and made `HeadlessCliApp`
-  implement a member meaning "not me" — a refused bequest.
-- **An args-backed `ICliIo`** yielding the args once, then end-of-input.
-  Honest, but it moves the mode into DI registration and leaves both app
+- **An ask-source seam on `CliApp`** (`SourceAsk`, defaulting to none) —
+  made the base know about sourcing asks, and made `HeadlessCliApp`
+  implement a member meaning "not me". A refused bequest.
+- **An args-backed `ICliIo`** yielding the args once, then end-of-input —
+  honest, but it moves the mode into DI registration and leaves both app
   classes empty.
-- **Copying `TerminalCliApp`'s continuation into `ArgsCliApp`.** Fixes #167
-  and keeps the duplicate that caused it.
-- **Merging both hosts into one class.** Loses the type test
+- **Copying `TerminalCliApp`'s continuation into `ArgsCliApp`** — fixes
+  #167 and keeps the duplicate that caused it.
+- **Merging both hosts into one class** — loses the type test
   `CliAppBuilder` uses to reject a headless launch with no args, turning a
   named error into a process waiting on input that never comes.
 
@@ -56,9 +59,9 @@ behind #167. Prose may still say "a one-shot invocation".
 - The continuation loop reads the run's *current* status rather than
   `WasChangedTo`'s history, which a `while` requires — history answers true
   forever once a run has moved past an ask.
-- A headless app now rethrows an `ExceptionOutcome` like an interactive one,
-  so a throwing handler ends it with a non-zero exit instead of 0.
-- A chain that never ends now leaves a headless invocation running rather
-  than truncating it silently. That is
+- A headless app now rethrows an `ExceptionOutcome` like an interactive
+  one, so a throwing handler ends it with a non-zero exit instead of 0.
+- **A chain that never ends now leaves a headless invocation running**
+  rather than truncating it silently. That is
   [#168](https://github.com/KitCli/KitCli/issues/168), and it is why #168
   blocks the rest of this work.
