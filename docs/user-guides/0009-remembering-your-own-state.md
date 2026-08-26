@@ -3,16 +3,15 @@
 ## What this is for
 
 [Remembering state across asks](0010-reusable-outcomes-and-the-workflow-run.md)
-covers the built-in `Reusable` outcomes: page size, filters, and the rest.
-Sooner or later you need something of your own — a selected account, a
+covers the built-in `Reusable` outcomes — page size, filters, and the rest.
+Sooner or later you need something of your own: a selected account, a
 chosen budget ID, anything a later command in the same run should read
 back. This is the three-type recipe.
 
 ## How to do it
 
 **1. A `Reusable` outcome**, what your handler returns. `Reusable` keeps
-the run going and available for the next ask, the right kind for state a
-later command reads:
+the run going and its data available for the next ask:
 
 ```csharp
 public record SelectedAccountOutcome(string AccountId) : Outcome(OutcomeKind.Reusable);
@@ -39,73 +38,52 @@ Raise the outcome with `ByResultingIn`. Custom outcomes have no `By...`
 shortcut of their own, as the built-ins do:
 
 ```csharp
-public class SelectAccountCliCommandHandler : CliCommandHandler<SelectAccountCliCommand>
-{
-    public override Task<Outcome[]> HandleCommand(SelectAccountCliCommand command, CancellationToken ct)
-        => FinishThisCommand()
-            .BySaying($"Selected account {command.AccountId}.")
-            .ByResultingIn(new SelectedAccountOutcome(command.AccountId))
-            .EndAsync();
-}
+return FinishThisCommand()
+    .BySaying($"Selected account {command.AccountId}.")
+    .ByResultingIn(new SelectedAccountOutcome(command.AccountId))
+    .EndAsync();
 ```
 
-Keep the reusable outcome last. Only the final outcome decides what the
-run does next, so ending on `ByFinallySaying` would finish the run and
-discard the account just selected.
+Keep the reusable outcome last. Only the final outcome decides what the run
+does next, so ending on `ByFinallySaying` would finish the run and discard
+the account you just selected.
 
 Read it back in a later command's factory, like any built-in artefact:
 
 ```csharp
-public class ShowBalanceCliCommandFactory : CliCommandFactory<ShowBalanceCliCommand>
-{
-    public override bool CanCreateWhen() => true;
-
-    public override CliCommand Create()
-    {
-        var accountId = GetRequiredArtefact<string>(nameof(SelectedAccountArtefact)).Value;
-        return new ShowBalanceCliCommand(accountId);
-    }
-}
+var accountId = GetRequiredArtefact<string>(nameof(SelectedAccountArtefact)).Value;
 ```
 
 **Discovery is automatic; the call that starts it is not.** Your registry
 must call `AddArtefactFactoriesForAssembly(assembly)`, separate from
-`AddCommandsFromAssembly`, which leaves artefact factories alone. Given
-that one call, every `ArtefactFactory<>` subclass in the assembly is found
-and registered alongside the built-ins, and you name
-`SelectedAccountArtefactFactory` nowhere. See
-[0004-creating-a-registry.md](0004-creating-a-registry.md).
+`AddCommandsFromAssembly`. Given that one call, every `ArtefactFactory<>`
+in the assembly is found, and you name `SelectedAccountArtefactFactory`
+nowhere. See [0004-creating-a-registry.md](0004-creating-a-registry.md).
 
 ## Common mistakes
 
-**Forgetting `AddArtefactFactoriesForAssembly` in the registry.** All
-three types compile, and the outcome returns happily. The failure appears
-when `GetRequiredArtefact` throws at runtime in the later command.
+**Forgetting `AddArtefactFactoriesForAssembly`.** All three types compile,
+and the outcome returns happily. The failure appears when
+`GetRequiredArtefact` throws at runtime in the later command.
 
-**Skipping the artefact and factory to re-parse the outcome history
-yourself.** Reading the run's raw history bypasses the type and name
-lookup (`GetArtefact`, `GetRequiredArtefact`) every other piece of
+**Skipping the artefact and factory to re-read the run's history
+yourself.** That bypasses the type-and-name lookup every other piece of
 remembered state uses. Write the three types, however small the value.
 
 **Making an outcome `Reusable` when nothing reads it back.** With no later
 factory querying the value, it needs no artefact pair. An `Anonymous`
-outcome — `BySaying`, or your own `Outcome(OutcomeKind.Anonymous)` —
-suffices for something purely informational.
+outcome suffices for something purely informational.
 
 **Giving two custom artefacts the same `Name`, or none when more than one
-could exist.** `GetArtefact<T>` filters by type, then by name if given,
-and takes the *last* match. An unnamed or colliding lookup silently
-returns whichever was set most recently.
+could exist.** `GetArtefact<T>` filters by type, then by name if given, and
+takes the *last* match. An unnamed or colliding lookup silently returns
+whichever was set most recently.
 
 ## Learn more
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
-  the built-in `Reusable` outcomes this pattern generalizes.
-- [0005-reading-command-arguments.md](0005-reading-command-arguments.md) —
-  `GetArgument` and `GetRequiredArgument`, for the current ask's arguments
-  rather than a prior command's state.
-- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — the mechanics
-  beneath: registration, "last match wins" lookup, and where a factory's
-  artefact list comes from at runtime.
-- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
+  the built-in `Reusable` outcomes this pattern generalises.
+- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — registration,
+  "last match wins" lookup, and where a factory's artefact list comes from.
+- [../concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
   `Outcome` and `OutcomeKind` model a custom outcome plugs into.

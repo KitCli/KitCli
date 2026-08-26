@@ -2,17 +2,15 @@
 
 ## What this is for
 
-One ask should sometimes drive several commands in sequence: a multi-step
-wizard, or a "list" command handing off to "show details for the first
-result", without the user typing each step. `ByMovingToCommand` says which
-command runs next from inside a handler, and KitCli runs it with no fresh
-input.
+Sometimes one thing the user typed should run several commands in a row: a
+multi-step wizard, or a "list" command handing off to "show details for the
+first result". `ByMovingToCommand` says which command runs next from inside
+a handler, and KitCli runs it with no fresh input.
 
 ## How to do it
 
 Call `ByMovingToCommand<TCommand>()` **last**, before `.EndAsync()`. Name
-the next command's type; its `ICliCommandFactory` builds it when the run
-gets there:
+the next command's *type*; its factory builds it when the run gets there:
 
 ```csharp
 public class StartWizardCliCommandHandler : CliCommandHandler<StartWizardCliCommand>
@@ -29,36 +27,25 @@ public class WizardStepOneCliCommandHandler : CliCommandHandler<WizardStepOneCli
     public override Task<Outcome[]> HandleCommand(WizardStepOneCliCommand command, CancellationToken ct)
         => FinishThisCommand()
             .BySaying("Step one done.")
-            .ByMovingToCommand<WizardStepTwoCliCommand>()
-            .EndAsync();
-}
-
-public class WizardStepTwoCliCommandHandler : CliCommandHandler<WizardStepTwoCliCommand>
-{
-    public override Task<Outcome[]> HandleCommand(WizardStepTwoCliCommand command, CancellationToken ct)
-        => FinishThisCommand()
-            .BySaying("Step two done.")
             .ByFinallySaying("Wizard complete!")
             .EndAsync();
 }
 ```
 
-One ask resolving to `StartWizardCliCommand` runs all three handlers. Each
-step runs on its own pass of the host loop, so output appears in order
-rather than at the end. Every handler needs its own `ByMovingToCommand`
-to keep going, and the last needs `ByFinallySaying(...)`, or any
-`Final`-kind outcome, to stop.
+One ask resolving to `StartWizardCliCommand` runs both handlers. Each step
+runs on its own pass of the host loop, so output appears in order rather
+than all at the end.
 
-**End every chain with a `Final`-kind outcome.** Without one, KitCli
-treats the run as reusable and waits for something else to move it
-forward. See
+**End every chain with a `Final`-kind outcome**, such as
+`ByFinallySaying`. Without one, KitCli treats the run as reusable and waits
+for something else to move it forward. See
 [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md).
 
 ## Giving the next command its data
 
 Because a factory builds it, the next command can read everything the run
 has gathered — see
-[docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md). For what
+[../concepts/0008-artefacts.md](../concepts/0008-artefacts.md). For what
 *this* handler decides, pass arguments:
 
 ```csharp
@@ -68,61 +55,45 @@ return FinishThisCommand()
     .EndAsync();
 ```
 
-`ShowBalanceCliCommandFactory` reads that with `GetRequiredArgument<int>("limit")`,
-exactly as if the user had typed it.
-
-**A command with constructor arguments needs a factory of its own.** KitCli
-only auto-registers one for a command it can build with `new`, so chaining
-to a command that has neither fails when the chain arrives, not when you
-write it.
-
-## Chaining to a command you built yourself
+`ShowBalanceCliCommandFactory` reads that with
+`GetRequiredArgument<int>("limit")`, exactly as if the user had typed it.
 
 `ByMovingToCommand(command)` takes an instance instead. Its factory never
-runs, so it sees none of the above — reach for it only when the command
-takes its data by constructor and you already have all of it:
-
-```csharp
-.ByMovingToCommand(new WizardStepTwoCliCommand(collectedValue))
-```
+runs, so it sees neither artefacts nor arguments — reach for it only when
+the command takes its data by constructor and you already have all of it.
 
 ## Common mistakes
 
-**Ending the chain on `ByMovingToCommand(...)`.** That queues one more
-step rather than finishing. Somewhere in the chain a handler must call
-`ByFinallySaying(...)`, or return another `Final` outcome, or the run
-never completes.
+**Ending the chain on `ByMovingToCommand(...)`.** That queues one more step
+rather than finishing. Somewhere a handler must return a `Final` outcome,
+or the run never completes.
 
-**Recursing with no way out.** A handler may hand back to its own command
-— a countdown, a retry, another page — and that ends fine as long as some
-pass returns a `Final` outcome. What never returns is the version with no
-exit: every pass queues the next unconditionally, so the run never reaches
-a final outcome, and it slows as it goes because each step grows the
-history the run reads back. Nothing detects this
+**Recursing with no way out.** A handler may hand back to its own command —
+a countdown, a retry, another page — and that ends fine as long as some
+pass returns a `Final` outcome. The version with no exit never returns, and
+slows as it goes because each step grows the history the run reads back.
+Nothing detects this
 ([#173](https://github.com/KitCli/KitCli/issues/173));
 `/test-unending-chain` in the playground is the mistake, not the pattern.
 
 **Expecting the chain to pause for input.** Every step runs back to back,
-with no ask in between. A step that needs something from the user has to
-be reached by a fresh ask, not by `ByMovingToCommand` — and in a headless
-app there is no fresh ask at all (see
+with no ask in between. A step that needs something from the user has to be
+reached by a fresh ask — and a headless app has none (see
 [0002-creating-a-headless-app.md](0002-creating-a-headless-app.md)).
 
-**Mutating shared state across steps.** Pass data down the chain as an
-argument, or read it back through an artefact when an earlier step's
-outcome was `Reusable`. Never smuggle state between handlers in a static
-or singleton.
+**Chaining to a command with constructor arguments and no factory.** KitCli
+only auto-registers a factory for a command it can build with `new`, so
+this fails when the chain arrives, not when you write it.
+
+**Mutating shared state across steps.** Pass data down as an argument, or
+read it back through an artefact. Never smuggle state between handlers in a
+static or a singleton.
 
 ## Learn more
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   what "reusable" means, and how a chain maps onto the run's state.
-- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
-  `Outcome` and `OutcomeKind` model this guide shows one slice of.
-- [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
-  how `NextCliCommandOutcome` drives the run's state machine.
-- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — passing data
-  from an earlier step to a later one without threading it through every
-  constructor.
-- [docs/adr/0011-chain-to-a-command-by-type.md](../adr/0011-chain-to-a-command-by-type.md) —
+- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — passing data
+  from an earlier step to a later one.
+- [../adr/0011-chain-to-a-command-by-type.md](../adr/0011-chain-to-a-command-by-type.md) —
   why there are two ways to name the next command.

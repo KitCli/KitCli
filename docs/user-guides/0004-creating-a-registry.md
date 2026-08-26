@@ -3,8 +3,8 @@
 ## What this is for
 
 Before `CliAppBuilder` builds the DI container, it needs to know which
-assemblies hold your commands and the services they depend on. A registry
-tells it: one class, wired in with `WithRegistry<T>()`.
+assemblies hold your commands, and what services those commands depend on.
+A registry tells it: one class, wired in with `WithRegistry<T>()`.
 
 ## How to do it
 
@@ -33,33 +33,27 @@ wires up its factory and MediatR handler. Call it once per assembly that
 defines commands. The assembly holding your `Program.cs` is scanned
 already, so a registry serves commands living elsewhere.
 
-Register any other services your handlers and factories need as you would
-in any DI setup: `services.AddSingleton<...>()`, and so on.
+Register any other services your handlers and factories need exactly as you
+would in any DI setup.
 
-### If your commands use artefacts
+### If your commands remember anything
 
-A *second*, separate call registers artefact factories;
-`AddCommandsFromAssembly` leaves them alone. Add it whenever a command in
-the assembly remembers state for a later command to read back (see
-[0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)):
+A *second*, separate call registers artefact factories, which is what lets
+a later command read what an earlier one produced:
 
 ```csharp
-public class MyAppRegistry : ICliAppRegistry
-{
-    public void Register(IServiceCollection services)
-    {
-        var assembly = typeof(GreetCliCommand).Assembly;
+var assembly = typeof(GreetCliCommand).Assembly;
 
-        services.AddCommandsFromAssembly(assembly);
-        services.AddArtefactFactoriesForAssembly(assembly);
-    }
-}
+services.AddCommandsFromAssembly(assembly);
+services.AddArtefactFactoriesForAssembly(assembly);
 ```
 
-That call also picks up artefact factories for every `Aggregator` and
-`TableBuilder` subclass in the assembly, which is what makes a paged
-table's "next page" work (see
-[0011-showing-a-paged-table.md](0011-showing-a-paged-table.md)).
+Add it whenever a command remembers state (see
+[0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)),
+a factory calls `LastCommandWas<T>()`, or a table needs a "next page" step
+(see [0011-showing-a-paged-table.md](0011-showing-a-paged-table.md)). It
+registers the built-in artefact factories as well as yours, so all three
+depend on it.
 
 ### When a registry needs settings
 
@@ -69,11 +63,6 @@ it with `WithJsonSettings` or `WithUserSecretSettings`, plus the
 two-type-parameter `WithRegistry<TSettings, TRegistry>()`:
 
 ```csharp
-public class MySettings
-{
-    public string ApiKey { get; init; } = string.Empty;
-}
-
 public class MyConfiguredRegistry : IConfigurableCliAppRegistry<MySettings>
 {
     public void Register(MySettings settings, IServiceCollection services)
@@ -84,19 +73,12 @@ public class MyConfiguredRegistry : IConfigurableCliAppRegistry<MySettings>
 }
 ```
 
-```csharp
-// Program.cs
-var app = new CliAppBuilder()
-    .WithBasicApp()
-    .WithJsonSettings("appsettings.json")
-    .WithRegistry<MySettings, MyConfiguredRegistry>();
+Build it with `.WithJsonSettings("appsettings.json")` before
+`.WithRegistry<MySettings, MyConfiguredRegistry>()`.
 
-await app.Run();
-```
-
-The configuration section name comes from `TSettings`'s type name with
-`Settings` stripped off, so `MySettings` reads the `My` section. To use a
-different section, rename the settings type; nothing names it explicitly.
+The configuration section name is `TSettings`'s type name with `Settings`
+removed, so `MySettings` reads the `My` section. To read a different
+section, rename the settings type; nothing names it explicitly.
 
 ## Common mistakes
 
@@ -105,24 +87,24 @@ different section, rename the settings type; nothing names it explicitly.
 source before it can bind settings to your type.
 
 **Registering one assembly's commands from two registries.** Call
-`AddCommandsFromAssembly` exactly once per assembly, from one registry,
-and remember your `Program.cs` assembly counts as registered already.
+`AddCommandsFromAssembly` exactly once per assembly, and remember your
+`Program.cs` assembly counts as registered already.
 
-**Forgetting `AddArtefactFactoriesForAssembly` when commands remember
-state.** Startup stays silent. The first symptom is a later command's
-`GetRequiredArtefact` throwing at runtime, reporting the artefact missing.
+**Forgetting `AddArtefactFactoriesForAssembly`.** Startup stays silent. The
+first symptom is a later command's `GetRequiredArtefact` throwing at
+runtime, or `LastCommandWas<T>()` quietly returning `false`.
 
-**Passing a marker type from the wrong assembly.**
-`AddCommandsFromAssembly` scans whichever assembly
-`typeof(SomeType).Assembly` resolves to. Point it at an assembly holding
-no commands and it throws `ArgumentException` ("No ICommand
-Implementations Found"); point it at the wrong assembly holding some, and
-your intended commands silently go unregistered while another assembly's
-register instead.
+**Passing a marker type from the wrong assembly.** Point
+`AddCommandsFromAssembly` at an assembly holding no commands and it throws
+`ArgumentException` ("No ICommand Implementations Found"); point it at the
+wrong one holding some, and your intended commands go unregistered in
+silence while another assembly's register instead.
 
 ## Learn more
 
 - [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — what
   `AddCommandsFromAssembly` finds and registers.
-- [docs/concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   the full mechanics behind that call.
+- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — what the
+  second call registers.
