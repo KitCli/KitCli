@@ -3,14 +3,12 @@
 ## What this is for
 
 A run that reaches a reusable outcome — a list shown, a page displayed —
-waits for whatever the user types next. When that resolves to no command,
-the app says nothing at all. `[CliNextCommandIs]` gives it something to
-say: the moves that would have worked, each with a description.
+waits for what the user types next, and says nothing when that leads
+nowhere. `[CliNextCommandIs]` gives it something to say.
 
 ## How to do it
 
-Declare them on the command that reaches the reusable outcome, not on the
-command being suggested, once per suggestion:
+Declare them on the command that parks the run, not the one suggested:
 
 ```csharp
 [CliNextCommandIs("test-follow-up", "Pick up where /test-suggesting left off.")]
@@ -28,8 +26,7 @@ public class TestSuggestingCliCommandHandler : CliCommandHandler<TestSuggestingC
 }
 ```
 
-Run `/test-suggesting` then `/nonsense` in the playground, and the second
-ask prints:
+In the playground, `/test-suggesting` then `/nonsense` prints:
 
 ```
 
@@ -39,26 +36,20 @@ Pick up where /test-suggesting left off.
 
 Give the name without a prefix character — the run adds the app's
 configured one. Any name the user could type works, including a shorthand
-or an alias
-([0013-giving-a-command-extra-names.md](0013-giving-a-command-extra-names.md)).
-The run stays parked either way, so the user can still type something
-else.
+or an [alias](0013-giving-a-command-extra-names.md).
 
 ## Common mistakes
 
 **Declaring suggestions on a command that finishes the run.** They are
-read off the last command that ran, and only while the run is parked at a
-reusable outcome. End on a `Final` outcome and the next ask starts a
-fresh run that fails as silently as it always did.
+read off the last command that ran, and only while the run is parked. End
+on a `Final` outcome and the next ask starts a fresh run, silent as ever.
 
 **Writing the prefix into the name.** `[CliNextCommandIs("/next", ...)]`
 renders as `//next`.
 
 **Expecting it only for a misspelled command.** Anything the parked run
-can't act on prints the suggestions: a name it can't resolve, a command
-gated off by `CanCreateWhen`
-([0006-gating-a-command-with-cancreatewhen.md](0006-gating-a-command-with-cancreatewhen.md)),
-and plain text with no prefix at all.
+can't act on prints them — an unknown name, a command gated off by
+`CanCreateWhen`, plain text with no prefix.
 
 ## Learn more
 
@@ -66,5 +57,3 @@ and plain text with no prefix at all.
   what parks a run at a reusable outcome in the first place.
 - [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
   where suggestions sit in the run's state machine.
-- [docs/adr/0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md) —
-  why the suggestion is an outcome with its own writer.
