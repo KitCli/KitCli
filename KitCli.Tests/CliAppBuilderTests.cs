@@ -25,7 +25,7 @@ public class CliAppBuilderTests
             .WithRegistry<TestCliAppRegistry>();
 
         // Act
-        // Running an ArgsCliApp with no args reaches a guard that only fires once the provider
+        // Running a HeadlessCliApp with no args reaches a guard that only fires once the provider
         // has been built and validated — so this specific throw proves validation passed.
         var run = () => classUnderTest.Run();
 
@@ -50,7 +50,7 @@ public class CliAppBuilderTests
             .With.Message.Contains(nameof(TestScopedDependency)));
     }
 
-    private class TestArgsCliApp(ICliWorkflow workflow, ICliIo io) : ArgsCliApp(workflow, io);
+    private class TestHeadlessCliApp(ICliWorkflow workflow, ICliIo io) : HeadlessCliApp(workflow, io);
 
     private record TestBuilderCliCommand : CliCommand;
 
@@ -80,7 +80,7 @@ public class CliAppBuilderTests
             services.AddCliWorkflowCommands();
             services.AddCommandsFromAssembly(typeof(TestBuilderCliCommand).Assembly);
 
-            services.AddSingleton<CliApp, TestArgsCliApp>();
+            services.AddSingleton<CliApp, TestHeadlessCliApp>();
         }
     }
 

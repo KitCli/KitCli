@@ -2,9 +2,9 @@ using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Workflow.Abstractions;
 
-namespace KitCli.Playground.App.Terminal;
+namespace KitCli.Playground.App;
 
-public class TestCliApp(ICliWorkflow workflow, ICliIo io) : TerminalCliApp(workflow, io)
+public class TestCliApp(ICliWorkflow workflow, ICliIo io) : CliApp(workflow, io)
 {
     protected override void OnSessionStart()
     {

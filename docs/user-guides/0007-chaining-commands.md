@@ -93,11 +93,20 @@ step rather than finishing. Somewhere in the chain a handler must call
 `ByFinallySaying(...)`, or return another `Final` outcome, or the run
 never completes.
 
-**Expecting a one-shot invocation to run a whole chain.** A one-shot
-invocation — `dotnet run -- /start-wizard`, built on `ArgsCliApp` — runs
-only the *first* command the ask resolves to, never the chained steps an
-interactive terminal app would drive. To finish the work in a single
-one-shot call, do it in one handler instead of chaining.
+**Recursing with no way out.** A handler may hand back to its own command
+— a countdown, a retry, another page — and that ends fine as long as some
+pass returns a `Final` outcome. What never returns is the version with no
+exit: every pass queues the next unconditionally, so the run never reaches
+a final outcome, and it slows as it goes because each step grows the
+history the run reads back. Nothing detects this
+([#173](https://github.com/KitCli/KitCli/issues/173));
+`/test-unending-chain` in the playground is the mistake, not the pattern.
+
+**Expecting the chain to pause for input.** Every step runs back to back,
+with no ask in between. A step that needs something from the user has to
+be reached by a fresh ask, not by `ByMovingToCommand` — and in a headless
+app there is no fresh ask at all (see
+[0002-creating-a-headless-app.md](0002-creating-a-headless-app.md)).
 
 **Mutating shared state across steps.** Pass data down the chain as an
 argument, or read it back through an artefact when an earlier step's
