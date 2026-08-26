@@ -240,13 +240,20 @@ commitments to defend.
    has neither. A cadence with no consumer decays into decoration.
 
    **Reference anchors** keep the scale honest instead. Compare each new
-   estimate against two, ideally one smaller and one larger:
+   estimate against two, ideally one smaller and one larger. The table is
+   the current scale, re-derived at the start of every refinement pass
+   from what has merged since the last one: anchors fixed months ago size
+   a repo that no longer exists. Replace the rows rather than adding to
+   them, and leave estimates set under an earlier scale alone.
+
+   Current scale, derived 2026-08-26:
 
    | Points | Reference | Shape |
    |---|---|---|
-   | 2 | [#101](https://github.com/KitCli/KitCli/pull/101) | 80 lines, one file, one test class. No design decision, no docs. |
-   | 5 | [#100](https://github.com/KitCli/KitCli/pull/100) | 195 lines across 10 files. New public API, an ADR, tests. |
-   | 13 | [#82](https://github.com/KitCli/KitCli/pull/82) | 812 lines across 23 files. Breaking, with an ADR and a concept doc. |
+   | 2 | [#177](https://github.com/KitCli/KitCli/pull/177) | 37 lines across 3 files. One playground scenario and the two guides it changes. No new API, no decision. |
+   | 5 | [#126](https://github.com/KitCli/KitCli/pull/126) | 146 lines across 4 files. A behaviour fix with tests, a concept doc, a CHANGELOG line. No new API. |
+   | 8 | [#107](https://github.com/KitCli/KitCli/pull/107) | 347 lines across 14 files. A new attribute, a new outcome and its writer, run-loop changes, tests, an ADR. |
+   | 13 | [#154](https://github.com/KitCli/KitCli/pull/154) | 963 lines across 27 files. New public types in two packages, registration changes, test helpers, an ADR. |
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
 for a ticket's Build-stage lifecycle, with one extension SoloCAIRN itself
