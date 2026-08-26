@@ -239,7 +239,15 @@ commitments to defend.
    iteration's capacity, and a repo with no deadline and nobody waiting
    has neither. A cadence with no consumer decays into decoration.
 
-   **Reference anchors** keep the scale honest instead. Compare each new
+   **A point is not a multiplier.** An 8 is a bigger bite than a 3 and a
+   less certain one; it is not 2.67 times anything, and least of all
+   2.67 times the diff. What moves an estimate up is how much is still
+   undecided, how far the change reaches, and how much you expect to
+   learn while doing it. The gaps widen because precision falls away as
+   work grows — an item sitting between a 5 and an 8 has to round, and
+   arguing about which way is the useful part.
+
+   **Reference anchors** keep the scale honest. Compare each new
    estimate against two, ideally one smaller and one larger. The table is
    the current scale, re-derived at the start of every refinement pass
    from what has merged since the last one: anchors fixed months ago size
@@ -250,13 +258,13 @@ commitments to defend.
 
    | Points | Reference | Shape |
    |---|---|---|
-   | 0.5 | [#175](https://github.com/KitCli/KitCli/pull/175) | 1 line, 1 file. A version string bumped for a release. Mechanical, nothing to decide. |
-   | 1 | [#129](https://github.com/KitCli/KitCli/pull/129) | 17 lines across 2 files. XML doc comments corrected on two types. No behaviour change, no tests. |
-   | 2 | [#177](https://github.com/KitCli/KitCli/pull/177) | 37 lines across 3 files. One playground scenario and the two guides it changes. No new API, no decision. |
-   | 3 | [#112](https://github.com/KitCli/KitCli/pull/112) | 79 lines across 4 files. A new class in the release tool and the wiring for it. Behaviour change, no public API, no docs. |
-   | 5 | [#126](https://github.com/KitCli/KitCli/pull/126) | 146 lines across 4 files. A behaviour fix with tests, a concept doc, a CHANGELOG line. No new API. |
-   | 8 | [#107](https://github.com/KitCli/KitCli/pull/107) | 347 lines across 14 files. A new attribute, a new outcome and its writer, run-loop changes, tests, an ADR. |
-   | 13 | [#154](https://github.com/KitCli/KitCli/pull/154) | 963 lines across 27 files. New public types in two packages, registration changes, test helpers, an ADR. |
+   | 0.5 | [#175](https://github.com/KitCli/KitCli/pull/175) | Nothing to decide and nowhere for it to reach: a version string bumped for a release. Wrong is visible immediately. (1 line) |
+   | 1 | [#129](https://github.com/KitCli/KitCli/pull/129) | You know the answer before you open the file. Correcting XML doc comments on two types — the only risk is describing the behaviour wrongly. (17 lines, 2 files) |
+   | 2 | [#177](https://github.com/KitCli/KitCli/pull/177) | Shape known, nothing to design. Reproduce a behaviour as a playground scenario and write it into the two guides that cover it. (37 lines, 3 files) |
+   | 3 | [#112](https://github.com/KitCli/KitCli/pull/112) | One decision, settled before coding: how to tell a changed package from an unchanged one. Reaches the release tool only, and a mistake surfaces at the next release. (79 lines, 4 files) |
+   | 5 | [#126](https://github.com/KitCli/KitCli/pull/126) | Small decision, wide reach: validating scopes touches every app the framework builds, and you cannot know what it will flag until you turn it on. Tests, a concept doc, a CHANGELOG line. (146 lines, 4 files) |
+   | 8 | [#107](https://github.com/KitCli/KitCli/pull/107) | Several questions open at the start — what an unresolved ask returns, where suggestions come from, how they render. Adds public API other people build on, changes the run loop, needs an ADR. (347 lines, 14 files) |
+   | 13 | [#154](https://github.com/KitCli/KitCli/pull/154) | The design is not settled when you start, and doing it is how you find out. Changes how every chained command is constructed, across two packages and registration, with test helpers and an ADR. (963 lines, 27 files) |
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
 for a ticket's Build-stage lifecycle, with one extension SoloCAIRN itself
