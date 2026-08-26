@@ -1,9 +1,15 @@
 # 0005. How much of the run loop can ArgsCliApp and TerminalCliApp share?
 
 - **Status:** In Review
+- **Superseded in part by** [ADR 0013](../adr/0013-merge-the-hosts-and-name-the-variant-headless.md):
+  the shape recommended below — the loop hoisted onto `CliApp` behind an
+  ask-source seam — was not built. `TerminalCliApp` held nothing `CliApp`
+  did not, so it folded in and the seam disappeared with it. Every finding
+  about *what* is wrong stands; the design for fixing it did not survive
+  writing.
 - **Spike:** [#169](https://github.com/KitCli/KitCli/issues/169)
 - **Time-box:** none agreed — filed alongside this investigation
-- **Date:** 2026-08-25
+- **Date:** 2026-08-25, revised 2026-08-26
 
 ## Verdict
 
@@ -15,8 +21,8 @@ the copy that caused it.
 
 Most of this is genuinely small. `TerminalCliApp.Run` and `ArgsCliApp.Run`
 run the same eight steps around the same `Workflow.NextRun()`, and differ in
-two places only: where an ask comes from, and when the session stops. Move
-the loop onto `CliApp` and a one-shot invocation drives its chain because
+two places only: where an ask comes from, and when the session stops. Leave
+the loop in one place and a one-shot invocation drives its chain, because
 there is no longer a second loop that doesn't.
 
 The complexity is what that exposes. Once a one-shot invocation ends when its
@@ -32,35 +38,48 @@ currently promises it never does; and the loop being rewritten has one test.
 
 ## Recommendation
 
-#167 stays open as the parent. #169 closes — it answered its question. The
-build hangs off #167 in this order.
+#167 stays open as the parent. #169 closes — it answered its question.
 
 1. **#168 first, and it is a hard blocker.** Decide what a run that ends on a
    queued step does: reach a named terminal state, or return a diagnostic
    outcome. Today `Workflow.Stop()` hides the question in one-shot mode.
    Nothing below is safe until an unterminated chain has a defined ending.
-2. **ADR — the run loop belongs to `CliApp`, and a host is an ask source.**
-   Amends ADR 0005, which is still `Proposed`. It keeps that ADR's actual
-   decision, that the mode is a compile-time subclass choice, and drops only
-   the part where each subclass owns a whole `Run`. It is not the
-   `args.Length` branch ADR 0005 rejected: no runtime `if` decides the mode.
-3. **`refactor(host)!` — hoist the loop and `ExecuteRunOperation` onto
-   `CliApp`**, behind two seams: one supplying the next ask, one deciding
-   whether the session continues. `TerminalCliApp` supplies `Io.AskAsync`;
-   `ArgsCliApp` supplies the joined args and ends the session once its run
-   reaches `Finished`. This closes #167 rather than a follow-up ticket
+2. **An ADR**, amending [ADR 0005](../adr/0005-args-driven-cli-app.md), which
+   is still `Proposed`.
+3. **The host change itself**, closing #167 rather than a follow-up ticket
    doing so: the truncation *is* the second copy.
 4. **Cover the host.** A `KitCli.Playground.Scenarios` chain run under both
-   apps, asserting the args app prints every step and its run reaches
-   `Finished`. The loop has one test today, which is how #167 shipped —
-   see [#26](https://github.com/KitCli/KitCli/issues/26) and the
-   *Add Tests for the App Host and Scenarios* milestone.
-5. **Docs, in the same PR as the change they describe.**
-   [`0002-cli-app-host.md`](../concepts/0002-cli-app-host.md) (the "runs
-   exactly one command" and hook-firing paragraphs),
-   [user guide 0002](../user-guides/0002-creating-an-args-app.md) and
-   [0007's gotchas](../user-guides/0007-chaining-commands.md), and
-   `CHANGELOG.md`.
+   apps. The loop has one test today, which is how #167 shipped — see
+   [#26](https://github.com/KitCli/KitCli/issues/26) and the *Add Tests for
+   the App Host and Scenarios* milestone.
+5. **Docs, in the same PR as the change they describe** —
+   [`0002-cli-app-host.md`](../concepts/0002-cli-app-host.md), user guides
+   0002, 0003 and 0007, and `CHANGELOG.md`.
+
+## What was built, and where it departed
+
+[#172](https://github.com/KitCli/KitCli/pull/172) shipped 2 through 5 as one
+change, recorded in
+[ADR 0013](../adr/0013-merge-the-hosts-and-name-the-variant-headless.md). Two
+departures worth the paper trail.
+
+**The seam was the wrong answer, twice over.** This document proposed hoisting
+the loop behind a method supplying the next ask. Written out, that method had
+one real implementation — `Io.AskAsync` — and `CliApp` already holds `ICliIo`.
+The seam abstracted something the base class had all along, and forced the
+one-shot host to implement a member meaning "not me". Three variants were tried
+and dropped: the ask-source seam, a base-class default returning none, and an
+`ICliIo` that yields the args once. What shipped instead: `TerminalCliApp`
+folded into `CliApp`, `ArgsCliApp` became `HeadlessCliApp` and overrides `Run`.
+No seam exists.
+
+**#168 did not go first.** The order above was not followed — the host change
+shipped ahead of it, so a chain that hands on forever now leaves a headless
+invocation running rather than truncating silently. That trade is recorded in
+ADR 0013's consequences and in the chaining guide, and
+[`/test-unending-chain`](../../KitCli.Playground.Scenarios/TestUnendingChainCliCommand.cs)
+demonstrates it. The blocker call stands: this is a worse failure than the one
+fixed, and it is live.
 
 ## What was established
 
@@ -122,17 +141,21 @@ and `KitCli.Workflow/CliWorkflow.cs`.
 
 ## Open questions
 
-- What should a one-shot invocation exit with when its run ends
-  `Exceptional`, or when the ask never resolved to a command? Both exit 0
-  today, so a script cannot tell success from failure.
-- What should happen when a chained step in one-shot mode stops at a reusable
-  checkpoint and wants another ask, with no more args to give it?
-- `ExecuteRunOperation` branches on `WasChangedTo(MovePastAsk)`, and
-  `CliWorkflowRunState.WasChangedTo` tests the run's history rather than its
-  current status. What that means for a run that moves past an ask more than
-  once is read from source and not reproduced — #168 carries it.
-- Does anything outside this repo call `ArgsCliApp.Run` or
-  `TerminalCliApp.Run` directly rather than through `CliAppBuilder.Run`?
+- What should a headless invocation exit with when the ask resolves to no
+  command? Still 0, so a script cannot tell success from failure. A handler
+  that throws now exits non-zero, which is the only part of this answered.
+- Three of these have since been answered, and are recorded where they
+  belong rather than here: a run parked at a reusable checkpoint with
+  nothing left to ask ends the session unfinished
+  ([#174](https://github.com/KitCli/KitCli/issues/174)); the shipped loop
+  reads the run's current status rather than `WasChangedTo`'s history, which
+  a `while` requires; and a chain that hands on forever really does never
+  return, reproduced by `/test-unending-chain`
+  ([#173](https://github.com/KitCli/KitCli/issues/173)).
+- Does anything outside this repo name the old types? v3.0.0 shipped the
+  rename, so the answer arrives as consumer reports rather than analysis.
+  `KitCli.Tooling.Release` is the one known case, pinned to an older package
+  and still on `ArgsCliApp` until its pin moves.
 
 ## Out of scope
 
