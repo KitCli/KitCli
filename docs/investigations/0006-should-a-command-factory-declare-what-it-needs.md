@@ -14,9 +14,9 @@ there are 28 `CanCreateWhen` implementations, and every one of them is a
 combination of four predicates: the sub-instruction equals a name, the
 sub-instruction is absent, a given command ran last, an argument of a given
 type and name is present. None needs an arbitrary lambda. The vocabulary is
-closed, and a builder can express all 28 without an escape hatch being
-reached for — though the escape hatch still stays, because a framework
-cannot know that about code it has not seen.
+closed, and a builder expresses all 28 without any of them having to fall back
+to writing `CanCreateWhen()` by hand — though that override stays available,
+because a framework cannot see consumer code it has not been shown.
 
 The complexity is the other half. A descriptor is only worth building for
 what it lets the framework *say*, and KitCli already tried to say it once:
@@ -215,9 +215,14 @@ belong at registration rather than first use.
 
 ## Open questions
 
-- Whether the escape hatch earns its place once the group lands. Nothing in the
-  corpus needs it; it stays because a framework cannot see code it has not been
-  shown, which is an argument from ignorance rather than from evidence.
+- Should overriding `CanCreateWhen()` stay possible at all? Step 4 leaves it
+  `virtual`, so a factory can ignore its own declaration and answer in code
+  instead. None of the 28 needs to. Keeping it has a cost the reporting half
+  pays: an override is invisible to the descriptor, so the catalogue and the
+  unmet-requirements table would describe a factory that is really deciding on
+  something else. Removing it has the opposite cost — a consumer whose case the
+  seven verbs miss has nowhere to go, and KitCli cannot see consumer code to
+  know whether such a case exists.
 
 ## Out of scope
 
