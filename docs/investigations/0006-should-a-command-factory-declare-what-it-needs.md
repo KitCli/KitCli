@@ -51,28 +51,44 @@ build, with these as sub-issues in this order.
    `ProducesOutcome<T>()`, declared for the catalogue rather than checked; see
    below. `OnDescribing` chains through the inheritance line so a derived
    factory adds to its base's declaration rather than replacing it, and the
-   builder carries an any-of group alongside the conjunction. Identity — the
-   derived name,
-   [`[CliCommandAlias]`](../adr/0007-cli-command-alias-attribute.md),
-   [`[CliNextCommandIs]`](../adr/0008-suggest-next-commands-attribute.md) —
-   stays where it is; see the open questions.
-3. **Default `CanCreateWhen()` to the declaration.** It stops being `abstract`
+   builder carries an any-of group alongside the conjunction.
+3. **Merge identity into the same descriptor at the root.** The descriptor is
+   the one model of what a command is. `OnDescribing` populates it from the
+   factory; the readers for
+   [`[CliCommandAlias]`](../adr/0007-cli-command-alias-attribute.md) and
+   [`[CliNextCommandIs]`](../adr/0008-suggest-next-commands-attribute.md)
+   populate it from the command type. Registration merges the two. Neither ADR
+   is superseded — their attributes become inputs to a descriptor rather than a
+   rival mechanism — and a command with no factory of its own still gets a
+   descriptor, so nothing has to grow a `CliCommandFactory<T>` it does not
+   otherwise need. It also gives `[CliNextCommandIs]`'s per-caller descriptions
+   one home: today every calling site hand-writes a description of the command
+   it points at.
+4. **Default `CanCreateWhen()` to the declaration.** It stops being `abstract`
    and becomes `virtual`, returning whether every declared requirement is met.
    This is source- and binary-compatible: every existing `override` still
    compiles, and `BasicCliCommandFactory<T>` and
    `BasicCreationCliCommandFactory<T>` keep their `sealed override … => true`.
-4. **An ADR.** A hook on every factory is a cross-cutting pattern, which is
+5. **An ADR.** A hook on every factory is a cross-cutting pattern, which is
    what CONTRIBUTING asks for one for. It should say plainly that the
    descriptor does not reopen
    [ADR 0003](../adr/0003-reflection-based-automatic-registration.md) —
    registration stays reflection-driven and names stay type-derived.
-5. **The reporting path, as its own ticket.** What a failed match tells the
-   user, and through what — a new outcome, or the typed exception hierarchy.
-   This is where the deleted `MissingOutcomes` strategy is finally revisited,
-   and it overlaps [#183](https://github.com/KitCli/KitCli/issues/183) on the
-   question of what a validation failure looks like to a user. Decide the two
-   together or the app grows two vocabularies for "that didn't work".
-6. **Docs in the same PR as the change** —
+6. **The reporting path, as its own ticket.** A failed match renders the
+   descriptor's unmet requirements as a table, and travels as an exception
+   rather than an ordinary outcome, because failing to resolve a command is
+   exceptional. This is where the deleted `MissingOutcomes` strategy is finally
+   revisited — a hand-passed `string[]` becomes the descriptor the framework
+   already holds. Two things it has to reconcile. Tables are
+   `TableBuilder<TSource, TAggregate>` with a `TableMap<TAggregate>` per shape
+   (see [`0009-tables.md`](../concepts/0009-tables.md)), so this needs a
+   requirement row type and a map for it. And the exception path renders
+   nothing today: `RespondToAsk` catches `NoCommandGeneratorException` and
+   returns `NothingOutcome`, so the exception has to carry the descriptor and
+   something has to write it. That reconciliation is shared with
+   [#183](https://github.com/KitCli/KitCli/issues/183) — decide the two
+   together, or the app grows two vocabularies for "that didn't work".
+7. **Docs in the same PR as the change** —
    [`0001-command-registration.md`](../concepts/0001-command-registration.md),
    [`0001-writing-a-basic-command.md`](../user-guides/0001-writing-a-basic-command.md),
    and `CHANGELOG.md`.
@@ -123,10 +139,14 @@ and a catalogue that renders without instantiating a factory.
   conversion, twice out of three times from a runtime value
   (`RanCommand.GetType().Name`, `Value.GetType().Name`). So a declared
   `Produces` can be rendered and read, but not checked against a `Requires`.
+  The verb is therefore `ProducesOutcome<T>()`, taking a type and no name —
+  the two `Requires` verbs take a name because the run holds one to match
+  against, and outcome space holds none until conversion. `Outcome` does not
+  grow a name to make the three read alike.
 - **`GetRequiredArtefact<T>` and `GetRequiredArgument<T>` throw a bare
   `Exception`** under `// TODO: Handle better upstream` / `// TODO: Handle
   further upstream`. They are the same missing capability seen from inside
-  `Create()`, and belong to step 5's ticket, not step 2's.
+  `Create()`, and belong to step 6's ticket, not step 2's.
 
 ## Evidence
 
@@ -185,20 +205,14 @@ belong at registration rather than first use.
 
 ## Open questions
 
-- Does the descriptor eventually absorb identity? `SetDescription` overlaps
-  `[CliNextCommandIs]`, which makes every *calling* site hand-write a
-  description of the command it points at — one description per caller for
-  the same command. Folding identity in supersedes ADRs 0007 and 0008 and
-  forces every aliased command to grow a factory, since a command with a
-  parameterless constructor gets `BasicCliCommandFactory<T>` generated and
-  nobody subclasses that. Not now; worth its own question later.
-- Does the any-of group go in the builder, or does the argument-or-artefact
-  fallback stay in `Create()`?
-- Should `Outcome` gain a name, so `ProducesOutcome<T>(outcomeName)` has
-  something to bind to and reads symmetrically with the two `Requires` verbs?
-  Today the name exists only after conversion, so the parameter would be
-  inventing one.
-- What does a failed match report, and to whom? Shared with #183.
+- One requirement can be satisfiable two ways. `AccountAttributeCliCommandFactory`
+  needs an account name, and takes it from a `--ynab-account-name` argument when
+  one is given, or from an `Account` artefact a previous command left behind when
+  one is not. Can the builder say "either of these", or does that fallback stay
+  hand-written in `Create()`?
+- What does the table of unmet requirements say when the reason is *no* candidate
+  factory at all, rather than one that declared requirements and missed them?
+  There is no descriptor to render in that case.
 
 ## Out of scope
 
