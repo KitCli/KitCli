@@ -2,13 +2,13 @@
 
 KitCli is a framework other people's code depends on, so this process
 optimizes for one thing: **every non-obvious decision has a paper trail.**
-Asked "why does X work this way" in a year, the answer should be a link,
-not archaeology.
+Asked "why does X work this way" in a year, you should answer with a
+link.
 
 ## Before you write code
 
-- **Bugs and small fixes** — open a PR. No issue needed for anything the
-  PR description can cover.
+- **Bugs and small fixes** — open a PR, and let its description stand in
+  for the issue.
 - **Features, breaking changes, anything touching more than one project**
   — open an issue first, using the [feature request
   template](.github/ISSUE_TEMPLATE/feature_request.yml). Agree a shape
@@ -32,7 +32,7 @@ not archaeology.
     (`refactor(host)!: rename RespondToNext to MoveToNext`) **and** check
     **Breaking change** in the body
 
-  We squash-merge, so this title becomes the commit on `main` and the
+  Squash-merge makes this title the commit on `main` and the
   CHANGELOG line (see [Versioning](#versioning--releases)). Get it right
   here and nothing needs rewriting later.
 - Fill in the [PR template](.github/PULL_REQUEST_TEMPLATE.md): link the
@@ -42,7 +42,7 @@ not archaeology.
   will not, and without it milestone and label filtering only works across
   issues.
 - CI (`dotnet build` plus `dotnet test` across all six test projects) must
-  be green before merge. Branch protection enforces this, not discipline.
+  be green before merge. Branch protection enforces it.
 - No approving review is required while there is one maintainer, who is
   also always the author — GitHub would not allow the approval anyway.
   [CODEOWNERS](CODEOWNERS) still maps areas to owners; turn required
@@ -60,10 +60,23 @@ not archaeology.
 - **Name test doubles `Test*`** — `TestCommandHandler`, not `Stub*`,
   `Fake*`, or `Mock*`.
 
+## Docs
+
+Five kinds live in [`docs/`](docs/): ADRs, concept docs, user guides,
+investigations, technology pages. Three rules cover all of them.
+
+- **Copy the kind's `0000-template.md`** and number it sequentially,
+  `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
+  Technology pages take their dependency's name instead.
+- **Verify every name, signature and sample against source** before it
+  lands. Readers trust a doc they cannot check, so a wrong one costs more
+  than a missing one.
+- **Keep them current in the same PR** that makes them wrong.
+
 ## ADRs
 
 An [ADR](docs/adr/) records a decision, its alternatives, and its
-consequences — not how something works today, which is
+consequences. How something works today belongs in
 [`docs/concepts/`](docs/concepts/).
 
 **Write one when you are:**
@@ -75,11 +88,10 @@ consequences — not how something works today, which is
 
 **Skip it for** bug fixes, internal refactors, and anything a code comment
 covers. When unsure, don't: a 15-minute decision needs no permanent
-record, and too many ADRs is worse than none, because nobody reads them.
+record, and nobody reads a folder of fifty.
 
-Copy [`docs/adr/0000-template.md`](docs/adr/0000-template.md), number it
-sequentially, and open it in the PR it justifies — or alone, if the
-decision precedes the code.
+Open the ADR in the PR it justifies, or alone if the decision precedes the
+code.
 
 ## Concepts
 
@@ -93,13 +105,8 @@ or reference material that belongs in source XML docs where docfx surfaces
 it. Lead with the answer rather than building to it, and never append a
 Q&A that re-answers the body.
 
-Copy [`docs/concepts/0000-template.md`](docs/concepts/0000-template.md).
-Verify every name and signature against source first — a doc describing
-aspirational behaviour is worse than no doc, because nothing flags it
-wrong.
-
-**Keep them current.** A change that makes a concept doc inaccurate fixes
-that doc in the same PR.
+Describe the code as it is. Aspirational behaviour reads exactly like
+shipped behaviour, and nothing flags the difference.
 
 ## User guides
 
@@ -115,21 +122,17 @@ reach for without caring how it works — artefacts, command reactions,
 continuous input, workflow commands. **Skip it for** internal machinery
 with no consumer-facing API; that is a concept doc.
 
-Copy [`docs/user-guides/0000-template.md`](docs/user-guides/0000-template.md).
-Number sequentially (`000x-topic-in-kebab-case.md`), in the order a
-reader should meet them — `toc.yml` is that order. Verify every code
-sample against current source. **Keep them current**, in the same PR.
+`toc.yml` holds the order a reader should meet them in.
 
 ## Investigations
 
 An investigation ([`docs/investigations/`](docs/investigations/)) is what a
-technical spike produces: the finding, not the code, since no pair carries
-it forward otherwise. Number sequentially (`000x-question.md`) from
-[`0000-template.md`](docs/investigations/0000-template.md), and skip it
-when a reader could re-derive the finding easily.
+technical spike leaves behind: the finding. A spike's code is throwaway,
+so the write-up is what survives it. Skip it when a reader could
+re-derive the finding easily.
 
-Lead with the verdict — **new complexity** or **no new complexity** — not
-the evidence. An investigation records what was *found*; what was
+Lead with the verdict — **new complexity** or **no new complexity** — and
+put the evidence under it. An investigation records what was *found*; what was
 *decided* is an ADR, which an investigation may justify but never
 replaces. It ships through a PR with a Status like any other work. Durable
 facts about a dependency belong in that dependency's own docs too, not
@@ -140,7 +143,7 @@ only here.
 A technology page ([`docs/technology/`](docs/technology/)) is the reference
 home for how KitCli uses one external dependency: which of its features
 KitCli supports, and where each stops. It answers "can I do X with the
-container?" — not how a KitCli subsystem works, which is
+container?"; how a KitCli subsystem works belongs in
 [`docs/concepts/`](docs/concepts/).
 
 **Write one when** a dependency's behaviour shapes what consumers can
@@ -148,11 +151,9 @@ build — the DI container's lifetimes, MediatR's dispatch — and the answer
 is a table a reader returns to. **Skip it for** a dependency KitCli
 consumes without constraining.
 
-Name by dependency, not numbered. Tables over prose. Verify every row
-against source or a runnable check before it lands: an unverified support
-table is worse than none, because readers trust it. Name the tracking
-issue for each gap, or say plainly that none exists. **Keep them current**
-in the same PR as any change that moves a row.
+Tables over prose, and every row checked against source or a runnable
+sample. Name the tracking issue for each gap, or say plainly that none
+exists.
 
 ## Issues
 
@@ -168,8 +169,8 @@ Use the matching [issue template](.github/ISSUE_TEMPLATE/). No triage
 meeting exists; an issue without an area label after about a week is fair
 game to close as stale.
 
-**Area is about behaviour, not files.** Pick the area whose behaviour the
-change alters, not every project the diff touches. Work that adds a type
+**Area follows behaviour.** Pick the area whose behaviour the change
+alters, whatever projects the diff touches. Work that adds a type
 in `Commands.Abstractions` so the workflow can construct commands
 differently is `area:workflow`.
 
@@ -197,10 +198,10 @@ commitments to defend.
    any personal account, so idea-staging lives inside the org.
 2. **SWAG** — the same estimate re-checked against everything competing
    for the slot, in `SWAG (months)`. **Setting `Priority`
-   (`High`/`Medium`/`Low`) is mandatory**: Status cannot reach
-   `SWAG'd / Prioritized` without it, forcing an explicit call against
-   what is already prioritized. Prioritizing then means sorting or
-   grouping the board — there is no separate roadmap to keep in sync.
+   (`High`/`Medium`/`Low`) is mandatory.** Status reaches
+   `SWAG'd / Prioritized` only once it is set, which forces an explicit
+   call against what is already prioritized. Prioritizing then means
+   sorting or grouping the board, which is the roadmap.
 3. **The domain board** — a greenlit idea joins the board for its domain.
    One board per domain area (Instructions, Commands, Outcomes, Artefacts,
    Workflow, Packaging, Tooling & Docs), never one per idea. A board is a
@@ -266,7 +267,7 @@ reviewable in comments, and tracked in GitHub's own history.
 
 ## Milestones
 
-**A milestone is a goal, not a release.** Git tags and
+**A milestone is a goal.** Git tags and
 [`CHANGELOG.md`](CHANGELOG.md) handle releases, never a milestone. A
 milestone groups issues that together deliver one outcome, and closes when
 that outcome is met.
@@ -289,7 +290,7 @@ target.
 
 ## Versioning & releases
 
-Every squash-merged PR that changes behavior gets a line in
+Every squash-merged PR that changes behaviour gets a line in
 [`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`, in [Keep a
 Changelog](https://keepachangelog.com/) format.
 
@@ -320,12 +321,17 @@ trigger by hand.
 
 It reads `<Version>` from `KitCli/KitCli.csproj` and stops if `v{version}`
 is already tagged, which is what makes an ordinary push a no-op.
-Otherwise it restores, builds, tests, exchanges a GitHub OIDC token for a
-one-hour NuGet key (needing a `NUGET_USER` secret, not a stored API key),
-packs and pushes all 9 packages in dependency order with
-`--skip-duplicate`, cuts `CHANGELOG.md`, tags the commit, creates a GitHub
-Release from the `[Unreleased]` notes, and opens an auto-merging PR for the
-changelog edit, since `main` is protected.
+Otherwise it:
+
+- restores, builds and tests
+- exchanges a GitHub OIDC token for a one-hour NuGet key, which needs a
+  `NUGET_USER` secret rather than a stored API key
+- packs and pushes all 9 packages in dependency order with
+  `--skip-duplicate`
+- cuts `CHANGELOG.md`, tags the commit, and creates a GitHub Release from
+  the `[Unreleased]` notes
+- opens an auto-merging PR for the changelog edit, since `main` is
+  protected
 
 So a release is: bump, merge, watch. The tag is the interlock — nothing
 publishes twice.
