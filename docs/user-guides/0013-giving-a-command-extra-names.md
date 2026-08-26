@@ -4,8 +4,7 @@
 
 A command answers to two names derived from its type — the full
 `spare-money` and the shorthand `sm`. `[CliCommandAlias]` adds any others
-you want, so a memorable name costs nothing but an attribute, and renaming
-the type is never the price of a better name.
+you want, so a better name never costs a type rename.
 
 ## How to do it
 
@@ -28,8 +27,7 @@ part of the name.
 
 Aliases are names *a user types*. Chaining
 ([0007-chaining-commands.md](0007-chaining-commands.md)) names the next
-command by type, so it neither needs nor sees them; a
-`[CliNextCommandIs]` suggestion
+command by type, so it never sees them; a suggestion
 ([0014-suggesting-what-to-run-next.md](0014-suggesting-what-to-run-next.md))
 may name one, since the user types that too.
 

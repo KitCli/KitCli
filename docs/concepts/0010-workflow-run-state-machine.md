@@ -37,12 +37,13 @@ it as still active.
 when none exists. `CreateNewRun()` gives each run its own DI scope and the
 workflow's cancellation token.
 
-## When an ask resolves to nothing
+## When an ask leads nowhere
 
-At a reusable checkpoint the run makes **zero** state changes and returns
-the moves the last command declared via `[CliNextCommandIs]`, as
-`SuggestionOutcome`s. Declaring none leaves a silent `NothingOutcome`. See
-[0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
+An empty ask, one the validator turns down, and one naming no command are one
+case. Parked at a reusable checkpoint the run makes **zero** state changes and
+returns the last command's `[CliNextCommandIs]` moves as `SuggestionOutcome`s;
+none declared, a silent `NothingOutcome`. Anywhere else all three fail into
+`InvalidAsk` and finish. See [0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
 
 ## Gaps
 
