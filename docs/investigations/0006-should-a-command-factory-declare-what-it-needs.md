@@ -7,238 +7,64 @@
 
 ## Verdict
 
-New complexity — but not in the half the spike expected.
+New complexity, in the half the spike did not expect.
 
-The declaration half is *smaller* than #184 assumed. Across three consumers
-there are 28 `CanCreateWhen` implementations, and every one of them is a
-combination of four predicates: the sub-instruction equals a name, the
-sub-instruction is absent, a given command ran last, an argument of a given
-type and name is present. None needs an arbitrary lambda. The vocabulary is
-closed, and a builder expresses all 28 without any of them having to fall back
-to writing `CanCreateWhen()` by hand — though that override stays available,
-because a framework cannot see consumer code it has not been shown.
+Declaring is the easy half. A factory says whether it applies by overriding
+`CanCreateWhen()`, and all 28 of those overrides across three consumers ask the
+same four questions, so a builder can replace them.
 
-The complexity is the other half. A descriptor is only worth building for
-what it lets the framework *say*, and KitCli already tried to say it once:
-`MissingOutcomesCliCommand` and its handler lived in
-`KitCli.Workflow.Commands/MissingOutcomes/`, both carrying
-`// TODO: Revisit strategy for reporting missing outcomes.`, and were deleted
-in `d3c5c0f` on 2026-02-13. They took a hand-passed `string[]` of prerequisite
-names and printed them — from inside `Create()`, after the factory had already
-answered that it *could* create. The strategy was never revisited. This spike
-is that revisit, and the reporting path is a second deliverable with its own
-decision to make, not a free consequence of declaring requirements.
-
-Two smaller things the issue did not assume, both real, both from consumer
-code rather than the Playground: requirements compose through **inheritance**
-(four factories `&&` a base class's answer with a local check), and they
-compose with **or** (`return ranAggregatorCommand || ranFilterCommand;`). A
-builder offering only a conjunction of `Requires…` calls cannot express either.
+Reporting is the hard half, and it is what makes a descriptor worth having.
+Today every unmet requirement becomes one message: `Did not find command factory
+for X`. KitCli tried to fix that once — `MissingOutcomesCliCommand` printed a
+hand-passed list of missing prerequisites under a `// TODO: Revisit strategy for
+reporting missing outcomes.`, and was deleted in `d3c5c0f` on 2026-02-13 with
+the revisit never done. It is a second deliverable, not a free consequence.
 
 ## Recommendation
 
-#184 closes — it answered its question. A fresh parent ticket carries the
-build, with these as sub-issues in this order.
+#184 closes. A fresh parent ticket carries the build, in this order.
 
-1. **Cover `CliCommandFactory` first** —
-   [#114](https://github.com/KitCli/KitCli/issues/114). The variants have no
-   tests, and `CanCreateWhen`'s contract is what changes. Everything below
-   lands on that code.
-2. **The descriptor and its builder.** Seven verbs cover the corpus:
-   `SubCommandIs(name)`, `HasNoSubCommand()`, `LastCommandWas<T>()`,
-   `RequiresArgument<T>(name)`, `RequiresArtefact<T>(name)` — the last two
-   matching `AnyArgument<T>` and `AnyArtefact<T>` as they already are —
-   `RequiresOneOf(group)` for a requirement two things can satisfy, and
-   `ProducesOutcome<T>()`, declared for the catalogue rather than checked; see
-   below. `OnDescribing` chains through the inheritance line so a derived
-   factory adds to its base's declaration rather than replacing it.
-
-   `RequiresOneOf` takes a nested group rather than continuing the previous
-   requirement with an `.Or…` call, which is shorter and reads more like the
-   sentence. Grouping explicitly means the same thing wherever it sits in the
-   chain. A trailing `.Or…` binds to the previous call by convention only, and
-   because these declarations are built to be inherited, the previous call can
-   belong to a base class in a file the reader is not looking at.
-3. **Merge identity into the same descriptor at the root.** The descriptor is
-   the one model of what a command is. `OnDescribing` populates it from the
-   factory; the readers for
-   [`[CliCommandAlias]`](../adr/0007-cli-command-alias-attribute.md) and
-   [`[CliNextCommandIs]`](../adr/0008-suggest-next-commands-attribute.md)
-   populate it from the command type. Registration merges the two. Neither ADR
-   is superseded — their attributes become inputs to a descriptor rather than a
-   rival mechanism — and a command with no factory of its own still gets a
-   descriptor, so nothing has to grow a `CliCommandFactory<T>` it does not
-   otherwise need. It also gives `[CliNextCommandIs]`'s per-caller descriptions
-   one home: today every calling site hand-writes a description of the command
-   it points at.
-4. **Default `CanCreateWhen()` to the declaration.** It stops being `abstract`
-   and becomes `virtual`, returning whether every declared requirement is met.
-   This is source- and binary-compatible: every existing `override` still
-   compiles, and `BasicCliCommandFactory<T>` and
-   `BasicCreationCliCommandFactory<T>` keep their `sealed override … => true`.
-5. **An ADR.** A hook on every factory is a cross-cutting pattern, which is
-   what CONTRIBUTING asks for one for. It should say plainly that the
-   descriptor does not reopen
-   [ADR 0003](../adr/0003-reflection-based-automatic-registration.md) —
-   registration stays reflection-driven and names stay type-derived.
-6. **The reporting path, as its own ticket.** A failed match renders the
-   descriptor's unmet requirements as a table, and travels as an exception
-   rather than an ordinary outcome, because failing to resolve a command is
-   exceptional. This is where the deleted `MissingOutcomes` strategy is finally
-   revisited — a hand-passed `string[]` becomes the descriptor the framework
-   already holds. Two things it has to reconcile. Tables are
-   `TableBuilder<TSource, TAggregate>` with a `TableMap<TAggregate>` per shape
-   (see [`0009-tables.md`](../concepts/0009-tables.md)), so this needs a
-   requirement row type and a map for it. And the exception path renders
-   nothing today: `RespondToAsk` catches `NoCommandGeneratorException` and
-   returns `NothingOutcome`, so the exception has to carry the descriptor and
-   something has to write it. That reconciliation is shared with
-   [#183](https://github.com/KitCli/KitCli/issues/183) — decide the two
-   together, or the app grows two vocabularies for "that didn't work".
-   The table renders only where a descriptor exists — declared by a factory, or
-   read off the command's attributes. An instruction resolving to neither has
-   nothing to describe, so no factory means no table, and that path keeps the
-   bare message it returns today.
-7. **Docs in the same PR as the change** —
-   [`0001-command-registration.md`](../concepts/0001-command-registration.md),
-   [`0001-writing-a-basic-command.md`](../user-guides/0001-writing-a-basic-command.md),
-   and `CHANGELOG.md`.
-
-Build descriptors **at registration**, not lazily on first use. It gives a
-startup-time check alongside the ones `AddCommandsFromAssembly` already makes,
-and a catalogue that renders without instantiating a factory.
+1. **Cover `CliCommandFactory`** ([#114](https://github.com/KitCli/KitCli/issues/114)) — its contract is what changes, and it has no tests.
+2. **The builder** — `SubCommandIs`, `HasNoSubCommand`, `LastCommandWas<T>`, `RequiresArgument<T>`, `RequiresArtefact<T>`, `RequiresOneOf`, `ProducesOutcome<T>`. `OnDescribing` chains up the inheritance line. Build at registration, so startup checks it and `--help` renders without instantiating a factory.
+3. **Merge identity into the same descriptor** — `OnDescribing` fills it from the factory, the [`[CliCommandAlias]`](../adr/0007-cli-command-alias-attribute.md) and [`[CliNextCommandIs]`](../adr/0008-suggest-next-commands-attribute.md) readers from the command type. Neither ADR is superseded, and a command with no factory still gets a descriptor.
+4. **Default `CanCreateWhen()` to the declaration** — `abstract` becomes `virtual`; existing overrides still compile.
+5. **An ADR**, since a hook on every factory is a cross-cutting pattern.
+6. **The reporting path, its own ticket** — unmet requirements render as a table and travel as an exception. No factory and no attributes means no descriptor, so no table. Shared with [#183](https://github.com/KitCli/KitCli/issues/183): decide both together, or the app grows two vocabularies for "that didn't work".
+7. **Docs in the same PR** — [command registration](../concepts/0001-command-registration.md), [writing a basic command](../user-guides/0001-writing-a-basic-command.md), `CHANGELOG.md`.
 
 ## What was established
 
-- **The vocabulary is closed.** 28 implementations, no arbitrary predicates:
+- **The vocabulary is closed** — 28 implementations, no arbitrary predicates.
 
   | Shape | Count |
   |---|---|
   | Sub-instruction equals a named constant | 12 |
-  | Sub-instruction absent (root command) | 6 |
+  | Sub-instruction absent | 6 |
   | A given command ran last | 6 |
-  | Base class's answer `&&` an argument-presence check | 4 |
+  | A base class's answer `&&` an argument check | 4 |
 
-- **A descriptor must be derivable from the factory type alone** — no
-  `Instruction`, no `Artefacts`. Factories are registered `AddKeyedSingleton`
-  and mutated by `Attach()`, which
-  [#142](https://github.com/KitCli/KitCli/issues/142) flags as a lifetime
-  hazard. A descriptor built from attached state would be a second piece of
-  shared mutable state on a singleton. Built from the type, the descriptor is
-  independent of #142 rather than blocked behind it.
-- **The same rule is already written two ways.** "No sub-instruction" appears
-  as `SubInstructionName is null` five times and
-  `string.IsNullOrEmpty(instruction.SubInstructionName)` once. A closed
-  vocabulary removes the choice.
-- **A requirement can be satisfiable two ways, and that lives in `Create()`
-  today.** `AccountAttributeCliCommandFactory` takes an account name from an
-  argument *or else* from an `Account` artefact, and its `CanCreateWhen` says
-  nothing about either. This is the case `RequiresOneOf` exists for.
-- **KitCli had a missing-prerequisite report and deleted it.** Prior art, and
-  the reason the reporting half is not a freebie. Its permanent home is this
-  file; nothing in the tree records it any more.
-- **A command produces outcomes, not artefacts, and the two do not join
-  statically.** `ProducesOutcome<T>` is the honest verb — it is what a handler
-  returns, and what the deleted report named
-  (`nameof(AccountCliCommandOutcome)`). But a requirement is checked in
-  artefact-*value* space, which is a different space again, and three things
-  keep them apart: `ArtefactFactory<TOutcome>.CreateArtefact` returns
-  `AnonymousArtefact`, so the artefact type never appears in a signature;
-  `Outcome` carries only a `Kind` and no name, so a name declared in outcome
-  space has nothing to bind to; and an artefact mints its own name during
-  conversion, twice out of three times from a runtime value
-  (`RanCommand.GetType().Name`, `Value.GetType().Name`). So a declared
-  `Produces` can be rendered and read, but not checked against a `Requires`.
-  The verb is therefore `ProducesOutcome<T>()`, taking a type and no name —
-  the two `Requires` verbs take a name because the run holds one to match
-  against, and outcome space holds none until conversion. `Outcome` does not
-  grow a name to make the three read alike.
-- **`GetRequiredArtefact<T>` and `GetRequiredArgument<T>` throw a bare
-  `Exception`** under `// TODO: Handle better upstream` / `// TODO: Handle
-  further upstream`. They are the same missing capability seen from inside
-  `Create()`, and belong to step 6's ticket, not step 2's.
+- **Requirements compose two ways the spike did not assume** — through inheritance (`base.CanCreateWhen(…) && …`, four factories) and with `or` (`ranAggregatorCommand || ranFilterCommand`). Hence `RequiresOneOf`.
+- **A descriptor must come from the factory type alone.** Factories are singletons mutated by `Attach()` ([#142](https://github.com/KitCli/KitCli/issues/142)); building one from that state would add a second piece of shared mutable state.
+- **`Produces` and `Requires` cannot be joined.** A command produces outcomes, but a requirement is checked against artefact values. `ArtefactFactory<TOutcome>` hides the artefact type behind `AnonymousArtefact`, and two of the three artefacts mint their name from a runtime value. So `ProducesOutcome<T>` is declared and rendered, never checked.
 
 ## Evidence
 
-```
-# The corpus. SpendfulnessCli is on the pre-rewrite API — CanCreateWhen took
-# (CliInstruction, List<CliCommandArtefact>) rather than reading Attach state —
-# so the shapes count here, not the signatures.
-grep -rl "bool CanCreateWhen" --include="*.cs" --exclude-dir=obj --exclude-dir=bin .
-#   SpendfulnessCli            23   (11 + 6 + 2 + 4 per the table)
-#   KitCli.Playground.Scenarios 4   (3 last-command-was, 1 sub-instruction equals)
-#   KitCli.Example.Filtering    1   (last-command-was && sub-instruction equals)
+`grep -rl "bool CanCreateWhen"` finds 23 factories in SpendfulnessCli, 4 in
+`KitCli.Playground.Scenarios`, 1 in KitCli.Example.Filtering. SpendfulnessCli
+predates the `Attach` rewrite, so the shapes count and the signatures do not.
+`git log --diff-filter=D -- "*MissingOutcomes*"` finds the deleted report.
 
-# The deleted report.
-git log --diff-filter=D --name-only -- "*MissingOutcomes*"
-#   d3c5c0f Made Outcome Collection Fluent   (2026-02-13)
-git show d3c5c0f^:KitCli.Workflow.Commands/MissingOutcomes/MissingOutcomesCliCommandHandler.cs
-#   "The following prerequisite outcomes were not returned from previous commands:"
-```
-
-Disjunction, in `MonthlySpendingCliCommandFactory`:
-
-```csharp
-return ranAggregatorCommand || ranFilterCommand;
-```
-
-Inheritance-chained composition, in
-`FilterTransactionsOnPayeeNameEqualsCliCommandFactory` and three siblings:
-
-```csharp
-var previousCalledTransactionsCommandAndFilterArgumentPresent = base.CanCreateWhen(instruction, artefacts);
-var payeeNameArgument = instruction.Arguments.OfType<string>(…ArgumentNames.Is);
-
-return previousCalledTransactionsCommandAndFilterArgumentPresent && payeeNameArgument != null;
-```
-
-The three spaces a declaration has to straddle:
-
-```csharp
-public abstract record Outcome(OutcomeKind Kind);                       // no name
-public abstract class ArtefactFactory<TOutcome> : IArtefactFactory       // outcome type is static
-    where TOutcome : Outcome
-{
-    protected abstract AnonymousArtefact CreateArtefact(TOutcome outcome);   // artefact type is not
-}
-public record PageSizeArtefact(int PageSize) : Artefact<int>(nameof(PageSize), PageSize);
-public record RanCliCommandArtefact(CliCommand RanCommand)
-    : Artefact<CliCommand>(RanCommand.GetType().Name, RanCommand);      // name from a runtime value
-```
-
-The shape being borrowed is `Bright.DataTool.Cli`'s `Connector` /
-`ConnectorDescriptor` / `ConnectorDescriptorBuilder`, itself modelled on
-`DbContext.OnConfiguring`. Its `SetId(Guid)` and `SetName` do not carry over:
-identity there serves connectors inside a serialized plan, where KitCli keys
-by a name derived from the type. Its `Build`-time throws do carry over, but
-belong at registration rather than first use.
+The borrowed shape is `Bright.DataTool.Cli`'s `ConnectorDescriptorBuilder`, after
+`DbContext.OnConfiguring`. Its `SetId` and `SetName` do not carry over, because
+KitCli derives a command's name from its type.
 
 ## Open questions
 
-- Should overriding `CanCreateWhen()` stay possible at all? Step 4 leaves it
-  `virtual`, so a factory can ignore its own declaration and answer in code
-  instead. None of the 28 needs to. Keeping it has a cost the reporting half
-  pays: an override is invisible to the descriptor, so the catalogue and the
-  unmet-requirements table would describe a factory that is really deciding on
-  something else. Removing it has the opposite cost — a consumer whose case the
-  seven verbs miss has nowhere to go, and KitCli cannot see consumer code to
-  know whether such a case exists.
+- Should overriding `CanCreateWhen()` stay possible? None of the 28 needs it, and an override is invisible to the descriptor, so the table would describe requirements the factory is not really deciding on. Removing it strands any consumer case the seven verbs miss.
 
 ## Out of scope
 
-- Instruction and argument-value validation, and whether FluentValidation
-  backs it — [#183](https://github.com/KitCli/KitCli/issues/183).
-- Making the produces/requires join checkable, by giving `ArtefactFactory<>` a
-  second type parameter. That is a breaking change across six implementations
-  with no test coverage ([#116](https://github.com/KitCli/KitCli/issues/116)),
-  and it only pays off once something validates a chain before running it —
-  [#124](https://github.com/KitCli/KitCli/issues/124),
-  [#147](https://github.com/KitCli/KitCli/issues/147),
-  [#152](https://github.com/KitCli/KitCli/issues/152).
-- Whether richer descriptors should replace first-match-wins with
-  most-specific-match. That would supersede
-  [ADR 0004](../adr/0004-first-match-wins-resolution.md) and is a separate
-  decision.
-- Whether `ICliCommandFactory` should become keyed transient
-  ([#142](https://github.com/KitCli/KitCli/issues/142)). Registration-time
-  descriptors do not depend on the answer.
+- Instruction and argument-value validation — [#183](https://github.com/KitCli/KitCli/issues/183).
+- Making the produces/requires join checkable: a second type parameter on `ArtefactFactory<>`, breaking six untested implementations ([#116](https://github.com/KitCli/KitCli/issues/116)).
+- Most-specific-match instead of first-match-wins, which would supersede [ADR 0004](../adr/0004-first-match-wins-resolution.md).
+- Whether `ICliCommandFactory` becomes keyed transient ([#142](https://github.com/KitCli/KitCli/issues/142)).
