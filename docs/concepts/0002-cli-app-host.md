@@ -54,7 +54,11 @@ startup**, naming both types, instead of silently capturing one.
 
 ## Gaps
 
-- A chain that never ends leaves a headless invocation running.
+- A chain that hands on forever never returns, and nothing detects it.
+  `/test-unending-chain` in the playground does it.
+  [#173](https://github.com/KitCli/KitCli/issues/173)
+- A chain that stops without a final outcome leaves its run unfinished and
+  its scope undisposed, silently.
   [#168](https://github.com/KitCli/KitCli/issues/168)
 
 ## See also
