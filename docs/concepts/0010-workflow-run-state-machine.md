@@ -1,9 +1,12 @@
 # 0010. Workflow run state machine
 
 A run is one arc from an ask to a final outcome, across as many commands as
-that takes. `CliWorkflowRun` enforces it as a state machine: an append-only
-history of status changes, plus a fixed table of legal from/to pairs.
-Anything else throws `ImpossibleStateChangeException`.
+that takes. It is the boundary everything else hangs off: state survives
+inside a run and dies with it, and a run owns one DI scope.
+
+`CliWorkflowRun` enforces it as a state machine — an append-only history of
+status changes, plus a fixed table of legal from/to pairs. Anything else
+throws `ImpossibleStateChangeException`.
 
 | From | To |
 |---|---|
@@ -39,11 +42,12 @@ workflow's cancellation token.
 
 ## When an ask leads nowhere
 
-An empty ask, one the validator turns down, and one naming no command are one
-case. Parked at a reusable checkpoint the run makes **zero** state changes and
-returns the last command's `[CliNextCommandIs]` moves as `SuggestionOutcome`s;
-none declared, a silent `NothingOutcome`. Anywhere else all three fail into
-`InvalidAsk` and finish. See [0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
+An empty ask, one the validator turns down, and one naming no command are
+one case. Parked at a reusable checkpoint the run makes **zero** state
+changes and returns the last command's `[CliNextCommandIs]` moves as
+`SuggestionOutcome`s; none declared, a silent `NothingOutcome`. Anywhere
+else all three fail into `InvalidAsk` and finish. See
+[../adr/0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
 
 ## Gaps
 
@@ -59,4 +63,4 @@ none declared, a silent `NothingOutcome`. Anywhere else all three fail into
 ## See also
 
 [0006-outcomes.md](0006-outcomes.md) · [0002-cli-app-host.md](0002-cli-app-host.md) ·
-[0002-di-scope-per-workflow-run.md](../adr/0002-di-scope-per-workflow-run.md)
+[../adr/0010-resolve-the-whole-run-from-its-scope.md](../adr/0010-resolve-the-whole-run-from-its-scope.md)

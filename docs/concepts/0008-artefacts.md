@@ -1,8 +1,9 @@
 # 0008. Artefacts
 
-An outcome belongs to the command that returned it. An artefact is that
-same data made queryable by type and name across the whole run, so a later
-command's factory can read what an earlier one produced.
+An outcome belongs to the command that returned it, and nothing else can
+reach it. An artefact is that same data made queryable by type and name
+across the whole run — so a later command's factory can read what an
+earlier command produced.
 
 Three types make one:
 
@@ -28,15 +29,16 @@ commands see the second.
 with `ByMovingToCommand<TCommand>()` has that command built by its factory,
 attached to the same artefacts — so data reaches a chain through artefacts
 rather than through the previous handler's local variables. See
-[docs/user-guides/0007-chaining-commands.md](../user-guides/0007-chaining-commands.md).
+[../user-guides/0007-chaining-commands.md](../user-guides/0007-chaining-commands.md).
 
 ## Registration takes a second call
 
 Your registry must call `AddArtefactFactoriesForAssembly(assembly)`.
 `AddCommandsFromAssembly` registers commands, factories, and handlers — but
-**not** artefact factories. Given that one call, every `ArtefactFactory<>`
-in the assembly is found, plus one for every closed `Aggregator<,>` and
-`TableBuilder<,>`.
+**not** artefact factories. That one call registers four built-ins,
+including the one behind `LastCommandWas<T>()`, then finds every
+`ArtefactFactory<>` in the assembly, plus one for every closed
+`Aggregator<,>` and `TableBuilder<,>`.
 
 Miss the call and nothing fails at startup. The first symptom is
 `GetRequiredArtefact` throwing at runtime.

@@ -1,7 +1,7 @@
 # 0005. Instruction parsing pipeline
 
 `InstructionParser.Parse` turns one line of terminal input into a typed
-`Instruction`. Nothing downstream sees the raw string again.
+`Instruction`. Nothing downstream ever sees the raw string again.
 
 ```
 /spare-money help --argumentOne hello world --argumentTwo 1
@@ -14,9 +14,9 @@ space, then **type** each value.
 
 ## Type comes from the value, not the command
 
-No command declares that `--dueDate` is a `DateOnly`. Each raw value is
-offered to the registered builders in order, and the first to claim it
-wins:
+This is the surprise. No command declares that `--dueDate` is a
+`DateOnly`. Each raw value is offered to the registered builders in order,
+and the first to claim it wins:
 
 | Order | Builder | Claims a value that... |
 |---|---|---|
@@ -30,7 +30,7 @@ wins:
 
 The "has a letter" test on `String` is what keeps `--count 5` an `int`.
 Conversely `--name 42` is an `int`, whatever the argument is called. A bare
-`--verbose` has no value, so it falls to `Bool` and becomes `true`.
+`--verbose` has no value, so it falls through to `Bool` and becomes `true`.
 
 **Order is the whole contract.** Move a builder and every value once
 claimed by the one ahead of it silently changes type.
@@ -51,4 +51,4 @@ claimed by the one ahead of it silently changes type.
 
 [0001-command-registration.md](0001-command-registration.md) ·
 [0008-artefacts.md](0008-artefacts.md) ·
-[0010-workflow-run-state-machine.md](0010-workflow-run-state-machine.md)
+[../user-guides/0005-reading-command-arguments.md](../user-guides/0005-reading-command-arguments.md)
