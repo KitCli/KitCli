@@ -24,3 +24,5 @@
   href: 0012-derive-version-bumps-from-the-public-api-diff.md
 - name: "0013. Merge the hosts and name the variant headless"
   href: 0013-merge-the-hosts-and-name-the-variant-headless.md
+- name: "0014. Give the roadmap a page of its own, outside the five kinds"
+  href: 0014-a-roadmap-page-outside-the-documentation-kinds.md

@@ -63,7 +63,10 @@ link.
 ## Docs
 
 Five kinds live in [`docs/`](docs/): ADRs, concept docs, user guides,
-investigations, technology pages. Three rules cover all of them.
+investigations, technology pages. Three rules cover all of them. The
+[roadmap](docs/roadmap.md) is the one page belonging to no kind — see
+[ADR 0014](docs/adr/0014-a-roadmap-page-outside-the-documentation-kinds.md)
+for why, and add an entry to it when a release or a change of shape lands.
 
 - **Copy the kind's `0000-template.md`** and number it sequentially,
   `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
