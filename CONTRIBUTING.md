@@ -73,6 +73,18 @@ investigations, technology pages. Three rules cover all of them.
   than a missing one.
 - **Keep them current in the same PR** that makes them wrong.
 
+Everything in `docs/` is published to
+[kitcli.github.io/KitCli](https://kitcli.github.io/KitCli/). The Docs
+workflow builds with `--warningsAsErrors`, so a link docfx cannot resolve
+fails CI. Links to a folder, or to a file outside `docs/`, are the two that
+catch people out: point at the folder's first page, and use a full
+`https://github.com/KitCli/KitCli/blob/main/...` URL for anything in the
+repo root. Preview before pushing:
+
+```
+docfx docfx.json --serve
+```
+
 ## ADRs
 
 An [ADR](docs/adr/) records a decision, its alternatives, and its

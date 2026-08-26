@@ -13,14 +13,15 @@
             "KitCli.Instructions.Abstractions/**.csproj",
             "KitCli.Workflow/**.csproj",
             "KitCli.Workflow.Abstractions/**.csproj",
-            "KitCli.Workflow.Commands/**.csproj",
-            "KitCli.Tooling.Release/**.csproj"
+            "KitCli.Workflow.Commands/**.csproj"
           ]
         }
       ],
       "dest": "api",
       "includePrivateMembers": false,
-      "disableGitFeatures": false
+      "disableGitFeatures": false,
+      "namespaceLayout": "nested",
+      "memberLayout": "separatePages"
     }
   ],
   "build": {
@@ -29,7 +30,7 @@
         "files": ["api/**.yml", "api/index.md"]
       },
       {
-        "files": ["user-guides/**.md", "user-guides/toc.yml", "concepts/**.md", "concepts/toc.yml", "adr/**.md", "adr/toc.yml"],
+        "files": ["**.md", "**/toc.yml"],
         "src": "docs",
         "dest": "docs",
         "exclude": ["**/0000-template.md"]
@@ -40,10 +41,25 @@
     ],
     "resource": [
       {
-        "files": ["docs/dependency-graph.png"]
+        "files": ["docs/dependency-graph.png", "docs/images/*.png"]
       }
     ],
     "output": "_site",
-    "template": ["default", "modern"]
+    "xref": ["https://learn.microsoft.com/en-us/dotnet/.xrefmap.json"],
+    "sitemap": {
+      "baseUrl": "https://kitcli.github.io/KitCli/",
+      "changefreq": "weekly"
+    },
+    "template": ["default", "modern", "templates/kitcli"],
+    "globalMetadata": {
+      "_appName": "KitCli",
+      "_gitContribute": {
+        "repo": "https://github.com/KitCli/KitCli",
+        "branch": "main"
+      },
+      "_appLogoPath": "docs/images/logo.png",
+      "_appFaviconPath": "docs/images/favicon.png",
+      "_appFooter": "<span>KitCli — create an extensible CLI in minutes. Built with <a href=\"https://dotnet.github.io/docfx\">docfx</a>.</span>"
+    }
   }
 }
