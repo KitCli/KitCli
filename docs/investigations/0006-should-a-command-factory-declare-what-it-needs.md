@@ -44,14 +44,21 @@ build, with these as sub-issues in this order.
    [#114](https://github.com/KitCli/KitCli/issues/114). The variants have no
    tests, and `CanCreateWhen`'s contract is what changes. Everything below
    lands on that code.
-2. **The descriptor and its builder.** Six verbs cover the corpus:
+2. **The descriptor and its builder.** Seven verbs cover the corpus:
    `SubCommandIs(name)`, `HasNoSubCommand()`, `LastCommandWas<T>()`,
    `RequiresArgument<T>(name)`, `RequiresArtefact<T>(name)` — the last two
-   matching `AnyArgument<T>` and `AnyArtefact<T>` as they already are — plus
+   matching `AnyArgument<T>` and `AnyArtefact<T>` as they already are —
+   `RequiresOneOf(group)` for a requirement two things can satisfy, and
    `ProducesOutcome<T>()`, declared for the catalogue rather than checked; see
    below. `OnDescribing` chains through the inheritance line so a derived
-   factory adds to its base's declaration rather than replacing it, and the
-   builder carries an any-of group alongside the conjunction.
+   factory adds to its base's declaration rather than replacing it.
+
+   `RequiresOneOf` takes a nested group rather than continuing the previous
+   requirement with an `.Or…` call, which is shorter and reads more like the
+   sentence. Grouping explicitly means the same thing wherever it sits in the
+   chain. A trailing `.Or…` binds to the previous call by convention only, and
+   because these declarations are built to be inherited, the previous call can
+   belong to a base class in a file the reader is not looking at.
 3. **Merge identity into the same descriptor at the root.** The descriptor is
    the one model of what a command is. `OnDescribing` populates it from the
    factory; the readers for
@@ -88,6 +95,10 @@ build, with these as sub-issues in this order.
    something has to write it. That reconciliation is shared with
    [#183](https://github.com/KitCli/KitCli/issues/183) — decide the two
    together, or the app grows two vocabularies for "that didn't work".
+   The table renders only where a descriptor exists — declared by a factory, or
+   read off the command's attributes. An instruction resolving to neither has
+   nothing to describe, so no factory means no table, and that path keeps the
+   bare message it returns today.
 7. **Docs in the same PR as the change** —
    [`0001-command-registration.md`](../concepts/0001-command-registration.md),
    [`0001-writing-a-basic-command.md`](../user-guides/0001-writing-a-basic-command.md),
@@ -122,8 +133,7 @@ and a catalogue that renders without instantiating a factory.
 - **A requirement can be satisfiable two ways, and that lives in `Create()`
   today.** `AccountAttributeCliCommandFactory` takes an account name from an
   argument *or else* from an `Account` artefact, and its `CanCreateWhen` says
-  nothing about either. This is the case that forces an any-of group into the
-  builder, or leaves the fallback where it is.
+  nothing about either. This is the case `RequiresOneOf` exists for.
 - **KitCli had a missing-prerequisite report and deleted it.** Prior art, and
   the reason the reporting half is not a freebie. Its permanent home is this
   file; nothing in the tree records it any more.
@@ -205,14 +215,9 @@ belong at registration rather than first use.
 
 ## Open questions
 
-- One requirement can be satisfiable two ways. `AccountAttributeCliCommandFactory`
-  needs an account name, and takes it from a `--ynab-account-name` argument when
-  one is given, or from an `Account` artefact a previous command left behind when
-  one is not. Can the builder say "either of these", or does that fallback stay
-  hand-written in `Create()`?
-- What does the table of unmet requirements say when the reason is *no* candidate
-  factory at all, rather than one that declared requirements and missed them?
-  There is no descriptor to render in that case.
+- Whether the escape hatch earns its place once the group lands. Nothing in the
+  corpus needs it; it stays because a framework cannot see code it has not been
+  shown, which is an argument from ignorance rather than from evidence.
 
 ## Out of scope
 
