@@ -125,7 +125,9 @@ dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # hea
   [command reactions](docs/user-guides/0008-command-reactions.md),
   [showing a paged table](docs/user-guides/0011-showing-a-paged-table.md),
   [remembering your own state](docs/user-guides/0009-remembering-your-own-state.md),
-  and [gating a command with CanCreateWhen](docs/user-guides/0006-gating-a-command-with-cancreatewhen.md).
+  [gating a command with CanCreateWhen](docs/user-guides/0006-gating-a-command-with-cancreatewhen.md),
+  [giving a command extra names](docs/user-guides/0013-giving-a-command-extra-names.md),
+  and [suggesting what to run next](docs/user-guides/0014-suggesting-what-to-run-next.md).
 - [`docs/concepts/`](docs/concepts/) — how each subsystem works today:
   [command registration](docs/concepts/0001-command-registration.md),
   [instruction parsing](docs/concepts/0005-instruction-parsing-pipeline.md),
