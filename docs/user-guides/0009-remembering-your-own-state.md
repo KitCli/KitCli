@@ -34,14 +34,28 @@ public class SelectedAccountArtefactFactory : ArtefactFactory<SelectedAccountOut
 }
 ```
 
-Raise the outcome with `ByResultingIn`. Custom outcomes have no `By...`
-shortcut of their own, as the built-ins do:
+Raise the outcome with `ByResultingIn`, which takes any `Outcome`:
 
 ```csharp
 return FinishThisCommand()
     .BySaying($"Selected account {command.AccountId}.")
     .ByResultingIn(new SelectedAccountOutcome(command.AccountId))
     .EndAsync();
+```
+
+To read like the built-ins do, give `OutcomeList` an extension member.
+Yours returns `OutcomeList` too, so it chains wherever
+`ByRememberingPageSize` would:
+
+```csharp
+public static class OutcomeListExtensions
+{
+    extension(OutcomeList outcomes)
+    {
+        public OutcomeList ByRememberingSelectedAccount(string accountId)
+            => outcomes.ByResultingIn(new SelectedAccountOutcome(accountId));
+    }
+}
 ```
 
 Keep the reusable outcome last. Only the final outcome decides what the run
