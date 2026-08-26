@@ -93,6 +93,13 @@ step rather than finishing. Somewhere in the chain a handler must call
 `ByFinallySaying(...)`, or return another `Final` outcome, or the run
 never completes.
 
+**Handing back to a command the chain has already run.** Its own, most
+easily. Each step queues the next, so the run never reaches a final
+outcome and the process never returns — and it slows as it goes, since
+every step grows the history the run reads back. Nothing detects this
+([#173](https://github.com/KitCli/KitCli/issues/173)); `/test-unending-chain`
+in the playground is it happening.
+
 **Expecting the chain to pause for input.** Every step runs back to back,
 with no ask in between. A step that needs something from the user has to
 be reached by a fresh ask, not by `ByMovingToCommand` — and in a headless
