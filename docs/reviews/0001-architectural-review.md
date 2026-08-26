@@ -2,6 +2,11 @@
 
 Date: 2026-07-25
 
+**This is a snapshot, not current state.** It records what was wrong on the
+date above. Many of the findings below have since been fixed, and the
+issue links are the only live record — follow one before assuming it still
+stands.
+
 ## Summary
 
 - **37 findings**, all filed as GitHub issues: **7 high**, **16 medium**,

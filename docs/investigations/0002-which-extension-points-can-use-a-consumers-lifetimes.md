@@ -23,8 +23,8 @@ milestone-scale, not a ticket.
 
 Accept [ADR 0010](../adr/0010-resolve-the-whole-run-from-its-scope.md),
 which supersedes 0002: every KitCli service that executes during a run is
-registered `Scoped` or `Transient` and resolved from the run's scope; only
-`ICliIo`, `ICliWorkflow` and `CliApp` stay `Singleton`.
+registered `Transient` and resolved from the run's scope; only `ICliIo`,
+`ICliWorkflow` and `CliApp` stay `Singleton`.
 
 Slice under the *Scope Dependency Injection Per Workflow Run* milestone,
 by area board — Workflow (#6), Commands (#9), Artefacts (#10). Delivery
@@ -33,7 +33,7 @@ order needs a joint planning pass; it is not implied by this document.
 ## What was established
 
 Permanent home for all of these is
-[0001-microsoft-dependency-injection.md](../technology/0001-microsoft-dependency-injection.md).
+[microsoft-dependency-injection.md](../technology/microsoft-dependency-injection.md).
 
 1. **Effective lifetime is `max(registered, holder's)`.** A dependency
    lives at least as long as whatever injected it. Registration is a
