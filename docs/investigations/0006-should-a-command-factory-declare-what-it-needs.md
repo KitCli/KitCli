@@ -44,10 +44,15 @@ build, with these as sub-issues in this order.
    [#114](https://github.com/KitCli/KitCli/issues/114). The variants have no
    tests, and `CanCreateWhen`'s contract is what changes. Everything below
    lands on that code.
-2. **The descriptor and its builder**, applicability only. `OnDescribing`
-   chains through the inheritance line so a derived factory adds to its base's
-   declaration rather than replacing it, and the builder carries an any-of
-   group alongside the conjunction. Identity — the derived name,
+2. **The descriptor and its builder.** Six verbs cover the corpus:
+   `SubCommandIs(name)`, `HasNoSubCommand()`, `LastCommandWas<T>()`,
+   `RequiresArgument<T>(name)`, `RequiresArtefact<T>(name)` — the last two
+   matching `AnyArgument<T>` and `AnyArtefact<T>` as they already are — plus
+   `ProducesOutcome<T>()`, declared for the catalogue rather than checked; see
+   below. `OnDescribing` chains through the inheritance line so a derived
+   factory adds to its base's declaration rather than replacing it, and the
+   builder carries an any-of group alongside the conjunction. Identity — the
+   derived name,
    [`[CliCommandAlias]`](../adr/0007-cli-command-alias-attribute.md),
    [`[CliNextCommandIs]`](../adr/0008-suggest-next-commands-attribute.md) —
    stays where it is; see the open questions.
@@ -106,6 +111,18 @@ and a catalogue that renders without instantiating a factory.
 - **KitCli had a missing-prerequisite report and deleted it.** Prior art, and
   the reason the reporting half is not a freebie. Its permanent home is this
   file; nothing in the tree records it any more.
+- **A command produces outcomes, not artefacts, and the two do not join
+  statically.** `ProducesOutcome<T>` is the honest verb — it is what a handler
+  returns, and what the deleted report named
+  (`nameof(AccountCliCommandOutcome)`). But a requirement is checked in
+  artefact-*value* space, which is a different space again, and three things
+  keep them apart: `ArtefactFactory<TOutcome>.CreateArtefact` returns
+  `AnonymousArtefact`, so the artefact type never appears in a signature;
+  `Outcome` carries only a `Kind` and no name, so a name declared in outcome
+  space has nothing to bind to; and an artefact mints its own name during
+  conversion, twice out of three times from a runtime value
+  (`RanCommand.GetType().Name`, `Value.GetType().Name`). So a declared
+  `Produces` can be rendered and read, but not checked against a `Requires`.
 - **`GetRequiredArtefact<T>` and `GetRequiredArgument<T>` throw a bare
   `Exception`** under `// TODO: Handle better upstream` / `// TODO: Handle
   further upstream`. They are the same missing capability seen from inside
@@ -145,6 +162,20 @@ var payeeNameArgument = instruction.Arguments.OfType<string>(…ArgumentNames.Is
 return previousCalledTransactionsCommandAndFilterArgumentPresent && payeeNameArgument != null;
 ```
 
+The three spaces a declaration has to straddle:
+
+```csharp
+public abstract record Outcome(OutcomeKind Kind);                       // no name
+public abstract class ArtefactFactory<TOutcome> : IArtefactFactory       // outcome type is static
+    where TOutcome : Outcome
+{
+    protected abstract AnonymousArtefact CreateArtefact(TOutcome outcome);   // artefact type is not
+}
+public record PageSizeArtefact(int PageSize) : Artefact<int>(nameof(PageSize), PageSize);
+public record RanCliCommandArtefact(CliCommand RanCommand)
+    : Artefact<CliCommand>(RanCommand.GetType().Name, RanCommand);      // name from a runtime value
+```
+
 The shape being borrowed is `Bright.DataTool.Cli`'s `Connector` /
 `ConnectorDescriptor` / `ConnectorDescriptorBuilder`, itself modelled on
 `DbContext.OnConfiguring`. Its `SetId(Guid)` and `SetName` do not carry over:
@@ -163,16 +194,21 @@ belong at registration rather than first use.
   nobody subclasses that. Not now; worth its own question later.
 - Does the any-of group go in the builder, or does the argument-or-artefact
   fallback stay in `Create()`?
+- Should `Outcome` gain a name, so `ProducesOutcome<T>(outcomeName)` has
+  something to bind to and reads symmetrically with the two `Requires` verbs?
+  Today the name exists only after conversion, so the parameter would be
+  inventing one.
 - What does a failed match report, and to whom? Shared with #183.
 
 ## Out of scope
 
 - Instruction and argument-value validation, and whether FluentValidation
   backs it — [#183](https://github.com/KitCli/KitCli/issues/183).
-- `Produces`. DataTool declares produced artefacts as well as required ones,
-  which pays off when a whole plan is validated before any of it runs. KitCli
-  resolves one command at a time, so it buys nothing until something validates
-  a chain up front — [#124](https://github.com/KitCli/KitCli/issues/124),
+- Making the produces/requires join checkable, by giving `ArtefactFactory<>` a
+  second type parameter. That is a breaking change across six implementations
+  with no test coverage ([#116](https://github.com/KitCli/KitCli/issues/116)),
+  and it only pays off once something validates a chain before running it —
+  [#124](https://github.com/KitCli/KitCli/issues/124),
   [#147](https://github.com/KitCli/KitCli/issues/147),
   [#152](https://github.com/KitCli/KitCli/issues/152).
 - Whether richer descriptors should replace first-match-wins with
