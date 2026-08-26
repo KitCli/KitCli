@@ -1,4 +1,4 @@
-# 0005. How much of the run loop can ArgsCliApp and TerminalCliApp share?
+# 0005. How much of the run loop can the two hosts share?
 
 - **Status:** In Review
 - **Superseded in part by** [ADR 0013](../adr/0013-merge-the-hosts-and-name-the-variant-headless.md):
@@ -6,7 +6,8 @@
   ask-source seam — was not built. `TerminalCliApp` held nothing `CliApp`
   did not, so it folded in and the seam disappeared with it. Every finding
   about *what* is wrong stands; the design for fixing it did not survive
-  writing.
+  writing. The two hosts were called `TerminalCliApp` and `ArgsCliApp` at
+  the time; they are now `CliApp` and `HeadlessCliApp`.
 - **Spike:** [#169](https://github.com/KitCli/KitCli/issues/169)
 - **Time-box:** none agreed — filed alongside this investigation
 - **Date:** 2026-08-25, revised 2026-08-26

@@ -1,9 +1,9 @@
-# 0001. Microsoft.Extensions.DependencyInjection
+# Microsoft.Extensions.DependencyInjection
 
 KitCli builds one container, in `CliAppBuilder.Run()`, from
 `Microsoft.Extensions.DependencyInjection` 10.0.2 on `net10.0`. This page
-records which container features KitCli supports, and where each one does
-and does not reach. For *why* the scope exists, see
+answers "can I do X with the container" — which features KitCli supports,
+and where each one stops. For *why* the run scope exists, see
 [ADR 0002](../adr/0002-di-scope-per-workflow-run.md).
 
 ```csharp
@@ -153,5 +153,6 @@ Injection Per Workflow Run* milestone.
 ## See also
 
 - [ADR 0002 — DI scope per workflow run](../adr/0002-di-scope-per-workflow-run.md)
+- [ADR 0010 — resolve the whole run from its scope](../adr/0010-resolve-the-whole-run-from-its-scope.md)
 - [Workflow run state machine](../concepts/0010-workflow-run-state-machine.md)
 - [CliApp host loop](../concepts/0002-cli-app-host.md)

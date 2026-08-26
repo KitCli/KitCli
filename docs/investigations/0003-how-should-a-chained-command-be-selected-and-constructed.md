@@ -18,7 +18,7 @@ New complexity. #147 asks for one method. It needs four tickets and an ADR.
 Some background, because the question is hard to state without it. A handler can
 end by handing straight on to another command, so one thing the user typed runs
 several commands in a row. That is a chain. Today the handler builds the next
-command itself, with `new`. Dan's complaint is that this skips the factory.
+command itself, with `new`, which skips the factory. #147 asks why.
 
 Factories matter because of what they can see. When a command comes from
 something the user typed, KitCli asks a factory to build it, and that factory
