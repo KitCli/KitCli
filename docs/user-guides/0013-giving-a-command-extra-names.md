@@ -18,12 +18,12 @@ public record SpareMoneyCliCommand : CliCommand;
 
 `/spare-money`, `/sm`, `/gimme` and `/give-me-cash` now all reach the same
 command, built by the same factory: an alias is another key onto the
-command you already have. `/test-aliased`, `/gimme` and `/give-me-cash`
-in the playground are one command, `TestAliasedCliCommand`.
+command you already have. In the playground, `/test-aliased`, `/gimme` and
+`/give-me-cash` are one command, `TestAliasedCliCommand`.
 
-Write aliases as the user types them — lowercase, dash-separated, no
-prefix character. Everything after the first space is a sub-command, not
-part of the name.
+Write aliases as the user types them — lowercase, dash-separated, no prefix
+character. Everything after the first space is a sub-command, not part of
+the name.
 
 Aliases are names *a user types*. Chaining
 ([0007-chaining-commands.md](0007-chaining-commands.md)) names the next
@@ -34,8 +34,8 @@ may name one, since the user types that too.
 ## Common mistakes
 
 **Expecting the alias to replace the derived names.** It adds to them.
-`/spare-money` and `/sm` keep working, and there is no way to turn either
-off — to change the primary name, rename the type.
+`/spare-money` and `/sm` keep working, and neither can be turned off — to
+change the primary name, rename the type.
 
 **Capitalising an alias.** Names are matched exactly, so
 `[CliCommandAlias("Gimme")]` answers to `/Gimme` and not to `/gimme`.
@@ -50,9 +50,9 @@ stem to `ta`.
 
 ## Learn more
 
-- [docs/concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   how a type name becomes an instruction name, and how the keyed
   registration an alias adds to works.
-- [docs/adr/0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md) —
+- [../adr/0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md) —
   why extra names are declared on the type rather than configured
   anywhere else.

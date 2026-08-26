@@ -2,9 +2,9 @@
 
 ## What this is for
 
-A user's ask can carry `--name value` pairs: `/greet --name Alex`. A
-command factory's argument helpers hand you those values already typed,
-so you never parse a raw string.
+An ask can carry `--name value` pairs: `/greet --name Alex`. A factory's
+argument helpers hand you those values already typed, so you never parse a
+raw string.
 
 ## How to do it
 
@@ -26,9 +26,9 @@ public class GreetCliCommandFactory : CliCommandFactory<GreetCliCommand>
 ```
 
 `/greet --name Alex --shout` resolves `name` to `"Alex"` and `shout` to
-`true`; a bool argument written with no value — a bare flag — resolves to
-`true`, following the usual CLI idiom. `/greet --name Alex` leaves `shout`
-unset, so the `?? false` default applies.
+`true` — a bool argument written with no value resolves to `true`,
+following the usual CLI idiom. `/greet --name Alex` leaves `shout` unset,
+so the `?? false` default applies.
 
 Three helpers exist, each generic over the argument's target type:
 
@@ -42,11 +42,11 @@ Passing `null` for `argumentName` matches the last argument of that type,
 whatever its name. Reserve that for a command taking exactly one argument
 of the type; otherwise name arguments explicitly.
 
-### Supported argument types
+### What decides an argument's type
 
-A value's type comes from what it looks like, never from what the command
-declares. Each raw string is offered to these in order, and the first to
-claim it wins:
+Not the command. **A value's type comes from what the value looks like.**
+Each raw string is offered to these in order, and the first to claim it
+wins:
 
 | Type | Claims a value that... | Example |
 |---|---|---|
@@ -58,44 +58,34 @@ claim it wins:
 | `DateOnly` | parses as a date | `--due 2026-03-01` |
 | `bool` | anything left, including no value at all | `--shout` |
 
-The "has a letter" rule on `string` keeps `--count 5` an `int`.
-Conversely `--name 42` is an `int`, not a `string`: a value that looks
-numeric is typed numeric, whatever the argument is called.
-
-You never parse a raw value yourself. Consuming code cannot add a type
+The "has a letter" rule on `string` keeps `--count 5` an `int`. Conversely
+`--name 42` is an `int`, not a `string`. Consuming code cannot add a type
 beyond this list today; see
-[docs/concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md)
+[../concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md)
 for why.
 
 ## Common mistakes
 
-**Calling `GetRequiredArgument<T>` for something optional.** It throws
-when the argument is missing. Use `GetArgument<T>` with a fallback
-(`?? default`) for anything a user might reasonably omit.
+**Calling `GetRequiredArgument<T>` for something optional.** It throws when
+the argument is missing. Use `GetArgument<T>` with a fallback for anything
+a user might reasonably omit.
 
 **Asking for the wrong type.** `GetArgument<T>` finds only an argument the
-rules above typed as `T`. `GetArgument<int>("page")` returns `null` in all
-three of these cases:
+rules above typed as `T`. `GetArgument<int>("page")` returns `null` for all
+three of `--page` (no value, so it became a `bool`), `--page abc` (has
+letters, so it became a `string`), and no `--page` at all. Nothing
+distinguishes "present but the wrong shape" from "absent".
 
-- `--page` — no value, so it became a `bool`
-- `--page abc` — has letters, so it became a `string`
-- no `--page` at all
-
-All three look alike to the factory. No separate signal distinguishes
-"present but the wrong shape" from "absent."
-
-**Reaching for `GetArgument` inside a command handler.** These helpers
-live on `CliCommandFactory<T>` alone. By the time a handler runs, the
-command instance holds whatever data it needs, and nothing remains to look
-up.
+**Reaching for `GetArgument` inside a handler.** These helpers live on
+`CliCommandFactory<T>` alone. By the time a handler runs, the command
+instance holds whatever data it needs.
 
 ## Learn more
 
 - [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — where a
-  factory fits into a command, and when you need one.
-- [docs/concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md) —
-  how a raw ask becomes the typed arguments these helpers read, and the
-  full list of built-in `IInstructionArgumentBuilder`s.
-- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — `GetArtefact`
-  and `GetRequiredArtefact`, the equivalents for state from *prior*
-  commands in the same run.
+  factory fits, and when you need one.
+- [../concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md) —
+  how a raw ask becomes typed arguments.
+- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) —
+  `GetArtefact` and `GetRequiredArtefact`, the equivalents for data from
+  *prior* commands in the same run.

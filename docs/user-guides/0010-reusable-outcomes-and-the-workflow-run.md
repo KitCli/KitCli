@@ -10,8 +10,7 @@ every later ask in the same run, with no storage of your own.
 ## How to do it
 
 Return a `Reusable` outcome from a handler. Any later command's factory in
-the same run can read it back, across separate asks the user types one
-after another:
+the same run can read it back:
 
 ```csharp
 public class SetPageSizeCliCommandHandler : CliCommandHandler<SetPageSizeCliCommand>
@@ -26,61 +25,52 @@ public class SetPageSizeCliCommandHandler : CliCommandHandler<SetPageSizeCliComm
 
 **The `Reusable` outcome has to be last.** Only the final outcome in the
 array decides what the run does next, so `ByRememberingPageSize` follows
-`BySaying`. Put a `Final` outcome last instead and the run ends, taking
-the page size with it.
+`BySaying`. Put a `Final` outcome last instead and the run ends, taking the
+page size with it.
 
-When the user's next ask resolves to a command whose factory needs that
-page size, read it with `GetArtefact<int>` or `GetRequiredArtefact<int>`
-inside a `CliCommandFactory<T>`; see
-[docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) for the API.
 `OutcomeList` carries a `By...` method for each built-in reusable outcome:
 `ByRememberingPageSize`, `ByRememberingPageNumber`, `ByRememberingFilter`,
-`ByAggregating`, and more.
+`ByAggregating`, and more. Read one back with `GetArtefact<int>` or
+`GetRequiredArtefact<int>` inside a `CliCommandFactory<T>`.
 
 ### Continuing without a fresh ask
 
-Some reusable state should drive the *very next* step at once, with no
-input from the user. `ByMovingToCommand<TCommand>()` does that; see
-[0007-chaining-commands.md](0007-chaining-commands.md). The distinction that matters
-here:
+Some state should drive the *very next* step at once. That is a different
+thing, and the difference catches people out:
 
 | You return... | What happens next |
 |---|---|
-| A plain `Reusable` outcome (e.g. `ByRememberingPageSize`) | The run waits for the user's next ask, which can see this outcome as an artefact. |
+| A plain `Reusable` outcome (e.g. `ByRememberingPageSize`) | The run waits for the user's next ask, which can read this as an artefact. |
 | `ByMovingToCommand<TCommand>()` | The run builds a `TCommand` through its factory and executes it too, in the same turn, with no ask. |
 | A `Final` outcome (e.g. `ByFinallySaying`) | The run ends. |
 
 ## Common mistakes
 
 **Ending the handler on `ByFinallySaying` after remembering something.**
-This is the usual way to lose state you just saved. The `Final` outcome
-comes last, so the run ends and its history goes with it. Say the
-confirmation with `BySaying`, and let the reusable outcome be last.
+This is the usual way to lose state you just saved. Say the confirmation
+with `BySaying`, and let the reusable outcome be last.
 
 **Expecting a `Reusable` outcome to run something at once.** It only makes
 state available to whatever the user asks for *next*. To run the next step
 without new input, use `ByMovingToCommand`.
 
-**Assuming remembered state outlives the run.** A run is the whole arc as
-the workflow sees it, and reaching a `Final` outcome discards everything it
-remembered. Reusable state carries across asks *within* one run, never
-across runs — separate one-shot CLI invocations included.
+**Assuming remembered state outlives the run.** Reaching a `Final` outcome
+discards everything the run remembered. Reusable state carries across asks
+*within* one run, never across runs — separate one-shot invocations
+included.
 
 **Returning two reusable outcomes a later command reads by type, with no
 distinguishing name.** Should two values in one run both become
 `Artefact<int>`, a later command asking by type alone gets whichever was
-set *most recently*. Give each a `Name` whenever more than one could exist
-in a run.
+set *most recently*. Give each a `Name` whenever more than one could exist.
 
 ## Learn more
 
 - [0007-chaining-commands.md](0007-chaining-commands.md) — the "continue without a
   fresh ask" half of this picture.
-- [docs/concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
-  `Outcome` and `OutcomeKind` taxonomy.
-- [docs/concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
-  `Reusable` outcome becomes something a later factory can query, and the
-  "last match wins" rule governing it.
-- [docs/concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
-  the state machine beneath: `ReachedReusableOutcome` against
-  `MovePastAsk`, and what keeps a run going.
+- [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md) —
+  remembering a value of your own, not just the built-ins.
+- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
+  `Reusable` outcome becomes something a later factory can query.
+- [../concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
+  the state machine beneath: `ReachedReusableOutcome` against `MovePastAsk`.
