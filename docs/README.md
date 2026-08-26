@@ -14,7 +14,9 @@ assumes them. Then pick a folder.
 
 Start at [writing a basic command](user-guides/0001-writing-a-basic-command.md).
 [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md) says when to write each kind, and
-`0000-template.md` in each folder is the skeleton to copy.
+`0000-template.md` in each folder is the skeleton to copy. The
+[roadmap](roadmap.md) tells the other story: how the framework got here,
+month by month.
 
 ## The seven words
 

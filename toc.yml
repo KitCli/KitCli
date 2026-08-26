@@ -1,5 +1,7 @@
 - name: Overview
   href: docs/README.md
+- name: Roadmap
+  href: docs/roadmap.md
 - name: User guides
   href: docs/user-guides/
   homepage: docs/user-guides/0001-writing-a-basic-command.md
