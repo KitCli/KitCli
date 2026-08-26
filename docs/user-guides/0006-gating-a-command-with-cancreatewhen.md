@@ -61,7 +61,8 @@ handler logic runs.
 error.** The ask fails to resolve to any command, like a typo or an
 unknown name, and no "almost matched but rejected" message exists. To tell
 the user why — "you need to select an account first" — declare the valid
-moves on the previous command with `[CliNextCommandIs(name, description)]`.
+moves on the previous command with `[CliNextCommandIs(name, description)]`
+([0014-suggesting-what-to-run-next.md](0014-suggesting-what-to-run-next.md)).
 Mid-run, an ask resolving to nothing then prints those suggestions instead
 of failing silently.
 

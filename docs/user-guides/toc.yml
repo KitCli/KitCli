@@ -22,3 +22,7 @@
   href: 0011-showing-a-paged-table.md
 - name: Exiting the app
   href: 0012-exiting-the-app.md
+- name: Giving a command extra names
+  href: 0013-giving-a-command-extra-names.md
+- name: Suggesting what to run next
+  href: 0014-suggesting-what-to-run-next.md
