@@ -1,2 +1,4 @@
 - name: Microsoft.Extensions.DependencyInjection
   href: microsoft-dependency-injection.md
+- name: ConsoleTables
+  href: console-tables.md

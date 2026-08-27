@@ -15,6 +15,7 @@ public abstract class TableBuilder<TSource, TAggregate>
     private TableMap<TAggregate>? _map;
     private int? _pageSize;
     private int? _pageNumber;
+    private int? _maxColumnWidth;
 
     /// <summary>
     /// Sets the aggregator used to turn the source sequence into aggregate results.
@@ -58,6 +59,18 @@ public abstract class TableBuilder<TSource, TAggregate>
     public TableBuilder<TSource, TAggregate> WithPageNumber(int pageNumber)
     {
         _pageNumber = pageNumber;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the width a column's text may reach before a cell is broken across lines. Left unset,
+    /// the built table breaks no cell.
+    /// </summary>
+    /// <param name="maxColumnWidth">The maximum column width.</param>
+    /// <returns>The same <see cref="TableBuilder{TSource, TAggregate}"/> instance, to allow chaining.</returns>
+    public TableBuilder<TSource, TAggregate> WithMaxColumnWidth(int maxColumnWidth)
+    {
+        _maxColumnWidth = maxColumnWidth;
         return this;
     }
 
@@ -122,6 +135,9 @@ public abstract class TableBuilder<TSource, TAggregate>
             rows.Add(row);
         }
 
-        return new Table(headerNames, rows);
+        return new Table(headerNames, rows)
+        {
+            MaxColumnWidth = _maxColumnWidth ?? Table.DefaultMaxColumnWidth
+        };
     }
 }

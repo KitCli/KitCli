@@ -9,6 +9,18 @@ namespace KitCli.Abstractions.Tables;
 public class Table
 {
     /// <summary>
+    /// The <see cref="MaxColumnWidth"/> at which no cell is ever broken across lines. Breaking one
+    /// gains no width back, because columns are sized from the full text.
+    /// </summary>
+    public const int DefaultMaxColumnWidth = int.MaxValue;
+
+    /// <summary>
+    /// The width a column's text may reach before a cell is broken across lines. Defaults to
+    /// <see cref="DefaultMaxColumnWidth"/>.
+    /// </summary>
+    public int MaxColumnWidth { get; set; } = DefaultMaxColumnWidth;
+
+    /// <summary>
     /// The column headers, in display order.
     /// </summary>
     public List<string> Columns { get; set; } = [];
@@ -48,7 +60,8 @@ public class Table
             {
                 // I do it in the output formatting
                 EnableCount = false
-            }
+            },
+            MaxWidth = MaxColumnWidth
         };
 
         table.AddColumn(Columns.ToArray());
