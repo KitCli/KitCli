@@ -6,8 +6,16 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- `Table.MaxColumnWidth`, and `TableBuilder.WithMaxColumnWidth(...)`, set the width a
+  column's text may reach before a cell is broken across lines. Unset, no cell
+  breaks.
+
 ### Fixed
 
+- A table cell longer than 40 characters is no longer chopped in half and ruled
+  off as two rows ([#205](https://github.com/KitCli/KitCli/issues/205)).
 - Typing something that isn't a command, mid-run, no longer ends the app — the
   run keeps its place and suggests what would work
   ([#182](https://github.com/KitCli/KitCli/issues/182)).

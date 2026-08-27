@@ -30,6 +30,14 @@ keep data off a table, keep it off the row type.
 Column order follows `TAggregate`'s property declaration order, not the
 order of `Map(...)` calls. Those decide each column's *name* only.
 
+## Rendering
+
+`Table.ToString()` renders the table as fixed-width text, one row of output
+per row of data, with a divider between rows. No cell is broken across
+lines unless you ask for it, with `WithMaxColumnWidth(...)` on the builder or
+`MaxColumnWidth` on the table. What else can and cannot be changed about the
+rendering is in [ConsoleTables](../technology/console-tables.md).
+
 ## Gaps
 
 - `WithMap` is mandatory; nothing defaults to mapping every property.
@@ -44,4 +52,5 @@ order of `Map(...)` calls. Those decide each column's *name* only.
 ## See also
 
 [0007-aggregators.md](0007-aggregators.md) · [0006-outcomes.md](0006-outcomes.md) ·
-[0008-artefacts.md](0008-artefacts.md)
+[0008-artefacts.md](0008-artefacts.md) ·
+[ConsoleTables](../technology/console-tables.md)
