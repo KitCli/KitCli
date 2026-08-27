@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-08-27
+
 ### Added
 
 - `Table.MaxColumnWidth`, and `TableBuilder.WithMaxColumnWidth(...)`, set the width a
