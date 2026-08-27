@@ -68,11 +68,20 @@ A row whose cell count differs from the column count throws a bare
 
 - The `ConsoleTable` is a local variable inside `Table.ToString()`, so
   `MaxColumnWidth` aside, a consumer cannot pick a style or change a
-  setting. No issue tracks this.
+  setting. Tracked as
+  [#210](https://github.com/KitCli/KitCli/issues/210) (style) and
+  [#212](https://github.com/KitCli/KitCli/issues/212) (row count, word
+  break).
+- `NumberAlignment` cannot be honoured while rows arrive through
+  `AddRow`. Tracked as
+  [#211](https://github.com/KitCli/KitCli/issues/211).
 - A cell containing a newline breaks the surrounding box, because the
-  library measures the whole string as one line. No issue tracks this.
+  library measures the whole string as one line. Tracked as
+  [#214](https://github.com/KitCli/KitCli/issues/214).
 - `From<T>`, `From(DataTable)`, `FromDictionary`, `Formats`, and
   `Write(Format)` are unused; a `TableBuilder` always produces rows.
+  `Formats` is what a per-column format would run through, tracked as
+  [#213](https://github.com/KitCli/KitCli/issues/213).
 
 ## See also
 
