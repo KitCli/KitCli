@@ -180,6 +180,20 @@ Every triaged issue carries three independent labels:
 | **Area** | `area:abstractions` · `area:instructions` · `area:commands` · `area:workflow` · `area:host` · `area:tooling` |
 | **Severity** | `sev:high` · `sev:medium` · `sev:low` |
 
+A fourth axis, **Release**, applies only when fixing the issue ships a
+change in a published package — it records the SemVer bump that fix
+implies for the package whose API it changes:
+
+| Label | Meaning |
+|---|---|
+| `release:patch` | Backwards-compatible fix; no public API change |
+| `release:minor` | New backwards-compatible public API or capability |
+| `release:major` | Breaks public API or a behavior contract |
+
+An issue with no `release:*` label ships nothing — docs, process, CI,
+tests, playground — or is a spike/question whose deliverable is a
+decision rather than a package change.
+
 Use the matching [issue template](.github/ISSUE_TEMPLATE/). No triage
 meeting exists; an issue without an area label after about a week is fair
 game to close as stale.
