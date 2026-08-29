@@ -156,6 +156,18 @@ public class OutcomeList : List<Outcome>
         => ByResultingIn(new ReactionOutcome(reaction));
 
     /// <summary>
+    /// Appends a <see cref="SpecifiedReactionOutcome"/> naming the given reaction type as one to publish.
+    /// The reaction is not built here: the run resolves it through its
+    /// <c>ICliCommandReactionFactory</c> when it publishes, so the factory sees the run's accumulated
+    /// artefacts — the same construction path <see cref="ByMovingToCommand{TCommand}()"/> gives the next command.
+    /// </summary>
+    /// <typeparam name="TReaction">The type of the reaction to publish.</typeparam>
+    /// <returns>This list, for chaining.</returns>
+    public OutcomeList ByReacting<TReaction>()
+        where TReaction : CliCommandReaction
+        => ByResultingIn(new SpecifiedReactionOutcome(typeof(TReaction)));
+
+    /// <summary>
     /// Appends a <see cref="NothingOutcome"/>, ending the run without displaying anything further.
     /// </summary>
     /// <returns>This list, for chaining.</returns>

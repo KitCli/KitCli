@@ -1,6 +1,7 @@
 using System.Reflection;
 using KitCli.Commands.Abstractions.Extensions;
 using KitCli.Commands.Abstractions.Factories;
+using KitCli.Commands.Abstractions.Tests.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
@@ -103,6 +104,50 @@ public class CommandServiceCollectionExtensionsTests
 
         // Assert
         Assert.That(provider.GetKeyedService<ICliCommandFactory>("no-factory"), Is.Null);
+    }
+
+    [Test]
+    public void GivenParameterlessReaction_WhenAddCommandsFromAssembly_ThenBasicFactoryIsResolvableByItsType()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetKeyedService<ICliCommandReactionFactory>(typeof(TestParameterlessCliCommandReaction));
+
+        // Assert
+        Assert.That(factory, Is.TypeOf<BasicCliCommandReactionFactory<TestParameterlessCliCommandReaction>>());
+    }
+
+    [Test]
+    public void GivenReactionWithDedicatedFactory_WhenAddCommandsFromAssembly_ThenDedicatedFactoryIsUsedInsteadOfBasicFallback()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetKeyedService<ICliCommandReactionFactory>(typeof(TestFactoryBuiltCliCommandReaction));
+
+        // Assert
+        Assert.That(factory, Is.TypeOf<TestCliCommandReactionFactory>());
+    }
+
+    [Test]
+    public void GivenReactionWithNoParameterlessConstructorAndNoDedicatedFactory_WhenAddCommandsFromAssembly_ThenNoFactoryIsRegisteredForIt()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        Assert.That(provider.GetKeyedService<ICliCommandReactionFactory>(typeof(TestCliCommandReaction)), Is.Null);
     }
 
     [Test]

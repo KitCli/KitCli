@@ -28,5 +28,10 @@ public enum CliExceptionCode
     /// <summary>
     /// No instruction was available to handle the request.
     /// </summary>
-    NoInstruction
+    NoInstruction,
+
+    /// <summary>
+    /// No reaction factory was available to handle the request.
+    /// </summary>
+    NoReactionFactory
 }

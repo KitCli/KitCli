@@ -35,6 +35,7 @@ public static class CommandServiceCollectionExtensions
 
             return services
                 .AddCommandFactories(assembly)
+                .AddReactionFactories(assembly)
                 .AddMediatRCommandsAndHandlers(assembly);
         }
 
@@ -71,6 +72,39 @@ public static class CommandServiceCollectionExtensions
                 }
             }
         
+            return services;
+        }
+
+        private IServiceCollection AddReactionFactories(Assembly assembly)
+        {
+            var reactionImplementationTypes = assembly.WhereClassTypesImplementType(typeof(CliCommandReaction));
+            var factoryImplementationTypes = assembly.WhereClassTypesImplementGenericType(typeof(CliCommandReactionFactory<>));
+
+            foreach (var reactionType in reactionImplementationTypes)
+            {
+                var matchingFactories = factoryImplementationTypes
+                    .Where(factory => factory.BaseType!.FirstGenericArgumentIs(reactionType))
+                    .ToList();
+
+                if (matchingFactories.Count > 1)
+                {
+                    throw new ArgumentException($"Multiple factories found for reaction type '{reactionType.Name}'");
+                }
+
+                if (matchingFactories.Count == 1)
+                {
+                    services.AddKeyedSingleton(typeof(ICliCommandReactionFactory), reactionType, matchingFactories.First());
+                    continue;
+                }
+
+                var hasEmptyConstructor = reactionType.GetConstructor(Type.EmptyTypes) is not null;
+                if (hasEmptyConstructor)
+                {
+                    var basicFactoryType = typeof(BasicCliCommandReactionFactory<>).MakeGenericType(reactionType);
+                    services.AddKeyedSingleton(typeof(ICliCommandReactionFactory), reactionType, basicFactoryType);
+                }
+            }
+
             return services;
         }
 
