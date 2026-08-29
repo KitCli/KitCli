@@ -25,6 +25,15 @@ Read it back in a factory with `GetArtefact<T>(name)` or
 given, and take the **last** match. Set a value twice in a run and later
 commands see the second.
 
+```mermaid
+flowchart LR
+    H["command A's handler"] -->|returns| O["outcome"]
+    O -->|"a registered factory's<br/>For() claims its type"| AF["artefact factory"]
+    AF -->|creates| L[("the run's artefacts")]
+    L -->|"GetArtefact, last match wins"| B["command B's factory"]
+    L -.->|"same list"| C["a chained command's factory"]
+```
+
 **A chained command reads artefacts too.** A handler naming its successor
 with `ByMovingToCommand<TCommand>()` has that command built by its factory,
 attached to the same artefacts — so data reaches a chain through artefacts

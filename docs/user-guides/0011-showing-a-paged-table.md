@@ -75,8 +75,22 @@ logic; `AfterAggregation` runs on the aggregated rows.
 
 ### Letting the user page through it
 
-The remembered builder comes back as an artefact, so the next command
-re-supplies neither aggregator nor column map:
+The four pieces flow one way to show the first page, and the dotted path
+is what makes the next page cheap — the builder is remembered on the run
+and comes back to the next command's factory as an artefact:
+
+```mermaid
+flowchart LR
+    S["raw source data"] --> AG["aggregator"]
+    AG --> TB["table builder<br/>+ map, page size, page number"]
+    TB -->|"Build()"| T["Table, shown"]
+    TB -.->|"ByRememberingHowToBuildTable"| L[("the run's artefacts")]
+    L -.->|"GetRequiredArtefact"| F["next-page factory"]
+    F --> TB2["same builder, new page"]
+    TB2 -->|"Build()"| T2["next page, shown"]
+```
+
+So the next command re-supplies neither aggregator nor column map:
 
 ```csharp
 public class NextExpensePageCliCommandFactory : PagedCliCommandFactory<NextExpensePageCliCommand>
@@ -100,6 +114,14 @@ Its handler sets `WithPageSize`/`WithPageNumber` on that builder, calls
 the current ask, falls back to the remembered artefact, then defaults to 20
 and 1. So `/next-page --pageNumber 3` and a bare `/next-page`, reusing the
 page you were on, both work through one factory.
+
+```mermaid
+flowchart TD
+    A{"paging on the ask?"} -->|yes| U["use what was typed"]
+    A -->|no| B{"paging remembered on the run?"}
+    B -->|yes| R["reuse the remembered page"]
+    B -->|no| D["default: size 20, page 1"]
+```
 
 The argument names are `pageNumber` and `pageSize`, camelCase.
 `--page-number` is a different argument, and is ignored.

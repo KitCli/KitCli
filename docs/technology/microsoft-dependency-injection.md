@@ -78,6 +78,24 @@ The scope opens in `CliWorkflow.CreateNewRun()` and is disposed in
 `Finished`. That happens inside `ExecuteCommand`'s `finally`, so it
 completes **before** `CliApp.WriteOutcomes` runs.
 
+```mermaid
+sequenceDiagram
+    participant Workflow as CliWorkflow
+    participant Run as CliWorkflowRun
+    participant Handler as command handler
+    participant App as CliApp
+    Workflow->>Run: CreateNewRun()
+    activate Run
+    note over Run: scope opens
+    Run->>Handler: Send(command)
+    Handler-->>Run: outcomes
+    note over Run: final outcome → Finished,<br/>scope disposed in the finally
+    deactivate Run
+    Run-->>App: outcomes
+    App->>App: WriteOutcomes()
+    note over App: scope already gone
+```
+
 | When the command's last outcome is | Run state | Scope at write time |
 |---|---|---|
 | Non-reusable (`Anonymous`, `Final`) | `Finished` | disposed |

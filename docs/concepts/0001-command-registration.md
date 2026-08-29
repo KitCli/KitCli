@@ -41,6 +41,23 @@ artefacts, and takes the **first** whose `CanCreateWhen()` returns `true` —
 the same first-match-wins rule used for argument builders and outcome
 writers ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
 
+Registration and resolution are two flows meeting at one keyed registry:
+
+```mermaid
+flowchart TB
+    subgraph Startup["startup"]
+        SCAN["AddCommandsFromAssembly scans"] --> TYPE["each CliCommand type"]
+        TYPE --> NAMES["full name, shorthand, aliases"]
+        NAMES --> REG[("factories, keyed by name")]
+    end
+    subgraph EachAsk["each ask"]
+        ASK["the name the user typed"] --> FETCH["every factory under that key"]
+        REG --> FETCH
+        FETCH --> ATTACH["attach instruction + artefacts"]
+        ATTACH --> FIRST["first true CanCreateWhen builds it"]
+    end
+```
+
 ## Gaps
 
 Two command types stemming to one instruction name fail only when a user's

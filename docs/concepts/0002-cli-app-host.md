@@ -27,6 +27,34 @@ OnSessionEnd(Workflow.Runs);
 while the run's latest state change is `MovePastAsk`, writing each step's
 outcomes as it goes. That is why a chain arrives whole under either host.
 
+```mermaid
+sequenceDiagram
+    participant App as CliApp
+    participant Io as ICliIo
+    participant Workflow as ICliWorkflow
+    participant Run as ICliWorkflowRun
+    note over App: OnSessionStart
+    loop until stopped, or the input ends
+        App->>Io: AskAsync()
+        App->>Workflow: NextRun()
+        note over App: OnRunCreated
+        App->>Run: RespondToAsk(ask)
+        note over App: OnRunStarted, while it executes
+        Run-->>App: outcomes, written
+        note over App: OnRunComplete
+        loop while the latest change is MovePastAsk
+            App->>Run: MoveToNext()
+            note over App: OnMovingPastAsk, while it executes
+            Run-->>App: outcomes, written
+            note over App: OnRunComplete
+        end
+    end
+    note over App: OnSessionEnd
+```
+
+`HeadlessCliApp` runs the outer loop's body once, with the process args
+joined into the ask; the inner loop still runs a whole chain.
+
 ## A headless session is one run, however far it gets
 
 `HeadlessCliApp.Run` opens the session, calls `ExecuteRunOperation` once

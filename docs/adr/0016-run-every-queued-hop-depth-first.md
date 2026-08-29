@@ -20,8 +20,7 @@ in the handler's list, so a hop followed by a message never hops.
 
 ```mermaid
 flowchart LR
-    A["A runs,
-    queues B, then C"] -->|"takes the last hop"| C["C runs"]
+    A["A runs,<br/>queues B, then C"] -->|"takes the last hop"| C["C runs"]
     A -.->|dropped| B["B never runs"]
 ```
 
@@ -40,19 +39,9 @@ behind it.
 
 ```mermaid
 flowchart LR
-    A["A runs,
-    queues B, C
-    ---
-    pending: B, C"] --> B["B runs,
-    queues D
-    ---
-    pending: D, C"]
-    B --> D["D runs
-    ---
-    pending: C"]
-    D --> C["C runs
-    ---
-    pending: none"]
+    A["A runs,<br/>queues B, C<br/>pending: B, C"] --> B["B runs,<br/>queues D<br/>pending: D, C"]
+    B --> D["D runs<br/>pending: C"]
+    D --> C["C runs<br/>pending: none"]
 ```
 
 Each box is one step: what runs, what it queues, and what is left waiting
