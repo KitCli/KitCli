@@ -31,6 +31,7 @@ public class CliWorkflowRun : ICliWorkflowRun
     private readonly IInstructionParser _instructionParser;
     private readonly IInstructionValidator _instructionValidator;
     private readonly ICliWorkflowCommandProvider _workflowCommandProvider;
+    private readonly ICliWorkflowReactionProvider _workflowReactionProvider;
     private readonly InstructionSettings _instructionSettings;
 
     private readonly ISender _sender;
@@ -46,6 +47,7 @@ public class CliWorkflowRun : ICliWorkflowRun
     /// <param name="instructionParser">Parses raw ask strings into instructions.</param>
     /// <param name="instructionValidator">Validates a parsed instruction before a command is resolved for it.</param>
     /// <param name="workflowCommandProvider">Resolves the command to execute for a valid instruction.</param>
+    /// <param name="workflowReactionProvider">Resolves the reaction to publish for a specified reaction type.</param>
     /// <param name="instructionSettings">
     /// The configured instruction settings, used to prefix any suggested next-command names.
     /// </param>
@@ -60,6 +62,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         IInstructionParser instructionParser,
         IInstructionValidator instructionValidator,
         ICliWorkflowCommandProvider workflowCommandProvider,
+        ICliWorkflowReactionProvider workflowReactionProvider,
         IOptions<InstructionSettings> instructionSettings,
         ISender sender,
         IPublisher publisher,
@@ -71,6 +74,7 @@ public class CliWorkflowRun : ICliWorkflowRun
         _instructionParser = instructionParser;
         _instructionValidator = instructionValidator;
         _workflowCommandProvider = workflowCommandProvider;
+        _workflowReactionProvider = workflowReactionProvider;
         _instructionSettings = instructionSettings.Value;
         _sender = sender;
         _publisher = publisher;
@@ -218,13 +222,32 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private Task TriggerCommandReactions(Outcome[] outcomes)
     {
-        var publishTasks = outcomes
+        var providedReactions = outcomes
             .OfType<ReactionOutcome>()
-            .Select(outcome => _publisher.Publish(outcome.Reaction))
+            .Select(outcome => outcome.Reaction);
+
+        var specifiedReactions = outcomes
+            .OfType<SpecifiedReactionOutcome>()
+            .Select(outcome => GetReactionToPublish(outcome, outcomes));
+
+        var publishTasks = providedReactions
+            .Concat(specifiedReactions)
+            .Select(reaction => _publisher.Publish(reaction))
             .ToList();
 
         return Task.WhenAll(publishTasks);
     }
+
+    /// <summary>
+    /// The reaction to publish for a specified outcome. A provided outcome already carries one; a
+    /// specified outcome names a type, which the run resolves through the reaction factory path, so the
+    /// factory sees the run's artefacts — those accumulated before this command plus the outcomes it
+    /// just produced.
+    /// </summary>
+    private CliCommandReaction GetReactionToPublish(SpecifiedReactionOutcome specifiedOutcome, Outcome[] currentOutcomes)
+        => _workflowReactionProvider.GetReaction(
+            specifiedOutcome.SpecifiedReactionType,
+            [..AllPriorOutcomes(), ..currentOutcomes]);
 
     private void UpdateStateAfterOutcome(Outcome[] outcomes)
     {

@@ -29,8 +29,9 @@ is the rule waiting for the first writer that claims a base type.
 Half the outcome types have no writer at all — `RanCliCommandOutcome`,
 `SpecifiedNextCliCommandOutcome`, `ProvidedNextCliCommandOutcome`,
 `AggregatorOutcome`, `TableBuilderOutcome`, `AggregatorFilterOutcome`,
-`ReactionOutcome`, `NothingOutcome`. Seven of those carry state for a later
-command; `NothingOutcome` is the deliberate silent ending. **None of them
+`ReactionOutcome`, `SpecifiedReactionOutcome`, `NothingOutcome`. Eight of
+those carry state for a later command; `NothingOutcome` is the deliberate
+silent ending. **None of them
 is a missing writer.**
 
 To change how a built-in outcome renders, register your own writer ahead of

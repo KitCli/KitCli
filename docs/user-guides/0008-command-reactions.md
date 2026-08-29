@@ -42,6 +42,30 @@ Add a second handler for the same reaction and both run. You register
 neither by hand, and the command handler needs no idea how many exist —
 zero, one, or several.
 
+## Letting a factory build the reaction
+
+`ByReacting<TReaction>()` names the reaction by type instead of building
+it, the way `ByMovingToCommand<TCommand>()` names the next command. A
+parameterless reaction needs nothing more. A reaction that reads the
+run's artefacts gets a `CliCommandReactionFactory<TReaction>` in the
+same assembly, and the run calls it when publishing:
+
+```csharp
+public class OrderPlacedCliCommandReactionFactory
+    : CliCommandReactionFactory<OrderPlacedCliCommandReaction>
+{
+    public override bool CanCreateWhen() => AnyArtefact<string>("OrderId");
+
+    public override CliCommandReaction Create()
+        => new OrderPlacedCliCommandReaction(GetRequiredArtefact<string>("OrderId").Value);
+}
+```
+
+The handler then raises it without assembling the data itself:
+`.ByReacting<OrderPlacedCliCommandReaction>()`. A reaction with neither
+a parameterless constructor nor a factory fails the run when published —
+build it yourself and use `ByReacting(instance)`.
+
 ## Common mistakes
 
 **Using a reaction to produce something the user should see.** A reaction

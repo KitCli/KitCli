@@ -35,6 +35,8 @@ public class CliWorkflowRunTests
 
     private record TestFactoryBuiltCliCommand : CliCommand;
 
+    private record TestSpecifiedCliCommandReaction : CliCommandReaction;
+
     private static readonly Instruction OriginatingInstruction =
         new("/", "some-valid-ask", "with-detail", []);
 
@@ -53,6 +55,7 @@ public class CliWorkflowRunTests
     private Mock<IInstructionParser> _cliInstructionParser;
     private Mock<IInstructionValidator> _cliInstructionValidator;
     private Mock<ICliWorkflowCommandProvider> _cliWorkflowCommandProvider;
+    private Mock<ICliWorkflowReactionProvider> _cliWorkflowReactionProvider;
     private Mock<ISender> _sender;
     private Mock<IPublisher> _publisher;
     private CliWorkflowRun _classUnderTest;
@@ -66,6 +69,7 @@ public class CliWorkflowRunTests
         _cliInstructionParser = new Mock<IInstructionParser>();
         _cliInstructionValidator = new Mock<IInstructionValidator>();
         _cliWorkflowCommandProvider = new Mock<ICliWorkflowCommandProvider>();
+        _cliWorkflowReactionProvider = new Mock<ICliWorkflowReactionProvider>();
         _sender = new Mock<ISender>();
         _publisher = new Mock<IPublisher>();
 
@@ -75,6 +79,7 @@ public class CliWorkflowRunTests
             _cliInstructionParser.Object,
             _cliInstructionValidator.Object,
             _cliWorkflowCommandProvider.Object,
+            _cliWorkflowReactionProvider.Object,
             DefaultInstructionSettings,
             _sender.Object,
             _publisher.Object
@@ -829,6 +834,7 @@ public class CliWorkflowRunTests
             _cliInstructionParser.Object,
             _cliInstructionValidator.Object,
             _cliWorkflowCommandProvider.Object,
+            _cliWorkflowReactionProvider.Object,
             Options.Create(new InstructionSettings { Prefix = '!' }),
             _sender.Object,
             _publisher.Object);
@@ -887,6 +893,75 @@ public class CliWorkflowRunTests
             Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
             Assert.That(resultingOutcomes.FirstOrDefault(), Is.InstanceOf<ExceptionOutcome>());
         });
+    }
+
+    [Test]
+    public async Task GivenHandlerSpecifiesReactionByType_WhenRespondToAsk_ThenPublishesTheFactoryResolvedReaction()
+    {
+        // Arrange
+        CliCommandReaction resolvedReaction = new TestSpecifiedCliCommandReaction();
+
+        ArrangeAskSpecifyingReaction(resolvedReaction);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        _publisher.Verify(
+            publisher => publisher.Publish(resolvedReaction, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GivenHandlerSpecifiesReactionByType_WhenRespondToAsk_ThenTheReactionFactorySeesTheCommandsOwnOutcomes()
+    {
+        // Arrange
+        CliCommandReaction resolvedReaction = new TestSpecifiedCliCommandReaction();
+
+        ArrangeAskSpecifyingReaction(resolvedReaction);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        _cliWorkflowReactionProvider.Verify(
+            provider => provider.GetReaction(
+                typeof(TestSpecifiedCliCommandReaction),
+                It.Is<List<Outcome>>(outcomes => outcomes.OfType<RanCliCommandOutcome>().Any())),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Sets up one ask whose handler returns a <see cref="SpecifiedReactionOutcome"/> naming
+    /// <see cref="TestSpecifiedCliCommandReaction"/>, with the reaction provider resolving it to the
+    /// given instance.
+    /// </summary>
+    private void ArrangeAskSpecifyingReaction(CliCommandReaction resolvedReaction)
+    {
+        var command = new TestChainingCliCommand();
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(OriginatingInstruction);
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(command);
+
+        _sender
+            .Setup(mediator => mediator.Send(command, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new SpecifiedReactionOutcome(typeof(TestSpecifiedCliCommandReaction)),
+                new NothingOutcome()
+            ]);
+
+        _cliWorkflowReactionProvider
+            .Setup(provider => provider.GetReaction(typeof(TestSpecifiedCliCommandReaction), It.IsAny<List<Outcome>>()))
+            .Returns(resolvedReaction);
     }
 
     /// <summary>
