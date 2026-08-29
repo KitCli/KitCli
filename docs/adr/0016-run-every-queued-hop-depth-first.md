@@ -50,9 +50,10 @@ runs before A's remaining plan resumes.
 
 The hops still waiting are derived, not stored: replay the history — an
 executed step consumes the front of the pending list, its new hops go on
-the front. The replay lives inside the run's state, behind
-`ICliWorkflowRunState`; `CliWorkflowRun` asks "any hop pending?" and
-"which is next?", never interpreting raw history itself. Factories still
+the front. The replay is an extension over what `ICliWorkflowRunState`
+already exposes (`AllOutcomeStateChanges()`), not a new interface member;
+`CliWorkflowRun` asks "any hop pending?" and "which is next?", never
+interpreting raw history itself. Factories still
 receive the flat outcome history as data — the state hides
 interpretation, not the outcomes.
 
@@ -73,6 +74,8 @@ interpretation, not the outcomes.
 
 - List position stops mattering: a hop followed by a message now hops.
   A behavior change, so a `CHANGELOG.md` entry ships with the code.
+- The public API only gains: no type changes shape and the interface
+  gains no member, so this is a minor release, not a major.
 - Rewrites ADR 0011's "still takes the last queued hop" consequence.
 - The move-past-ask guard asks the state, so hops consumed steps ago no
   longer count as pending — a latent bug gone.
