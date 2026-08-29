@@ -28,10 +28,11 @@ command through its factory (#154)`, with no `!`, so the derived bump would
 have been 1.1.0. A hand-written `**Breaking:**` line in `CHANGELOG.md` was
 the only signal in the repo pointing at a major.
 
-This ADR assumes per-package versioning, which is what ships today but is
-still owed its own record —
-[#128](https://github.com/KitCli/KitCli/issues/128). It decides how a bump
-is *sized*, not whether packages share a number.
+This ADR assumes per-package versioning, which is what ships today. It
+decides how a bump is *sized*, not whether packages share a number —
+[ADR 0015](0015-version-the-packages-in-lockstep.md) since decided they
+share one, which narrows the propagation below to a single maximum over
+the set.
 
 ## Decision
 
@@ -73,8 +74,9 @@ nothing looked.
 - **Diff the built assembly against the published nupkg at release time** —
   needs the network and the previous package, and reports after the change
   has landed rather than failing the PR that made it.
-- **Version all nine packages in lockstep** — moves the question rather
-  than answering it, and belongs to #128.
+- **Version all nine packages in lockstep** — a separate question, since
+  answered by [ADR 0015](0015-version-the-packages-in-lockstep.md). It
+  changes how a level propagates, not how one is detected.
 
 ## Consequences
 
