@@ -90,6 +90,23 @@ article > h1:first-of-type::after {
   background: var(--kit-sweep);
 }
 
+/* Bootstrap zeroes margin-top on headings, so sections run together; give
+   each level room above proportional to its weight. */
+article h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+article h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+article h4,
+article h5 {
+  margin-top: 1.5rem;
+}
+
 footer {
   border-top: 0;
   box-shadow: inset 0 1px 0 var(--bs-border-color);
