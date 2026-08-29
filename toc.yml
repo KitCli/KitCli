@@ -8,18 +8,22 @@
 - name: Concepts
   href: docs/concepts/
   homepage: docs/concepts/0001-command-registration.md
-- name: ADRs
-  href: docs/adr/
-  homepage: docs/adr/0001-mediatr-for-command-dispatch.md
-- name: Investigations
-  href: docs/investigations/
-  homepage: docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md
-- name: Technology
-  href: docs/technology/
-  homepage: docs/technology/microsoft-dependency-injection.md
-- name: Reviews
-  href: docs/reviews/
-  homepage: docs/reviews/0001-architectural-review.md
+- name: Development
+  items:
+    - name: ADRs
+      href: docs/adr/
+      homepage: docs/adr/0001-mediatr-for-command-dispatch.md
+    - name: Investigations
+      href: docs/investigations/
+      homepage: docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md
+    - name: Technology
+      href: docs/technology/
+      homepage: docs/technology/microsoft-dependency-injection.md
+    - name: Reviews
+      href: docs/reviews/
+      homepage: docs/reviews/0001-architectural-review.md
+    - name: Test coverage
+      href: docs/reviews/0002-test-coverage-review.md
 - name: API reference
   href: api/
   homepage: api/index.md
