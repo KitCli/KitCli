@@ -28,3 +28,5 @@
   href: 0014-a-roadmap-page-outside-the-documentation-kinds.md
 - name: "0015. Version all nine packages in lockstep"
   href: 0015-version-the-packages-in-lockstep.md
+- name: "0016. Run every queued hop, depth-first"
+  href: 0016-run-every-queued-hop-depth-first.md
