@@ -1,2 +1,4 @@
 - name: "0001. Architectural review"
   href: 0001-architectural-review.md
+- name: "0002. Test coverage review"
+  href: 0002-test-coverage-review.md
