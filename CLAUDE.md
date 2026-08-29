@@ -19,6 +19,19 @@ dotnet test KitCli.sln
 
 CI runs the same three steps on every PR and push to `main`.
 
+## Parallel sessions
+
+`claude --worktree <name>` starts an isolated checkout under
+`.claude/worktrees/`, so two sessions can build at once without their
+edits colliding. Each worktree is a fresh checkout: `dotnet restore` it
+before the first build, since `bin/` and `obj/` are not shared.
+
+**Split parallel work by area label**, the same axis issues use —
+`abstractions`, `instructions`, `commands`, `workflow`, `host`,
+`tooling`. One session per area. Two sessions on the same area will
+conflict in the same files, and the merge costs more than the
+parallelism saved.
+
 ## Conventions
 
 - **Commits/PR titles**: Conventional Commits — `<type>(scope): <description>`.

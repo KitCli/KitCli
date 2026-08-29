@@ -404,3 +404,6 @@ FodyWeavers.xsd
 _site/
 api/*.yml
 api/.manifest
+
+# Claude Code parallel worktrees
+.claude/worktrees/
