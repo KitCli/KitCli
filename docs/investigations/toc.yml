@@ -8,3 +8,5 @@
   href: 0005-how-much-of-the-run-loop-can-the-two-hosts-share.md
 - name: "0006. Should a command factory declare what it needs instead of overriding CanCreateWhen?"
   href: 0006-should-a-command-factory-declare-what-it-needs.md
+- name: "0007. Should an instruction argument's type come from its content or the command's declaration?"
+  href: 0007-should-an-arguments-type-come-from-its-content-or-the-commands-declaration.md
