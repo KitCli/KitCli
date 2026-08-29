@@ -264,6 +264,45 @@ public class OutcomeListTests
     }
 
     [Test]
+    public void GivenReactionType_WhenByReacting_ThenAppendsOutcomeCarryingThatType()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByReacting<TestParameterlessCliCommandReaction>().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new SpecifiedReactionOutcome(typeof(TestParameterlessCliCommandReaction))
+        }).AsCollection);
+    }
+
+    [Test]
+    public void GivenReactionTypeWithNoParameterlessConstructor_WhenByReacting_ThenAppendsOutcomeAnyway()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByReacting<TestCliCommandReaction>().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[]
+        {
+            new SpecifiedReactionOutcome(typeof(TestCliCommandReaction))
+        }).AsCollection);
+    }
+
+    [Test]
+    public void GivenEitherOverload_WhenByReacting_ThenBothCarryAnAnonymousOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList()
+            .ByReacting<TestParameterlessCliCommandReaction>()
+            .ByReacting(new TestCliCommandReaction("a command ran"))
+            .End();
+
+        // Assert
+        Assert.That(outcomes.Select(outcome => outcome.Kind), Is.All.EqualTo(OutcomeKind.Anonymous));
+    }
+
+    [Test]
     public void WhenByFinallyDoingNothing_ThenAppendsNothingOutcome()
     {
         // Act
