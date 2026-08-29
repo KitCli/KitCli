@@ -18,6 +18,13 @@ hop queued. Queue five and four vanish, silently. Whether the run
 continues at all is also decided by whichever outcome happens to sit last
 in the handler's list, so a hop followed by a message never hops.
 
+```mermaid
+flowchart LR
+    A["A runs,
+    queues B, then C"] -->|"takes the last hop"| C["C runs"]
+    A -.->|dropped| B["B never runs"]
+```
+
 Nothing records which hops were already taken. The run does keep its full
 history — each step stores the outcomes it produced, including a record
 of the command that ran — but `CliWorkflowRun` re-reads that raw history
@@ -30,6 +37,27 @@ queues further hops, those run first and the earlier queue then resumes —
 nested to-do lists. A queues B then C, B queues D: the order is A, B, D,
 C. An existing chain keeps its exact meaning when a sibling is stacked
 behind it.
+
+```mermaid
+flowchart LR
+    A["A runs,
+    queues B, C
+    ---
+    pending: B, C"] --> B["B runs,
+    queues D
+    ---
+    pending: D, C"]
+    B --> D["D runs
+    ---
+    pending: C"]
+    D --> C["C runs
+    ---
+    pending: none"]
+```
+
+Each box is one step: what runs, what it queues, and what is left waiting
+afterwards. B's own hop D lands at the front of the pending list, so it
+runs before A's remaining plan resumes.
 
 The hops still waiting are derived, not stored: replay the history — an
 executed step consumes the front of the pending list, its new hops go on
