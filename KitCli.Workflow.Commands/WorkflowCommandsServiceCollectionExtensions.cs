@@ -11,12 +11,14 @@ public static class WorkflowCommandsServiceCollectionExtensions
 {
     /// <summary>
     /// Registers the commands defined in this assembly (such as <see cref="ExitCliCommand"/>) and the
-    /// <see cref="ICliWorkflowCommandProvider"/> used to resolve them.
+    /// <see cref="ICliWorkflowCommandProvider"/> and <see cref="ICliWorkflowReactionProvider"/> used to
+    /// resolve them.
     /// </summary>
     /// <param name="services">The service collection to add registrations to.</param>
     /// <returns>The same service collection, for chaining.</returns>
     public static IServiceCollection AddCliWorkflowCommands(this IServiceCollection services)
         => services
             .AddCommandsFromAssembly(typeof(ExitCliCommand).Assembly)
-            .AddSingleton<ICliWorkflowCommandProvider, CliWorkflowCommandProvider>();
+            .AddSingleton<ICliWorkflowCommandProvider, CliWorkflowCommandProvider>()
+            .AddSingleton<ICliWorkflowReactionProvider, CliWorkflowReactionProvider>();
 }

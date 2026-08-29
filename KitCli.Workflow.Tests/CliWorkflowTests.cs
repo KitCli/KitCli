@@ -68,6 +68,10 @@ public class CliWorkflowTests
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
 
         _serviceProviderMock
+            .Setup(sp =>  sp.GetService(typeof(ICliWorkflowReactionProvider)))
+            .Returns(new Mock<ICliWorkflowReactionProvider>().Object);
+
+        _serviceProviderMock
             .Setup(sp => sp.GetService(typeof(IOptions<InstructionSettings>)))
             .Returns(DefaultInstructionSettings);
 
@@ -102,6 +106,10 @@ public class CliWorkflowTests
         _serviceProviderMock
             .Setup(sp =>  sp.GetService(typeof(ICliWorkflowCommandProvider)))
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
+
+        _serviceProviderMock
+            .Setup(sp =>  sp.GetService(typeof(ICliWorkflowReactionProvider)))
+            .Returns(new Mock<ICliWorkflowReactionProvider>().Object);
         
         _serviceProviderMock
             .Setup(sp => sp.GetService(typeof(ISender)))
@@ -123,6 +131,7 @@ public class CliWorkflowTests
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
+            new Mock<ICliWorkflowReactionProvider>().Object,
             DefaultInstructionSettings,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);
@@ -153,6 +162,10 @@ public class CliWorkflowTests
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
 
         _serviceProviderMock
+            .Setup(sp =>  sp.GetService(typeof(ICliWorkflowReactionProvider)))
+            .Returns(new Mock<ICliWorkflowReactionProvider>().Object);
+
+        _serviceProviderMock
             .Setup(sp => sp.GetService(typeof(IOptions<InstructionSettings>)))
             .Returns(DefaultInstructionSettings);
 
@@ -179,6 +192,7 @@ public class CliWorkflowTests
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
+            new Mock<ICliWorkflowReactionProvider>().Object,
             DefaultInstructionSettings,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);

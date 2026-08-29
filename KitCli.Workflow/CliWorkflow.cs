@@ -68,6 +68,10 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
             .ServiceProvider
             .GetRequiredService<ICliWorkflowCommandProvider>();
 
+        var reactionProvider = serviceScope
+            .ServiceProvider
+            .GetRequiredService<ICliWorkflowReactionProvider>();
+
         var instructionSettings = serviceScope
             .ServiceProvider
             .GetRequiredService<IOptions<InstructionSettings>>();
@@ -86,6 +90,7 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
             instructionParser,
             instructionValidator,
             commandProvider,
+            reactionProvider,
             instructionSettings,
             sender,
             publisher,

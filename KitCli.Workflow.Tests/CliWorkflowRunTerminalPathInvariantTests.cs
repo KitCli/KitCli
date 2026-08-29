@@ -54,6 +54,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             parser.Object,
             validator.Object,
             provider.Object,
+            new Mock<ICliWorkflowReactionProvider>().Object,
             DefaultInstructionSettings,
             sender.Object,
             new Mock<IPublisher>().Object);
@@ -73,6 +74,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
+            new Mock<ICliWorkflowReactionProvider>().Object,
             DefaultInstructionSettings,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);
@@ -105,6 +107,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             parser.Object,
             validator.Object,
             provider.Object,
+            new Mock<ICliWorkflowReactionProvider>().Object,
             DefaultInstructionSettings,
             sender.Object,
             new Mock<IPublisher>().Object);
@@ -130,6 +133,7 @@ public class CliWorkflowRunTerminalPathInvariantTests
             new Mock<IInstructionParser>().Object,
             new Mock<IInstructionValidator>().Object,
             new Mock<ICliWorkflowCommandProvider>().Object,
+            new Mock<ICliWorkflowReactionProvider>().Object,
             DefaultInstructionSettings,
             new Mock<ISender>().Object,
             new Mock<IPublisher>().Object);
@@ -183,6 +187,8 @@ public class CliWorkflowRunTerminalPathInvariantTests
             .Returns(new Mock<IInstructionValidator>().Object);
         serviceProviderMock.Setup(sp => sp.GetService(typeof(ICliWorkflowCommandProvider)))
             .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ICliWorkflowReactionProvider)))
+            .Returns(new Mock<ICliWorkflowReactionProvider>().Object);
         serviceProviderMock.Setup(sp => sp.GetService(typeof(IOptions<InstructionSettings>)))
             .Returns(DefaultInstructionSettings);
         serviceProviderMock.Setup(sp => sp.GetService(typeof(ISender)))

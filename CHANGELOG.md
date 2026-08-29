@@ -6,6 +6,14 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- `ByReacting<TReaction>()` names a reaction by type instead of building it, the
+  way `ByMovingToCommand<TCommand>()` names the next command. The run constructs
+  it through a `CliCommandReactionFactory<TReaction>` — auto-registered for
+  parameterless reactions — so the factory sees the run's artefacts
+  ([#204](https://github.com/KitCli/KitCli/issues/204)).
+
 ## [3.1.0] - 2026-08-27
 
 ### Added
