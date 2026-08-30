@@ -40,21 +40,21 @@ jobs:
       - name: Test
         run: dotnet test KitCli.sln --configuration Release
 
-  # Only runs once build+test have succeeded in this same workflow run, and only for a run on
+  # Decides whether there is anything to release, so the publish job below can be skipped
+  # outright when there isn't. The root KitCli package's committed version is what this hinges
+  # on. If a tag for it already exists, this exact version was published by an earlier run —
+  # most commonly the automated CHANGELOG.md PR from that very release merging back into main,
+  # which would otherwise re-trigger the publish job in a loop. Skipping the whole publish job
+  # (rather than each of its steps) also keeps that no-op run out of the repo's Deployments
+  # list, which only publish's environment declaration writes to. Only evaluated for a run on
   # main — a workflow_dispatch against another branch still builds and tests, it just never
-  # reaches this job. That guarantees CI actually passed for the exact commit being published,
-  # with no separate cross-workflow check needed.
-  publish:
+  # gets here.
+  release_gate:
     runs-on: ubuntu-latest
-    needs: [build, test]
-    environment:
-      name: nuget
-      url: https://www.nuget.org/packages/KitCli
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    permissions:
-      contents: write
-      id-token: write # enable GitHub OIDC token issuance, exchanged for a short-lived NuGet API key below
-      pull-requests: write # open the CHANGELOG.md PR below, since main is a protected branch
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      already_published: ${{ steps.version.outputs.already_published }}
     steps:
       # fetch-depth: 0 pulls full history and tags — the "Determine release version" step
       # below needs the tag list to know whether this version was already published; the
@@ -63,16 +63,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: "10.0.x"
-
-      # The root KitCli package's committed version is what the rest of this job hinges on. If a
-      # tag for it already exists, this exact version was published by an earlier run — most
-      # commonly the automated CHANGELOG.md PR from that very release merging back into main,
-      # which would otherwise re-trigger this whole job in a loop. Every step below is skipped
-      # rather than re-pack/re-push/re-tag/re-release a version that's already out.
       - name: Determine release version
         id: version
         run: |
@@ -90,8 +80,29 @@ jobs:
             echo "already_published=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # Only runs once build+test have succeeded in this same workflow run, and only when
+  # release_gate says the committed version isn't published yet. That guarantees CI actually
+  # passed for the exact commit being published, with no separate cross-workflow check needed.
+  publish:
+    runs-on: ubuntu-latest
+    needs: [build, test, release_gate]
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/KitCli
+    if: needs.release_gate.outputs.already_published == 'false'
+    permissions:
+      contents: write
+      id-token: write # enable GitHub OIDC token issuance, exchanged for a short-lived NuGet API key below
+      pull-requests: write # open the CHANGELOG.md PR below, since main is a protected branch
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
       - name: Check NUGET_USER is configured
-        if: steps.version.outputs.already_published == 'false'
         run: |
           if [ -z "${{ secrets.NUGET_USER }}" ]; then
             echo "::error::NUGET_USER secret is not set. Add it (your nuget.org profile name, not email) under Settings > Secrets and variables > Actions before running this workflow."
@@ -99,22 +110,18 @@ jobs:
           fi
 
       - name: Restore
-        if: steps.version.outputs.already_published == 'false'
         run: dotnet restore KitCli.sln
 
       - name: Build
-        if: steps.version.outputs.already_published == 'false'
         run: dotnet build KitCli.sln --configuration Release --no-restore
 
       - name: Test
-        if: steps.version.outputs.already_published == 'false'
         run: dotnet test KitCli.sln --configuration Release --no-build
 
       # Exchanges this job's GitHub OIDC token for a NuGet API key that's valid for
       # one hour — requested here, immediately before the pack/push loop below, since
       # requesting it any earlier risks it expiring before the push actually happens.
       - name: NuGet login (OIDC -> temp API key)
-        if: steps.version.outputs.already_published == 'false'
         uses: NuGet/login@v1
         id: nuget-login
         with:
@@ -130,7 +137,6 @@ jobs:
       # <ProjectReference>s point to. Verified against the actual
       # ProjectReference graph, not assumed (see #55, #56).
       - name: Pack and push (in dependency order)
-        if: steps.version.outputs.already_published == 'false'
         run: |
           set -e
           projects=(
@@ -170,11 +176,10 @@ jobs:
       # steps are bookkeeping. If one of them fails, the tag/release
       # can be created by hand afterward without re-publishing anything.
       - name: Cut CHANGELOG.md
-        if: steps.version.outputs.already_published == 'false'
         id: changelog
         run: |
           set -e
-          version="${{ steps.version.outputs.version }}"
+          version="${{ needs.release_gate.outputs.version }}"
           release_date=$(date +%Y-%m-%d)
 
           if ! grep -q "^## \[Unreleased\]" CHANGELOG.md; then
@@ -207,18 +212,16 @@ jobs:
       # edit below is committed anywhere) — the release corresponds to the code
       # that produced the packages, not to whatever lands in the changelog PR.
       - name: Tag release
-        if: steps.version.outputs.already_published == 'false'
         run: |
-          git tag "v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
+          git tag "v${{ needs.release_gate.outputs.version }}"
+          git push origin "v${{ needs.release_gate.outputs.version }}"
 
       - name: Create GitHub Release
-        if: steps.version.outputs.already_published == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --title "v${{ steps.version.outputs.version }}" \
+          gh release create "v${{ needs.release_gate.outputs.version }}" \
+            --title "v${{ needs.release_gate.outputs.version }}" \
             --notes "${{ steps.changelog.outputs.notes }}"
 
       # main requires status checks to pass before any push lands, including a
@@ -226,27 +229,26 @@ jobs:
       # update goes through a normal PR (which triggers those checks) instead of
       # `git push origin HEAD:main`, and is left to merge on its own once they pass.
       # That merge is itself a push to main, which re-triggers this workflow — the
-      # "Determine release version" step above is what stops that second run from
-      # trying to publish the same version all over again.
+      # release_gate job above is what stops that second run from trying to publish
+      # the same version all over again.
       - name: Open CHANGELOG.md PR
-        if: steps.version.outputs.already_published == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          branch="chore/changelog-v${{ steps.version.outputs.version }}"
+          branch="chore/changelog-v${{ needs.release_gate.outputs.version }}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           git add CHANGELOG.md
-          git commit -m "chore(release): cut CHANGELOG.md for v${{ steps.version.outputs.version }}"
+          git commit -m "chore(release): cut CHANGELOG.md for v${{ needs.release_gate.outputs.version }}"
           git push origin "$branch"
 
           pr_url=$(gh pr create \
             --base main \
             --head "$branch" \
-            --title "chore(release): cut CHANGELOG.md for v${{ steps.version.outputs.version }}" \
-            --body "Automated changelog update for v${{ steps.version.outputs.version }}, opened as a PR because \`main\` requires status checks that a direct push from this workflow can't satisfy.")
+            --title "chore(release): cut CHANGELOG.md for v${{ needs.release_gate.outputs.version }}" \
+            --body "Automated changelog update for v${{ needs.release_gate.outputs.version }}, opened as a PR because \`main\` requires status checks that a direct push from this workflow can't satisfy.")
 
           gh pr merge --auto --squash "$pr_url"
