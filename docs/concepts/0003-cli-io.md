@@ -8,6 +8,7 @@ goes through it, and nothing else in the framework touches `Console`.
 ```csharp
 public interface ICliIo
 {
+    bool CanAsk => true;   // HeadlessCliIo answers false
     Task<string?> AskAsync(CancellationToken cancellationToken);
     void Pause();          // CliIo writes a blank line
     void Say(string something);
@@ -16,9 +17,17 @@ public interface ICliIo
 }
 ```
 
-`AddCliAbstractions` registers `CliIo`, the `Console`-backed default, as a
-singleton. Replace it to assert on what a command printed, or to host
-KitCli somewhere with no console at all.
+`CliAppBuilder.Run` registers the I/O as a singleton from the app you chose,
+unless a registry registered an `ICliIo` first: register your own to assert
+on what a command printed, or to host KitCli somewhere with no console at
+all. `CliIo` is the `Console`-backed default.
+
+A `HeadlessCliApp` runs with `HeadlessCliIo` instead. It writes to the console like `CliIo`, but its
+input has nothing attached: `CanAsk` says so ahead of time, and asking
+anyway throws `NoInputException`, a programming error rather than an end
+of input. `CanAsk` has a default body, so an I/O
+of your own inherits an answer of true. A handler or factory that injects
+`ICliIo` reads it to decline a prompt nobody would answer.
 
 ## Cancelling a blocked read
 

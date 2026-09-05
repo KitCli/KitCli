@@ -53,7 +53,9 @@ sequenceDiagram
 ```
 
 `HeadlessCliApp` runs the outer loop's body once, with the process args
-joined into the ask; the inner loop still runs a whole chain.
+joined into the ask; the inner loop still runs a whole chain. It runs with
+`HeadlessCliIo`, so a command learns which host it is under from
+`ICliIo.CanAsk` ([0003-cli-io.md](0003-cli-io.md)).
 
 ## A headless session is one run, however far it gets
 
@@ -76,9 +78,9 @@ suit progress indicators rather than setup. All six fire under both hosts,
 
 ## Everything outside a run is a singleton
 
-`CliAppBuilder.Run` builds the provider with `ValidateScopes` and
-`ValidateOnBuild` on, then resolves the `CliApp` and its writers once from
-the root. Those live for the whole app; only handlers get per-run
+`CliAppBuilder.Run` registers the I/O the chosen app needs unless a registry
+did, builds the provider with `ValidateScopes` and `ValidateOnBuild` on,
+then resolves the `CliApp` and its writers once from the root. Those live for the whole app; only handlers get per-run
 instances. **A singleton depending on a `Scoped` service fails at
 startup**, naming both types, instead of silently capturing one.
 

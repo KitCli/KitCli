@@ -13,6 +13,22 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   it through a `CliCommandReactionFactory<TReaction>` — auto-registered for
   parameterless reactions — so the factory sees the run's artefacts
   ([#204](https://github.com/KitCli/KitCli/issues/204)).
+- `ICliIo.CanAsk` says whether anything is attached to the input to answer an
+  ask. A `HeadlessCliApp` now runs with `HeadlessCliIo`, which answers false and
+  throws `NoInputException` on `AskAsync`, so a handler or factory can skip a
+  confirmation or prompt nobody would answer. `CanAsk` has a default body, so an
+  `ICliIo` of your own keeps compiling.
+
+### Changed
+
+- `CliAppBuilder.Run` registers the `ICliIo` from the app it was given, unless a
+  registry registered one first. `AddCli<TCliApp>` no longer registers it.
+
+### Removed
+
+- **Breaking:** `AddCliAbstractions()`, which only registered `CliIo`. Register
+  an `ICliIo` in a registry, or let `CliAppBuilder` register it. See
+  [0017-let-a-command-ask-its-io-whether-anyone-can-answer.md](docs/adr/0017-let-a-command-ask-its-io-whether-anyone-can-answer.md).
 
 ## [3.1.0] - 2026-08-27
 
