@@ -41,6 +41,26 @@ All six lifecycle hooks work (see
 [0003-creating-an-interactive-app.md](0003-creating-an-interactive-app.md)),
 `OnMovingPastAsk` firing once per chained step.
 
+## Telling headless from interactive inside a command
+
+A command that would confirm, prompt, or page in an interactive session has
+nobody to ask here. Inject `ICliIo` into its handler or factory and read
+`CanAsk`:
+
+```csharp
+public class GreetCliCommandHandler(ICliIo io) : CliCommandHandler<GreetCliCommand>
+{
+    public override Task<Outcome[]> HandleCommand(GreetCliCommand command, CancellationToken cancellationToken)
+        => FinishThisCommand()
+            .ByFinallySaying(io.CanAsk ? "Hello. What next?" : "Hello, and goodbye.")
+            .EndAsync();
+}
+```
+
+A headless app runs with an I/O that has nothing attached to its input, so
+`CanAsk` is false for the life of the process, whatever the console is
+doing. `/test-can-ask` in the playground prints which answer it got.
+
 ## Common mistakes
 
 **Calling `app.Run()` with no arguments.** A headless app has no way to ask

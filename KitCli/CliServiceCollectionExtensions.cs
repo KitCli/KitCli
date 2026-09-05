@@ -1,5 +1,5 @@
 using System.Reflection;
-using KitCli.Abstractions;
+using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions;
 using KitCli.Commands.Abstractions.Extensions;
 using KitCli.Instructions.Extensions;
@@ -20,14 +20,15 @@ public static class CliServiceCollectionExtensions
     /// <summary>
     /// Registers the abstractions, instruction parsing, command handling, and workflow services a
     /// KitCli app needs, scans the entry assembly for commands, and registers <typeparamref name="TCliApp"/>
-    /// as the singleton <see cref="CliApp"/> to run.
+    /// as the singleton <see cref="CliApp"/> to run. The <see cref="ICliIo"/> is
+    /// <see cref="CliAppBuilder"/>'s to register, from the app it was given, unless a registry
+    /// already registered one.
     /// </summary>
-    /// <typeparam name="TCliApp">The concrete <see cref="CliApp"/> subclass to run — determines whether the app is terminal- or args-driven.</typeparam>
+    /// <typeparam name="TCliApp">The concrete <see cref="CliApp"/> subclass to run — determines whether the app is interactive or headless.</typeparam>
     /// <param name="serviceCollection">The service collection to register services into.</param>
     /// <returns>The same service collection, for chaining.</returns>
     public static IServiceCollection AddCli<TCliApp>(this IServiceCollection serviceCollection) where TCliApp : CliApp
     {
-        serviceCollection.AddCliAbstractions();
         serviceCollection.AddCliInstructions();
         serviceCollection.AddCommandAbstractions();
         

@@ -6,7 +6,7 @@ namespace KitCli.Abstractions.Io;
 public class CliIo : ICliIo
 {
     /// <inheritdoc/>
-    public async Task<string?> AskAsync(CancellationToken cancellationToken)
+    public virtual async Task<string?> AskAsync(CancellationToken cancellationToken)
     {
         var abandonableBackgroundConsoleRead = Task.Run(Console.ReadLine, CancellationToken.None);
 

@@ -7,6 +7,13 @@ namespace KitCli.Abstractions.Io;
 public interface ICliIo
 {
     /// <summary>
+    /// Whether anything is attached to the input to answer an ask. <see langword="false"/> under a headless
+    /// app, whose only ask is the process args, so a command that would confirm or prompt can fail with
+    /// what to pass instead.
+    /// </summary>
+    bool CanAsk => true;
+
+    /// <summary>
     /// Asynchronously reads a line of input from the console.
     /// </summary>
     /// <param name="cancellationToken">A token used to abandon the read.</param>
