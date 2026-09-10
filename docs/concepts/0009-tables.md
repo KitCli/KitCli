@@ -33,10 +33,14 @@ order of `Map(...)` calls. Those decide each column's *name* only.
 ## Rendering
 
 `Table.ToString()` renders the table as fixed-width text, one row of output
-per row of data, with a divider between rows. No cell is broken across
-lines unless you ask for it, with `WithMaxColumnWidth(...)` on the builder or
-`MaxColumnWidth` on the table. What else can and cannot be changed about the
-rendering is in [ConsoleTables](../technology/console-tables.md).
+per row of data, with a divider between rows. A value holding line breaks
+takes as many lines as it has, inside its own row.
+
+The table is sized to fit the console it is printed to, so a long value
+wraps inside its own column rather than running off the side. Hold one
+column narrower than that with `WithMaxColumnWidth(...)` on the builder or
+`MaxColumnWidth` on the table. What else can and cannot be changed about
+the rendering is in [Spectre.Console](../technology/spectre-console.md).
 
 ## Gaps
 
@@ -53,4 +57,4 @@ rendering is in [ConsoleTables](../technology/console-tables.md).
 
 [0007-aggregators.md](0007-aggregators.md) · [0006-outcomes.md](0006-outcomes.md) ·
 [0008-artefacts.md](0008-artefacts.md) ·
-[ConsoleTables](../technology/console-tables.md)
+[Spectre.Console](../technology/spectre-console.md)

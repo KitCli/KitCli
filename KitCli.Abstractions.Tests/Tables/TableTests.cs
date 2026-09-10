@@ -108,8 +108,52 @@ public class TableTests
         Assert.That(rendered, Does.Not.Contain("Count:"));
     }
 
+    [Test]
+    public void GivenCellContainingNewLines_WhenToString_ThenItStaysInsideOneRow()
+    {
+        // Arrange
+        var table = new Table(["Name", "Description"], [["alpha", "first line\nsecond line"]]);
+
+        // Act
+        var rendered = table.ToString();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(CellLinesIn(rendered), Is.EqualTo(3));
+            Assert.That(EveryLineIsTheSameWidth(rendered), Is.True);
+        });
+    }
+
+    [Test]
+    public void GivenCellContainingSquareBrackets_WhenToString_ThenTheyAreRenderedLiterally()
+    {
+        // Arrange
+        var bracketed = "List`1[System.String]";
+        var table = new Table(["Type"], [[bracketed]]);
+
+        // Act
+        var rendered = table.ToString();
+
+        // Assert
+        Assert.That(rendered, Does.Contain(bracketed));
+    }
+
+    private static bool EveryLineIsTheSameWidth(string rendered)
+        => rendered
+            .Split(Environment.NewLine)
+            .Where(line => line.Length > 0)
+            .Select(line => line.Length)
+            .Distinct()
+            .Count() == 1;
+
     private static int CellLinesIn(string rendered)
         => rendered
             .Split(Environment.NewLine)
-            .Count(line => line.Contains('|'));
+            .Count(HoldsCellText);
+
+    private static bool HoldsCellText(string line)
+        => line.Contains('|') && line.Any(character => !BorderCharacters.Contains(character));
+
+    private static readonly char[] BorderCharacters = ['|', '-', '+'];
 }
