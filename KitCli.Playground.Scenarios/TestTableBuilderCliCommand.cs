@@ -25,7 +25,7 @@ public class TestTableBuilderCliCommandHandler : CliCommandHandler<TestTableBuil
     public override Task<Outcome[]> HandleCommand(TestTableBuilderCliCommand command, CancellationToken cancellationToken)
     {
         var faker = new Faker<TestSource>()
-            .RuleFor(f => f.Category, f => f.Random.Word())
+            .CustomInstantiator(f => new TestSource(f.Random.Word()))
             .RuleFor(f => f.Cost, f => f.Random.Decimal(10, 100));
         
         var source = faker.Generate(1000);
