@@ -10,3 +10,5 @@
   href: 0006-should-a-command-factory-declare-what-it-needs.md
 - name: "0007. Should an instruction argument's type come from its content or the command's declaration?"
   href: 0007-should-an-arguments-type-come-from-its-content-or-the-commands-declaration.md
+- name: "0008. Should table rendering be rebuilt on Spectre.Console?"
+  href: 0008-should-table-rendering-be-rebuilt-on-spectre-console.md
