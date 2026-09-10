@@ -8,12 +8,12 @@
 ## Verdict
 
 No new complexity. Swapping the library that draws KitCli's tables changes one
-method, breaks nobody's code, and settles four of the five issues behind #215:
-line breaks in a cell (#214), border styles (#210), numbers lined up on the
-right (#211), and a row count (#212).
+method, breaks nobody's code, and settles three of the five issues behind #215:
+line breaks in a cell (#214), border styles (#210), and numbers lined up on the
+right (#211).
 
 It fails the bar #215 set for itself — Spectre.Console has no opinion about how
-objects turn into rows, so the table builder is unchanged either way. Four
+objects turn into rows, so the table builder is unchanged either way. Three
 issues closing outright is the justification instead.
 
 ## Recommendation
@@ -32,7 +32,12 @@ its milestone is one issue of eight done, with no due date.
 
 - **The old library never reaches the public surface.** It appears once, inside
   the method that turns a table into text. What changes is the printed text, and
-  `Table.MaxColumnWidth`: today it wraps without narrowing, Spectre caps width.
+  `Table.MaxColumnWidth`: today it wraps text without narrowing a column, while
+  a Spectre column width is exact — short values are padded out to it.
+- **#212 is not settled by the swap.** Its row-count half is a line of text
+  either way; Spectre has no count feature, only a free-text caption. Its other
+  half — choosing where a long cell breaks — the old library exposes and Spectre
+  has no equivalent for. KitCli sets neither today.
 - **Numbers cannot be right-aligned today at all.** The old library aligns only
   a column it knows holds numbers, and learns that only from a path KitCli
   cannot take. Spectre needs no such knowledge — alignment is a column setting.
@@ -40,10 +45,12 @@ its milestone is one issue of eight done, with no due date.
   among the things a swap would fix. It does not. Permanent home:
   [the ConsoleTables page](../technology/console-tables.md).
 - **Spectre is heavily used despite its version.** 56.8 million downloads
-  against 12.6 million, MIT, committed to daily, 1.0 "coming" since August 2024.
-  One of its last three updates broke things; all three only added to table
-  drawing. The old library's author closed the same request as #214 with "I
-  don't think this library supports it", and recommended Spectre.Console.
+  against 12.6 million, MIT, nine commits in the last fortnight, 1.0 "coming"
+  since a merged preparation in August 2024. One of its last three updates broke
+  things (0.55.0, which said so); table drawing changed in that release only,
+  additively, and not at all in the two since. The old library's author closed
+  the same request as #214 with "I don't think this library supports it", and
+  recommended Spectre.Console.
 
 ## Evidence
 
@@ -52,11 +59,15 @@ using the stack trace from the playground command `/test-stack-trace-table`.
 Alignment was checked four ways; forcing the old library's hidden list of column
 types by reflection makes the alignment appear, which is how the blockage was
 identified. Counts came from NuGet's search API and the GitHub CLI, the upstream
-position from ConsoleTables issues 60, 71 and 88.
+position from ConsoleTables issues 60, 71 and 88. Every claim about Spectre was
+then re-checked against a clone of its repository at 0.57.2 — its table widget,
+its licence, its release tags and the commits between them.
 
 ## Open questions
 
-- How wide may a table be? There is no console to fit to when producing text.
+- How wide may a table be? Spectre measures the real terminal even when writing
+  to a string, falling back to 80 columns when there is none, so KitCli has to
+  set a width or let it vary with whatever terminal the process happens to have.
 - Which border style replaces today's look, and what replaces markdown output?
 
 ## Out of scope
