@@ -14,6 +14,21 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   parameterless reactions — so the factory sees the run's artefacts
   ([#204](https://github.com/KitCli/KitCli/issues/204)).
 
+### Fixed
+
+- A table cell holding line breaks no longer breaks the box around it. Its
+  lines now render inside the cell's own row
+  ([#214](https://github.com/KitCli/KitCli/issues/214)).
+
+### Changed
+
+- Tables render through Spectre.Console instead of ConsoleTables, so every
+  table looks slightly different. A table is now sized to fit the console it is
+  printed to, so a long value wraps inside its own column instead of running off
+  the side. `Table.MaxColumnWidth` keeps its name, and now holds a column
+  narrower than that. See
+  [ADR 0017](docs/adr/0017-render-tables-with-spectre-console.md).
+
 ## [3.1.0] - 2026-08-27
 
 ### Added

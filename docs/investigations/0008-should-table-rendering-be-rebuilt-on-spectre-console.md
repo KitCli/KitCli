@@ -38,7 +38,7 @@ its milestone is one issue of eight done, with no due date.
   cannot take. Spectre needs no such knowledge — alignment is a column setting.
 - **The old library handles Japanese and Chinese correctly.** #215 lists this
   among the things a swap would fix. It does not. Permanent home:
-  [the ConsoleTables page](../technology/console-tables.md).
+  [the Spectre.Console page](../technology/spectre-console.md).
 - **Spectre is heavily used despite its version.** 56.8 million downloads
   against 12.6 million, MIT, committed to daily, 1.0 "coming" since August 2024.
   One of its last three updates broke things; all three only added to table

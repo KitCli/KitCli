@@ -30,3 +30,5 @@
   href: 0015-version-the-packages-in-lockstep.md
 - name: "0016. Run every queued hop, depth-first"
   href: 0016-run-every-queued-hop-depth-first.md
+- name: "0017. Render tables with Spectre.Console"
+  href: 0017-render-tables-with-spectre-console.md
