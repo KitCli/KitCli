@@ -7,10 +7,10 @@
 
 ## Verdict
 
-**New complexity**, and not where the question expected it. The depth limit
-is not real: every word between the command name and the first `--` is
-already captured, so `/user edit cir --value hello` arrives whole. It just
-arrives glued into one string, which nothing can match against.
+**New complexity.** The depth limit is not real: every word between the
+command name and the first `--` is already captured, so
+`/user edit cir --value hello` arrives whole. It just arrives glued into
+one string, which nothing can match against.
 
 The complexity is knowing which word the list ends on. In `/user edit cir`,
 `edit` names a command and `cir` is a value — and reading left to right,
