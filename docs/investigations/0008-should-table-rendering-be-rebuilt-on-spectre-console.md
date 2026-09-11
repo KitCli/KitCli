@@ -18,16 +18,14 @@ never the renderer's fault to begin with.
 
 ## Recommendation
 
-#215 stays open as the parent, with four pieces under it.
+#215 stays open as the parent, with three pieces under it.
 
-1. **Confirm #214 and close it.** The fix is on `main` and the playground
-   scenario `/test-stack-trace-table` shows it.
-2. **Expose the border style** (#210). `Table.ToString()` fixes it to
+1. **Expose the border style** (#210). `Table.ToString()` fixes it to
    `TableBorder.Ascii`, so the complaint survived the swap intact: a
    different library, still one look nobody can change. Markdown output has
    no replacement at all.
-3. **Re-scope #212**, which cannot be built as written.
-4. **Leave alignment and formats to
+2. **Re-scope #212**, which cannot be built as written.
+3. **Leave alignment and formats to
    [#260](https://github.com/KitCli/KitCli/issues/260)**, which #211 and
    #213 folded into. Both were blocked by KitCli, not by the old library.
 
