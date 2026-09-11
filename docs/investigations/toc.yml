@@ -12,3 +12,5 @@
   href: 0007-should-an-arguments-type-come-from-its-content-or-the-commands-declaration.md
 - name: "0008. Should table rendering be rebuilt on Spectre.Console?"
   href: 0008-should-table-rendering-be-rebuilt-on-spectre-console.md
+- name: "0009. How many sub-commands can one instruction address?"
+  href: 0009-how-many-sub-commands-can-one-instruction-address.md
