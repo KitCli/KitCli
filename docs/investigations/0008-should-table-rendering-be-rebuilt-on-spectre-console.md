@@ -3,63 +3,65 @@
 - **Status:** In Review
 - **Spike:** [#215](https://github.com/KitCli/KitCli/issues/215)
 - **Time-box:** 60 minutes
-- **Date:** 2026-09-10
+- **Date:** 2026-09-11
 
 ## Verdict
 
-No new complexity. Swapping the library that draws KitCli's tables changes one
-method, breaks nobody's code, and settles four of the five issues behind #215:
-line breaks in a cell (#214), border styles (#210), numbers lined up on the
-right (#211), and a row count (#212).
-
-It fails the bar #215 set for itself — Spectre.Console has no opinion about how
-objects turn into rows, so the table builder is unchanged either way. Four
-issues closing outright is the justification instead.
+New complexity. The swap itself is one ticket — one method changes, nobody's
+code breaks — and it shipped as
+[#252](https://github.com/KitCli/KitCli/pull/252). What does not follow is
+the reason #215 wanted it: that picking a renderer settles the five issues
+underneath. Picking one settles exactly one of them, a cell holding a line
+break (#214). The other four are still work, and two are not the work #215
+described — a row count cannot be built on Spectre at all, and two more were
+never the renderer's fault to begin with.
 
 ## Recommendation
 
-Close #215 and open a fresh delivery ticket for the swap, with a decision
-record. Build #213 separately whenever: it needs the table builder to apply a
-column's chosen format, which no library change helps with, and is already a
-known gap in [the tables concept doc](../concepts/0009-tables.md).
+#215 stays open as the parent, with four pieces under it.
 
-Two options were rejected. Patching #214 inside the old library is throwaway
-work that still looks wrong, because that library rules off every line it
-prints. Waiting for [#14](https://github.com/KitCli/KitCli/issues/14) is worse:
-its milestone is one issue of eight done, with no due date.
+1. **Confirm #214 and close it.** The fix is on `main` and the playground
+   scenario `/test-stack-trace-table` shows it.
+2. **Expose the border style** (#210). `Table.ToString()` fixes it to
+   `TableBorder.Ascii`, so the complaint survived the swap intact: a
+   different library, still one look nobody can change. Markdown output has
+   no replacement at all.
+3. **Re-scope #212**, which cannot be built as written.
+4. **Leave alignment and formats to
+   [#260](https://github.com/KitCli/KitCli/issues/260)**, which #211 and
+   #213 folded into. Both were blocked by KitCli, not by the old library.
 
 ## What was established
 
-- **The old library never reaches the public surface.** It appears once, inside
-  the method that turns a table into text. What changes is the printed text, and
-  `Table.MaxColumnWidth`: today it wraps without narrowing, Spectre caps width.
-- **Numbers cannot be right-aligned today at all.** The old library aligns only
-  a column it knows holds numbers, and learns that only from a path KitCli
-  cannot take. Spectre needs no such knowledge — alignment is a column setting.
-- **The old library handles Japanese and Chinese correctly.** #215 lists this
-  among the things a swap would fix. It does not. Permanent home:
+- **The renderer never reaches the public surface.** It appears once, in the
+  method that turns a table into text, which is why the swap was one ticket.
+- **Spectre has no row count, and no way to choose where a long cell
+  breaks.** Both halves of #212 die here. Permanent home:
   [the Spectre.Console page](../technology/spectre-console.md).
-- **Spectre is heavily used despite its version.** 56.8 million downloads
-  against 12.6 million, MIT, committed to daily, 1.0 "coming" since August 2024.
-  One of its last three updates broke things; all three only added to table
-  drawing. The old library's author closed the same request as #214 with "I
-  don't think this library supports it", and recommended Spectre.Console.
+- **Alignment and per-column formats were never the renderer's problem.**
+  The table builder turns every value into a string before anything draws
+  it, so the column's type is gone by then. That is the line #260 has to
+  move, and no library choice helps.
+- **Japanese and Chinese were already correct.** #215 lists this among the
+  things a swap would fix. Both libraries handle it.
 
 ## Evidence
 
-Run in a scratch project against ConsoleTables 2.7.0 and Spectre.Console 0.57.2,
-using the stack trace from the playground command `/test-stack-trace-table`.
-Alignment was checked four ways; forcing the old library's hidden list of column
-types by reflection makes the alignment appear, which is how the blockage was
-identified. Counts came from NuGet's search API and the GitHub CLI, the upstream
-position from ConsoleTables issues 60, 71 and 88.
+Both libraries were drawn side by side in a scratch project — ConsoleTables
+2.7.0 against Spectre.Console 0.57.2 — using the stack trace from the
+playground command `/test-stack-trace-table`. Forcing the old library's
+hidden list of column types by reflection made alignment appear, which is
+how that blockage was identified. Everything above is now confirmed by
+shipped code in #252.
 
 ## Open questions
 
-- How wide may a table be? There is no console to fit to when producing text.
-- Which border style replaces today's look, and what replaces markdown output?
+- Does KitCli count its own rows, or does #212 close unbuilt?
+- What replaces markdown output — another border, or KitCli writing
+  markdown itself rather than asking a renderer to?
 
 ## Out of scope
 
 Colour, prompts, progress bars, and Spectre.Console's own command handling.
-Whether KitCli should keep writing to the screen as plain text was not reached.
+Whether KitCli should keep writing to the screen as plain text was not
+reached.
