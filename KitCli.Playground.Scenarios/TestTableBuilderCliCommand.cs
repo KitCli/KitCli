@@ -37,6 +37,7 @@ public class TestTableBuilderCliCommandHandler : CliCommandHandler<TestTableBuil
         var tableBuilder = new TestTableBuilder()
             .WithAggregator(aggregator)
             .WithMap<TestTableMap>()
+            .WithMaxColumnWidth(12)
             .WithPageSize(2)
             .WithPageNumber(1);
         
