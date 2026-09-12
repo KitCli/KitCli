@@ -21,6 +21,7 @@ public class TableBuilderTests
             Assert.That(builder.WithPageSize(10), Is.SameAs(builder));
             Assert.That(builder.WithPageNumber(1), Is.SameAs(builder));
             Assert.That(builder.WithMaxColumnWidth(40), Is.SameAs(builder));
+            Assert.That(builder.WithStyle(CliTableStyle.None), Is.SameAs(builder));
         });
     }
 
@@ -167,6 +168,33 @@ public class TableBuilderTests
 
         // Assert
         Assert.That(table.MaxColumnWidth, Is.EqualTo(40));
+    }
+
+    [Test]
+    public void GivenNoStyle_WhenBuild_ThenTheTableCarriesTheAsciiOne()
+    {
+        // Arrange
+        var builder = ConfiguredBuilder(new TestAggregate("alpha", "the first value"));
+
+        // Act
+        var table = builder.Build();
+
+        // Assert
+        Assert.That(table.Style, Is.EqualTo(CliTableStyle.Ascii));
+    }
+
+    [Test]
+    public void GivenAStyle_WhenBuild_ThenTheTableCarriesIt()
+    {
+        // Arrange
+        var builder = ConfiguredBuilder(new TestAggregate("alpha", "the first value"))
+            .WithStyle(CliTableStyle.None);
+
+        // Act
+        var table = builder.Build();
+
+        // Assert
+        Assert.That(table.Style, Is.EqualTo(CliTableStyle.None));
     }
 
     private static TableBuilder<TestAggregate, TestAggregate> ConfiguredBuilder(params TestAggregate[] aggregates)

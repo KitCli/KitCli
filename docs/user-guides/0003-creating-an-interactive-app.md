@@ -22,7 +22,7 @@ await app.Run();
 
 Run it and it prompts in a loop, executing whatever command each line
 resolves to, until a command ends the session (see
-[0012-exiting-the-app.md](0012-exiting-the-app.md)) or the input runs out.
+[0014-exiting-the-app.md](0014-exiting-the-app.md)) or the input runs out.
 
 ### Hooking into the session lifecycle
 

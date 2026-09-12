@@ -51,7 +51,7 @@ services.AddArtefactFactoriesForAssembly(assembly);
 Add it whenever a command remembers state (see
 [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)),
 a factory calls `LastCommandWas<T>()`, or a table needs a "next page" step
-(see [0011-showing-a-paged-table.md](0011-showing-a-paged-table.md)). It
+(see [0012-showing-a-paged-table.md](0012-showing-a-paged-table.md)). It
 registers the built-in artefact factories as well as yours, so all three
 depend on it.
 
