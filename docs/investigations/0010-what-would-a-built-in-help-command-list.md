@@ -17,36 +17,41 @@ what it does. Both gaps are what *Describing a Command* exists to close, so
 
 ## Recommendation
 
-Five tickets. The first two stand alone and can go now.
+Five tickets, filed. Only the second starts unblocked.
 
-1. **A wrong command prints nothing** — `bug`, `area:workflow`. Say
-   *Unknown command. Please use /help to see all available commands.* Split
-   the two silences first: a line naming no command, and a name matching none.
-2. **A table can drop its borders** — *Print More Than Plain Text*. Help
-   listings are drawn without rules or boxes, and
+1. [#262](https://github.com/KitCli/KitCli/issues/262) **A wrong command
+   prints nothing.** Say *Unknown command. Please use /help to see all
+   available commands.* Blocked by
+   [#219](https://github.com/KitCli/KitCli/issues/219), which splits the two
+   reasons a name fails.
+2. [#263](https://github.com/KitCli/KitCli/issues/263) **A table can drop its
+   borders.** Help listings are drawn without rules or boxes, and
    [#260](https://github.com/KitCli/KitCli/issues/260) covers only columns.
-3. **A command carries a description**, written into
+3. [#264](https://github.com/KitCli/KitCli/issues/264) **A command carries a
+   description**, written into
    [#191](https://github.com/KitCli/KitCli/issues/191)'s descriptor rather
-   than added as a fourth attribute beside the three already there.
-4. **Registration keeps a list of what it registered.** The scan already
-   walks every command and works out its names. Writing them down is the
-   cheap half of [#190](https://github.com/KitCli/KitCli/issues/190).
-5. **`/help` itself** — three files beside `Exit`, printing a borderless
-   table. A second permutation takes a command name and shows that one
-   command in full, which needs #190's argument declarations.
+   than added as a fourth label beside the three already there.
+4. [#265](https://github.com/KitCli/KitCli/issues/265) **Registration keeps a
+   list of what it registered**, which the scan already walks. The cheap half
+   of [#190](https://github.com/KitCli/KitCli/issues/190).
+5. [#266](https://github.com/KitCli/KitCli/issues/266) **`/help` itself** —
+   three files beside `Exit`, printing a borderless table. A second
+   permutation takes a command name and shows that one in full, which needs
+   #190's argument declarations.
+
+The first two sit in *Print More Than Plain Text*, with #219 moved there as
+the enabler. The last three hang off #188 in *Describing a Command*.
 
 ## What was established
 
 1. **The name lookup only runs one way.** Every command is filed under its
-   full name, its shorthand and each alias. Ask it for `spare-money` and it
-   answers. Ask what names it holds and it cannot: .NET has no way to read
-   the keys back out once the app has started.
-2. **Nothing holds a description, and `///` comments cannot become one.**
-   A command's name is worked out from its type name and nothing else is
-   kept. The C# compiler never puts documentation comments into the built
-   assembly; they go to a separate file next to it, which every app would
-   have to switch on and ship. Spectre.Console, McMaster and
-   CommandLineParser all take the text from an attribute instead.
+   full name, shorthand and aliases. Ask for `spare-money` and it answers;
+   ask what names it holds and it cannot, once the app has started.
+2. **Nothing holds a description.** A command's name comes from its type
+   name, and nothing else is kept. Documentation comments cannot fill the
+   gap: they never reach the finished program, only a separate file each app
+   would have to switch on and ship. Other .NET libraries all ask the author
+   to write the sentence somewhere the program carries.
 3. **[#188](https://github.com/KitCli/KitCli/issues/188) already says
    this.** Its list of consequences reads "there is no `--help`, no
    catalogue". The descriptor it proposes is built while the app starts and
@@ -55,11 +60,9 @@ Five tickets. The first two stand alone and can go now.
    and returns an outcome that no writer claims. A "Command Not Found"
    outcome and its writer already exist, and the only thing producing them
    is a playground handler.
-5. **Two different failures share that silence.** No command registered
-   under the name is a wrong command. A command that is registered but
-   declines to run is not, and sending that one to `/help` points the
-   reader at an entry sitting in the list already. Telling them apart is
-   [#219](https://github.com/KitCli/KitCli/issues/219).
+5. **Two different failures share that silence.** No command under the name
+   is a wrong command. A command that exists but declines to run is not, and
+   `/help` would send that reader to an entry already in the list.
 6. **The table frame is fixed in code.** Every table draws with an ASCII
    border and a line between rows, set where the table renders itself and
    exposed nowhere. Spectre.Console can draw no border at all.
@@ -80,16 +83,13 @@ Run state changes: Running, InvalidAsk, Finished
 Run outcomes achieved: NothingOutcome
 ```
 
-The run knew the ask was bad and finished quietly. A real app shows
-nothing and asks again.
+The run knew the ask was bad and finished quietly. A real app shows nothing.
 
 ## Open questions
 
-- One row per command, or one per name? Every command answers to a full
-  name and a shorthand, and some to aliases too.
-- What order, and how is a built-in marked? There are no categories to
-  group by.
-- What fills the description column for a command whose author wrote none?
+- Three shape questions, carried on #266: one row per command or one per
+  name, what order and how a built-in is marked, and what an empty
+  description column shows.
 
 ## Out of scope
 
