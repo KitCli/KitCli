@@ -14,7 +14,7 @@ Read the documentation at
 - [Quick start](#quick-start)
 - [Project structure](#project-structure)
 - [Build and test](#build-and-test)
-- [Documentation](#documentation)
+- [Kinds of documentation](#kinds-of-documentation)
 - [Packages](#packages)
 - [Contributing](#contributing)
 - [License](#license)
@@ -93,7 +93,6 @@ KitCli.Tooling.Release/              the release CLI, itself built with KitCli
 *.Tests, *.IntegrationTests/         six test projects
 ```
 
-![Dependency graph](docs/dependency-graph.png)
 
 ## Build and test
 
@@ -111,39 +110,34 @@ dotnet run --project KitCli.Playground.App                # interactive
 dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # headless
 ```
 
-## Documentation
+## Kinds of documentation
+
+Everything below is published at
+[kitcli.github.io/KitCli](https://kitcli.github.io/KitCli/), and each link
+opens the page that starts that kind.
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — conventions, branching, how to
-  propose a change.
-- [`docs/user-guides/`](docs/user-guides/) — how to use a pattern in
-  practice, without needing to know the machinery underneath:
-  [writing a basic command](docs/user-guides/0001-writing-a-basic-command.md),
-  [reading command arguments](docs/user-guides/0005-reading-command-arguments.md),
-  [exiting the app](docs/user-guides/0012-exiting-the-app.md),
-  [creating an interactive app](docs/user-guides/0003-creating-an-interactive-app.md),
-  [creating a headless app](docs/user-guides/0002-creating-a-headless-app.md),
-  [creating a registry](docs/user-guides/0004-creating-a-registry.md),
-  [chaining commands](docs/user-guides/0007-chaining-commands.md),
-  [remembering state across asks](docs/user-guides/0010-reusable-outcomes-and-the-workflow-run.md),
-  [command reactions](docs/user-guides/0008-command-reactions.md),
-  [showing a paged table](docs/user-guides/0011-showing-a-paged-table.md),
-  [remembering your own state](docs/user-guides/0009-remembering-your-own-state.md),
-  [gating a command with CanCreateWhen](docs/user-guides/0006-gating-a-command-with-cancreatewhen.md),
-  [giving a command extra names](docs/user-guides/0013-giving-a-command-extra-names.md),
-  and [suggesting what to run next](docs/user-guides/0014-suggesting-what-to-run-next.md).
-- [`docs/concepts/`](docs/concepts/) — how each subsystem works today:
-  [command registration](docs/concepts/0001-command-registration.md),
-  [instruction parsing](docs/concepts/0005-instruction-parsing-pipeline.md),
-  the [workflow state machine](docs/concepts/0010-workflow-run-state-machine.md),
-  the [host loop](docs/concepts/0002-cli-app-host.md),
-  [CLI I/O](docs/concepts/0003-cli-io.md) and
-  [outcome writing](docs/concepts/0004-outcome-writing.md),
-  [outcomes](docs/concepts/0006-outcomes.md) and
-  [artefacts](docs/concepts/0008-artefacts.md),
-  [aggregators](docs/concepts/0007-aggregators.md) and
-  [tables](docs/concepts/0009-tables.md).
-- [`docs/adr/`](docs/adr/) — architectural decisions and why.
-- [`docs/reviews/`](docs/reviews/) — past architectural reviews.
+  propose a change, and when to write each kind of doc below. Lives in the
+  repository, not on the site.
+- [User guides](https://kitcli.github.io/KitCli/docs/user-guides/0001-writing-a-basic-command.html)
+  — how to do one task, without needing to know the machinery underneath.
+- [Concepts](https://kitcli.github.io/KitCli/docs/concepts/0001-command-registration.html)
+  — how each subsystem works today, for when a guide left you wondering why.
+- [Decision records](https://kitcli.github.io/KitCli/docs/adr/0001-mediatr-for-command-dispatch.html)
+  — a decision, its alternatives and what it cost, for when you want to
+  change something and need the reason it is that way.
+- [Investigations](https://kitcli.github.io/KitCli/docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.html)
+  — what a spike found, verdict first, for when you are picking up the work
+  it scoped.
+- [Technology](https://kitcli.github.io/KitCli/docs/technology/microsoft-dependency-injection.html)
+  — what KitCli's dependencies can do.
+- [Reviews](https://kitcli.github.io/KitCli/docs/reviews/0001-architectural-review.html)
+  — past architectural reviews. Historical only; never current state.
+
+The [documentation home](https://kitcli.github.io/KitCli/docs/README.html)
+is the full index, and the
+[roadmap](https://kitcli.github.io/KitCli/docs/roadmap.html) tells how the
+framework got here, month by month.
 
 ## Packages
 
