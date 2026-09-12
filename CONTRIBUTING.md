@@ -276,16 +276,16 @@ commitments to defend.
    a repo that no longer exists. Replace the rows rather than adding to
    them, and leave estimates set under an earlier scale alone.
 
-   Current scale, derived 2026-08-26:
+   Current scale, derived 2026-09-12:
 
    | Points | Reference | Shape |
    |---|---|---|
-   | 0.5 | [#175](https://github.com/KitCli/KitCli/pull/175) | A version string bumped for a release. One file, and CI proves it. |
-   | 1 | [#129](https://github.com/KitCli/KitCli/pull/129) | XML doc comments corrected on two types. You know the answer before you open the file. |
-   | 2 | [#177](https://github.com/KitCli/KitCli/pull/177) | A behaviour reproduced as a playground scenario and written into the two guides that cover it. The shape is known throughout. |
-   | 3 | [#112](https://github.com/KitCli/KitCli/pull/112) | One decision, settled before coding: how to tell a changed package from an unchanged one. Reaches the release tool alone. |
-   | 5 | [#126](https://github.com/KitCli/KitCli/pull/126) | Scope validation at build time. A small decision with wide reach — every app the framework builds — and what it flags appears only once it runs. |
-   | 8 | [#107](https://github.com/KitCli/KitCli/pull/107) | Three questions open at the start: what an unresolved ask returns, where suggestions come from, how they render. Adds public API, changes the run loop, lands an ADR. |
+   | 0.5 | [#207](https://github.com/KitCli/KitCli/pull/207) | Package versions bumped for a release. Nothing to decide, and CI proves it. |
+   | 1 | [#269](https://github.com/KitCli/KitCli/pull/269) | The readme pointed at the docs site. You know the answer before you open the file. |
+   | 2 | [#246](https://github.com/KitCli/KitCli/pull/246) | Tests written for one factory's accessors. The shape is known the whole way through. |
+   | 3 | [#245](https://github.com/KitCli/KitCli/pull/245) | Eight writers covered by tests. One decision settled before coding: how to fake the writing surface once for all eight. |
+   | 5 | [#252](https://github.com/KitCli/KitCli/pull/252) | Table rendering moved onto Spectre.Console. A small decision with wide reach — every table in every app — and what it breaks appears only when it runs. |
+   | 8 | [#268](https://github.com/KitCli/KitCli/pull/268) | A table choosing how its lines are drawn. Three questions open at the start: which styles exist, how a caller picks one, how it meets the renderer. Adds public API. |
    | 13 | [#154](https://github.com/KitCli/KitCli/pull/154) | Construction changed for every chained command, across two packages and registration. The design settles while you build it, with test helpers and an ADR. |
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
