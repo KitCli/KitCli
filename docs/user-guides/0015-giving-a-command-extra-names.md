@@ -1,4 +1,4 @@
-# 0013. Giving a command extra names
+# 0015. Giving a command extra names
 
 ## What this is for
 
@@ -28,7 +28,7 @@ the name.
 Aliases are names *a user types*. Chaining
 ([0007-chaining-commands.md](0007-chaining-commands.md)) names the next
 command by type, so it never sees them; a suggestion
-([0014-suggesting-what-to-run-next.md](0014-suggesting-what-to-run-next.md))
+([0016-suggesting-what-to-run-next.md](0016-suggesting-what-to-run-next.md))
 may name one, since the user types that too.
 
 ## Common mistakes

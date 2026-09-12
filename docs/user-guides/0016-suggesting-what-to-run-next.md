@@ -1,4 +1,4 @@
-# 0014. Suggesting what to run next
+# 0016. Suggesting what to run next
 
 ## What this is for
 
@@ -42,7 +42,7 @@ The same command, by its shorthand name.
 
 Give the name without a prefix character — the run adds the app's
 configured one. Any name the user could type works, including a shorthand
-or an [alias](0013-giving-a-command-extra-names.md).
+or an [alias](0015-giving-a-command-extra-names.md).
 
 ## Common mistakes
 

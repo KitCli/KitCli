@@ -63,7 +63,7 @@ logic runs.
 resolve to any command, like a typo would, and no "almost matched but
 rejected" message exists. To tell the user why, declare the valid moves on
 the *previous* command with `[CliNextCommandIs(name, description)]`
-([0014-suggesting-what-to-run-next.md](0014-suggesting-what-to-run-next.md)).
+([0016-suggesting-what-to-run-next.md](0016-suggesting-what-to-run-next.md)).
 
 **Writing a second factory for the same command type to route between two
 behaviours.** `AddCommandsFromAssembly` throws at startup ("Multiple

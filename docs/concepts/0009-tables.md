@@ -1,60 +1,90 @@
 # 0009. Tables
 
-An aggregator gives you rows. A table needs those rows plus column names
-and a page. `TableBuilder<TSource, TAggregate>` holds all three — its own
-aggregator, map, and paging — so remembering the builder is enough for a
-later command to rebuild the table without re-supplying any of it.
+A table is columns, rows, and the frame drawn around them. `Table` holds
+all three and renders itself as fixed-width text. `TableBuilder<TSource,
+TAggregate>` produces one, keeping the aggregator, the column map and the
+page together so a later command can rebuild the same table from nothing.
 
 ```csharp
-var tableBuilder = new ExpenseTableBuilder()
+var table = new ExpenseTableBuilder()
     .WithAggregator(aggregator)
     .WithMap<ExpenseTableMap>()
     .WithPageSize(20)
-    .WithPageNumber(1);
-
-var table = tableBuilder.Build();
+    .WithPageNumber(1)
+    .Build();
 ```
 
-`TableMap<TAggregate>` declares the columns, one `Map(x => x.Property)`
-call each, chaining `.Name("...")` to override the displayed name.
-Subclass `TableBuilder` once per table shape; the subclass adds nothing but
-a distinct type, which is how it gets found as an artefact later.
+## Every property is looked up, not only the mapped ones
 
-## Map every public property, not just the ones you want shown
+`Build()` walks every public property of the row type and reads the map
+through a plain dictionary indexer:
 
-`Build()` walks every public instance property of `TAggregate` and looks
-each up in the map through a plain dictionary indexer. **An unmapped
-property throws `KeyNotFoundException`** rather than hiding that column. To
-keep data off a table, keep it off the row type.
+```csharp
+public record ExpenseRow(string Category, decimal TotalCost, int ReceiptId);
 
-Column order follows `TAggregate`'s property declaration order, not the
-order of `Map(...)` calls. Those decide each column's *name* only.
+public class ExpenseTableMap : TableMap<ExpenseRow>
+{
+    public ExpenseTableMap() => Map(x => x.Category).Name("Category");
+}
+```
 
-## Rendering
+```
+System.Collections.Generic.KeyNotFoundException:
+The given key 'System.Decimal TotalCost' was not present in the dictionary.
+```
 
-`Table.ToString()` renders the table as fixed-width text, one row of output
-per row of data, with a divider between rows. A value holding line breaks
-takes as many lines as it has, inside its own row.
+**An unmapped property throws rather than hiding that column.** Keep data
+off a table by keeping it off the row type. Column order follows the row
+type's declaration order; the `Map(...)` calls decide names only.
 
-The table is sized to fit the console it is printed to, so a long value
-wraps inside its own column rather than running off the side. Hold one
-column narrower than that with `WithMaxColumnWidth(...)` on the builder or
-`MaxColumnWidth` on the table. What else can and cannot be changed about
-the rendering is in [Spectre.Console](../technology/spectre-console.md).
+## The style is chosen, the row lines follow
+
+`Style`, or `WithStyle(...)` on the builder, picks one of nineteen
+`CliTableStyle` values — all of them drawn in
+[../user-guides/0013-styling-a-table.md](../user-guides/0013-styling-a-table.md).
+`Ascii` is the default and the look every table had before the setting
+existed.
+
+**Lines between rows are not separately settable.** The ten styles that
+draw a box draw them:
+
+```
++------------------------+      Category  Total Cost
+| Category  | Total Cost |      Groceries 412.80
+|-----------+------------|      Rent      1150.00
+| Groceries | 412.80     |
+|-----------+------------|
+| Rent      | 1150.00    |
++------------------------+
+```
+
+The other nine leave the rows to run on, because lines between the rows of
+a table with no frame around it read as clutter.
+
+## Sizing
+
+The table is measured against the console it is about to print to — eighty
+columns when there is none — so a long value wraps inside its own column
+rather than running off the side. `MaxColumnWidth` holds one column
+narrower still. A value with line breaks in it takes as many lines as it
+has, inside its own row, and square brackets print literally.
 
 ## Gaps
 
 - `WithMap` is mandatory; nothing defaults to mapping every property.
-- Values are always `.ToString()`; `TableColumnMap` carries no formatting
-  function yet.
-- Every `Build()` precondition throws a bare `Exception`. Tracked as
+- A page size and number are mandatory too, so a table that never pages
+  still declares one.
+- Values are always `.ToString()`. A column cannot set its alignment, its
+  format or its colour — [#260](https://github.com/KitCli/KitCli/issues/260).
+- Every `Build()` precondition throws a bare `Exception` —
   [#34](https://github.com/KitCli/KitCli/issues/34).
-- `CliTableSortOrder` is dead code. Tracked as
-  [#53](https://github.com/KitCli/KitCli/issues/53). Sorting comes only
-  from `AfterAggregation`.
+- `CliTableSortOrder` is dead code —
+  [#53](https://github.com/KitCli/KitCli/issues/53). Sorting comes only from
+  `AfterAggregation`.
 
 ## See also
 
 [0007-aggregators.md](0007-aggregators.md) · [0006-outcomes.md](0006-outcomes.md) ·
 [0008-artefacts.md](0008-artefacts.md) ·
+[../user-guides/0011-showing-a-table.md](../user-guides/0011-showing-a-table.md) ·
 [Spectre.Console](../technology/spectre-console.md)
