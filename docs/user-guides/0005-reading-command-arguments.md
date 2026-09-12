@@ -30,6 +30,10 @@ public class GreetCliCommandFactory : CliCommandFactory<GreetCliCommand>
 following the usual CLI idiom. `/greet --name Alex` leaves `shout` unset,
 so the `?? false` default applies.
 
+A value can contain `--`: `/note --text a--b` sets `text` to `a--b`. The one
+place it cannot is directly in front of a word, as in `--text see --help`,
+which reads as a second argument named `help`.
+
 Three helpers exist, each generic over the argument's target type:
 
 ```csharp

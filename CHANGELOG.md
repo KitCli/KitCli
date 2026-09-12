@@ -24,6 +24,11 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Fixed
 
+- An argument value can now contain `--`, as in `--range 10--20` or
+  `--note see -- there`. Until now any `--` anywhere in the line started a new
+  argument and cut the value short. A `--` written directly in front of a word
+  still starts an argument, which is what `--name` has always meant
+  ([#39](https://github.com/KitCli/KitCli/issues/39)).
 - A table cell holding line breaks no longer breaks the box around it. Its
   lines now render inside the cell's own row
   ([#214](https://github.com/KitCli/KitCli/issues/214)).
