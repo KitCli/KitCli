@@ -12,6 +12,10 @@ It runs three stages: **index** the four token regions without allocating,
 **extract** them into strings and split arguments on `--` then on the first
 space, then **type** each value.
 
+A `--` only splits where an argument can start: at the beginning of a word,
+with a letter straight after it. So `--range 10--20` and `--note see -- there`
+keep their values whole.
+
 ## Type comes from the value, not the command
 
 This is the surprise. No command declares that `--dueDate` is a
@@ -37,7 +41,9 @@ claimed by the one ahead of it silently changes type.
 
 ## Gaps
 
-- No quoting or escaping, so `--` cannot appear inside a value.
+- A `--` immediately followed by a word is read as an argument, wherever it
+  sits. `--note see --help for options` still becomes two arguments, because
+  nothing tells the parser that this command has no `help` argument.
   [#39](https://github.com/KitCli/KitCli/issues/39)
 - `Int`, `Decimal`, and `DateOnly` parse with the current thread culture,
   not invariant. [#22](https://github.com/KitCli/KitCli/issues/22)

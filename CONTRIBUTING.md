@@ -27,7 +27,7 @@ link.
     [issue area](#issues) — `abstractions`, `instructions`, `commands`,
     `workflow`, `host`, `tooling`
   - `description`: lowercase, imperative, no trailing period —
-    `feat(instructions): add quoting support to the tokenizer`
+    `feat(commands): give a command extra names`
   - breaking: add `!` before the colon
     (`refactor(host)!: rename RespondToNext to MoveToNext`) **and** check
     **Breaking change** in the body
