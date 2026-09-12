@@ -237,8 +237,9 @@ commitments to defend.
    place in the codebase, so it outlives any single piece of work.
 4. **Inception spike** — plans the *next* milestone in real detail.
    Everything past that is a rough forecast, re-planned on arrival
-   (rolling-wave, not a full plan up front). Refresh `Validated Estimate
-   (months)` as you learn, not once.
+   (rolling-wave, not a full plan up front). Fill in `Actual (months)`
+   and `Finished On` as you build, so a past guess can be read against
+   what the work took.
 5. **Backlog refinement, just-in-time** — only the next handful of tickets
    need full ordering and estimates. The rest of the milestone stays a
    loosely-ordered backlog. A milestone-scale re-planning pass helps when
