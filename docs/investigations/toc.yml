@@ -14,3 +14,5 @@
   href: 0008-should-table-rendering-be-rebuilt-on-spectre-console.md
 - name: "0009. How many sub-commands can one instruction address?"
   href: 0009-how-many-sub-commands-can-one-instruction-address.md
+- name: "0010. What would a built-in /help command list?"
+  href: 0010-what-would-a-built-in-help-command-list.md
