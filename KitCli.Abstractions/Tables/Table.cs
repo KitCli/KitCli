@@ -22,6 +22,13 @@ public class Table
     public int MaxColumnWidth { get; set; } = DefaultMaxColumnWidth;
 
     /// <summary>
+    /// How the table's lines are drawn: the frame around it, the dividers between its columns, the
+    /// rule under its headers, and whether a line separates each row. Defaults to
+    /// <see cref="CliTableStyle.Ascii"/>.
+    /// </summary>
+    public CliTableStyle Style { get; set; } = CliTableStyle.Ascii;
+
+    /// <summary>
     /// The column headers, in display order.
     /// </summary>
     public List<string> Columns { get; set; } = [];
@@ -55,10 +62,12 @@ public class Table
     /// <returns>The formatted table.</returns>
     public override string ToString()
     {
+        var (border, linesBetweenRows) = Drawn(Style);
+
         var table = new Spectre.Console.Table
         {
-            Border = TableBorder.Ascii,
-            ShowRowSeparators = true
+            Border = border,
+            ShowRowSeparators = linesBetweenRows
         };
 
         for (var index = 0; index < Columns.Count; index++)
@@ -69,6 +78,29 @@ public class Table
 
         return Render(table);
     }
+
+    private static (TableBorder Border, bool LinesBetweenRows) Drawn(CliTableStyle style) => style switch
+    {
+        CliTableStyle.AsciiGrid => (TableBorder.Ascii2, true),
+        CliTableStyle.AsciiDoubleHeader => (TableBorder.AsciiDoubleHead, true),
+        CliTableStyle.Box => (TableBorder.Square, true),
+        CliTableStyle.RoundedBox => (TableBorder.Rounded, true),
+        CliTableStyle.ThickBox => (TableBorder.Heavy, true),
+        CliTableStyle.ThickEdgedBox => (TableBorder.HeavyEdge, true),
+        CliTableStyle.ThickHeaderBox => (TableBorder.HeavyHead, true),
+        CliTableStyle.DoubleBox => (TableBorder.Double, true),
+        CliTableStyle.DoubleEdgedBox => (TableBorder.DoubleEdge, true),
+        CliTableStyle.Dividers => (TableBorder.Minimal, false),
+        CliTableStyle.ThickHeaderDividers => (TableBorder.MinimalHeavyHead, false),
+        CliTableStyle.DoubleHeaderDividers => (TableBorder.MinimalDoubleHead, false),
+        CliTableStyle.HeaderLine => (TableBorder.Simple, false),
+        CliTableStyle.ThickHeaderLine => (TableBorder.SimpleHeavy, false),
+        CliTableStyle.CompactHeaderLine => (TableBorder.Minimalist, false),
+        CliTableStyle.HeaderAndEdgeLines => (TableBorder.Horizontal, false),
+        CliTableStyle.Markdown => (TableBorder.Markdown, false),
+        CliTableStyle.None => (TableBorder.None, false),
+        _ => (TableBorder.Ascii, true)
+    };
 
     private TableColumn ColumnAt(int index)
     {

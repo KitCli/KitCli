@@ -8,6 +8,14 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Added
 
+- `Table.Style`, and `TableBuilder.WithStyle(...)`, choose how a table's lines
+  are drawn, from nineteen `CliTableStyle` values. `Ascii` is the box every
+  table has drawn until now and stays the default. `None` draws nothing and
+  lines the columns up by spacing alone, `HeaderLine` draws only a rule under
+  the column headers, and `Markdown` writes a table that renders as one when
+  pasted into an issue or a document. Lines between rows travel with the
+  choice: only the styles that draw a box draw them
+  ([#263](https://github.com/KitCli/KitCli/issues/263)).
 - `ByReacting<TReaction>()` names a reaction by type instead of building it, the
   way `ByMovingToCommand<TCommand>()` names the next command. The run constructs
   it through a `CliCommandReactionFactory<TReaction>` — auto-registered for
