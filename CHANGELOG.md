@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-09-16
+
 ### Added
 
 - `Table.Style`, and `TableBuilder.WithStyle(...)`, choose how a table's lines
