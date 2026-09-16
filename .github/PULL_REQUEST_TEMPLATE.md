@@ -12,6 +12,9 @@ Keep the whole description under 30 lines. Explain the problem before the
 fix, in plain language a reader with no context on this repo can follow.
 Reach for a code snippet over a paragraph wherever one shows the change
 faster.
+
+Write "Linked issue: #N", never "Fixes #N" / "Closes #N" — those auto-close
+the issue on merge, and that needs agreeing first, separately.
 -->
 
 ## What
