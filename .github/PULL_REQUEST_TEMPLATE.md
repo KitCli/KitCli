@@ -7,6 +7,11 @@ Title must follow Conventional Commits: <type>(scope): <description>
   example (breaking): refactor(host)!: rename RespondToNext to MoveToNext
 Description is lowercase, imperative mood, no trailing period, no "fix stuff."
 This becomes the squash-merge commit title, i.e. the CHANGELOG line.
+
+Keep the whole description under 30 lines. Explain the problem before the
+fix, in plain language a reader with no context on this repo can follow.
+Reach for a code snippet over a paragraph wherever one shows the change
+faster.
 -->
 
 ## What
@@ -15,13 +20,7 @@ This becomes the squash-merge commit title, i.e. the CHANGELOG line.
 
 Linked issue: #
 
-## How
-
-## Tested
-
-- [ ] Unit tests
-- [ ] `KitCli.Playground.Scenarios` scenario
-- [ ] Manual
+Tested: unit tests, a `KitCli.Playground.Scenarios` scenario, or manual — say which.
 
 ## Kind of change
 
@@ -32,7 +31,5 @@ Linked issue: #
 - [ ] Tech debt
 - [ ] Docs / process
 
-If **Breaking change** or a new cross-cutting pattern/project boundary
-change: needs an ADR in `docs/adr/` in this PR. If this changes behavior:
-update `CHANGELOG.md` under `[Unreleased]`. If this changes behavior a
-concept doc describes: update that doc in `docs/concepts/`.
+Breaking change or new cross-cutting pattern: add an ADR in `docs/adr/`.
+Behaviour change: update `CHANGELOG.md`, and any concept doc it affects.
