@@ -24,6 +24,10 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Fixed
 
+- `AddCommandsFromAssembly` no longer throws at startup when a command type has
+  more than one `CliCommandFactory<T>`. Each is registered, and the first
+  whose `CanCreateWhen()` returns `true` builds the command, same as before
+  the regression ([#283](https://github.com/KitCli/KitCli/issues/283)).
 - An argument value can now contain `--`, as in `--range 10--20` or
   `--note see -- there`. Until now any `--` anywhere in the line started a new
   argument and cut the value short. A `--` written directly in front of a word

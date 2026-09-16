@@ -53,14 +53,13 @@ public static class CommandServiceCollectionExtensions
                     .Where(factory => factory.BaseType!.FirstGenericArgumentIs(commandType))
                     .ToList();
 
-                if (matchingFactories.Count > 1)
+                if (matchingFactories.Count > 0)
                 {
-                    throw new ArgumentException($"Multiple factories found for command type '{commandType.Name}'");
-                }
+                    foreach (var matchingFactory in matchingFactories)
+                    {
+                        services.AddCommandFactory(commandType, matchingFactory);
+                    }
 
-                if (matchingFactories.Count == 1)
-                {
-                    services.AddCommandFactory(commandType, matchingFactories.First());
                     continue;
                 }
 
@@ -71,7 +70,7 @@ public static class CommandServiceCollectionExtensions
                     services.AddCommandFactory(commandType, basicFactoryType);
                 }
             }
-        
+
             return services;
         }
 
