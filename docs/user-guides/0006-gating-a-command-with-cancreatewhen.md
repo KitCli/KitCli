@@ -74,6 +74,6 @@ the *previous* command with `[CliNextCommandIs(name, description)]`
 - [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   where `CanCreateWhen` sits in resolution: keyed DI narrows the
   candidates, `CanCreateWhen` picks among them, first match wins.
-- [0017-giving-a-command-type-more-than-one-factory.md](0017-giving-a-command-type-more-than-one-factory.md) —
-  writing several `CliCommandFactory<T>` for one command type, each
-  claiming its own sub-command.
+- [0017-creating-sub-commands.md](0017-creating-sub-commands.md) —
+  writing several `CliCommandFactory<T>` for one command type, one per
+  sub-command word.
