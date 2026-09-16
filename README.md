@@ -89,7 +89,6 @@ KitCli.Workflow[.Abstractions]/      the run state machine
 KitCli.Workflow.Commands/            built-in commands (/exit)
 
 KitCli.Playground.*/                 runnable sample apps and scenarios
-KitCli.Tooling.Release/              the release CLI, itself built with KitCli
 *.Tests, *.IntegrationTests/         six test projects
 ```
 
