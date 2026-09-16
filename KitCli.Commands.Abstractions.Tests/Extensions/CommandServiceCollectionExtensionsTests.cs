@@ -90,6 +90,40 @@ public class CommandServiceCollectionExtensionsTests
         Assert.That(factory, Is.TypeOf<DedicatedFactoryCliCommandFactory>());
     }
 
+    private record MultiFactoryCliCommand : CliCommand;
+
+    private class MultiFactoryCliCommandFactoryA : CliCommandFactory<MultiFactoryCliCommand>
+    {
+        public override bool CanCreateWhen() => SubCommandIs("a");
+        public override CliCommand Create() => new MultiFactoryCliCommand();
+    }
+
+    private class MultiFactoryCliCommandFactoryB : CliCommandFactory<MultiFactoryCliCommand>
+    {
+        public override bool CanCreateWhen() => SubCommandIs("b");
+        public override CliCommand Create() => new MultiFactoryCliCommand();
+    }
+
+    [Test]
+    public void GivenCommandWithMultipleFactories_WhenAddCommandsFromAssembly_ThenBothFactoriesAreRegisteredUnderItsName()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var instructionName = CliCommand.GetInstructionName(typeof(MultiFactoryCliCommand));
+
+        // Act
+        services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
+        var provider = services.BuildServiceProvider();
+        var factories = provider.GetKeyedServices<ICliCommandFactory>(instructionName).ToList();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(factories, Has.Exactly(1).TypeOf<MultiFactoryCliCommandFactoryA>());
+            Assert.That(factories, Has.Exactly(1).TypeOf<MultiFactoryCliCommandFactoryB>());
+        });
+    }
+
     private record NoFactoryCliCommand(string Text) : CliCommand;
 
     [Test]

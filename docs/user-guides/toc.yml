@@ -30,3 +30,5 @@
   href: 0015-giving-a-command-extra-names.md
 - name: Suggesting what to run next
   href: 0016-suggesting-what-to-run-next.md
+- name: Creating sub-commands
+  href: 0017-creating-sub-commands.md

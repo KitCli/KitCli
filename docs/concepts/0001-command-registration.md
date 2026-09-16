@@ -30,8 +30,7 @@ generic argument is that type:
 
 | Factories found for the type | Result |
 |---|---|
-| exactly one | registered under the full name, shorthand, and aliases |
-| more than one | throws at startup, "Multiple factories found for command type" |
+| one or more | each registered under the full name, shorthand, and aliases |
 | none, and the command has a parameterless constructor | `BasicCliCommandFactory<T>` registered for you |
 | none, and it has not | no factory, and nothing says so until a user types the name |
 
@@ -39,7 +38,9 @@ When an ask arrives, `CliWorkflowCommandProvider.GetCommand` fetches every
 factory keyed under that name, attaches the instruction and the run's
 artefacts, and takes the **first** whose `CanCreateWhen()` returns `true` —
 the same first-match-wins rule used for argument builders and outcome
-writers ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
+writers ([ADR 0004](../adr/0004-first-match-wins-resolution.md)). This is
+what lets several `CliCommandFactory<T>` share one command type, each
+picking a different subcommand with `CanCreateWhen()`.
 
 Registration and resolution are two flows meeting at one keyed registry:
 

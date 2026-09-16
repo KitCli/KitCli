@@ -65,12 +65,6 @@ rejected" message exists. To tell the user why, declare the valid moves on
 the *previous* command with `[CliNextCommandIs(name, description)]`
 ([0016-suggesting-what-to-run-next.md](0016-suggesting-what-to-run-next.md)).
 
-**Writing a second factory for the same command type to route between two
-behaviours.** `AddCommandsFromAssembly` throws at startup ("Multiple
-factories found for command type"). `CanCreateWhen` gates whether *one*
-factory's command is offered. For genuinely different behaviour, branch
-inside one `Create()`, or give each variant its own command type.
-
 ## Learn more
 
 - [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — when you
@@ -80,3 +74,6 @@ inside one `Create()`, or give each variant its own command type.
 - [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
   where `CanCreateWhen` sits in resolution: keyed DI narrows the
   candidates, `CanCreateWhen` picks among them, first match wins.
+- [0017-creating-sub-commands.md](0017-creating-sub-commands.md) —
+  writing several `CliCommandFactory<T>` for one command type, one per
+  sub-command word.
