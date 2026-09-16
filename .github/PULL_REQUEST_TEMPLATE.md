@@ -10,11 +10,12 @@ This becomes the squash-merge commit title, i.e. the CHANGELOG line.
 
 Keep the whole description under 30 lines. Explain the problem before the
 fix, in plain language a reader with no context on this repo can follow.
-Reach for a code snippet over a paragraph wherever one shows the change
+Use a code snippet instead of a paragraph whenever one shows the change
 faster.
 
-Write "Linked issue: #N", never "Fixes #N" / "Closes #N" — those auto-close
-the issue on merge, and that needs agreeing first, separately.
+Write "Linked issue: #N". Only write "Fixes #N" or "Closes #N" if the
+issue's reporter already agreed this PR resolves it — GitHub closes the
+issue automatically when either phrase merges.
 -->
 
 ## What
@@ -34,5 +35,6 @@ Tested: unit tests, a `KitCli.Playground.Scenarios` scenario, or manual — say 
 - [ ] Tech debt
 - [ ] Docs / process
 
-Breaking change or new cross-cutting pattern: add an ADR in `docs/adr/`.
-Behaviour change: update `CHANGELOG.md`, and any concept doc it affects.
+If this is a breaking change or a new cross-cutting pattern, add an ADR in
+`docs/adr/`. If it changes behaviour, update `CHANGELOG.md` and any concept
+doc it affects.
