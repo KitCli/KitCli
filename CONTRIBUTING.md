@@ -327,22 +327,21 @@ Changelog](https://keepachangelog.com/) format.
 Releasing has two halves: you decide the version numbers, CI does the
 rest.
 
-**1. Bump the versions** with the release CLI, itself a KitCli app:
+**1. Bump the versions by hand.** Read the diff since each package's own
+last release — pickaxe-search history for the commit that set its current
+`<Version>` — and size the bump from what that diff does to the package's
+own public API: a fix with no public change is a patch, a new public
+member is a minor, a removed or incompatibly-changed one is a major. Only
+count what a consumer can actually reach through that package's own
+types — a change three layers down that never surfaces through this
+package's own surface doesn't earn it more than a patch.
 
-```bash
-dotnet run --project KitCli.Tooling.Release -- /release --dry-run   # report what would change
-dotnet run --project KitCli.Tooling.Release -- /release             # write the bumps
-```
-
-It finds every csproj carrying both `<PackageId>` and `<Version>`, orders
-them dependencies-first, and bumps a project when that project changed
-since its own last release, or when anything it references is bumping.
-"Last release" comes from pickaxe-searching history for the commit that
-set the current `<Version>`, so no tags are involved. Pass `--publish` to
-pack and push from your machine — reserve that for a broken pipeline.
-
-**It only ever bumps the patch number**, whatever changed —
-[#127](https://github.com/KitCli/KitCli/issues/127).
+A package that didn't change at all still needs a new version if anything
+it references bumped, since `dotnet pack` pins exact versions between
+packages rather than ranges — bump it patch, on the reasoning above.
+Working dependencies-first (leaf packages before whatever references
+them) means each package's own bump already accounts for what its
+dependencies picked up.
 
 **2. Merge the bumps to `main`.** The `publish` job in
 [`ci.yml`](.github/workflows/ci.yml) does the rest automatically on every
