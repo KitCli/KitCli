@@ -6,6 +6,12 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Fixed
+
+- `ByMovingToCommand<T>()` no longer prints a blank line for every command it
+  chains through. One now prints after the whole chain, same as any other
+  command ([#290](https://github.com/KitCli/KitCli/issues/290)).
+
 ## [3.1.1] - 2026-09-16
 
 ### Added
