@@ -89,8 +89,6 @@ public abstract class CliApp
 
         OnRunComplete(run, outcomes);
 
-        Io.Pause();
-
         while (run.State.Changes[^1].To == ClIWorkflowRunStateStatus.MovePastAsk)
         {
             var movePastAskTask = run.MoveToNext();
@@ -102,9 +100,9 @@ public abstract class CliApp
             WriteOutcomes(outcomes, outcomeIoWriters);
 
             OnRunComplete(run, outcomes);
-
-            Io.Pause();
         }
+
+        Io.Pause();
 
         return outcomes;
     }
