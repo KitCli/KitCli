@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.1.2] - 2026-09-18
+
 ### Fixed
 
 - `ByMovingToCommand<T>()` no longer prints a blank line for every command it
