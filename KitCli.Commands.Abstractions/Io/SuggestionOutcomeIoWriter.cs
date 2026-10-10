@@ -13,8 +13,8 @@ namespace KitCli.Commands.Abstractions.Io;
 /// <param name="cliIo">The IO surface to write to.</param>
 public class SuggestionOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {
-    private const string NameSpacing = "  ";
-    private const string DescriptionSpacing = "    ";
+    internal const string NameSpacing = "  ";
+    internal const string DescriptionSpacing = "    ";
     
     /// <inheritdoc/>
     public bool CanWriteFor(Outcome outcome) => outcome is SuggestionOutcome;
