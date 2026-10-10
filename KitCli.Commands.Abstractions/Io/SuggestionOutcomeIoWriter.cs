@@ -5,12 +5,17 @@ using KitCli.Commands.Abstractions.Outcomes.Anonymous;
 namespace KitCli.Commands.Abstractions.Io;
 
 /// <summary>
-/// Writes a <see cref="SuggestionOutcome"/> by displaying a blank line, then its instruction name and
-/// description, so a suggestion is always visually separated from whatever preceded it.
+/// Writes a <see cref="SuggestionOutcome"/> by displaying a blank line, then its instruction name
+/// indented two spaces, with its description indented four — so a suggestion is always visually
+/// separated from whatever preceded it, and reads as one indented block rather than two flush-left
+/// lines.
 /// </summary>
 /// <param name="cliIo">The IO surface to write to.</param>
 public class SuggestionOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
 {
+    internal const string NameSpacing = "  ";
+    internal const string DescriptionSpacing = "    ";
+    
     /// <inheritdoc/>
     public bool CanWriteFor(Outcome outcome) => outcome is SuggestionOutcome;
 
@@ -18,8 +23,10 @@ public class SuggestionOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
     public void Write(Outcome outcome)
     {
         var suggestionOutcome = (SuggestionOutcome)outcome;
+
         cliIo.Pause();
-        cliIo.Say(suggestionOutcome.Name);
-        cliIo.Say(suggestionOutcome.Description);
+
+        cliIo.Say($"{NameSpacing}{suggestionOutcome.Name}");
+        cliIo.Say($"{DescriptionSpacing}{suggestionOutcome.Description}");
     }
 }

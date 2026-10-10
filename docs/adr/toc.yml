@@ -32,3 +32,5 @@
   href: 0016-run-every-queued-hop-depth-first.md
 - name: "0017. Render tables with Spectre.Console"
   href: 0017-render-tables-with-spectre-console.md
+- name: "0018. Suggest commands that could be next via a [CliNextCommandCouldBe] attribute"
+  href: 0018-suggest-commands-that-could-be-next.md

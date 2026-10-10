@@ -60,3 +60,8 @@ way the run's state is untouched: it stays parked exactly as before.
 A command that parks a run can declare what to try next, with no new state
 machinery, at the cost of one more attribute to know about. A command that
 declares none behaves exactly as before, so this is purely additive.
+
+The rejected `PauseOutcome`/writer pair above was reintroduced in
+[ADR 0018](0018-suggest-commands-that-could-be-next.md) once a second call
+site needed a bare blank line. This ADR's decision — the
+`[CliNextCommandIs]` attribute itself — is otherwise unaffected.

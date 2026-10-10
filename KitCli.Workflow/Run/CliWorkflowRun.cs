@@ -166,7 +166,9 @@ public class CliWorkflowRun : ICliWorkflowRun
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
 
-            return allOutcomes;
+            var suggestedNextCommands = SuggestNextCommands(command);
+
+            return [..allOutcomes, ..suggestedNextCommands];
         }
         catch (Exception exception)
         {
@@ -320,11 +322,46 @@ public class CliWorkflowRun : ICliWorkflowRun
 
         var prefix = _instructionSettings.Prefix.ToString();
 
-        return possibleCommandsToMoveTo
-            .Select(Outcome (next) => new SuggestionOutcome(
-                $"{prefix}{next.Name}",
-                next.Description))
-            .ToArray();
+        return
+        [
+            new PauseOutcome(),
+            new SayOutcome("You might have meant:"),
+            
+            ..possibleCommandsToMoveTo
+                .Select(Outcome (next) => new SuggestionOutcome(
+                    $"{prefix}{next.Name}",
+                    next.Description))
+        ];
+    }
+
+    /// <summary>
+    /// The commands this run's just-executed command declares via <see cref="CliNextCommandCouldBeAttribute"/>,
+    /// printed once regardless of whether the run parked or finished. Empty when it declares none.
+    /// </summary>
+    private Outcome[] SuggestNextCommands(CliCommand command)
+    {
+        var possibleCommandsToMoveTo = command
+            .GetType()
+            .GetCliNextCommandCouldBeNames()
+            .ToList();
+
+        if (possibleCommandsToMoveTo.Count == 0)
+        {
+            return [];
+        }
+
+        var prefix = _instructionSettings.Prefix.ToString();
+
+        return
+        [
+            new PauseOutcome(),
+            new SayOutcome("All done. You might want to run:"),
+            
+            ..possibleCommandsToMoveTo
+                .Select(Outcome (next) => new SuggestionOutcome(
+                    $"{prefix}{next.Name}", 
+                    next.Description))
+        ];
     }
 
     // TODO: Perhaps move to extension somewhere
