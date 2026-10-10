@@ -84,14 +84,15 @@ match.
   cross-cutting pattern, a project/package boundary change, a breaking
   public API change, or reversing a prior ADR. Skip it for bug fixes and
   internal refactors.
-- **Concept doc** (`docs/concepts/`, copy `0000-template.md`): how a
+- **Concept doc** (`docs/concepts/`, copy `template.md`, no number in
+  the filename or title — `toc.yml` groups them by area instead): how a
   subsystem works *today*, for onboarding. Write one for any subsystem a
   new contributor would need explained that isn't already covered.
 - **Before writing either**: read the actual current source for every
   class/method/signature you're about to describe. Never describe
   intended or aspirational behavior as current.
 - **Style** (learned from real review feedback, encoded in
-  `docs/concepts/0000-template.md`'s header comment — read it before
+  `docs/concepts/template.md`'s header comment — read it before
   writing): one idea per paragraph; prefer a list or table over a dense
   sentence chaining branches with arrows/semicolons; don't cram more
   than 2-3 inline-code names into one sentence; define or avoid jargon

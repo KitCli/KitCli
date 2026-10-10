@@ -104,5 +104,5 @@ every time.
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   remembering anything between commands.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
+- [../concepts/artefacts.md](../concepts/artefacts.md) — how a
   remembered builder reaches the next factory.

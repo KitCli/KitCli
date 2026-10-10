@@ -12,17 +12,17 @@ it, which one does, when more than one says yes?
 
 - `InstructionParser.Parse` picks the first `IInstructionArgumentBuilder`
   whose `For(value)` returns `true`
-  ([0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md)).
+  ([instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md)).
 - `CliWorkflowCommandProvider.GetCommand` picks the first
   `ICliCommandFactory`, among those keyed under the resolved name, whose
   `CanCreateWhen()` returns `true`
-  ([0001-command-registration.md](../concepts/0001-command-registration.md)).
+  ([command-registration.md](../concepts/command-registration.md)).
 - The same provider's `ConvertOutcomesToArtefacts` picks the first
   `IArtefactFactory` whose `For(outcome)` returns `true`
-  ([0008-artefacts.md](../concepts/0008-artefacts.md)).
+  ([artefacts.md](../concepts/artefacts.md)).
 - `CliApp.WriteOutcomes` picks the first `IOutcomeIoWriter` whose
   `CanWriteFor(outcome)` returns `true`
-  ([0004-outcome-writing.md](../concepts/0004-outcome-writing.md)).
+  ([outcome-writing.md](../concepts/outcome-writing.md)).
 
 Each was arrived at separately, and all four behave the same. Naming it as
 one pattern means learning it once.

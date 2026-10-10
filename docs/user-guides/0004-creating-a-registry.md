@@ -104,7 +104,7 @@ silence while another assembly's register instead.
 
 - [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — what
   `AddCommandsFromAssembly` finds and registers.
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   the full mechanics behind that call.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — what the
+- [../concepts/artefacts.md](../concepts/artefacts.md) — what the
   second call registers.

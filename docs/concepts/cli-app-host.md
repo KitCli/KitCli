@@ -1,4 +1,4 @@
-# 0002. CliApp host loop
+# CliApp host loop
 
 Something has to fetch what the user typed, run it, and print what came
 back. That is the host. `CliApp` is it: the shell around a workflow.
@@ -93,5 +93,6 @@ startup**, naming both types, instead of silently capturing one.
 
 ## See also
 
-[0010-workflow-run-state-machine.md](0010-workflow-run-state-machine.md) ·
-[0003-cli-io.md](0003-cli-io.md) · [0004-outcome-writing.md](0004-outcome-writing.md)
+[workflow-run-state-machine.md](workflow-run-state-machine.md) ·
+[cli-io.md](cli-io.md) · [outcome-writing.md](outcome-writing.md) ·
+[app-configuration.md](app-configuration.md)

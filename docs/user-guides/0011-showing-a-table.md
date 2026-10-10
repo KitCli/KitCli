@@ -135,7 +135,7 @@ columns and rows with no pipeline behind it.
   a reader through a long list.
 - [0013-styling-a-table.md](0013-styling-a-table.md) — all
   nineteen frames, drawn.
-- [../concepts/0009-tables.md](../concepts/0009-tables.md) — why the map is
+- [../concepts/tables.md](../concepts/tables.md) — why the map is
   mandatory, and what a column still cannot say.
-- [../concepts/0007-aggregators.md](../concepts/0007-aggregators.md) — the
+- [../concepts/aggregators.md](../concepts/aggregators.md) — the
   pipeline beneath step 1.

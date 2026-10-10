@@ -52,7 +52,7 @@ nothing by default. Override only what you need.
 
 **Subclassing `CliApp` to change static output text.** To reword a built-in
 message, write an `IOutcomeIoWriter` (see
-[../concepts/0004-outcome-writing.md](../concepts/0004-outcome-writing.md)).
+[../concepts/outcome-writing.md](../concepts/outcome-writing.md)).
 Hooks govern *when* something happens, writers *how* an outcome renders.
 
 **Doing setup in `OnRunStarted` or `OnMovingPastAsk`.** Both fire while the
@@ -75,5 +75,5 @@ for a hook first.
   one-invocation alternative.
 - [0004-creating-a-registry.md](0004-creating-a-registry.md) — wiring up the
   commands, and settings, an app runs.
-- [../concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — what
+- [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
   `CliApp.Run` does each iteration, and when each hook fires.

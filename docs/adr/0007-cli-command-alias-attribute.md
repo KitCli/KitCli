@@ -8,7 +8,7 @@ Date: 2026-08-23
 A command's instruction name is derived mechanically from its type name —
 remove `CliCommand`, dash-split, lowercase — plus a shorthand from its
 uppercase letters (see
-[0001-command-registration.md](../concepts/0001-command-registration.md)).
+[command-registration.md](../concepts/command-registration.md)).
 Renaming the type was the only way to change either. So a command could not
 have a memorable user-facing name that does not fit the PascalCase
 convention, nor more than one name, without renaming the type everywhere.

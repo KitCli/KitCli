@@ -172,5 +172,5 @@ Injection Per Workflow Run* milestone.
 
 - [ADR 0002 — DI scope per workflow run](../adr/0002-di-scope-per-workflow-run.md)
 - [ADR 0010 — resolve the whole run from its scope](../adr/0010-resolve-the-whole-run-from-its-scope.md)
-- [Workflow run state machine](../concepts/0010-workflow-run-state-machine.md)
-- [CliApp host loop](../concepts/0002-cli-app-host.md)
+- [Workflow run state machine](../concepts/workflow-run-state-machine.md)
+- [CliApp host loop](../concepts/cli-app-host.md)

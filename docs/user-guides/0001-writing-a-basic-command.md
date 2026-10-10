@@ -93,5 +93,5 @@ says nothing, and the command is unreachable when someone types its name.
   arguments a factory reads.
 - [0006-gating-a-command-with-cancreatewhen.md](0006-gating-a-command-with-cancreatewhen.md) —
   what `CanCreateWhen` is for, and how a `false` fails.
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   how the name is derived and how the factory is chosen.

@@ -5,7 +5,7 @@
 `net10.0`, and is the only place in KitCli that touches it. This page answers
 "can I change how a table looks" — which of the library's features KitCli uses,
 and where each one stops. For how a table is *built*, see
-[0009-tables.md](../concepts/0009-tables.md). Why the library changed is in
+[tables.md](../concepts/tables.md). Why the library changed is in
 [ADR 0017](../adr/0017-render-tables-with-spectre-console.md).
 
 ```csharp

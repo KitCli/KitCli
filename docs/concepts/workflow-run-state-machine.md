@@ -1,4 +1,4 @@
-# 0010. Workflow run state machine
+# Workflow run state machine
 
 A run is one arc from an ask to a final outcome, across as many commands as
 that takes. It is the boundary everything else hangs off: state survives
@@ -74,5 +74,6 @@ else all three fail into `InvalidAsk` and finish. See
 
 ## See also
 
-[0006-outcomes.md](0006-outcomes.md) · [0002-cli-app-host.md](0002-cli-app-host.md) ·
+[outcomes.md](outcomes.md) · [cli-app-host.md](cli-app-host.md) ·
+[specified-vs-provided-outcomes.md](specified-vs-provided-outcomes.md) ·
 [../adr/0010-resolve-the-whole-run-from-its-scope.md](../adr/0010-resolve-the-whole-run-from-its-scope.md)

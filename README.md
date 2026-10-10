@@ -120,7 +120,7 @@ opens the page that starts that kind.
   repository, not on the site.
 - [User guides](https://kitcli.github.io/KitCli/docs/user-guides/0001-writing-a-basic-command.html)
   — how to do one task, without needing to know the machinery underneath.
-- [Concepts](https://kitcli.github.io/KitCli/docs/concepts/0001-command-registration.html)
+- [Concepts](https://kitcli.github.io/KitCli/docs/concepts/command-registration.html)
   — how each subsystem works today, for when a guide left you wondering why.
 - [Decision records](https://kitcli.github.io/KitCli/docs/adr/0001-mediatr-for-command-dispatch.html)
   — a decision, its alternatives and what it cost, for when you want to

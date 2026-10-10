@@ -48,8 +48,8 @@ skip `OnSessionEnd` and any cleanup a consuming app's hooks perform.
 
 ## Learn more
 
-- [../concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
+- [../concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
   what a `Final` outcome does to a run's state.
-- [../concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — the host
+- [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — the host
   loop reading `Workflow.Status` each iteration, and `OnSessionEnd` firing
   once it stops.

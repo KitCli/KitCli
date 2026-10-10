@@ -1,4 +1,4 @@
-# 0003. CLI I/O
+# CLI I/O
 
 A framework that calls `Console` directly cannot be tested and cannot be
 hosted anywhere else. So KitCli calls it in exactly one class. `ICliIo` is
@@ -46,5 +46,5 @@ its token runs to completion.**
 
 ## See also
 
-[0002-cli-app-host.md](0002-cli-app-host.md) · [0004-outcome-writing.md](0004-outcome-writing.md) ·
+[cli-app-host.md](cli-app-host.md) · [outcome-writing.md](outcome-writing.md) ·
 [../adr/0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)

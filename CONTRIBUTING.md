@@ -70,7 +70,9 @@ for why, and add an entry to it when a release or a change of shape lands.
 
 - **Copy the kind's `0000-template.md`** and number it sequentially,
   `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
-  Technology pages take their dependency's name instead.
+  Technology pages take their dependency's name instead, and concept docs
+  take their topic's name with no number — `toc.yml` gives the reading
+  order instead.
 - **Verify every name, signature and sample against source** before it
   lands. Readers trust a doc they cannot check, so a wrong one costs more
   than a missing one.
@@ -126,6 +128,10 @@ Q&A that re-answers the body.
 
 Describe the code as it is. Aspirational behaviour reads exactly like
 shipped behaviour, and nothing flags the difference.
+
+`toc.yml` groups them by area — `abstractions`, `instructions`,
+`commands`, `workflow`, `host`, `tooling` — in the order a reader should
+meet them within that area.
 
 ## User guides
 

@@ -56,5 +56,5 @@ own constructor arguments.
 - [0006-gating-a-command-with-cancreatewhen.md](0006-gating-a-command-with-cancreatewhen.md) —
   how `CanCreateWhen` decides whether one factory's command is offered at
   all.
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   how registration keys factories by name and resolves them first-match-wins.

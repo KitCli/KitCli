@@ -70,7 +70,7 @@ set *most recently*. Give each a `Name` whenever more than one could exist.
   fresh ask" half of this picture.
 - [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md) —
   remembering a value of your own, not just the built-ins.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
+- [../concepts/artefacts.md](../concepts/artefacts.md) — how a
   `Reusable` outcome becomes something a later factory can query.
-- [../concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
+- [../concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
   the state machine beneath: `ReachedReusableOutcome` against `MovePastAsk`.

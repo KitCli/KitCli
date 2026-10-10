@@ -1,4 +1,4 @@
-# 0009. Tables
+# Tables
 
 A table is columns, rows, and the frame drawn around them. `Table` holds
 all three and renders itself as fixed-width text. `TableBuilder<TSource,
@@ -84,7 +84,7 @@ has, inside its own row, and square brackets print literally.
 
 ## See also
 
-[0007-aggregators.md](0007-aggregators.md) · [0006-outcomes.md](0006-outcomes.md) ·
-[0008-artefacts.md](0008-artefacts.md) ·
+[aggregators.md](aggregators.md) · [outcomes.md](outcomes.md) ·
+[artefacts.md](artefacts.md) ·
 [../user-guides/0011-showing-a-table.md](../user-guides/0011-showing-a-table.md) ·
 [Spectre.Console](../technology/spectre-console.md)

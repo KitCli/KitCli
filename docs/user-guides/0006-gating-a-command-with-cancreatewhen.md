@@ -71,7 +71,7 @@ the *previous* command with `[CliNextCommandIs(name, description)]`
   need a factory at all.
 - [0005-reading-command-arguments.md](0005-reading-command-arguments.md) — the
   argument helpers `CanCreateWhen` can also read.
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   where `CanCreateWhen` sits in resolution: keyed DI narrows the
   candidates, `CanCreateWhen` picks among them, first match wins.
 - [0017-creating-sub-commands.md](0017-creating-sub-commands.md) —

@@ -61,5 +61,5 @@ cannot act on prints them — an unknown name, a command gated off by
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   what parks a run at a reusable outcome in the first place.
-- [../concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
+- [../concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
   where suggestions sit in the run's state machine.

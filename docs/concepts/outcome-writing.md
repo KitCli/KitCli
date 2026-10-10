@@ -1,4 +1,4 @@
-# 0004. Outcome writing
+# Outcome writing
 
 A handler returns outcomes; it never prints. Turning one outcome into
 output is an `IOutcomeIoWriter`'s job, and separating the two is what lets
@@ -69,5 +69,5 @@ A plain `SayOutcome`/`FinalSayOutcome` has no level and always writes.
 
 ## See also
 
-[0006-outcomes.md](0006-outcomes.md) · [0003-cli-io.md](0003-cli-io.md) ·
-[0002-cli-app-host.md](0002-cli-app-host.md)
+[outcomes.md](outcomes.md) · [cli-io.md](cli-io.md) ·
+[cli-app-host.md](cli-app-host.md) · [app-configuration.md](app-configuration.md)

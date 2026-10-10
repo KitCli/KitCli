@@ -62,6 +62,6 @@ interactive app fed by piped input.
   interactive alternative, and the hooks both modes share.
 - [0007-chaining-commands.md](0007-chaining-commands.md) — running several commands
   from one ask.
-- [../concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — what
+- [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
   `HeadlessCliApp.Run` does, and why the choice between the two hosts is
   made at compile time.

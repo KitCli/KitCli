@@ -6,7 +6,7 @@ assumes them. Then pick a folder.
 | Folder | Answers | Read it when |
 | --- | --- | --- |
 | [`user-guides/`](user-guides/0001-writing-a-basic-command.md) | How do I do X? | You are building an app with KitCli. |
-| [`concepts/`](concepts/0001-command-registration.md) | How does X work? | A guide left you wondering why. |
+| [`concepts/`](concepts/command-registration.md) | How does X work? | A guide left you wondering why. |
 | [`adr/`](adr/0001-mediatr-for-command-dispatch.md) | Why is X like this? | You want to change something and need the reason it is that way. |
 | [`investigations/`](investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md) | What did we find out? | You are picking up work a spike scoped. |
 | [`technology/`](technology/microsoft-dependency-injection.md) | What can I do with KitCli's dependency X? | You are asking "does the container support…". |

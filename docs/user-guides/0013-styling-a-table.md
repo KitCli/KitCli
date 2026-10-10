@@ -135,5 +135,5 @@ around the whole table. Nothing styles a single column yet —
 
 - [0011-showing-a-table.md](0011-showing-a-table.md) — building the table
   in the first place.
-- [../concepts/0009-tables.md](../concepts/0009-tables.md) — how a table
+- [../concepts/tables.md](../concepts/tables.md) — how a table
   renders itself.

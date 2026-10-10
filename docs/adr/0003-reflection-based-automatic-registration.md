@@ -23,11 +23,11 @@ reflection-scans that assembly at startup and registers what it finds:
 - `AddCommandsFromAssembly` finds every `CliCommand` subtype, matches it to
   a `CliCommandFactory<>` (or falls back to `BasicCliCommandFactory<>`),
   and registers MediatR handlers from the same assembly. See
-  [0001-command-registration.md](../concepts/0001-command-registration.md).
+  [command-registration.md](../concepts/command-registration.md).
 - `AddArtefactFactoriesForAssembly` finds every `ArtefactFactory<>`,
   building closed generic types with `MakeGenericType` and
   `Activator.CreateInstance`. See
-  [0008-artefacts.md](../concepts/0008-artefacts.md).
+  [artefacts.md](../concepts/artefacts.md).
 
 ## Alternatives considered
 
@@ -49,6 +49,6 @@ write the class and it is found. The costs:
 - A class in an assembly nobody told KitCli to scan is silently
   unregistered. Nothing names what was missed; a consumer notices at
   runtime. See the "Gaps" sections of
-  [0008-artefacts.md](../concepts/0008-artefacts.md) and
-  [0001-command-registration.md](../concepts/0001-command-registration.md)
+  [artefacts.md](../concepts/artefacts.md) and
+  [command-registration.md](../concepts/command-registration.md)
   for the failure shape in each subsystem.

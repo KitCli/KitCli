@@ -1,20 +1,34 @@
-- name: Command registration
-  href: 0001-command-registration.md
-- name: CliApp host loop
-  href: 0002-cli-app-host.md
-- name: CLI I/O
-  href: 0003-cli-io.md
-- name: Outcome writing
-  href: 0004-outcome-writing.md
-- name: Instruction parsing pipeline
-  href: 0005-instruction-parsing-pipeline.md
-- name: Outcomes
-  href: 0006-outcomes.md
-- name: Aggregators
-  href: 0007-aggregators.md
-- name: Artefacts
-  href: 0008-artefacts.md
-- name: Tables
-  href: 0009-tables.md
-- name: Workflow run state machine
-  href: 0010-workflow-run-state-machine.md
+- name: Abstractions
+  items:
+    - name: CLI I/O
+      href: cli-io.md
+    - name: Tables
+      href: tables.md
+- name: Instructions
+  items:
+    - name: Instruction parsing pipeline
+      href: instruction-parsing-pipeline.md
+- name: Commands
+  items:
+    - name: Command registration
+      href: command-registration.md
+    - name: Outcomes
+      href: outcomes.md
+    - name: Outcome writing
+      href: outcome-writing.md
+    - name: Aggregators
+      href: aggregators.md
+    - name: Artefacts
+      href: artefacts.md
+- name: Workflow
+  items:
+    - name: Workflow run state machine
+      href: workflow-run-state-machine.md
+    - name: Specified vs provided outcomes
+      href: specified-vs-provided-outcomes.md
+- name: Host
+  items:
+    - name: CliApp host loop
+      href: cli-app-host.md
+    - name: App configuration
+      href: app-configuration.md

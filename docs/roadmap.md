@@ -65,7 +65,7 @@ layout: landing
       <code>Cli.Commands</code>, <code>Cli.ViewModel.Abstractions</code> and
       <code>Cli.Workflow</code> are projects of their own, types take the
       <code>Cli</code> prefix they still carry, and instruction parsing is
-      rewritten around <a href="concepts/0005-instruction-parsing-pipeline.md">token
+      rewritten around <a href="concepts/instruction-parsing-pipeline.md">token
       indexing</a>.
     </p>
   </div>
@@ -76,11 +76,11 @@ layout: landing
     <span class="tl-when">November 2025</span>
     <h3>The vocabulary settles</h3>
     <p>
-      Generators become <a href="concepts/0001-command-registration.md">factories</a>,
-      command properties become <a href="concepts/0008-artefacts.md">artefacts</a>,
+      Generators become <a href="concepts/command-registration.md">factories</a>,
+      command properties become <a href="concepts/artefacts.md">artefacts</a>,
       and reusable outcomes plus a <code>ReachedReusableOutcome</code> status
       let one run survive several asks — the
-      <a href="concepts/0010-workflow-run-state-machine.md">state machine</a> in
+      <a href="concepts/workflow-run-state-machine.md">state machine</a> in
       outline. Instruction validators, configurable prefixes and the first real
       test coverage arrive with them.
     </p>
@@ -93,7 +93,7 @@ layout: landing
     <h3>Paging</h3>
     <p>
       Page size and page number become
-      <a href="concepts/0006-outcomes.md">outcomes</a> a later command can read
+      <a href="concepts/outcomes.md">outcomes</a> a later command can read
       back, rather than arguments every command has to ask for again. Artefacts
       get names.
     </p>
@@ -146,7 +146,7 @@ layout: landing
     <p>
       Process, not code: <code>CONTRIBUTING.md</code>, the first
       <a href="adr/0001-mediatr-for-command-dispatch.md">ADRs</a> and
-      <a href="concepts/0001-command-registration.md">concept docs</a>, and an
+      <a href="concepts/command-registration.md">concept docs</a>, and an
       automated release workflow. A framework other people's code depends on
       needs to be able to answer "why is it like this".
     </p>

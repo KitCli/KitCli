@@ -60,7 +60,7 @@ await app.Run();</code></pre>
       <p class="kit-card-q">How do I do X?</p>
       <p>You are building an app with KitCli.</p>
     </a>
-    <a class="kit-card" href="docs/concepts/0001-command-registration.md">
+    <a class="kit-card" href="docs/concepts/command-registration.md">
       <h3>Concepts</h3>
       <p class="kit-card-q">How does X work?</p>
       <p>A guide left you wondering why.</p>

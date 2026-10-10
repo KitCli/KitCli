@@ -54,7 +54,7 @@ currently promises it never does; and the loop being rewritten has one test.
    [#26](https://github.com/KitCli/KitCli/issues/26) and the *Add Tests for
    the App Host and Scenarios* milestone.
 5. **Docs, in the same PR as the change they describe** —
-   [`0002-cli-app-host.md`](../concepts/0002-cli-app-host.md), user guides
+   [`cli-app-host.md`](../concepts/cli-app-host.md), user guides
    0002, 0003 and 0007, and `CHANGELOG.md`.
 
 ## What was built, and where it departed

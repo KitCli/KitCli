@@ -50,7 +50,7 @@ stem to `ta`.
 
 ## Learn more
 
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   how a type name becomes an instruction name, and how the keyed
   registration an alias adds to works.
 - [../adr/0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md) —
