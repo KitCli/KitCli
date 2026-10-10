@@ -94,6 +94,10 @@ An [ADR](docs/adr/) records a decision, its alternatives, and its
 consequences. How something works today belongs in
 [`docs/concepts/`](docs/concepts/).
 
+**Keep it under 100 lines, for a reader with no context on this
+codebase** — plain words, the problem before the decision, and a type
+named only when they'd have to type it.
+
 **Write one when you are:**
 
 - introducing a cross-cutting pattern ("commands dispatch through MediatR")
