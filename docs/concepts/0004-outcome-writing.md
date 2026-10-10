@@ -41,6 +41,21 @@ afterwards lands behind the built-ins and never wins.
 An `ExceptionOutcome` never prints: `CliApp` rethrows before
 `WriteOutcomes` runs, under either host.
 
+## Leveled messages
+
+`BySaying(message, level)` and `ByFinallySaying(message, level)` append a
+`LeveledSayOutcome`/`LeveledFinalSayOutcome` — subclasses of `SayOutcome`/
+`FinalSayOutcome` carrying a `MessageLevel` (`Trace` through `Error`).
+`MessageOutcomeIoWriter`/`OutputOutcomeIoWriter` check that level against
+`KitCliSettings.MinimumMessageLevel` and skip the write if it falls short.
+A plain `SayOutcome`/`FinalSayOutcome` has no level and always writes.
+
+`MinimumMessageLevel` defaults to `Information`.
+`CliAppBuilder.WithMinimumMessageLevel(level)` sets it as a config value
+under the `KitCli` section — the same `WithJsonSettings`/
+`WithUserSecretSettings` pipeline `InstructionSettings` uses, no
+`WithSettings<KitCliSettings>()` needed.
+
 ## Gaps
 
 - An unmatched outcome is dropped in silence, and nothing distinguishes

@@ -60,6 +60,15 @@ public class OutcomeList : List<Outcome>
             .ToArray<Outcome>());
 
     /// <summary>
+    /// Appends a <see cref="LeveledSayOutcome"/> carrying the given message and level.
+    /// </summary>
+    /// <param name="message">The message to say.</param>
+    /// <param name="level">How important this message is.</param>
+    /// <returns>This list, for chaining.</returns>
+    public OutcomeList BySaying(string message, MessageLevel level)
+        => ByResultingIn(new LeveledSayOutcome(message, level));
+
+    /// <summary>
     /// Appends a <see cref="TableOutcome"/> carrying the given table.
     /// </summary>
     /// <param name="table">The table to show.</param>
@@ -181,6 +190,15 @@ public class OutcomeList : List<Outcome>
     /// <returns>This list, for chaining.</returns>
     public OutcomeList ByFinallySaying(string message)
         => ByResultingIn(new FinalSayOutcome(message));
+
+    /// <summary>
+    /// Appends a <see cref="LeveledFinalSayOutcome"/> carrying the given message and level, ending the run.
+    /// </summary>
+    /// <param name="message">The final message to say.</param>
+    /// <param name="level">How important this message is.</param>
+    /// <returns>This list, for chaining.</returns>
+    public OutcomeList ByFinallySaying(string message, MessageLevel level)
+        => ByResultingIn(new LeveledFinalSayOutcome(message, level));
 
     /// <summary>
     /// Appends a <see cref="CliCommandNotFoundOutcome"/>, ending the run because no command was found.
