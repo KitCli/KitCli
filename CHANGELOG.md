@@ -11,10 +11,10 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - `BySaying(message, level)` and `ByFinallySaying(message, level)` give a
   message a `MessageLevel` (`Trace` through `Error`), shown only when it
   meets `KitCliSettings.MinimumMessageLevel` (defaults to `Information`).
-  Set it with `CliAppBuilder.WithMinimumMessageLevel(level)`, or from
-  configuration under a `KitCli` section, same as any other KitCli-owned
-  setting. The existing `BySaying(message)` is unaffected — a plain message
-  always shows ([#299](https://github.com/KitCli/KitCli/issues/299)).
+  Configure it under a `KitCli` section, loaded via `WithJsonSettings`/
+  `WithUserSecretSettings`, same as any other KitCli-owned setting. The
+  existing `BySaying(message)` is unaffected — a plain message always shows
+  ([#299](https://github.com/KitCli/KitCli/issues/299)).
 - `[CliNextCommandCouldBe(name, description)]` suggests commands once a
   command finishes, even outside a parked run — `[CliNextCommandIs]` only
   ever fired when a parked run's next ask failed to resolve

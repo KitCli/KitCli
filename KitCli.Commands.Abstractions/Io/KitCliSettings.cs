@@ -3,14 +3,16 @@ using KitCli.Commands.Abstractions.Outcomes;
 namespace KitCli.Commands.Abstractions.Io;
 
 /// <summary>
-/// KitCli-owned settings a consumer can configure through <c>CliAppBuilder</c>'s <c>With...</c> methods,
-/// without having to opt in via <c>WithSettings{T}()</c>.
+/// KitCli-owned settings, resolved the same way as <c>InstructionSettings</c>: bound from a
+/// <c>KitCli</c> configuration section if one exists (via <c>WithJsonSettings</c>/
+/// <c>WithUserSecretSettings</c>), falling back to the defaults below otherwise. No
+/// <c>WithSettings{T}()</c> call is needed either way.
 /// </summary>
 public class KitCliSettings
 {
     /// <summary>
     /// The lowest <see cref="MessageLevel"/> a leveled message outcome must have to be written.
-    /// Set via <c>CliAppBuilder.WithMinimumMessageLevel</c>; defaults to <see cref="MessageLevel.Information"/>.
+    /// Defaults to <see cref="MessageLevel.Information"/>.
     /// </summary>
     public MessageLevel MinimumMessageLevel { get; set; } = MessageLevel.Information;
 }

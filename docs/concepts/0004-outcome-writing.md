@@ -50,11 +50,10 @@ An `ExceptionOutcome` never prints: `CliApp` rethrows before
 `KitCliSettings.MinimumMessageLevel` and skip the write if it falls short.
 A plain `SayOutcome`/`FinalSayOutcome` has no level and always writes.
 
-`MinimumMessageLevel` defaults to `Information`.
-`CliAppBuilder.WithMinimumMessageLevel(level)` sets it as a config value
-under the `KitCli` section — the same `WithJsonSettings`/
-`WithUserSecretSettings` pipeline `InstructionSettings` uses, no
-`WithSettings<KitCliSettings>()` needed.
+`MinimumMessageLevel` defaults to `Information`, resolved the same way as
+`InstructionSettings`: bound from a `KitCli` section if `WithJsonSettings`/
+`WithUserSecretSettings` loaded one, the default otherwise. No
+`WithSettings<KitCliSettings>()` call is needed either way.
 
 ## Gaps
 

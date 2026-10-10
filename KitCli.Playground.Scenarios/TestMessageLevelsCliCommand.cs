@@ -6,9 +6,10 @@ namespace KitCli.Playground.Scenarios;
 
 /// <summary>
 /// Leveled messages. Says one message at every <see cref="MessageLevel"/>, then a plain, always-shown
-/// final message. Add <c>.WithMinimumMessageLevel(MessageLevel.Warning)</c> to this app's
-/// <c>CliAppBuilder</c> chain in <c>Program.cs</c> and rerun to see the quieter ones disappear — the
-/// final message still shows either way, since it isn't leveled. Type <c>/test-message-levels</c>.
+/// final message. Add <c>.WithJsonSettings("appsettings.json")</c> to this app's <c>CliAppBuilder</c>
+/// chain in <c>Program.cs</c>, with a <c>{ "KitCli": { "MinimumMessageLevel": "Warning" } }</c> file
+/// next to it, and rerun to see the quieter ones disappear — the final message still shows either
+/// way, since it isn't leveled. Type <c>/test-message-levels</c>.
 /// </summary>
 public record TestMessageLevelsCliCommand : CliCommand;
 

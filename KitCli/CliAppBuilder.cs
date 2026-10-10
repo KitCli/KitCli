@@ -1,7 +1,6 @@
 using System.Reflection;
 using KitCli.Abstractions;
 using KitCli.Commands.Abstractions.Io;
-using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Instructions.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -117,26 +116,6 @@ public class CliAppBuilder
         return this;
     }
     
-    /// <summary>
-    /// Sets the minimum <see cref="MessageLevel"/> a leveled <c>BySaying</c> or <c>ByFinallySaying</c>
-    /// message must meet to be written. Optional — without this call, the minimum level is
-    /// <see cref="MessageLevel.Information"/>. Resolved the same way as any other
-    /// <see cref="KitCliSettings"/> value: through whatever configuration sources
-    /// <see cref="WithJsonSettings"/>/<see cref="WithUserSecretSettings"/> add, with this call layered on top.
-    /// </summary>
-    /// <param name="level">The minimum level to show.</param>
-    /// <returns>This builder, for chaining.</returns>
-    public CliAppBuilder WithMinimumMessageLevel(MessageLevel level)
-    {
-        SetUpConfigurationBuilder();
-
-        _configurationBuilder!.AddInMemoryCollection([
-            new KeyValuePair<string, string?>("KitCli:MinimumMessageLevel", level.ToString())
-        ]);
-
-        return this;
-    }
-
     /// <summary>
     /// Instantiates <typeparamref name="TRegistry"/> and calls its <see cref="ICliAppRegistry.Register"/>
     /// to register that registry's commands and services into this builder's service collection.
