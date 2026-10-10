@@ -10,8 +10,8 @@ This becomes the squash-merge commit title, i.e. the CHANGELOG line.
 
 Keep the whole description under 30 lines. Explain the problem before the
 fix, in plain language a reader with no context on this repo can follow.
-Use a code snippet instead of a paragraph whenever one shows the change
-faster.
+Use a code snippet or diagram instead of a paragraph whenever one shows the
+change faster.
 
 Write "Linked issue: #N". Only write "Fixes #N" or "Closes #N" if the
 issue's reporter already agreed this PR resolves it — GitHub closes the

@@ -9,7 +9,8 @@ What forces are at play. What problem exists. Link the GitHub issue.
 
 ## Decision
 
-What we're doing. One paragraph, no hedging.
+What we're doing. One paragraph, no hedging. Add a code sample or diagram
+only where prose alone can't carry the shape.
 
 ## Alternatives considered
 
