@@ -422,6 +422,8 @@ public class CliWorkflowRunTests
 
         var expectedOutcomes = new Outcome[]
         {
+            new PauseOutcome(),
+            new SayOutcome("You might have meant:"),
             new SuggestionOutcome("/next", "Show the next page."),
             new SuggestionOutcome("/prev", "Show the previous page."),
         };
@@ -476,6 +478,8 @@ public class CliWorkflowRunTests
 
         var expectedOutcomes = new Outcome[]
         {
+            new PauseOutcome(),
+            new SayOutcome("You might have meant:"),
             new SuggestionOutcome("/next", "Show the next page."),
             new SuggestionOutcome("/prev", "Show the previous page."),
         };
@@ -531,6 +535,8 @@ public class CliWorkflowRunTests
 
         var expectedOutcomes = new Outcome[]
         {
+            new PauseOutcome(),
+            new SayOutcome("You might have meant:"),
             new SuggestionOutcome("/next", "Show the next page."),
             new SuggestionOutcome("/prev", "Show the previous page."),
         };

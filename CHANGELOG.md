@@ -6,6 +6,19 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- `[CliNextCommandCouldBe(name, description)]` suggests commands once a
+  command finishes, even outside a parked run — `[CliNextCommandIs]` only
+  ever fired when a parked run's next ask failed to resolve
+  ([#294](https://github.com/KitCli/KitCli/issues/294)).
+
+### Changed
+
+- A suggested-next-command now prints under a header line instead of bare,
+  with its name and description indented on separate lines instead of flush
+  left.
+
 ## [3.1.2] - 2026-09-18
 
 ### Fixed

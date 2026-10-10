@@ -35,8 +35,24 @@ The two attributes split by when they fire, not by what they look like:
 - `[CliNextCommandCouldBe]` — you've just run a command; here's what's
   often asked next.
 
-A command may declare both. `Is` keeps its existing behaviour, call site,
-and `List<Outcome>` overload untouched.
+A command may declare both. `Is` keeps its existing call site and
+`List<Outcome>` overload, but both overloads of `SuggestNextCommands` now
+lead with a one-line header, each worded for when it fires:
+
+- `Is`/`RejectAsk`: `PauseOutcome`, then `SayOutcome("You might have
+  meant:")` — the run is still open, the ask just didn't resolve.
+- `CouldBe`: `PauseOutcome`, then `SayOutcome("All done. You might want
+  to run:")` — the command just finished.
+
+`PauseOutcome` is a new outcome: a blank line, with its own
+`PauseOutcomeIoWriter`. [ADR 0008](0008-suggest-next-commands-attribute.md)
+considered and rejected exactly this type, folding the blank line into
+`SuggestionOutcomeIoWriter` instead because it had no other consumer. It
+now has one — the blank line before the header — so it is reintroduced as
+its own type rather than duplicating `cliIo.Pause()` at a second call
+site. `SuggestionOutcomeIoWriter` keeps calling `cliIo.Pause()` directly
+for the blank line between suggestions; it is not changed to emit
+`PauseOutcome` itself, since nothing asked for that and it still works.
 
 ## Alternatives considered
 
@@ -53,6 +69,10 @@ and `List<Outcome>` overload untouched.
   already recorded by the time `RejectAsk` runs; `CouldBe` fires once,
   straight off the command just run, with no history lookup needed.
   Merging them reintroduces the bool-flag problem one level up.
+- **No header line, just the suggestions.** The first cut did this; the
+  suggestion block read as unstructured noise with nothing to say what it
+  was. A header line split by context (`Is` vs `CouldBe`) is one line of
+  cost for a reader to know why they're seeing it.
 
 ## Consequences
 
@@ -63,3 +83,6 @@ and `List<Outcome>` overload untouched.
 - A command declaring both attributes shows `CouldBe` once on finishing,
   and `Is` again only if the run parks and the next ask fails — no
   duplication, because the two never print for the same event.
+- `PauseOutcome` exists again, reversing that part of ADR 0008. ADR 0008's
+  core decision — the `[CliNextCommandIs]` attribute itself — is
+  unaffected and stays Accepted.

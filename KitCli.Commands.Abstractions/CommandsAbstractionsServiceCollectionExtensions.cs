@@ -23,6 +23,7 @@ public static class CommandsAbstractionsServiceCollectionExtensions
                 .AddOutcomeIoWriter<PageSizeOutcomeIoWriter>()
                 .AddOutcomeIoWriter<PageNumberOutcomeIoWriter>()
                 .AddOutcomeIoWriter<SuggestionOutcomeIoWriter>()
+                .AddOutcomeIoWriter<PauseOutcomeIoWriter>()
                 .AddOutcomeIoWriter<ExceptionOutcomeIoWriter>();
 
         /// <summary>
