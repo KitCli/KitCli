@@ -15,8 +15,10 @@ silently, where today it loudly fails instead.
 
 ## Recommendation
 
-Two candidate fixes, with a real tradeoff. Pick one before turning
-[#289](https://github.com/KitCli/KitCli/issues/289) into delivery work.
+Three candidate fixes. Pick one before turning
+[#289](https://github.com/KitCli/KitCli/issues/289) into delivery work — the
+third changes the shape of the breaking change enough that it needs its own
+estimate, not #289's current `release:patch`.
 
 1. **Naming-convention stopgap.** Recognise a factory as already covering a
    sibling command when the factory's class name is `{CommandTypeName}Factory`
@@ -33,6 +35,45 @@ Two candidate fixes, with a real tradeoff. Pick one before turning
    actually covers instead of guessing from its name. Correct, but depends on
    three issues that haven't shipped, and none were scoped with this gap in
    mind.
+3. **Split `<T>` into what keys the factory and what it builds.**
+   `CliCommandFactory<TKeyedOnCommand, TProducesCommand>` — `TKeyedOnCommand`
+   still drives the registration key, same as today's shared `<T>`;
+   `TProducesCommand` is what `Create()` actually returns, now declared on
+   the class and readable with plain reflection, no guessing and no instance
+   needed:
+
+   ```csharp
+   public class HelloThereCliCommandFactory
+       : CliCommandFactory<HelloCliCommand, HelloThereCliCommand>
+   {
+       public override bool CanCreateWhen() => SubCommandIs("there");
+       public override HelloThereCliCommand Create() => new HelloThereCliCommand();
+   }
+   ```
+
+   `AddCommandFactories` can now ask a sound question for a sibling like
+   `HelloMateCliCommand` — "does any factory's `TProducesCommand` equal this
+   type?" — instead of guessing from a factory's name. That retires the
+   fragile half of option 1.
+
+   It does not retire the other half. Knowing `HelloMateCliCommand` is
+   uncovered still leaves two questions unanswered by either type parameter:
+   which key to register its fallback under (`"hello"`, not the dead
+   `"hello-mate"`), and what sub-command word to gate it on (`"mate"`).
+   Those still come from the same naming convention as option 1 — a
+   sibling's stripped name starting with its family's primary stripped name.
+   The alternative is to stop generating that fallback automatically and
+   require a declared factory, even a trivial one, for every sibling once
+   any one of them needs custom code — which brings back the exact
+   boilerplate [#289](https://github.com/KitCli/KitCli/issues/289) is
+   about removing.
+
+   Breaking either way: every existing `CliCommandFactory<T>` implementation
+   would need to become `CliCommandFactory<T, T>` or move to the two-parameter
+   form, unless `CliCommandFactory<T>` stays as a `: CliCommandFactory<T, T>`
+   convenience base for the common case — which still leaves every factory
+   using the shared-key strategy pattern (12 of 28, per investigation
+   [0006](0006-should-a-command-factory-declare-what-it-needs.md)) to rewrite.
 
 ## What was established
 
@@ -81,12 +122,19 @@ fallback always registers too:
 | `/hello there` | builds `HelloThereCliCommand` | unchanged |
 | `/hello mate` | throws the same exception | builds `HelloCliCommand` — **wrong**, no exception |
 
+Option 3 is a design sketch, not yet written or run — unlike the two rows
+above, nothing here has confirmed it compiles or resolves correctly.
+
 ## Open questions
 
 - Does this gap get its own fix, or fold entirely into [#188](https://github.com/KitCli/KitCli/issues/188)'s
   descriptor work?
 - If the naming-convention stopgap ships first, does it get retired once the
   descriptor epic lands, or does it stay as a permanent, cheaper path?
+- If option 3 ships, do `BasicCliCommandFactory<T>` and its siblings
+  (`BasicCreationCliCommandFactory<T>`, `BasicDecisionCliCommandFactory<T>`)
+  stay single-generic forever as sugar for `<T, T>`, or do they eventually
+  need two-parameter forms too?
 
 ## Out of scope
 
