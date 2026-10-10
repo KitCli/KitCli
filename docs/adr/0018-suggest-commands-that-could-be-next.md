@@ -35,9 +35,17 @@ The two attributes split by when they fire, not by what they look like:
 - `[CliNextCommandCouldBe]` — you've just run a command; here's what's
   often asked next.
 
-A command may declare both. `Is` keeps its existing call site and
-`List<Outcome>` overload, but both overloads of `SuggestNextCommands` now
-lead with a one-line header, each worded for when it fires:
+A command may declare both:
+
+```csharp
+[CliNextCommandIs("next", "Show the next page.")]
+[CliNextCommandCouldBe("export", "Export the current results.")]
+public record ShowPageCliCommand : CliCommand;
+```
+
+`Is` keeps its existing call site and `List<Outcome>` overload, but both
+overloads of `SuggestNextCommands` now lead with a one-line header, each
+worded for when it fires:
 
 - `Is`/`RejectAsk`: `PauseOutcome`, then `SayOutcome("You might have
   meant:")` — the run is still open, the ask just didn't resolve.
