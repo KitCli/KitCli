@@ -218,20 +218,20 @@ public class CliAppBuilder
         {
             throw new Exception("You must call With[..]Settings before calling WithSettings.");
         }
-
+        
         if (_configuration == null)
         {
             _configuration = _configurationBuilder.Build();
         }
-
+        
         var configurationName = typeof(TSettings)
             .Name
             .Replace("Settings", string.Empty);
 
         var section = _configuration.GetSection(configurationName);
-
+        
         var sectionExists = section.Exists();
-
+        
         if (!sectionExists && typeof(TSettings) == typeof(InstructionSettings))
         {
             return new InstructionSettings() as TSettings;
@@ -262,7 +262,7 @@ public class CliAppBuilder
         
         var instructionSettings = GetSettings<InstructionSettings>();
         var options = new OptionsWrapper<InstructionSettings>(instructionSettings!);
-
+        
         _services.AddSingleton<IOptions<InstructionSettings>>(options);
     }
 
