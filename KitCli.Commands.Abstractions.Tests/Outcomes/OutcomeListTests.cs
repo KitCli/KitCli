@@ -70,6 +70,16 @@ public class OutcomeListTests
     }
 
     [Test]
+    public void GivenMessageAndLevel_WhenBySaying_ThenAppendsLeveledSayOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().BySaying("careful", MessageLevel.Warning).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new LeveledSayOutcome("careful", MessageLevel.Warning) }).AsCollection);
+    }
+
+    [Test]
     public void GivenTable_WhenByShowingTable_ThenAppendsTableOutcome()
     {
         // Arrange
@@ -320,6 +330,16 @@ public class OutcomeListTests
 
         // Assert
         Assert.That(outcomes, Is.EqualTo(new Outcome[] { new FinalSayOutcome("done") }).AsCollection);
+    }
+
+    [Test]
+    public void GivenMessageAndLevel_WhenByFinallySaying_ThenAppendsLeveledFinalSayOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByFinallySaying("careful", MessageLevel.Warning).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new LeveledFinalSayOutcome("careful", MessageLevel.Warning) }).AsCollection);
     }
 
     [Test]

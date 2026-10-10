@@ -169,6 +169,7 @@ public class CliAppBuilder
     public Task Run(string[]? args = null)
     {
         EnsureInstructionSettingsRegistered();
+        EnsureKitCliSettingsRegistered();
 
         var serviceProvider = _services.BuildServiceProvider(ServiceProviderOptions);
 
@@ -207,7 +208,12 @@ public class CliAppBuilder
         {
             return new InstructionSettings() as TSettings;
         }
-        
+
+        if (_configurationBuilder == null && typeof(TSettings) == typeof(KitCliSettings))
+        {
+            return new KitCliSettings() as TSettings;
+        }
+
         if (_configurationBuilder == null)
         {
             throw new Exception("You must call With[..]Settings before calling WithSettings.");
@@ -229,6 +235,11 @@ public class CliAppBuilder
         if (!sectionExists && typeof(TSettings) == typeof(InstructionSettings))
         {
             return new InstructionSettings() as TSettings;
+        }
+
+        if (!sectionExists && typeof(TSettings) == typeof(KitCliSettings))
+        {
+            return new KitCliSettings() as TSettings;
         }
 
         if (!sectionExists)
@@ -253,5 +264,12 @@ public class CliAppBuilder
         var options = new OptionsWrapper<InstructionSettings>(instructionSettings!);
         
         _services.AddSingleton<IOptions<InstructionSettings>>(options);
+    }
+
+    private void EnsureKitCliSettingsRegistered()
+    {
+        var kitCliSettings = GetSettings<KitCliSettings>() ?? new KitCliSettings();
+
+        _services.AddSingleton(kitCliSettings);
     }
 }
