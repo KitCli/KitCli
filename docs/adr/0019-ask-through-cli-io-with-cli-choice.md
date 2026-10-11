@@ -30,8 +30,8 @@ Cancelling gives `null` or an empty list.
 
 ## Consequences
 
-- An app that implements `ICliIo` itself must add both methods. That is a
-  breaking change; apps using `CliIo` are unaffected.
+- An app with its own `ICliIo` implementation adds both methods. Apps using
+  `CliIo` need nothing.
 - A prompt waits for a keypress, and any line printed meanwhile scrambles it.
   `CliApp.OnRunStarted` ran in that window, so it now runs before the command
   starts, straight after `OnRunCreated`, and is obsolete
