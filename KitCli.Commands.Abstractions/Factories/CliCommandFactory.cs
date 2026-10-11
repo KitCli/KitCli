@@ -6,6 +6,46 @@ using KitCli.Instructions.Arguments;
 namespace KitCli.Commands.Abstractions.Factories;
 
 /// <summary>
+/// The fallback <c>AddCommandsFromAssembly</c> registers for a command sharing its registration key with
+/// at least one sibling that has a hand-written factory, but that has no hand-written factory of its own.
+/// Never hand-written — registration constructs it by reflection once it has worked out
+/// <typeparamref name="TPrimaryCliCommand"/> and <typeparamref name="TCreate"/> for itself. Matches a
+/// sub-command word derived from the two types, or the absence of a sub-command word entirely when
+/// <typeparamref name="TCreate"/> is <typeparamref name="TPrimaryCliCommand"/> itself.
+/// </summary>
+/// <typeparam name="TPrimaryCliCommand">The command type this fallback is registered under.</typeparam>
+/// <typeparam name="TCreate">The exact command type this fallback builds.</typeparam>
+public class FallbackCliSubCommandFactory<TPrimaryCliCommand, TCreate> : CliCommandFactory<TPrimaryCliCommand>
+    where TPrimaryCliCommand : CliCommand
+    where TCreate : CliCommand, new()
+{
+    /// <inheritdoc/>
+    public override bool CanCreateWhen() => SubCommandIs<TCreate>();
+
+    /// <inheritdoc/>
+    public override CliCommand Create() => new TCreate();
+
+    /// <summary>
+    /// Determines whether the attached instruction's sub-command word matches the one
+    /// <typeparamref name="TSubCliCommand"/> derives from its name — or, when that derived word is empty
+    /// because <typeparamref name="TSubCliCommand"/> is the primary command itself, whether the instruction
+    /// had no sub-command word at all. An empty derived word and a missing typed one are both represented
+    /// differently (<see cref="string.Empty"/> versus <see langword="null"/>), so they're compared for
+    /// either rather than for exact equality.
+    /// </summary>
+    private bool SubCommandIs<TSubCliCommand>() where TSubCliCommand : CliCommand
+    {
+        var subCommandWord = CliCommand.GetPrimaryInstructionName(
+            typeof(TPrimaryCliCommand),
+            typeof(TSubCliCommand));
+
+        return string.IsNullOrEmpty(subCommandWord)
+            ? string.IsNullOrEmpty(Instruction.SubInstructionName)
+            : SubCommandIs(subCommandWord);
+    }
+}
+
+/// <summary>
 /// A custom factory for creating a specific <see cref="CliCommand"/>.
 /// This is useful when the command creation logic is complex and cannot be easily handled by a simple constructor or when it requires access to the instruction and artefacts for decision-making.
 /// If you need don't need to use Arguments or Artefacts, you do not need to create this factory: basic commands are automatically created.

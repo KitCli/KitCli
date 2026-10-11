@@ -44,4 +44,21 @@ public record CliCommand : IRequest<Outcome[]>
     /// <returns><paramref name="commandName"/> with every occurrence of <c>CliCommand</c> removed.</returns>
     public static string StripCommandName(string commandName)
         => commandName.ReplaceCommandSuffix();
+
+    /// <summary>
+    /// Derives the sub-command word a command type answers to, by removing <paramref name="primaryCommandType"/>'s
+    /// own instruction name from the start of <paramref name="subCommandType"/>'s. For example,
+    /// <c>HelloMateCliCommand</c> under <c>HelloCliCommand</c> gives <c>"mate"</c>. Passing the same type for
+    /// both gives an empty string, meaning no sub-command word at all — the primary command itself.
+    /// </summary>
+    /// <param name="primaryCommandType">The command type whose instruction name the two are registered under.</param>
+    /// <param name="subCommandType">The command type to derive a sub-command word for.</param>
+    /// <returns>The sub-command word, or an empty string when <paramref name="subCommandType"/> is the primary command itself.</returns>
+    public static string GetPrimaryInstructionName(Type primaryCommandType, Type subCommandType)
+    {
+        var keyName = GetInstructionName(primaryCommandType); // e.g. "hello" from HelloCliCommand
+        var subName = GetInstructionName(subCommandType); // e.g. "hello-mate" from HelloMateCliCommand
+
+        return subName[keyName.Length..].TrimStart('-');
+    }
 }
