@@ -185,6 +185,39 @@ public class CommandServiceCollectionExtensionsTests
     }
 
     [Test]
+    public void GivenAFamilySharingAKey_WhenAddCommandsFromAssembly_ThenEveryMemberGetsTheRightFactory()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var instructionName = CliCommand.GetInstructionName(typeof(TestPrimaryCliCommand));
+
+        // Act
+        services.AddCommandsFromAssembly(Assembly.GetExecutingAssembly());
+        var provider = services.BuildServiceProvider();
+        var factories = provider.GetKeyedServices<ICliCommandFactory>(instructionName).ToList();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            // The dedicated sub-command's own hand-written factory is registered as-is.
+            Assert.That(factories, Has.Exactly(1).TypeOf<TestPrimaryDedicatedSubCliCommandFactory>());
+
+            // The bare primary command has no factory of its own, but shares its key with a
+            // sibling that does — it gets the conditional fallback, not the plain unconditional one.
+            Assert.That(factories, Has.Exactly(1)
+                .TypeOf<FallbackCliSubCommandFactory<TestPrimaryCliCommand, TestPrimaryCliCommand>>());
+
+            // The uncovered sibling has no factory anywhere — it's found and given a fallback too.
+            Assert.That(factories, Has.Exactly(1)
+                .TypeOf<FallbackCliSubCommandFactory<TestPrimaryCliCommand, TestPrimaryUncoveredSubCliCommand>>());
+
+            // The dedicated sub-command doesn't also get a redundant automatic fallback.
+            Assert.That(factories, Has.Exactly(0)
+                .TypeOf<FallbackCliSubCommandFactory<TestPrimaryCliCommand, TestPrimaryDedicatedSubCliCommand>>());
+        });
+    }
+
+    [Test]
     public void GivenNullAssembly_WhenAddCommandsFromAssembly_ThenThrowsNullReferenceException()
     {
         // Arrange

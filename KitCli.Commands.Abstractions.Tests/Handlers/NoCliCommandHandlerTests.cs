@@ -7,23 +7,23 @@ namespace KitCli.Commands.Abstractions.Tests.Handlers;
 [TestFixture]
 public class NoCliCommandHandlerTests
 {
-    private record TestCliCommand : CliCommand;
-    
-    private class TestCliCommandHandler : CliCommandHandler<TestCliCommand>;
-    
-    private CliCommandHandler<TestCliCommand> _classUnderTest;
+    private record NoHandlerCliCommand : CliCommand;
+
+    private class NoHandlerCliCommandHandler : CliCommandHandler<NoHandlerCliCommand>;
+
+    private CliCommandHandler<NoHandlerCliCommand> _classUnderTest;
 
     [SetUp]
     public void SetUp()
     {
-        _classUnderTest = new TestCliCommandHandler();
+        _classUnderTest = new NoHandlerCliCommandHandler();
     }
-    
+
     [Test]
     public async Task GivenCommand_WhenHandle_ReturnsOutputOutcome()
     {
         // Arrange
-        var command = new TestCliCommand();
+        var command = new NoHandlerCliCommand();
         
         // Act
         var outcome = await _classUnderTest.Handle(command, CancellationToken.None);

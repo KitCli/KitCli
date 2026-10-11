@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using KitCli.Commands.Abstractions.Tests.TestHelpers;
+using NUnit.Framework;
 
 namespace KitCli.Commands.Abstractions.Tests;
 
@@ -45,5 +46,29 @@ public class CliCommandTests
 
         // Assert
         Assert.That(strippedName, Is.EqualTo(expectedStrippedName));
+    }
+
+    [Test]
+    public void GivenASiblingType_WhenGetPrimaryInstructionName_ThenReturnsItsSubCommandWord()
+    {
+        // Act
+        var subCommandWord = CliCommand.GetPrimaryInstructionName(
+            typeof(TestPrimaryCliCommand),
+            typeof(TestPrimaryUncoveredSubCliCommand));
+
+        // Assert
+        Assert.That(subCommandWord, Is.EqualTo("uncovered-sub"));
+    }
+
+    [Test]
+    public void GivenThePrimaryTypeItself_WhenGetPrimaryInstructionName_ThenReturnsAnEmptyString()
+    {
+        // Act
+        var subCommandWord = CliCommand.GetPrimaryInstructionName(
+            typeof(TestPrimaryCliCommand),
+            typeof(TestPrimaryCliCommand));
+
+        // Assert
+        Assert.That(subCommandWord, Is.Empty);
     }
 }
