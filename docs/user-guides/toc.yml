@@ -32,3 +32,5 @@
   href: 0016-suggesting-what-to-run-next.md
 - name: Creating sub-commands
   href: 0017-creating-sub-commands.md
+- name: Choosing from a list
+  href: 0018-choosing-from-a-list.md

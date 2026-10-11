@@ -55,9 +55,10 @@ message, write an `IOutcomeIoWriter` (see
 [../concepts/outcome-writing.md](../concepts/outcome-writing.md)).
 Hooks govern *when* something happens, writers *how* an outcome renders.
 
-**Doing setup in `OnRunStarted` or `OnMovingPastAsk`.** Both fire while the
-run executes, neither before nor after. Use them for progress, never for
-work a run depends on.
+**Doing setup in `OnMovingPastAsk`.** It fires while its step executes,
+neither before nor after. Use it for progress, never for work a run
+depends on. `OnRunStarted` fires just before the command starts, so a line
+it writes appears ahead of the command's own output.
 
 **Passing a `HeadlessCliApp` subclass to `WithApp<T>()`, then calling
 `Run()` with no arguments.** The base class you extend decides the mode,

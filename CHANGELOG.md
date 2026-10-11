@@ -19,12 +19,29 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   command finishes, even outside a parked run — `[CliNextCommandIs]` only
   ever fired when a parked run's next ask failed to resolve
   ([#294](https://github.com/KitCli/KitCli/issues/294)).
+- `ICliIo.ChooseAsync` and `ICliIo.ChooseManyAsync` show a list the person
+  moves through with the arrow keys, picking one item with enter or ticking
+  several with the space bar. Each item is a `CliChoice` — a `Label` to show
+  and an optional `Value` handed back with the pick
+  ([#255](https://github.com/KitCli/KitCli/issues/255)).
 
 ### Changed
 
+- **Breaking:** `ICliIo` has two new members, `ChooseAsync` and
+  `ChooseManyAsync`, so an app that implements `ICliIo` itself must add
+  them. `CliIo` is unaffected.
+- **Breaking:** `CliApp.OnRunStarted` now runs just before the command
+  starts instead of just after, so a line it writes no longer lands on top
+  of a list the command shows.
 - A suggested-next-command now prints under a header line instead of bare,
   with its name and description indented on separate lines instead of flush
   left.
+
+### Deprecated
+
+- `CliApp.OnRunStarted` now runs straight after `OnRunCreated`, so it tells
+  an app nothing that hook does not. Override `OnRunCreated` instead; removal
+  is tracked in [#305](https://github.com/KitCli/KitCli/issues/305).
 
 ## [3.1.2] - 2026-09-18
 

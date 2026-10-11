@@ -17,11 +17,6 @@ public class TestCliApp(ICliWorkflow workflow, ICliIo io) : HeadlessCliApp(workf
         Io.Say("TestCliApp run created.");
     }
 
-    protected override void OnRunStarted(ICliWorkflowRun run, string? ask)
-    {
-        Io.Say("TestCliApp run started.");
-    }
-
     protected override void OnRunComplete(ICliWorkflowRun run, Outcome[] outcomes)
     {
         Io.Say("TestCliApp run completed.");

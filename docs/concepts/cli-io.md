@@ -9,6 +9,8 @@ goes through it, and nothing else in the framework touches `Console`.
 public interface ICliIo
 {
     Task<string?> AskAsync(CancellationToken cancellationToken);
+    Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
+    Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
     void Pause();          // CliIo writes a blank line
     void Say(string something);
     void SetTitle(string title);
@@ -29,6 +31,20 @@ waiting for a keypress that may never come.
 
 **`null` also means end-of-input**, and `RespondToAsk` treats both the same
 way. A piped stream running dry ends a run like a Ctrl+C does.
+
+## Picking from a list
+
+`ChooseAsync` and `ChooseManyAsync` show a Spectre selection prompt: arrow
+keys to move, enter to pick, space to tick in the many-choice list. A
+`CliChoice` is a `Label` to show and an optional `Value` handed back with the
+pick. Spectre's prompt takes the cancellation token itself, so a Ctrl+C
+returns `null` or an empty list without the background-thread race `AskAsync`
+needs. An empty list of choices throws.
+
+**A prompt redraws itself in place, so a line printed while one is showing
+scrambles it.** Nothing in `CliIo` prevents that; print before asking or
+after the answer. `CliIo` takes an optional `IAnsiConsole`, so a test can
+drive the prompt with Spectre's `TestConsole`.
 
 ## What a Ctrl+C does
 
