@@ -34,9 +34,9 @@ names, and the guess is wrong in general, not just fragile (established
 facts 4–5).
 
 Fixing that needs a command to declare its relationship as data instead
-of KitCli guessing it. Nothing in KitCli does that yet — it's milestone
-[20, "Describing a Command"](https://github.com/KitCli/KitCli/milestone/20),
-nine open issues, none shipped.
+of KitCli guessing it. Nothing in KitCli does that yet — not even
+milestone [20, "Describing a Command"](https://github.com/KitCli/KitCli/milestone/20)
+as currently scoped (established fact 8).
 
 ## Recommendation
 
@@ -46,15 +46,21 @@ nine open issues, none shipped.
    `HelloThereCliCommand`. No new type, nothing breaks, and on its own
    this fixes the reported crash: `/hello` stops failing once KitCli
    knows `HelloThereCliCommandFactory` only covers `there`.
-2. **Blocked: declaring an uncovered sibling's relationship.** Nothing
-   available today can produce `HelloCliCommand` + `"mate"` for
-   `HelloMateCliCommand` both reliably and for free — only guess it
-   (wrong in general) or hand-write it (ruled out as a requirement, not
-   a preference). Revisit once milestone 20 ships.
+2. **Decided: ship the guess now too, despite being unreliable in
+   general.** Nothing available today can produce `HelloCliCommand` +
+   `"mate"` for `HelloMateCliCommand` both reliably and for free — only
+   guess it (wrong in general, established facts 4–5) or hand-write it
+   (ruled out as a requirement). Shipping the guess anyway trades the
+   bug reported in #289 — near-certain, fires on every hand-written
+   sub-command factory anyone writes — for a narrower one that needs a
+   specific naming coincidence between two unrelated commands, and
+   fails the same loud way (established fact 9). Net improvement.
+3. **Still blocked: removing the guess entirely.** That needs milestone
+   20 to gain the addition in established fact 8. Revisit once it does.
 
-Recommend splitting [#289](https://github.com/KitCli/KitCli/issues/289):
-ship item 1 now, leave the rest blocked on milestone 20 — a call for
-whoever reviews this.
+Recommend [#289](https://github.com/KitCli/KitCli/issues/289) ships as
+recommendation 2 describes, with recommendation 3 tracked separately
+against milestone 20 — a call for whoever reviews this.
 
 ## What was established
 
@@ -116,6 +122,32 @@ whoever reviews this.
    any instruction runs. [#192](https://github.com/KitCli/KitCli/issues/192)
    would make `CanCreateWhen()` read that declaration instead of being
    a black box. Both open.
+8. **Checked every issue in milestone 20, and none of them cover a
+   command declaring a relationship to *another* command.** #190's
+   `SubCommandIs(name)` is declared on a factory, which
+   `HelloMateCliCommand` doesn't have. #191 gives a factory-less
+   command a descriptor too, but only from attributes already
+   planned — aliases, next-command hints — not a new one for "which
+   command is this a sub-command of." #264 (a human-readable
+   description) and #265 (a listing of registered commands) are
+   unrelated. The natural shape for the missing piece follows #191's
+   own precedent for the factory-less case: an attribute on the
+   primary command, since there's no factory to call a builder method
+   on — `[HasSubCommand(typeof(HelloMateCliCommand), "mate")]` on
+   `HelloCliCommand`, not a method milestone 20's planned
+   `OnDescribing` hook would have nowhere to live for a factory-less
+   command.
+9. **The guess trades a common, certain bug for a rarer, narrower one —
+   confirmed lower severity, not just assumed.** If a command's own
+   name happens to be an exact prefix of an unrelated, multi-word
+   command's name elsewhere in the same app, that command stops being
+   reachable under its own name — a real regression this fix
+   introduces. But #289 fires on *every* hand-written sub-command
+   factory anyone writes, a routine thing to do; this needs a specific
+   naming coincidence between two otherwise-unrelated commands, which
+   most command sets will never have. Both fail the same way too — a
+   loud crash on a name that used to resolve, not a silent wrong
+   answer — so this isn't a new *kind* of failure, just a narrower one.
 
 ## Evidence
 
@@ -157,15 +189,18 @@ matched against `Handlers/NoCliCommandHandlerTests.cs`'s private
 `TestCliCommand` — different files, identical stripped name. Neither
 test calls registration directly; both were swept in because
 registration scans every command type in the assembly regardless of
-which test is running.
+which test is running. This specific pair was renamed apart
+(`NoHandlerCliCommand`) to remove the one instance found — the general
+risk this demonstrates (fact 4) remains for any two types that happen
+to share a name elsewhere.
 
 ## Open questions
 
-- Does [#289](https://github.com/KitCli/KitCli/issues/289) split —
-  recommendation 1 now, the rest blocked on milestone 20 — or does the
-  whole issue wait?
 - Does the name-matching detection in recommendation 1 survive once
   milestone 20 ships, or get replaced outright?
+- Does fact 8's addition get proposed as a new issue under milestone
+  20, or folded into #191 directly, since it extends the exact
+  precedent #191 already sets?
 
 ## Out of scope
 
