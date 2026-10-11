@@ -16,5 +16,5 @@
   href: 0009-how-many-sub-commands-can-one-instruction-address.md
 - name: "0010. What would a built-in /help command list?"
   href: 0010-what-would-a-built-in-help-command-list.md
-- name: "0011. How should a fallback get added when a sibling sub-command already has a factory?"
-  href: 0011-how-should-a-fallback-get-added-when-a-sibling-sub-command-already-has-a-factory.md
+- name: "0011. Handling fallback command factories when sub commands are in use"
+  href: 0011-handling-fallback-command-factories-when-sub-commands-are-in-use.md
