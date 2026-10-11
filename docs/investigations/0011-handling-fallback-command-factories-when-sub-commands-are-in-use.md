@@ -9,101 +9,116 @@
 
 **New complexity.**
 
-Someone can type a command into a KitCli app, like `/hello`. Some commands
-take it further with an extra word right after, like `/hello there` —
-asking for one specific thing out of several the plain command could mean.
+A KitCli command is a word someone types after a slash, like `/hello`. A
+sub-command is an extra word right after it, like `/hello there`, asking
+for one specific action instead of the plain one.
 
-Behind the scenes, each of these needs a short instruction sheet telling
-the app exactly what to build. Most of the time nobody has to write one:
-if a command needs nothing beyond "build the plain, empty version,"
-KitCli writes that sheet for you — a **default sheet**.
+Each command needs a factory: the code that builds the object
+representing that exact ask, so KitCli knows which handler runs next.
+Most commands don't need a hand-written factory — if building the object
+takes nothing beyond `new()`, KitCli writes that factory for you. Call
+that the **automatic fallback**.
 
-The moment someone writes their own sheet, by hand, for just one
-extra-word version, KitCli stops writing default sheets for everything
-else that starts with the same word — the plain command included.
+Writing one hand-written factory, for one sub-command, currently turns
+the automatic fallback off for every other command sharing the same
+name — the plain command included, and any other sub-command that still
+needed nothing but `new()`.
 
-The fix that looks obvious — tell KitCli to keep writing default sheets no
-matter what — was tried. It stops the crash. But it also makes KitCli
-quietly build the wrong thing for any other extra-word version nobody
-wrote a sheet for, instead of honestly admitting it doesn't know what to
-do. That's worse than the crash it replaces.
+Leaving the automatic fallback switched on even when a hand-written
+factory exists was tried as the fix. It does stop the plain command from
+crashing. But it also makes KitCli silently build the wrong command for a
+sub-command nobody wrote a factory for, instead of throwing the exception
+it throws today. A wrong answer with no error is worse than a crash.
 
 ## Recommendation
 
-Three candidate fixes, each a real option with a real cost. Pick one
-before turning [#289](https://github.com/KitCli/KitCli/issues/289) into
-work to build — the third needs its own estimate, not #289's current
-"small fix" label.
+Three candidate fixes, each with a real cost. Pick one before turning
+[#289](https://github.com/KitCli/KitCli/issues/289) into work to build —
+the third needs its own estimate, not #289's current "small fix" label.
 
-1. **Guess from the sheet's own label.** Every hand-written sheet in this
-   codebase already happens to be named after the exact thing it builds.
-   Treat that as proof it's covered, and write default sheets for
-   everything else. Cheap, but fragile — rename a sheet, and the app
-   silently loses track of what it covers.
-2. **Wait for commands to say what they need.** Separate, larger work is
-   already planned ([#188](https://github.com/KitCli/KitCli/issues/188)).
-   It would have every sheet state plainly, as a fact anyone can check,
-   exactly which extra-word version it's for — no guessing. The right
-   long-term answer, but it depends on other unfinished work.
-3. **Give a hand-written sheet two labels instead of one** — worked
-   through below.
+1. **Guess coverage from the factory's class name.** Every hand-written
+   factory in this codebase is already named after the exact command it
+   builds — `HelloThereCliCommandFactory` builds `HelloThereCliCommand`.
+   Treat a name match as proof that command is covered, and give the
+   automatic fallback to everything else sharing its command name. Cheap,
+   but fragile: renaming a factory would silently switch its coverage off.
+2. **Wait for commands to declare what they need.** Separate, larger work
+   is already planned ([#188](https://github.com/KitCli/KitCli/issues/188)).
+   It would let a factory state, as data KitCli can read before running
+   anything, exactly which sub-command it's for — no guessing. The right
+   long-term answer, but it depends on unfinished work not planned with
+   this problem in mind.
+3. **Give `CliCommandFactory<T>` a second type parameter, for what it
+   builds** — worked through below.
 
 ### Option 3, worked through
 
-Right now, a hand-written sheet only has room for one label: which
-starting word it's for — "hello". It has nowhere to also say which exact
-thing it builds. So KitCli can't tell "somebody already wrote a sheet for
-`hello there`" apart from "nobody's written one for `hello mate` yet" —
-both sheets, if they existed, would carry the identical label.
+Today, every factory for commands sharing one name has to declare the
+same type parameter: the plain command's own type. `HelloThereCliCommandFactory`
+is declared as `CliCommandFactory<HelloCliCommand>`, even though its
+`Create()` method returns a `HelloThereCliCommand`. Declaring
+`HelloCliCommand` is what gets it looked up under "hello"; `CanCreateWhen()`
+is what decides, once someone actually types a command, whether this
+specific factory applies.
 
-The fix: give the sheet a second label, so it can say both things. One
-label still says which starting word it's for. The other says, plainly,
-which exact thing it builds. *(In code: `CliCommandFactory<HelloCliCommand,
-HelloThereCliCommand>` instead of today's `CliCommandFactory<HelloCliCommand>`
-— the first type stays the shared starting word, the second is new.)*
+Because every factory sharing "hello" declares that same type parameter,
+KitCli has no way to ask "does a factory already exist for
+`HelloMateCliCommand` specifically?" The type parameter only ever answers
+"does a factory exist for the `hello` group."
 
-Now KitCli can check that second label directly, for any extra-word
-version, and know for certain whether it's covered — a real check, not a
-guess.
+The fix: give `CliCommandFactory<T>` a second type parameter, for what
+the factory actually builds:
 
-That only answers "is it covered?" Say KitCli has worked out that nobody's
-written a sheet for `hello mate`. It still needs two more answers before
-it can write a default sheet automatically:
+```csharp
+public class HelloThereCliCommandFactory
+    : CliCommandFactory<HelloCliCommand, HelloThereCliCommand>
+{
+    public override bool CanCreateWhen() => SubCommandIs("there");
+    public override HelloThereCliCommand Create() => new HelloThereCliCommand();
+}
+```
 
-- Which starting word to file the default sheet under. It has to be
-  "hello" — the same word the plain command and `hello there` already
-  use, not something built from `hello mate` on its own, which nobody
-  would ever type to look it up.
-- Which exact word, typed after "hello", should make that default sheet
-  apply. It has to be "mate".
+`HelloCliCommand` still groups it under "hello." `HelloThereCliCommand` is
+new: the exact type `Create()` returns, declared on the class itself. With
+this, KitCli could check, by reflection, whether any factory's second type
+parameter equals `HelloMateCliCommand`. A match would mean a factory
+already covers it; no match would mean it doesn't — a real check, not a
+guess at a class name.
 
-Neither answer comes from the second label. Both still have to be guessed
-from the name `hello mate` itself — the same guess option 1 makes.
+That only answers whether `HelloMateCliCommand` is covered. If it isn't,
+KitCli still has to build it an automatic fallback, and the second type
+parameter doesn't answer two things that fallback needs: which group to
+register it under ("hello," not something derived from
+`HelloMateCliCommand`'s own name), and which sub-command word should
+trigger it ("mate"). Both still have to come from guessing at
+`HelloMateCliCommand`'s name — the same guess option 1 makes.
 
-It's also a breaking change: every sheet written today only has room for
-one label, not two.
+It's also a breaking change: every `CliCommandFactory<T>` written today
+takes one type parameter, not two.
 
 ## What was established
 
-1. **One starting word covers a command and everything that follows it.**
-   `/hello`, `/hello there`, and `/hello mate` are all looked up by the
-   single word "hello"; the extra word is only checked afterwards, by
-   whichever sheet is in charge.
-2. **That's why nothing today tells a covered extra-word version apart
-   from an uncovered one.** Every sheet sharing a starting word carries
-   the identical label. The real difference between them lives only
-   inside each sheet's own logic — invisible until it actually runs.
-3. **Confirmed the reported crash.** One hand-written sheet covering one
-   extra-word version leaves everything else sharing its starting word —
-   plain command included — with nothing to build it, and each one
-   crashes outright.
+1. **Every factory sharing a command name shares that command's type
+   parameter.** A hand-written factory for `/hello there` or `/hello mate`
+   has to declare `CliCommandFactory<HelloCliCommand>` — never
+   `CliCommandFactory<HelloThereCliCommand>` or
+   `CliCommandFactory<HelloMateCliCommand>` — so KitCli looks it up under
+   "hello," the same name as the plain command.
+2. **That's why nothing today distinguishes a covered sub-command from an
+   uncovered one.** Every factory sharing a command name declares the
+   identical type parameter. Which sub-command a factory actually covers
+   lives only inside its `CanCreateWhen()` method, unreadable without
+   running it.
+3. **Confirmed the reported crash.** With `HelloThereCliCommandFactory` as
+   the only hand-written factory, both `/hello` and `/hello mate` threw
+   `NoCommandGeneratorException`; `/hello there` built `HelloThereCliCommand`
+   correctly.
 
 ## Evidence
 
 Wrote one small family by hand: a plain `HelloCliCommand`, and two
-extra-word versions, `HelloThereCliCommand` and `HelloMateCliCommand`.
-Wrote a sheet (a factory, in code) for `there` only — neither of the
-other two needs more than "build it plain":
+sub-commands, `HelloThereCliCommand` and `HelloMateCliCommand`. Wrote a
+factory for `there` only — the other two need nothing beyond `new()`:
 
 ```csharp
 public class HelloThereCliCommandFactory : CliCommandFactory<HelloCliCommand>
@@ -114,14 +129,15 @@ public class HelloThereCliCommandFactory : CliCommandFactory<HelloCliCommand>
 ```
 
 Typed `/hello`, `/hello there`, and `/hello mate` through KitCli's actual
-command-resolution code on `main` (`bbea37e`), then again after patching
-it so the default sheet always gets written too:
+command-resolution code on `main` (`bbea37e`), then again after removing
+the guard that stops the automatic fallback registering whenever a
+dedicated factory already exists:
 
-| Typed | Today | With the default sheet always written too |
+| Typed | Today | With the automatic fallback always registered |
 |---|---|---|
-| `/hello` | crashes: "did not find a command factory for hello" | builds `HelloCliCommand` — fixed |
+| `/hello` | throws `NoCommandGeneratorException: Did not find command factory for hello` | builds `HelloCliCommand` — fixed |
 | `/hello there` | builds `HelloThereCliCommand` | unchanged |
-| `/hello mate` | crashes, same message as `/hello` | builds `HelloCliCommand` — **wrong command, no crash** |
+| `/hello mate` | throws the same exception as `/hello` | builds `HelloCliCommand` — **wrong command, no exception** |
 
 Option 3 is a design sketch, not yet written or run — nothing has
 confirmed it compiles or behaves as described.
