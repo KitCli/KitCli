@@ -26,6 +26,11 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   with its name and description indented on separate lines instead of flush
   left.
 
+### Fixed
+
+- A sub-command's factory no longer disables the plain command, or any
+  other sub-command, sharing its key ([#289](https://github.com/KitCli/KitCli/issues/289)).
+
 ## [3.1.2] - 2026-09-18
 
 ### Fixed

@@ -26,13 +26,24 @@ wherever it appears.** So `SpareMoneyCommand` keeps its suffix and becomes
 
 A factory is what turns the name a user typed into a command object.
 Registration pairs each command type with the `CliCommandFactory<>` whose
-generic argument is that type:
+generic argument is that type. A sub-command's factory still declares its
+*primary* command's type, not its own — that's what puts `/hello` and
+`/hello there` under one key, "hello" — so registration first groups every
+command type by the longest other command name it starts with
+(`HelloMateCliCommand` groups under `HelloCliCommand`) before deciding
+what each one needs:
 
-| Factories found for the type | Result |
+| Factory found for the type | Result |
 |---|---|
-| one or more | each registered under the full name, shorthand, and aliases |
-| none, and the command has a parameterless constructor | `BasicCliCommandFactory<T>` registered for you |
-| none, and it has not | no factory, and nothing says so until a user types the name |
+| one or more, naming this exact type | each registered under the full name, shorthand, and aliases |
+| none for this type, but another family member has one | `FallbackCliSubCommandFactory<TPrimary, T>` registered, matching only this type's own sub-command word |
+| none at all, and no family member shares this type's key | `BasicCliCommandFactory<T>` registered, matching unconditionally |
+| none, and the command has no parameterless constructor | no factory, and nothing says so until a user types the name |
+
+"Found for this exact type" is read off a hand-written factory's own class
+name — `HelloThereCliCommandFactory` is taken as building
+`HelloThereCliCommand` — not from its declared generic argument, which
+only ever says which family it belongs to.
 
 When an ask arrives, `CliWorkflowCommandProvider.GetCommand` fetches every
 factory keyed under that name, attaches the instruction and the run's
@@ -64,6 +75,12 @@ flowchart TB
 Two command types stemming to one instruction name fail only when a user's
 ask resolves there, not at startup. Tracked as
 [#19](https://github.com/KitCli/KitCli/issues/19).
+
+Grouping by the longest matching name is a guess, confirmed unreliable in
+general — a false match in this codebase's own tests, and a genuine
+ambiguity when a primary command's own name is more than one word. See
+investigation
+[0011](../investigations/0011-handling-fallback-command-factories-when-sub-commands-are-in-use.md).
 
 ## See also
 
