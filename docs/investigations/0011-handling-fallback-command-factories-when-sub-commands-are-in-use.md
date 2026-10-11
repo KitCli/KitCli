@@ -22,12 +22,16 @@ nothing but `new()`.
 Finding that `HelloMateCliCommand` has no factory isn't the problem —
 that's a one-line check: scan every command type, subtract the ones a
 factory already covers, whatever's left is uncovered. The actual
-unknown is narrower: nothing records that `HelloMateCliCommand` belongs
-to `HelloCliCommand`, so there's no fact to read for what the automatic
-fallback would need — `CliCommandFactory<HelloCliCommand>` as its type,
-`SubCommandIs("mate")` as its check. That relationship can only be
-guessed from the two names today, and the guess is wrong in general,
-not just fragile (established facts 4–5).
+unknown is narrower, and more fundamental than "hard to find": nothing
+ever asserts that `HelloMateCliCommand` *is* a sub-command of
+`HelloCliCommand` in the first place. That fact only exists as the
+behaviour of a `CanCreateWhen()` method someone wrote — specifically, a
+call to `SubCommandIs("mate")`. No factory means no such call was ever
+written, so there's nothing to read, not even something hidden. The
+only way to produce `CliCommandFactory<HelloCliCommand>` as the type
+and `SubCommandIs("mate")` as the check is to guess them from the two
+names, and the guess is wrong in general, not just fragile (established
+facts 4–5).
 
 Fixing that needs a command to declare its relationship as data instead
 of KitCli guessing it. Nothing in KitCli does that yet — it's milestone
@@ -62,7 +66,8 @@ whoever reviews this.
    wouldn't look it up under "hello" at all. So nothing distinguishes a
    covered sub-command from an uncovered one by that type alone; what a
    factory actually covers lives only inside its `CanCreateWhen()`
-   method, unreadable without running it.
+   method. For an uncovered command, that method was never written at
+   all — there's nothing to read, not even something unreadable.
 2. **Confirmed the reported crash, and that the obvious fix is worse.**
    One factory covering one sub-command left every other ask sharing
    its key crashing (Evidence). Always registering the automatic
@@ -85,20 +90,26 @@ whoever reviews this.
    before any sub-command word is added, so the split is genuinely
    ambiguous.** Given `HelloTherePersonSubCliCommand`, nothing says
    whether it's `Hello` + `TherePersonSub`, `HelloThere` + `PersonSub`,
-   or `HelloTherePerson` + `Sub`. Checking which candidate exists as a
-   real type only resolves it when the shorter command was written as
-   its own type — which fails exactly when there's no factory to check
-   against, the case this is meant to solve. (This doesn't reach a
+   or `HelloTherePerson` + `Sub`. The deeper reason it's unresolvable:
+   nothing marks `HelloTherePersonSubCliCommand` as a sub-command of
+   anything in the first place, so there's no authority to check a
+   candidate split against beyond hoping a shorter type happens to
+   exist. Checking which candidate exists as a real type only resolves
+   it when the shorter command was written as its own type — which
+   fails exactly when there's no factory to check against, the case
+   this is meant to solve. (This doesn't reach a
    sub-command that already has a hand-written factory — that factory
    has to declare the real primary type to compile, so its existence
    is a guaranteed fact there, not a guess.)
-6. **A factory declaring both its key and what it builds works, and
-   was rejected anyway.** Giving `CliCommandFactory<T>` a second type
-   parameter made "is this sibling covered" a real, reflectable fact
-   instead of a guess — the full suite passed with it in place
-   (Evidence). Rejected on two grounds: breaking change to every
-   existing factory, and new ceremony a developer has to hand-write —
-   ruled out as a requirement.
+6. **A factory declaring both its key and what it builds works for
+   anything a developer wrote, and was rejected anyway.** Giving
+   `CliCommandFactory<T>` a second type parameter made "is this
+   sibling covered" a real, reflectable fact instead of a guess — but
+   only for a factory someone hand-wrote. It did nothing for
+   `HelloMateCliCommand`, which still needed the same guess as fact 4
+   (Evidence). Rejected on two further grounds: breaking change to
+   every existing factory, and new ceremony a developer has to
+   hand-write — ruled out as a requirement.
 7. **The one fix that's both reliable and free isn't built yet.**
    [#190](https://github.com/KitCli/KitCli/issues/190) would let a
    factory declare its sub-command requirement as data, read before
@@ -131,8 +142,13 @@ automatic fallback always registered regardless of other factories:
 
 Rewrote the factory as `CliCommandFactory<HelloCliCommand,
 HelloThereCliCommand>` and had registration read the second type by
-reflection. Worked — full suite passed, `/hello mate` resolved with
-zero code written for it. Reverted anyway (established fact 6).
+reflection, instead of guessing `HelloThereCliCommand`'s coverage from
+the factory's class name. That detection worked reliably. `/hello
+mate` still needed the same name-matching guess as fact 4 to be found
+and given a relationship — the two-parameter factory only makes
+something a developer *wrote* checkable; it does nothing for a sibling
+nobody wrote anything for. Full suite passed regardless. Reverted
+anyway (established fact 6).
 
 While building the name-matching grouping (fact 4), reran
 `KitCli.Commands.Abstractions.Tests` (148 tests, unrelated to this
