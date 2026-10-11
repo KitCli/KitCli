@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-10-11
+
 ### Added
 
 - `BySaying(message, level)` and `ByFinallySaying(message, level)` give a
