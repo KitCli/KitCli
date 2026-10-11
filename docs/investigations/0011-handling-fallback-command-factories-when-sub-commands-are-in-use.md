@@ -49,8 +49,10 @@ work to build — the third needs its own estimate, not #289's current
 ### Option 3, worked through
 
 Today a sub-command's factory only names its command's *word group* —
-"hello". It never says which specific thing it builds. That's the whole
-problem: nothing can tell a covered sub-command from an uncovered one.
+"hello". It never says which specific thing it builds. So KitCli has no
+way to check whether `HelloThereCliCommand` already has a hand-written
+factory ("covered") while `HelloMateCliCommand` doesn't ("uncovered") —
+both factories, if they existed, would look identical from the outside.
 
 The fix: let a factory declare both things, not just one:
 
@@ -60,13 +62,22 @@ public class HelloThereCliCommandFactory
 ```
 
 `HelloCliCommand` is still the word group. `HelloThereCliCommand` is new —
-the exact thing this factory builds, readable straight off the class, no
-guessing involved.
+the exact thing this factory builds. Now KitCli can check, for any sibling
+command, whether some factory's second type matches it. A match means
+covered. No match means uncovered — a real check, not a guess.
 
-That only answers half the problem. Knowing `HelloMateCliCommand` is *not*
-covered still leaves two things unanswered: which word group it falls back
-under, and which word triggers it. Both are still guessed, the same way as
-option 1.
+That only answers "is it covered?" Say KitCli has worked out that
+`HelloMateCliCommand` is uncovered, and needs to build it an automatic
+factory. Doing that correctly still needs two answers this check doesn't
+give:
+
+- Which word group to register it under — "hello", the one
+  `HelloCliCommand` and `HelloThereCliCommand` already use, not something
+  built from `HelloMateCliCommand`'s own name, which nobody ever types.
+- Which word, typed after "hello", should trigger it — "mate".
+
+Neither comes from the type check above. Both still have to be guessed
+from `HelloMateCliCommand`'s name, the same guess option 1 makes.
 
 It's also breaking: every factory written today takes one type, not two.
 
