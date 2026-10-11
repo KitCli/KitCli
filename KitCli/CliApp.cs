@@ -79,11 +79,13 @@ public abstract class CliApp
 
         OnRunCreated(run);
 
-        var runTask = run.RespondToAsk(ask);
-
+#pragma warning disable CS0618
         OnRunStarted(run, ask);
+#pragma warning restore CS0618
 
-        var outcomes = RethrowIfExceptional(await runTask);
+        var runResult = await run.RespondToAsk(ask);
+
+        var outcomes = RethrowIfExceptional(runResult);
 
         WriteOutcomes(outcomes, outcomeIoWriters);
 
@@ -170,11 +172,13 @@ public abstract class CliApp
     }
 
     /// <summary>
-    /// Called after a run's ask-handling task has been started but before it is awaited, so an
-    /// override can show a "working…" indicator concurrently with the run executing. No-op by default.
+    /// Called just before a run's ask-handling task is started, immediately after
+    /// <see cref="OnRunCreated"/> with nothing between them, so it tells an app nothing that hook does
+    /// not. No-op by default.
     /// </summary>
     /// <param name="run">The run that was started.</param>
     /// <param name="ask">The ask text the run is responding to, or <c>null</c> if none was sourced.</param>
+    [Obsolete("Fires immediately after OnRunCreated, so it adds nothing. Override OnRunCreated instead.")]
     protected virtual void OnRunStarted(ICliWorkflowRun run, string? ask)
     {
     }

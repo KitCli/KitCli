@@ -38,8 +38,8 @@ sequenceDiagram
         App->>Io: AskAsync()
         App->>Workflow: NextRun()
         note over App: OnRunCreated
+        note over App: OnRunStarted
         App->>Run: RespondToAsk(ask)
-        note over App: OnRunStarted, while it executes
         Run-->>App: outcomes, written
         note over App: OnRunComplete
         loop while the latest change is MovePastAsk
@@ -68,9 +68,10 @@ mode for the life of the class, and `CliAppBuilder.Run` throws if a
 
 Six `protected virtual` hooks — `OnSessionStart`, `OnRunCreated`,
 `OnRunStarted`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd` — let an
-app watch a session without overriding `Run`. None redirects flow, and
-`OnRunStarted`/`OnMovingPastAsk` fire *while* the run executes, so they
-suit progress indicators rather than setup. All six fire under both hosts,
+app watch a session without overriding `Run`. None redirects flow.
+`OnRunStarted` fires before the command starts, so a line it writes lands
+ahead of anything the command prints or asks. `OnMovingPastAsk` fires
+*while* its step executes, so it suits progress indicators rather than setup. All six fire under both hosts,
 `OnRunComplete` once per step rather than once per ask. An
 `ExceptionOutcome` is rethrown before its outcomes are written.
 
