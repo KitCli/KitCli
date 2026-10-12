@@ -51,9 +51,10 @@ nobody reaches the confirmation step out of order. This needs
 `LastCommandIs<T>()` is `true` only when `T` is the step immediately before,
 and `false` once another command has run since. To accept a repeat of the
 same step, such as turning a page twice, check for both:
-`LastCommandIs<List>() || LastCommandIs<NextPage>()`. The older
-`LastCommandWas<T>()` is obsolete: despite its name it is `true` when `T` ran
-at any earlier point in the run.
+`LastCommandIs<List>() || LastCommandIs<NextPage>()`. To ask
+"has `T` run at any earlier point", use `AnyLastCommandIs<T>()`. The older
+`LastCommandWas<T>()` does the same but is obsolete, since its name suggests
+the latest only.
 
 ## Common mistakes
 

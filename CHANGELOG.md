@@ -25,14 +25,16 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - `LastCommandIs<T>()` on a command factory is true only when `T` ran
   immediately before. `LastCommandWas<T>()` is true when `T` ran at any earlier
   point in the run, so two factories gated on different callers could both
-  match; gate on `LastCommandIs<T>()` to tell the callers apart
+  match; gate on `LastCommandIs<T>()` to tell the callers apart.
+  `AnyLastCommandIs<T>()` is the explicit name for the any-earlier-run check
   ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -88,8 +90,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -101,8 +104,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -131,8 +135,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -169,8 +174,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -185,8 +191,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -232,8 +239,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -266,8 +274,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -309,8 +318,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 ### Deprecated
 
 - `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `LastCommandIs<T>()` for the command that
-  ran immediately before ([#321](https://github.com/KitCli/KitCli/issues/321)).
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 

@@ -69,8 +69,8 @@ There the entry command ends the run with `ByFinallySaying` instead.
 ## Sharp edges
 
 - `LastCommandIs<T>()` is true only when `T` ran immediately before. The
-  obsolete `LastCommandWas<T>()` is true when `T` ran anywhere earlier in the
-  run, so two callers that both detour in one run match both factories, and
+  `AnyLastCommandIs<T>()` (and the obsolete `LastCommandWas<T>()`) is true when
+  `T` ran anywhere earlier in the run, so two callers that both detour in one run match both factories, and
   the first registered wins
   ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
 - A chain that keeps moving on to another command, and never reaches a
