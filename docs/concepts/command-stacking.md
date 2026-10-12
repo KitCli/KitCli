@@ -71,8 +71,9 @@ There the entry command ends the run with `ByFinallySaying` instead.
 - `LastCommandWas<T>()` is true only when `T` ran immediately before. That is
   why each caller gets its own factory: the detour returns to whichever
   command sent it.
-- Every route must end on a `Final` outcome, or the run waits for an ask.
-  A loop with no exit runs forever, and nothing catches it
+- A chain that keeps moving on to another command, and never reaches a
+  `Final` outcome or parks on a reusable one, never returns. Nothing catches
+  it, though this is read from source and not yet reproduced
   ([#173](https://github.com/KitCli/KitCli/issues/173)).
 
 ## See also
