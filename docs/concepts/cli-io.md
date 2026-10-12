@@ -13,6 +13,7 @@ public interface ICliIo
     Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
     void Pause();          // CliIo writes a blank line
     void Say(string something);
+    void Say(string something, MessageLevel level);
     void SetTitle(string title);
     void OnCancel(Action cancel);
 }
@@ -45,6 +46,15 @@ needs. An empty list of choices throws.
 scrambles it.** Nothing in `CliIo` prevents that; print before asking or
 after the answer. `CliIo` takes an optional `IAnsiConsole`, so a test can
 drive the prompt with Spectre's `TestConsole`.
+
+## Saying a message at a level
+
+`Say(something, level)` writes only when `level` meets
+`KitCliSettings.MinimumMessageLevel`, the rule leveled outcomes follow
+([outcome writing](outcome-writing.md)). It is for code that has no outcome
+list to return, such as progress lines from a pipeline inside a command.
+`CliIo` reads the setting from its optional `KitCliSettings` argument and
+falls back to the default, `Information`.
 
 ## What a Ctrl+C does
 

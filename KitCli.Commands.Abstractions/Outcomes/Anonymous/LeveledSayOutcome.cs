@@ -1,3 +1,5 @@
+using KitCli.Abstractions.Io;
+
 namespace KitCli.Commands.Abstractions.Outcomes.Anonymous;
 
 /// <summary>
