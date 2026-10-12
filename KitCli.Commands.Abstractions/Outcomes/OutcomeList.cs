@@ -147,6 +147,19 @@ public class OutcomeList : List<Outcome>
         => ByResultingIn(new SpecifiedNextCliCommandOutcome(typeof(TCommand), [..arguments]));
 
     /// <summary>
+    /// Appends a <see cref="SpecifiedNextCliCommandOutcome"/> naming the given command type as the next
+    /// one to run, for when the type is only known at run time. Prefer <see cref="ByMovingToCommand{TCommand}()"/>
+    /// when it is known when writing the handler.
+    /// </summary>
+    /// <param name="commandType">The type of the command to move to.</param>
+    /// <returns>This list, for chaining.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="commandType"/> is not a <see cref="CliCommand"/>.</exception>
+    public OutcomeList ByMovingToCommand(Type commandType)
+        => typeof(CliCommand).IsAssignableFrom(commandType)
+            ? ByResultingIn(new SpecifiedNextCliCommandOutcome(commandType))
+            : throw new ArgumentException($"'{commandType.Name}' is not a {nameof(CliCommand)}.", nameof(commandType));
+
+    /// <summary>
     /// Appends a <see cref="ProvidedNextCliCommandOutcome"/> remembering the given command as the next one to run.
     /// The command is built here, by the calling handler, so its factory never runs and never sees the
     /// run's artefacts. Prefer <see cref="ByMovingToCommand{TCommand}()"/> unless the next command takes

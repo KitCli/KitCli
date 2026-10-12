@@ -97,6 +97,23 @@ public class CliCommandFactoryTests
     }
 
     [Test]
+    [TestCase("test-next", true)]
+    [TestCase("page", false)]
+    public void GivenInstructionWithSubCommand_WhenIsSubCommandIsCalled_ThenItMatchesOnlyThatCommandTypesName(
+        string attachedSubCommandName,
+        bool expectedMatch)
+    {
+        // Arrange
+        _factory.Attach(InstructionWith(attachedSubCommandName), []);
+
+        // Act
+        var matches = _factory.IsSubCommand<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(matches, Is.EqualTo(expectedMatch));
+    }
+
+    [Test]
     public void GivenTypedArguments_WhenArgumentsAreRead_ThenOnlyThoseOfThatTypeAreReturned()
     {
         // Arrange

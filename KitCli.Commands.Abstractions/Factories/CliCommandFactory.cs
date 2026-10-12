@@ -55,6 +55,15 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     }
 
     /// <summary>
+    /// Determines whether the attached instruction's sub-instruction name is the instruction name of the given command type.
+    /// </summary>
+    /// <typeparam name="TCommand">The command type whose instruction name to compare against.</typeparam>
+    /// <returns><see langword="true"/> if the attached instruction's sub-instruction name matches; otherwise <see langword="false"/>.</returns>
+    /// <exception cref="Exception">Thrown when no instruction and artefacts have been attached via <see cref="Attach"/>.</exception>
+    protected bool IsSubCommand<TCommand>() where TCommand : CliCommand
+        => SubCommandIs(CliCommand.GetInstructionName(typeof(TCommand)));
+
+    /// <summary>
     /// Determines whether the attached instruction has any argument of the given type, optionally filtered by name.
     /// </summary>
     /// <typeparam name="TArgumentType">The argument value type to look for.</typeparam>

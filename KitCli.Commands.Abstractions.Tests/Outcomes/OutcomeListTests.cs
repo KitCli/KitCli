@@ -176,6 +176,30 @@ public class OutcomeListTests
     }
 
     [Test]
+    public void GivenCommandTypeKnownAtRunTime_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThatType()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByMovingToCommand(typeof(TestNextCliCommand)).End();
+
+        // Assert
+        var outcome = outcomes.Single() as SpecifiedNextCliCommandOutcome;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(outcome, Is.Not.Null);
+            Assert.That(outcome!.SpecifiedCommandType, Is.EqualTo(typeof(TestNextCliCommand)));
+            Assert.That(outcome.Arguments, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void GivenTypeThatIsNotACommand_WhenByMovingToCommand_ThenThrows()
+    {
+        // Assert
+        Assert.That(() => new OutcomeList().ByMovingToCommand(typeof(string)), Throws.ArgumentException);
+    }
+
+    [Test]
     public void GivenArguments_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThem()
     {
         // Arrange

@@ -22,6 +22,8 @@ public class TestCliCommandFactory : CliCommandFactory<TestNextCliCommand>
 
     public new bool SubCommandIs(string subCommandName) => base.SubCommandIs(subCommandName);
 
+    public new bool IsSubCommand<TCommand>() where TCommand : CliCommand => base.IsSubCommand<TCommand>();
+
     public new bool AnyArgument<TArgumentType>(string? argumentName) where TArgumentType : notnull
         => base.AnyArgument<TArgumentType>(argumentName);
 
