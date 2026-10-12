@@ -166,7 +166,7 @@ public class CliWorkflowRun : ICliWorkflowRun
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
 
-            if (allOutcomes.Last() is NextCliCommandOutcome)
+            if (State.WasLastChangedTo(ClIWorkflowRunStateStatus.MovePastAsk))
             {
                 return allOutcomes;
             }

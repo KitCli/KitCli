@@ -8,6 +8,9 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Added
 
+- `ICliWorkflowRunState.WasLastChangedTo(...)` checks the run's latest status
+  change, where `WasChangedTo(...)` checks its whole history. An app with its
+  own `ICliWorkflowRunState` implementation needs to add it.
 - `ByMovingToCommand(Type)` moves to a command whose type is only known at run
   time ([#314](https://github.com/KitCli/KitCli/issues/314)).
 - `IsSubCommand<TCommand>()` on a command factory checks the sub-command by
