@@ -44,6 +44,14 @@ public interface ICliIo
     void Say(string something);
 
     /// <summary>
+    /// Writes a line of output to the console, unless <paramref name="level"/> is below the configured
+    /// <see cref="KitCliSettings.MinimumMessageLevel"/>.
+    /// </summary>
+    /// <param name="something">The text to write.</param>
+    /// <param name="level">How important the text is.</param>
+    void Say(string something, MessageLevel level);
+
+    /// <summary>
     /// Sets the console window title.
     /// </summary>
     /// <param name="title">The title to display.</param>

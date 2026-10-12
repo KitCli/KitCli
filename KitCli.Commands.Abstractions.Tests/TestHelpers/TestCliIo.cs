@@ -25,6 +25,9 @@ public class TestCliIo : ICliIo
     public void Say(string something)
         => Lines.Add(something);
 
+    public void Say(string something, MessageLevel level)
+        => Lines.Add(something);
+
     public void SetTitle(string title)
     {
     }

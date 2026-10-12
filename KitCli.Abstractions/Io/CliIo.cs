@@ -5,7 +5,7 @@ namespace KitCli.Abstractions.Io;
 /// <summary>
 /// Default <see cref="ICliIo"/> implementation backed by the standard <see cref="Console"/>.
 /// </summary>
-public class CliIo(IAnsiConsole? console = null) : ICliIo
+public class CliIo(IAnsiConsole? console = null, KitCliSettings? kitCliSettings = null) : ICliIo
 {
     private readonly IAnsiConsole _console = console ?? AnsiConsole.Console;
 
@@ -68,6 +68,17 @@ public class CliIo(IAnsiConsole? console = null) : ICliIo
     /// <inheritdoc/>
     public void Say(string something)
         => Console.WriteLine(something);
+
+    /// <inheritdoc/>
+    public void Say(string something, MessageLevel level)
+    {
+        if (level < (kitCliSettings?.MinimumMessageLevel ?? new KitCliSettings().MinimumMessageLevel))
+        {
+            return;
+        }
+
+        Say(something);
+    }
 
     /// <inheritdoc/>
     public void SetTitle(string title)

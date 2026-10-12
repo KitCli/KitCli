@@ -6,6 +6,20 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- `ICliIo.Say(message, level)` writes a message only when its `MessageLevel`
+  meets `KitCliSettings.MinimumMessageLevel`, the same rule `BySaying(message,
+  level)` follows. An app with its own `ICliIo` implementation needs to add it
+  ([#310](https://github.com/KitCli/KitCli/issues/310)).
+
+### Changed
+
+- **Breaking for `KitCli.Commands.Abstractions` users:** `MessageLevel` and
+  `KitCliSettings` moved to `KitCli.Abstractions.Io` so `ICliIo` can use them.
+  Add `using KitCli.Abstractions.Io;` where they are named. Code using only the
+  `KitCli` package is unaffected.
+
 ## [3.2.0] - 2026-10-11
 
 ### Added

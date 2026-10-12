@@ -23,6 +23,50 @@ public class CliIoTests
         => _console.Dispose();
 
     [Test]
+    [TestCase(MessageLevel.Debug, false)]
+    [TestCase(MessageLevel.Information, true)]
+    [TestCase(MessageLevel.Error, true)]
+    public void GivenDefaultMinimumLevel_WhenSayWithLevel_ThenWritesOnlyWhenLevelMeetsIt(MessageLevel level, bool expectedWritten)
+    {
+        // Arrange
+        var written = CaptureConsoleOut(() => new CliIo(_console).Say("hello", level));
+
+        // Assert
+        Assert.That(written.Contains("hello"), Is.EqualTo(expectedWritten));
+    }
+
+    [Test]
+    public void GivenConfiguredMinimumLevel_WhenSayWithLevelBelowIt_ThenWritesNothing()
+    {
+        // Arrange
+        var io = new CliIo(_console, new KitCliSettings { MinimumMessageLevel = MessageLevel.Error });
+
+        // Act
+        var written = CaptureConsoleOut(() => io.Say("hello", MessageLevel.Warning));
+
+        // Assert
+        Assert.That(written, Is.Empty);
+    }
+
+    private static string CaptureConsoleOut(Action act)
+    {
+        var original = Console.Out;
+        var writer = new StringWriter();
+        Console.SetOut(writer);
+
+        try
+        {
+            act();
+        }
+        finally
+        {
+            Console.SetOut(original);
+        }
+
+        return writer.ToString();
+    }
+
+    [Test]
     public async Task GivenChoices_WhenArrowDownThenEnter_ThenChoosesTheSecond()
     {
         // Arrange
