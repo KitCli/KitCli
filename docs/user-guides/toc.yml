@@ -34,3 +34,7 @@
   href: 0017-creating-sub-commands.md
 - name: Choosing from a list
   href: 0018-choosing-from-a-list.md
+- name: Advanced techniques
+  items:
+    - name: Asking for a missing value and carrying on
+      href: 0019-asking-for-a-missing-value-and-carrying-on.md

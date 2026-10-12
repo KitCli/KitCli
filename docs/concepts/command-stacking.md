@@ -1,18 +1,20 @@
 # Command stacking
 
-Command stacking builds one long job out of small commands. Each command
-does one thing, then names the command that runs next, so a single ask can
-run six handlers in a row. A command that lacks something sends the run to
-a command that gets it, and that command sends the run back.
+A task often takes several steps that share one decision. An export, for
+example, needs to know where to read from, its **source**: chosen once,
+then used to connect, check, write and summarise. Command stacking builds
+the task from small commands, one per step. Each command
+[chains](../user-guides/0007-chaining-commands.md) to the next and passes
+on what it decided.
 
 ```mermaid
 flowchart LR
-    Ask(["/export"]) --> Export[Export]
-    Export -->|no source, interactive| Choose["/source choose"]
+    Ask(["user types /export"]) --> Export["/export"]
+    Export -->|"no source, may ask"| Choose[Choose a source]
     Choose -->|source chosen| Export
-    Choose -->|nothing picked| Choose
-    Export -->|no source, headless| End1[[Ends: no source]]
-    Export -->|has everything| Connect[Connect]
+    Choose -->|nothing chosen| End1[[Ends: no source]]
+    Export -->|"no source, told not to ask"| End1
+    Export -->|has a source| Connect[Connect]
     Connect --> Check[Check]
     Check -->|fails| End2[[Ends: check failed]]
     Check -->|passes| Write[Write]
@@ -20,67 +22,67 @@ flowchart LR
     Summarise --> End3[[Ends]]
 ```
 
-`/export` is the entry command: it checks what the job needs and picks the
-route, and does none of the work. Every box is its own command.
+Every box from `/export` to Summarise is its own command. The names are
+examples, not part of KitCli.
 
-## Three moves
+## The parts
 
-| Move | The handler returns | Use it for |
-| --- | --- | --- |
-| Forward | `ByMovingToCommand<TNext>()` | The next stage |
-| Detour and return | `ByMovingToCommand<TChoose>()`; the detour later returns `ByMovingToCommand(command.ReturnTo)` | Getting something the entry command lacks |
-| Ask again | `ByMovingToCommand(command)`, the same built command, so it keeps its return target | A choice left blank or not recognised |
+- A **command** is one step the app can run, such as `/export`.
+- A **handler** does a command's work.
+- An **outcome** is what a handler returns: a message to show, a value to
+  remember, or the command to run next.
+- An **artefact** is a remembered outcome that any later command can read.
+- A **factory** builds a command, reading artefacts to fill it in.
+- A **run** is everything that follows one typed command, until a command
+  ends it.
 
-**A detour returns to the entry command, not past it.** The entry command
-runs again, its factory reads the new choice as an artefact, and it checks
-everything from the top. It stays the one place that decides the route.
-
-## One command, several factories
-
-The detour learns where to return from the factory that built it. Give it
-one factory per caller, gated on `LastCommandIs<TCaller>()`:
+In `/export`'s handler, remember the source and name the next command.
+KitCli runs that command next:
 
 ```csharp
-public record ChooseSourceCliCommand(Type? ReturnTo) : CliCommand;
-
-public class ChooseSourceAfterExportCliCommandFactory : CliCommandFactory<ChooseSourceCliCommand>
-{
-    public override bool CanCreateWhen() => LastCommandIs<ExportCliCommand>();
-
-    public override CliCommand Create() => new ChooseSourceCliCommand(typeof(ExportCliCommand));
-}
+return FinishThisCommand()
+    .ByResultingIn(new SourceOutcome(command.Source))
+    .ByMovingToCommand<ConnectCliCommand>()
+    .EndAsync();
 ```
 
-Typed directly as `/source choose`, a factory for the parent `/source`
-command, gated on `SubCommandIs("choose")`, builds it with no return target,
-so it ends after the choice. **The same command is a step in a stack and a
-command of its own**; the factory that built it decides which.
+In the next command's factory, read the source back:
 
-## Data rides in artefacts
+```csharp
+public override CliCommand Create()
+    => new ConnectCliCommand(GetRequiredArtefact<string>(nameof(SourceArtefact)).Value);
+```
 
-Each stage returns what later stages need as outcomes: the chosen source,
-the open connection, the flags. The next stage's factory reads them back as
-artefacts. The entry command reads the flags once and returns them as one
-outcome, so no later stage parses `--headless` again.
+`SourceOutcome`, `SourceArtefact` and `ConnectCliCommand` are the app's own
+types. [Remembering your own state](../user-guides/0009-remembering-your-own-state.md)
+shows how to write the first two.
 
-A detour asks the user something, and a headless run has no one to ask.
-There the entry command ends the run with `ByFinallySaying` instead.
+## Why a decision travels as an outcome
 
-## Sharp edges
+**Only the command the user typed can read what they typed.** A command
+the run moves on to sees only the artefacts and any arguments the previous
+handler passes it. To let every later command see a flag such as
+`--dry-run`, the first command returns it as an outcome.
 
-- `LastCommandIs<T>()` is true only when `T` ran immediately before. The
-  `AnyLastCommandIs<T>()` (and the obsolete `LastCommandWas<T>()`) is true when
-  `T` ran anywhere earlier in the run, so two callers that both detour in one run match both factories, and
-  the first registered wins
-  ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
-- A chain that keeps moving on to another command, and never reaches a
-  `Final` outcome or parks on a reusable one, never returns. Nothing catches
-  it, though this is read from source and not yet reproduced
-  ([#173](https://github.com/KitCli/KitCli/issues/173)).
+## Where services fit
+
+**Services do the work; commands make the decisions.** A service reaches
+something outside the run: a database, an API, settings. A choice kept in
+a service outlives the run that made it, so a later run can act on a stale
+one. An artefact ends with its run.
+
+| Put it in a service | Put it in a command |
+| --- | --- |
+| Reading and writing data | Choosing which source to use |
+| Calling an API | Deciding which command runs next |
+| Loading settings | Passing a choice to later commands |
+
+## Gaps
+
+- [Nothing catches a chain that hands on forever (#173)](https://github.com/KitCli/KitCli/issues/173).
+  A command that keeps moving on, and never ends the run, never returns.
 
 ## See also
 
-[artefacts.md](artefacts.md) ·
-[specified-vs-provided-outcomes.md](specified-vs-provided-outcomes.md) ·
-[../user-guides/0007-chaining-commands.md](../user-guides/0007-chaining-commands.md) ·
-[../user-guides/0006-gating-a-command-with-cancreatewhen.md](../user-guides/0006-gating-a-command-with-cancreatewhen.md)
+[Artefacts](artefacts.md) · [Outcomes](outcomes.md) ·
+[Asking for a missing value and carrying on](../user-guides/0019-asking-for-a-missing-value-and-carrying-on.md)

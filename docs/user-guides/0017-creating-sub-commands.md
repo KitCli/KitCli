@@ -38,6 +38,27 @@ A sub-command is one word today. `/user edit team lead` arrives as a single
 glued string, `"edit team lead"`, not three words to match against — see
 [0009-how-many-sub-commands-can-one-instruction-address.md](../investigations/0009-how-many-sub-commands-can-one-instruction-address.md).
 
+### Building a different command for a sub-command word
+
+A factory's type argument sets the name the user types, but `Create()` can
+return any command. To let users type `/source choose` and run the asking
+command from
+[Asking for a missing value and carrying on](0019-asking-for-a-missing-value-and-carrying-on.md),
+add a command that only supplies the word `source`:
+
+```csharp
+public record SourceCliCommand : CliCommand;
+
+public class SourceChooseCliCommandFactory : CliCommandFactory<SourceCliCommand>
+{
+    public override bool CanCreateWhen() => SubCommandIs("choose");
+    public override CliCommand Create() => new ChooseSourceCliCommand(ReturnTo: null);
+}
+```
+
+`SourceCliCommand` never runs, so it needs no handler. In an interactive
+app, the user's choice is remembered, and their next `/export` reads it.
+
 ## Common mistakes
 
 **Typing an unlisted word and expecting an error.** `/user delete`, with no
