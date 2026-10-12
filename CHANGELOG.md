@@ -26,6 +26,14 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   with its name and description indented on separate lines instead of flush
   left.
 
+### Fixed
+
+- An app whose entry project holds no commands of its own now starts when a
+  registry adds commands from another assembly. `WithApp` and `WithBasicApp`
+  no longer throw for an empty entry assembly; `Run` throws instead when no
+  command was registered anywhere besides the built-in workflow commands
+  ([#118](https://github.com/KitCli/KitCli/issues/118)).
+
 ## [3.1.2] - 2026-09-18
 
 ### Fixed

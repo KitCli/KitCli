@@ -39,6 +39,20 @@ public static class CommandServiceCollectionExtensions
                 .AddMediatRCommandsAndHandlers(assembly);
         }
 
+        /// <summary>
+        /// Determines whether any command factory is registered for a command outside the given assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly whose commands do not count.</param>
+        /// <returns><see langword="true"/> if a command from any other assembly has a registered factory; otherwise <see langword="false"/>.</returns>
+        public bool AnyCommandsRegisteredOutside(Assembly assembly)
+            => services
+                .Where(descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ICliCommandFactory))
+                .Select(descriptor => descriptor.KeyedImplementationType!)
+                .Select(factoryType => factoryType.IsGenericType
+                    ? factoryType.GetGenericArguments()[0].Assembly
+                    : factoryType.Assembly)
+                .Any(commandAssembly => commandAssembly != assembly);
+
         private IServiceCollection AddMediatRCommandsAndHandlers(Assembly assembly)
             => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
 

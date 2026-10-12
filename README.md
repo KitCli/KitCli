@@ -107,6 +107,7 @@ six test projects. To see the framework running, start a playground app:
 ```bash
 dotnet run --project KitCli.Playground.App                # interactive
 dotnet run --project KitCli.Playground.App.Headless -- /echo --name Alex   # headless
+dotnet run --project KitCli.Playground.App.NoCommands     # registers no commands, so it fails to start
 ```
 
 ## Kinds of documentation
