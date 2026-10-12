@@ -136,6 +136,7 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     /// </summary>
     /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
     /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran previously; otherwise <see langword="false"/>.</returns>
+    [Obsolete("Despite its name, this matches any earlier run of the command. Use LastCommandIs<T>() for the command that ran immediately before.")]
     protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
     {
         var artefact = GetArtefact<CliCommand>(typeof(TRanCliCommand).Name);

@@ -45,7 +45,7 @@ rather than through the previous handler's local variables. See
 Your registry must call `AddArtefactFactoriesForAssembly(assembly)`.
 `AddCommandsFromAssembly` registers commands, factories, and handlers — but
 **not** artefact factories. That one call registers four built-ins,
-including the one behind `LastCommandWas<T>()`, then finds every
+including the one behind `LastCommandIs<T>()`, then finds every
 `ArtefactFactory<>` in the assembly, plus one for every closed
 `Aggregator<,>` and `TableBuilder<,>`.
 
