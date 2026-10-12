@@ -29,9 +29,9 @@ takes an optional `KitCliSettings` to apply the minimum.
 ## Consequences
 
 - Code that names `MessageLevel` or `KitCliSettings` adds
-  `using KitCli.Abstractions.Io;`. This breaks `KitCli.Commands.Abstractions`
-  users. The `KitCli` package re-exports nothing it used, so its users are
-  unaffected.
+  `using KitCli.Abstractions.Io;`. This breaks code that references
+  `KitCli.Commands.Abstractions` directly. Apps that reference only the `KitCli`
+  package are unaffected.
 - An app with its own `ICliIo` implementation adds the new method.
 - The outcome writers still do their own check, so the rule exists twice
   until they call `Say(message, level)` instead.
