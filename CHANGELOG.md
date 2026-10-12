@@ -64,6 +64,11 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   an app nothing that hook does not. Override `OnRunCreated` instead; removal
   is tracked in [#305](https://github.com/KitCli/KitCli/issues/305).
 
+### Fixed
+
+- An app whose entry project has no commands now starts when a registry adds
+  them from another project ([#118](https://github.com/KitCli/KitCli/issues/118)).
+
 ## [3.1.2] - 2026-09-18
 
 ### Fixed
