@@ -31,6 +31,9 @@ public class CliWorkflowRunTests
 
     private record TestChainingCliCommand : CliCommand;
 
+    [CliNextCommandCouldBe("x", "Do x.")]
+    private record TestChainingWithCouldBeCliCommand : CliCommand;
+
     private record TestChainedToCliCommand(string Name) : CliCommand;
 
     private record TestFactoryBuiltCliCommand : CliCommand;
@@ -565,6 +568,36 @@ public class CliWorkflowRunTests
             .Select(x => x.To);
 
         Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenCommandDeclaringCouldBeNextMovesStraightOn_WhenRespondToAsk_DoesNotSuggestIt()
+    {
+        // Arrange
+        var firstCommand = new TestChainingWithCouldBeCliCommand();
+        var nextOutcome = new ProvidedNextCliCommandOutcome(new TestChainedToCliCommand("next"));
+
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(OriginatingInstruction);
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(firstCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(firstCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([nextOutcome]);
+
+        // Act
+        var outcomes = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        Assert.That(outcomes.OfType<SuggestionOutcome>(), Is.Empty);
     }
 
     [Test]

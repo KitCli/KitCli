@@ -44,6 +44,24 @@ Give the name without a prefix character — the run adds the app's
 configured one. Any name the user could type works, including a shorthand
 or an [alias](0015-giving-a-command-extra-names.md).
 
+## Suggesting after commands that move on
+
+`[CliNextCommandCouldBe]` suggests commands once a command finishes. A
+command that ends with `ByMovingToCommand<B>()` has not finished the run, so
+it prints nothing. Only the last command in the chain prints, and only its
+own suggestions:
+
+```csharp
+[CliNextCommandCouldBe("export", "Export the results.")]
+public record StepOneCliCommand : CliCommand; // ends with ByMovingToCommand<StepTwoCliCommand>()
+
+[CliNextCommandCouldBe("share", "Share the results.")]
+public record StepTwoCliCommand : CliCommand; // finishes the run
+```
+
+Running `/step-one` prints `/share` and never `/export`. Declare the
+suggestions on the command that ends the chain.
+
 ## Common mistakes
 
 **Declaring suggestions on a command that finishes the run.** They are read

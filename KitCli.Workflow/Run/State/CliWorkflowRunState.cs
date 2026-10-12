@@ -27,6 +27,10 @@ public class CliWorkflowRunState : ICliWorkflowRunState
         => Changes.Any(change => oneOfStatuses.Contains(change.To));
 
     /// <inheritdoc/>
+    public bool WasLastChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses)
+        => Changes.LastOrDefault() is { } lastChange && oneOfStatuses.Contains(lastChange.To);
+
+    /// <inheritdoc/>
     public List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges()
         => Changes
             .OfType<IOutcomeCliWorkflowRunStateChange>()

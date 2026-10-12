@@ -22,6 +22,11 @@ public interface ICliWorkflowRunState
     /// <returns><c>true</c> if the run has ever reached any of <paramref name="oneOfStatuses"/>; otherwise <c>false</c>.</returns>
     bool WasChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses);
 
+    /// <summary>Determines whether the run's most recent status change was to any of the given statuses.</summary>
+    /// <param name="oneOfStatuses">The statuses to check for.</param>
+    /// <returns><c>true</c> if the latest change was to any of <paramref name="oneOfStatuses"/>; otherwise <c>false</c>.</returns>
+    bool WasLastChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses);
+
     /// <summary>Returns every state change in this run's history that carried outcomes.</summary>
     /// <returns>The outcome-carrying state changes, in the order they occurred.</returns>
     List<IOutcomeCliWorkflowRunStateChange> AllOutcomeStateChanges();
