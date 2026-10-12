@@ -26,6 +26,8 @@
       href: workflow-run-state-machine.md
     - name: Specified vs provided outcomes
       href: specified-vs-provided-outcomes.md
+    - name: Command stacking
+      href: command-stacking.md
 - name: Host
   items:
     - name: CliApp host loop

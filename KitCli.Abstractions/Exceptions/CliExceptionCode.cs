@@ -33,5 +33,10 @@ public enum CliExceptionCode
     /// <summary>
     /// No reaction factory was available to handle the request.
     /// </summary>
-    NoReactionFactory
+    NoReactionFactory,
+
+    /// <summary>
+    /// No command was registered for the app to run.
+    /// </summary>
+    NoCommands
 }
