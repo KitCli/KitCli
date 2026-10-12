@@ -42,8 +42,16 @@ public class TestCliCommandFactory : CliCommandFactory<TestNextCliCommand>
     public new bool AnyArtefact<TArtefactType>(string? artefactName) where TArtefactType : notnull
         => base.AnyArtefact<TArtefactType>(artefactName);
 
+#pragma warning disable CS0618
     public new bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
         => base.LastCommandWas<TRanCliCommand>();
+#pragma warning restore CS0618
+
+    public new bool AnyLastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
+        => base.AnyLastCommandIs<TRanCliCommand>();
+
+    public new bool LastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
+        => base.LastCommandIs<TRanCliCommand>();
 
     public new Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName = null)
         where TArtefactType : notnull

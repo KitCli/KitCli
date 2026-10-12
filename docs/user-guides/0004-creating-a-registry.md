@@ -50,7 +50,7 @@ services.AddArtefactFactoriesForAssembly(assembly);
 
 Add it whenever a command remembers state (see
 [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)),
-a factory calls `LastCommandWas<T>()`, or a table needs a "next page" step
+a factory calls `LastCommandIs<T>()`, or a table needs a "next page" step
 (see [0012-showing-a-paged-table.md](0012-showing-a-paged-table.md)). It
 registers the built-in artefact factories as well as yours, so all three
 depend on it.
@@ -92,7 +92,7 @@ source before it can bind settings to your type.
 
 **Forgetting `AddArtefactFactoriesForAssembly`.** Startup stays silent. The
 first symptom is a later command's `GetRequiredArtefact` throwing at
-runtime, or `LastCommandWas<T>()` quietly returning `false`.
+runtime, or `LastCommandIs<T>()` quietly returning `false`.
 
 **Passing a marker type from the wrong assembly.** Point
 `AddCommandsFromAssembly` at an assembly holding no commands and it throws

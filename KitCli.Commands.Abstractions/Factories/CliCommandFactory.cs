@@ -130,16 +130,40 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     }
 
     /// <summary>
-    /// Determines whether the given command type is the most recently run command, based on whether a
-    /// matching <c>RanCliCommandArtefact</c> exists in the attached artefacts.
+    /// Determines whether the given command type ran at any earlier point in the run, based on whether a
+    /// matching <c>RanCliCommandArtefact</c> exists in the attached artefacts. To check only the command
+    /// that ran immediately before, use <see cref="LastCommandIs{TRanCliCommand}"/>.
     /// </summary>
     /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
     /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran previously; otherwise <see langword="false"/>.</returns>
-    protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
+    protected bool AnyLastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
     {
         var artefact = GetArtefact<CliCommand>(typeof(TRanCliCommand).Name);
 
         return artefact != null;
+    }
+
+    /// <summary>
+    /// Determines whether the given command type ran at any earlier point in the run.
+    /// </summary>
+    /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
+    /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran previously; otherwise <see langword="false"/>.</returns>
+    [Obsolete("Despite its name, this matches any earlier run of the command. Use AnyLastCommandIs<T>() for that, or LastCommandIs<T>() for the command that ran immediately before.")]
+    protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
+        => AnyLastCommandIs<TRanCliCommand>();
+
+    /// <summary>
+    /// Determines whether the given command type is the command that ran immediately before, based on the
+    /// last <c>RanCliCommandArtefact</c> in the attached artefacts. A command that ran earlier, with
+    /// another command run since, does not match.
+    /// </summary>
+    /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
+    /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran most recently; otherwise <see langword="false"/>.</returns>
+    protected bool LastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
+    {
+        var artefact = GetArtefact<CliCommand>();
+
+        return artefact?.Name == typeof(TRanCliCommand).Name;
     }
 
     /// <summary>

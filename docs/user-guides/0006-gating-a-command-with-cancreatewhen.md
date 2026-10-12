@@ -29,14 +29,14 @@ factory existed.
 
 ### Gating on what already happened in this run
 
-Any `CliCommandFactory<T>` can call `LastCommandWas<TPriorCommand>()` or
+Any `CliCommandFactory<T>` can call `LastCommandIs<TPriorCommand>()` or
 query an artefact, offering a command only once an earlier step has
 happened:
 
 ```csharp
 public class ConfirmDeleteCliCommandFactory : CliCommandFactory<ConfirmDeleteCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<RequestDeleteCliCommand>();
+    public override bool CanCreateWhen() => LastCommandIs<RequestDeleteCliCommand>();
 
     public override CliCommand Create() => new ConfirmDeleteCliCommand();
 }
@@ -45,12 +45,16 @@ public class ConfirmDeleteCliCommandFactory : CliCommandFactory<ConfirmDeleteCli
 Typing `/confirm-delete` before `/request-delete` fails to resolve, so
 nobody reaches the confirmation step out of order. This needs
 `AddArtefactFactoriesForAssembly` in your registry — without it
-`LastCommandWas` always returns `false`. See
+`LastCommandIs` always returns `false`. See
 [0004-creating-a-registry.md](0004-creating-a-registry.md).
 
-Despite its name, `LastCommandWas<T>()` is `true` when `T` ran at any point
-in the current run, not only most recently. Use it to ask "has this step
-happened yet", never "is this the step immediately before".
+`LastCommandIs<T>()` is `true` only when `T` is the step immediately before,
+and `false` once another command has run since. To accept a repeat of the
+same step, such as turning a page twice, check for both:
+`LastCommandIs<List>() || LastCommandIs<NextPage>()`. To ask
+"has `T` run at any earlier point", use `AnyLastCommandIs<T>()`. The older
+`LastCommandWas<T>()` does the same but is obsolete, since its name suggests
+the latest only.
 
 ## Common mistakes
 

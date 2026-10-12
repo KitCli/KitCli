@@ -38,14 +38,14 @@ everything from the top. It stays the one place that decides the route.
 ## One command, several factories
 
 The detour learns where to return from the factory that built it. Give it
-one factory per caller, gated on `LastCommandWas<TCaller>()`:
+one factory per caller, gated on `LastCommandIs<TCaller>()`:
 
 ```csharp
 public record ChooseSourceCliCommand(Type? ReturnTo) : CliCommand;
 
 public class ChooseSourceAfterExportCliCommandFactory : CliCommandFactory<ChooseSourceCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<ExportCliCommand>();
+    public override bool CanCreateWhen() => LastCommandIs<ExportCliCommand>();
 
     public override CliCommand Create() => new ChooseSourceCliCommand(typeof(ExportCliCommand));
 }
@@ -68,11 +68,14 @@ There the entry command ends the run with `ByFinallySaying` instead.
 
 ## Sharp edges
 
-- `LastCommandWas<T>()` is true when `T` ran anywhere earlier in the run.
-  When two callers both detour in one run, both factories match and the
-  first registered wins ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
-- Every route must end on a `Final` outcome, or the run waits for an ask.
-  A loop with no exit runs forever, and nothing catches it
+- `LastCommandIs<T>()` is true only when `T` ran immediately before. The
+  `AnyLastCommandIs<T>()` (and the obsolete `LastCommandWas<T>()`) is true when
+  `T` ran anywhere earlier in the run, so two callers that both detour in one run match both factories, and
+  the first registered wins
+  ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
+- A chain that keeps moving on to another command, and never reaches a
+  `Final` outcome or parks on a reusable one, never returns. Nothing catches
+  it, though this is read from source and not yet reproduced
   ([#173](https://github.com/KitCli/KitCli/issues/173)).
 
 ## See also

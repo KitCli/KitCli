@@ -407,6 +407,101 @@ public class CliCommandFactoryTests
         Assert.That(ran, Is.False);
     }
 
+    [Test]
+    public void GivenTheCommandRanBeforeAnotherCommand_WhenLastCommandWasIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestNextCliCommand()),
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget"))
+        ]);
+
+        // Act
+        var ran = _factory.LastCommandWas<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenTheCommandRanBeforeAnotherCommand_WhenAnyLastCommandIsIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestNextCliCommand()),
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget"))
+        ]);
+
+        // Act
+        var ran = _factory.AnyLastCommandIs<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenAnotherCommandRan_WhenAnyLastCommandIsIsCalled_ThenItDoesNotMatch()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+            [new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget"))]);
+
+        // Act
+        var ran = _factory.AnyLastCommandIs<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.False);
+    }
+
+    [Test]
+    public void GivenTheCommandRanLast_WhenLastCommandIsIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget")),
+            new RanCliCommandArtefact(new TestNextCliCommand())
+        ]);
+
+        // Act
+        var ran = _factory.LastCommandIs<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenTheCommandRanBeforeAnotherCommand_WhenLastCommandIsIsCalled_ThenItDoesNotMatch()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestNextCliCommand()),
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget"))
+        ]);
+
+        // Act
+        var ran = _factory.LastCommandIs<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.False);
+    }
+
+    [Test]
+    public void GivenNoCommandRan_WhenLastCommandIsIsCalled_ThenItDoesNotMatch()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty, []);
+
+        // Act
+        var ran = _factory.LastCommandIs<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.False);
+    }
+
     private static Instruction InstructionWith(string subInstructionName,
         params AnonymousInstructionArgument[] arguments)
         => new("/", "test", subInstructionName, arguments.ToList());
