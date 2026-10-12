@@ -91,7 +91,7 @@ public record TestAggregatorPageCliCommand(Aggregator<TestSource, TestAggregate>
 
 public class TestAggregatorPageCliCommandFactory : PagedCliCommandFactory<TestAggregatorPageCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<TestAggregatorFilterCliCommand>() || LastCommandWas<TestAggregatorPageCliCommand>();
+    public override bool CanCreateWhen() => LastCommandWas<TestAggregatorFilterCliCommand>();
 
     public override CliCommand Create()
     {

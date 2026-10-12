@@ -45,8 +45,7 @@ return FinishThisCommand()
 ```csharp
 public class NextExpensePageCliCommandFactory : PagedCliCommandFactory<NextExpensePageCliCommand>
 {
-    public override bool CanCreateWhen()
-        => LastCommandWas<ListExpensesCliCommand>() || LastCommandWas<NextExpensePageCliCommand>();
+    public override bool CanCreateWhen() => LastCommandWas<ListExpensesCliCommand>();
 
     public override CliCommand Create()
     {

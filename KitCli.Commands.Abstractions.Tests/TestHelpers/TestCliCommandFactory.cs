@@ -45,6 +45,9 @@ public class TestCliCommandFactory : CliCommandFactory<TestNextCliCommand>
     public new bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
         => base.LastCommandWas<TRanCliCommand>();
 
+    public new bool LastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
+        => base.LastCommandIs<TRanCliCommand>();
+
     public new Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName = null)
         where TArtefactType : notnull
         => base.GetArtefact<TArtefactType>(artefactName);
