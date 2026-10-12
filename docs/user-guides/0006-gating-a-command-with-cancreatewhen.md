@@ -48,9 +48,10 @@ nobody reaches the confirmation step out of order. This needs
 `LastCommandWas` always returns `false`. See
 [0004-creating-a-registry.md](0004-creating-a-registry.md).
 
-Despite its name, `LastCommandWas<T>()` is `true` when `T` ran at any point
-in the current run, not only most recently. Use it to ask "has this step
-happened yet", never "is this the step immediately before".
+`LastCommandWas<T>()` is `true` only when `T` is the command that ran
+immediately before. Once another command has run, it is `false`. To accept
+a repeat of the same step, such as turning a page twice, check for both:
+`LastCommandWas<List>() || LastCommandWas<NextPage>()`.
 
 ## Common mistakes
 

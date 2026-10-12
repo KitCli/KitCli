@@ -29,6 +29,12 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   moves straight on to another command with `ByMovingToCommand`. They print
   when the run parks or finishes
   ([#315](https://github.com/KitCli/KitCli/issues/315)).
+- `LastCommandWas<T>()` on a command factory is now true only when `T` ran
+  immediately before, as its name says. It used to be true when `T` ran at any
+  earlier point in the run, so two factories gated on different callers could
+  both match. A factory that relied on the old behaviour, such as one that
+  accepts a repeated page turn, checks each command it accepts
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Changed
 

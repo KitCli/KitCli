@@ -395,6 +395,41 @@ public class CliCommandFactoryTests
     }
 
     [Test]
+    public void GivenTheCommandRanBeforeAnotherCommand_WhenLastCommandWasIsCalled_ThenItDoesNotMatch()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestNextCliCommand()),
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget"))
+        ]);
+
+        // Act
+        var ran = _factory.LastCommandWas<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.False);
+    }
+
+    [Test]
+    public void GivenTheCommandRanAgainAfterAnotherCommand_WhenLastCommandWasIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestNextCliCommand()),
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget")),
+            new RanCliCommandArtefact(new TestNextCliCommand())
+        ]);
+
+        // Act
+        var ran = _factory.LastCommandWas<TestNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
     public void GivenNoCommandRan_WhenLastCommandWasIsCalled_ThenItDoesNotMatch()
     {
         // Arrange

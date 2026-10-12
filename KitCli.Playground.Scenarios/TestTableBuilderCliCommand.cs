@@ -56,7 +56,7 @@ public record TestTableBuilderPageChangeCliCommand(TableBuilder<TestSource, Test
 
 public class TestTableBuilderPageChangeCliCommandFactory : PagedCliCommandFactory<TestTableBuilderPageChangeCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<TestTableBuilderCliCommand>();
+    public override bool CanCreateWhen() => LastCommandWas<TestTableBuilderCliCommand>() || LastCommandWas<TestTableBuilderPageChangeCliCommand>();
 
     public override CliCommand Create()
     {

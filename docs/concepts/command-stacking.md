@@ -68,9 +68,9 @@ There the entry command ends the run with `ByFinallySaying` instead.
 
 ## Sharp edges
 
-- `LastCommandWas<T>()` is true when `T` ran anywhere earlier in the run.
-  When two callers both detour in one run, both factories match and the
-  first registered wins ([ADR 0004](../adr/0004-first-match-wins-resolution.md)).
+- `LastCommandWas<T>()` is true only when `T` ran immediately before. That is
+  why each caller gets its own factory: the detour returns to whichever
+  command sent it.
 - Every route must end on a `Final` outcome, or the run waits for an ask.
   A loop with no exit runs forever, and nothing catches it
   ([#173](https://github.com/KitCli/KitCli/issues/173)).
