@@ -166,6 +166,11 @@ public class CliWorkflowRun : ICliWorkflowRun
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
 
+            if (allOutcomes.Last() is NextCliCommandOutcome)
+            {
+                return allOutcomes;
+            }
+
             var suggestedNextCommands = SuggestNextCommands(command);
 
             return [..allOutcomes, ..suggestedNextCommands];
@@ -336,7 +341,8 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     /// <summary>
     /// The commands this run's just-executed command declares via <see cref="CliNextCommandCouldBeAttribute"/>,
-    /// printed once regardless of whether the run parked or finished. Empty when it declares none.
+    /// printed once the run parks or finishes, never while it moves straight on to another command.
+    /// Empty when it declares none.
     /// </summary>
     private Outcome[] SuggestNextCommands(CliCommand command)
     {

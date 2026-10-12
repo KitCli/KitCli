@@ -20,6 +20,13 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   level)` follows. An app with its own `ICliIo` implementation needs to add it
   ([#310](https://github.com/KitCli/KitCli/issues/310)).
 
+### Fixed
+
+- A command's `[CliNextCommandCouldBe]` suggestions no longer print when it
+  moves straight on to another command with `ByMovingToCommand`. They print
+  when the run parks or finishes
+  ([#315](https://github.com/KitCli/KitCli/issues/315)).
+
 ### Changed
 
 - **Breaking for `KitCli.Commands.Abstractions` users:** `MessageLevel` and
