@@ -1,4 +1,4 @@
-namespace KitCli.Commands.Abstractions.Outcomes;
+namespace KitCli.Abstractions.Io;
 
 /// <summary>
 /// How important a message is, from quietest to loudest.

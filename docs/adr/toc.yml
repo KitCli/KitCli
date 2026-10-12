@@ -34,3 +34,7 @@
   href: 0017-render-tables-with-spectre-console.md
 - name: "0018. Suggest commands that could be next via a [CliNextCommandCouldBe] attribute"
   href: 0018-suggest-commands-that-could-be-next.md
+- name: "0019. Ask the person to pick through ICliIo, using CliChoice"
+  href: 0019-ask-through-cli-io-with-cli-choice.md
+- name: "0020. Keep MessageLevel and KitCliSettings beside ICliIo"
+  href: 0020-keep-message-level-and-settings-beside-cli-io.md

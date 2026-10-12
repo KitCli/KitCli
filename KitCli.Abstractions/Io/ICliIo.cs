@@ -14,6 +14,25 @@ public interface ICliIo
     Task<string?> AskAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Shows a list the person moves through with the arrow keys and picks one item from with enter.
+    /// </summary>
+    /// <param name="title">The question shown above the list.</param>
+    /// <param name="choices">The choices to pick from.</param>
+    /// <param name="cancellationToken">A token used to abandon the prompt.</param>
+    /// <returns>The picked choice, or <see langword="null"/> if the prompt was cancelled.</returns>
+    Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Shows a list the person moves through with the arrow keys, ticks choices in with the space bar and
+    /// confirms with enter.
+    /// </summary>
+    /// <param name="title">The question shown above the list.</param>
+    /// <param name="choices">The choices to pick from.</param>
+    /// <param name="cancellationToken">A token used to abandon the prompt.</param>
+    /// <returns>The ticked choices, or an empty list if nothing was ticked or the prompt was cancelled.</returns>
+    Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Writes a blank line to the console.
     /// </summary>
     void Pause();
@@ -23,6 +42,14 @@ public interface ICliIo
     /// </summary>
     /// <param name="something">The text to write.</param>
     void Say(string something);
+
+    /// <summary>
+    /// Writes a line of output to the console, unless <paramref name="level"/> is below the configured
+    /// <see cref="KitCliSettings.MinimumMessageLevel"/>.
+    /// </summary>
+    /// <param name="something">The text to write.</param>
+    /// <param name="level">How important the text is.</param>
+    void Say(string something, MessageLevel level);
 
     /// <summary>
     /// Sets the console window title.

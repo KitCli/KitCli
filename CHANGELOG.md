@@ -8,6 +8,29 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Added
 
+- `ByMovingToCommand(Type)` moves to a command whose type is only known at run
+  time ([#314](https://github.com/KitCli/KitCli/issues/314)).
+- `IsSubCommand<TCommand>()` on a command factory checks the sub-command by
+  command type instead of a name string.
+- `cliIo.SayCommandSuggestion(name, description)` writes a suggested command in
+  the same indented block a suggestion outcome uses
+  ([#313](https://github.com/KitCli/KitCli/issues/313)).
+- `ICliIo.Say(message, level)` writes a message only when its `MessageLevel`
+  meets `KitCliSettings.MinimumMessageLevel`, the same rule `BySaying(message,
+  level)` follows. An app with its own `ICliIo` implementation needs to add it
+  ([#310](https://github.com/KitCli/KitCli/issues/310)).
+
+### Changed
+
+- **Breaking for `KitCli.Commands.Abstractions` users:** `MessageLevel` and
+  `KitCliSettings` moved to `KitCli.Abstractions.Io` so `ICliIo` can use them.
+  Add `using KitCli.Abstractions.Io;` where they are named. Code using only the
+  `KitCli` package is unaffected.
+
+## [3.2.0] - 2026-10-11
+
+### Added
+
 - `BySaying(message, level)` and `ByFinallySaying(message, level)` give a
   message a `MessageLevel` (`Trace` through `Error`), shown only when it
   meets `KitCliSettings.MinimumMessageLevel` (defaults to `Information`).
@@ -19,20 +42,32 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   command finishes, even outside a parked run — `[CliNextCommandIs]` only
   ever fired when a parked run's next ask failed to resolve
   ([#294](https://github.com/KitCli/KitCli/issues/294)).
+- `ICliIo.ChooseAsync` and `ICliIo.ChooseManyAsync` show a list the person
+  moves through with the arrow keys, picking one item with enter or ticking
+  several with the space bar. Each item is a `CliChoice` — a `Label` to show
+  and an optional `Value` handed back with the pick. An app with its own
+  `ICliIo` implementation needs to add both
+  ([#255](https://github.com/KitCli/KitCli/issues/255)).
 
 ### Changed
 
+- `CliApp.OnRunStarted` now runs just before the command starts instead of
+  just after, so a line it writes no longer lands on top of a list the
+  command shows.
 - A suggested-next-command now prints under a header line instead of bare,
   with its name and description indented on separate lines instead of flush
   left.
 
+### Deprecated
+
+- `CliApp.OnRunStarted` now runs straight after `OnRunCreated`, so it tells
+  an app nothing that hook does not. Override `OnRunCreated` instead; removal
+  is tracked in [#305](https://github.com/KitCli/KitCli/issues/305).
+
 ### Fixed
 
-- An app whose entry project holds no commands of its own now starts when a
-  registry adds commands from another assembly. `WithApp` and `WithBasicApp`
-  no longer throw for an empty entry assembly; `Run` throws instead when no
-  command was registered anywhere besides the built-in workflow commands
-  ([#118](https://github.com/KitCli/KitCli/issues/118)).
+- An app whose entry project has no commands now starts when a registry adds
+  them from another project ([#118](https://github.com/KitCli/KitCli/issues/118)).
 
 ## [3.1.2] - 2026-09-18
 

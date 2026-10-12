@@ -1,6 +1,4 @@
-using KitCli.Commands.Abstractions.Outcomes;
-
-namespace KitCli.Commands.Abstractions.Io;
+namespace KitCli.Abstractions.Io;
 
 /// <summary>
 /// KitCli-owned settings, resolved the same way as <c>InstructionSettings</c>: bound from a
