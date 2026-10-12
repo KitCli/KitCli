@@ -8,6 +8,13 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Added
 
+- `ByMovingToCommand(Type)` moves to a command whose type is only known at run
+  time ([#314](https://github.com/KitCli/KitCli/issues/314)).
+- `IsSubCommand<TCommand>()` on a command factory checks the sub-command by
+  command type instead of a name string.
+- `cliIo.SayCommandSuggestion(name, description)` writes a suggested command in
+  the same indented block a suggestion outcome uses
+  ([#313](https://github.com/KitCli/KitCli/issues/313)).
 - `ICliIo.Say(message, level)` writes a message only when its `MessageLevel`
   meets `KitCliSettings.MinimumMessageLevel`, the same rule `BySaying(message,
   level)` follows. An app with its own `ICliIo` implementation needs to add it

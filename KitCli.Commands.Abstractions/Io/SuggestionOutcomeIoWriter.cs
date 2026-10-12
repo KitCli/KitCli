@@ -24,9 +24,6 @@ public class SuggestionOutcomeIoWriter(ICliIo cliIo) : IOutcomeIoWriter
     {
         var suggestionOutcome = (SuggestionOutcome)outcome;
 
-        cliIo.Pause();
-
-        cliIo.Say($"{NameSpacing}{suggestionOutcome.Name}");
-        cliIo.Say($"{DescriptionSpacing}{suggestionOutcome.Description}");
+        cliIo.SayCommandSuggestion(suggestionOutcome.Name, suggestionOutcome.Description);
     }
 }
