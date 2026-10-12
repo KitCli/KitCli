@@ -47,7 +47,7 @@ public class TestCliCommandFactory : CliCommandFactory<TestNextCliCommand>
         => base.LastCommandWas<TRanCliCommand>();
 #pragma warning restore CS0618
 
-    public bool AnyLastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
+    public new bool AnyLastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
         => base.AnyLastCommandIs<TRanCliCommand>();
 
     public new bool LastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
