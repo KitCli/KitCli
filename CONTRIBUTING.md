@@ -163,6 +163,9 @@ replaces. It ships through a PR with a Status like any other work. Durable
 facts about a dependency belong in that dependency's own docs too, not
 only here.
 
+`toc.yml` groups them by the release they shipped in, oldest first, under
+a short label with no number. A new one goes under `Unreleased`.
+
 ## Technology
 
 A technology page ([`docs/technology/`](docs/technology/)) is the reference

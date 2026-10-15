@@ -1,20 +1,30 @@
-- name: "0002. Which extension points can use a consumer's registered lifetimes?"
-  href: 0002-which-extension-points-can-use-a-consumers-lifetimes.md
-- name: "0003. How should a chained command be selected and constructed?"
-  href: 0003-how-should-a-chained-command-be-selected-and-constructed.md
-- name: "0004. Respect SEMVER in Release"
-  href: 0004-respect-semver-in-release.md
-- name: "0005. How much of the run loop can the two hosts share?"
-  href: 0005-how-much-of-the-run-loop-can-the-two-hosts-share.md
-- name: "0006. Should a command factory declare what it needs instead of overriding CanCreateWhen?"
-  href: 0006-should-a-command-factory-declare-what-it-needs.md
-- name: "0007. Should an instruction argument's type come from its content or the command's declaration?"
-  href: 0007-should-an-arguments-type-come-from-its-content-or-the-commands-declaration.md
-- name: "0008. Should table rendering be rebuilt on Spectre.Console?"
-  href: 0008-should-table-rendering-be-rebuilt-on-spectre-console.md
-- name: "0009. How many sub-commands can one instruction address?"
-  href: 0009-how-many-sub-commands-can-one-instruction-address.md
-- name: "0010. What would a built-in /help command list?"
-  href: 0010-what-would-a-built-in-help-command-list.md
-- name: "0011. Can an artefact outlive the run that made it?"
-  href: 0011-can-an-artefact-outlive-the-run-that-made-it.md
+- name: "2.0.0"
+  items:
+    - name: Consumer lifetimes in extension points
+      href: 0002-which-extension-points-can-use-a-consumers-lifetimes.md
+    - name: Selecting a chained command
+      href: 0003-how-should-a-chained-command-be-selected-and-constructed.md
+- name: "3.0.0"
+  items:
+    - name: Versioning releases by SemVer
+      href: 0004-respect-semver-in-release.md
+- name: "3.1.0"
+  items:
+    - name: Sharing the run loop between hosts
+      href: 0005-how-much-of-the-run-loop-can-the-two-hosts-share.md
+    - name: Declaring what a factory needs
+      href: 0006-should-a-command-factory-declare-what-it-needs.md
+- name: "3.1.1"
+  items:
+    - name: Where an argument's type comes from
+      href: 0007-should-an-arguments-type-come-from-its-content-or-the-commands-declaration.md
+    - name: Tables on Spectre.Console
+      href: 0008-should-table-rendering-be-rebuilt-on-spectre-console.md
+    - name: Sub-commands per instruction
+      href: 0009-how-many-sub-commands-can-one-instruction-address.md
+    - name: A built-in /help command
+      href: 0010-what-would-a-built-in-help-command-list.md
+- name: Unreleased
+  items:
+    - name: Artefacts that outlive a run
+      href: 0011-can-an-artefact-outlive-the-run-that-made-it.md
