@@ -56,7 +56,7 @@ public record TestAggregatorFilterCliCommand(Aggregator<TestSource, TestAggregat
 
 public class TestAggregatorFilterCliCommandFactory : CliCommandFactory<TestAggregatorFilterCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<TestAggregatorCliCommand>();
+    public override bool CanCreateWhen() => LastCommandIs<TestAggregatorCliCommand>();
 
     public override CliCommand Create()
     {
@@ -91,7 +91,7 @@ public record TestAggregatorPageCliCommand(Aggregator<TestSource, TestAggregate>
 
 public class TestAggregatorPageCliCommandFactory : PagedCliCommandFactory<TestAggregatorPageCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<TestAggregatorFilterCliCommand>();
+    public override bool CanCreateWhen() => LastCommandIs<TestAggregatorFilterCliCommand>() || LastCommandIs<TestAggregatorPageCliCommand>();
 
     public override CliCommand Create()
     {

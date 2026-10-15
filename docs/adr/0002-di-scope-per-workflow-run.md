@@ -32,7 +32,7 @@ and resolves that run's `IInstructionParser`, `IInstructionValidator`,
 `scope.ServiceProvider`. `CliWorkflowRun` holds that scope and disposes it
 in `UpdateStateWhenFinished()`, the moment the run's state reaches
 `Finished` — see
-[0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md)
+[workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md)
 for how that guard fires exactly once per run.
 
 This is a per-*run* scope, not a per-*command* scope: a multi-turn run

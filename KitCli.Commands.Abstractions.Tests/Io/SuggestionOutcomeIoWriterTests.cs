@@ -30,7 +30,7 @@ public class SuggestionOutcomeIoWriterTests
     }
 
     [Test]
-    public void GivenSuggestionOutcome_WhenWrite_ThenPausesThenSaysNameAndDescription()
+    public void GivenSuggestionOutcome_WhenWrite_ThenPausesThenSaysIndentedNameAndDescription()
     {
         // Arrange
         var cliIo = new TestCliIo();
@@ -40,6 +40,11 @@ public class SuggestionOutcomeIoWriterTests
         writer.Write(new SuggestionOutcome("/list", "Lists things"));
 
         // Assert
-        Assert.That(cliIo.Lines, Is.EqualTo(new[] { string.Empty, "/list", "Lists things" }).AsCollection);
+        Assert.That(cliIo.Lines, Is.EqualTo(new[]
+        {
+            string.Empty,
+            $"{SuggestionOutcomeIoWriter.NameSpacing}/list",
+            $"{SuggestionOutcomeIoWriter.DescriptionSpacing}Lists things",
+        }).AsCollection);
     }
 }

@@ -50,8 +50,8 @@ services.AddArtefactFactoriesForAssembly(assembly);
 
 Add it whenever a command remembers state (see
 [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)),
-a factory calls `LastCommandWas<T>()`, or a table needs a "next page" step
-(see [0011-showing-a-paged-table.md](0011-showing-a-paged-table.md)). It
+a factory calls `LastCommandIs<T>()`, or a table needs a "next page" step
+(see [0012-showing-a-paged-table.md](0012-showing-a-paged-table.md)). It
 registers the built-in artefact factories as well as yours, so all three
 depend on it.
 
@@ -92,7 +92,7 @@ source before it can bind settings to your type.
 
 **Forgetting `AddArtefactFactoriesForAssembly`.** Startup stays silent. The
 first symptom is a later command's `GetRequiredArtefact` throwing at
-runtime, or `LastCommandWas<T>()` quietly returning `false`.
+runtime, or `LastCommandIs<T>()` quietly returning `false`.
 
 **Passing a marker type from the wrong assembly.** Point
 `AddCommandsFromAssembly` at an assembly holding no commands and it throws
@@ -104,7 +104,7 @@ silence while another assembly's register instead.
 
 - [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — what
   `AddCommandsFromAssembly` finds and registers.
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   the full mechanics behind that call.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — what the
+- [../concepts/artefacts.md](../concepts/artefacts.md) — what the
   second call registers.

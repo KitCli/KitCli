@@ -36,6 +36,11 @@ public enum CliExceptionCode
     NoReactionFactory,
 
     /// <summary>
+    /// No command was registered for the app to run.
+    /// </summary>
+    NoCommands,
+
+    /// <summary>
     /// Nothing was attached to the input to answer an ask.
     /// </summary>
     NoInput

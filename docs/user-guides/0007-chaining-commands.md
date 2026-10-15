@@ -45,7 +45,7 @@ for something else to move it forward. See
 
 Because a factory builds it, the next command can read everything the run
 has gathered — see
-[../concepts/0008-artefacts.md](../concepts/0008-artefacts.md). For what
+[../concepts/artefacts.md](../concepts/artefacts.md). For what
 *this* handler decides, pass arguments:
 
 ```csharp
@@ -93,7 +93,7 @@ static or a singleton.
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   what "reusable" means, and how a chain maps onto the run's state.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — passing data
+- [../concepts/artefacts.md](../concepts/artefacts.md) — passing data
   from an earlier step to a later one.
 - [../adr/0011-chain-to-a-command-by-type.md](../adr/0011-chain-to-a-command-by-type.md) —
   why there are two ways to name the next command.

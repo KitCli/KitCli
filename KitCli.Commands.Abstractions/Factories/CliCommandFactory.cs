@@ -55,6 +55,15 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     }
 
     /// <summary>
+    /// Determines whether the attached instruction's sub-instruction name is the instruction name of the given command type.
+    /// </summary>
+    /// <typeparam name="TCommand">The command type whose instruction name to compare against.</typeparam>
+    /// <returns><see langword="true"/> if the attached instruction's sub-instruction name matches; otherwise <see langword="false"/>.</returns>
+    /// <exception cref="Exception">Thrown when no instruction and artefacts have been attached via <see cref="Attach"/>.</exception>
+    protected bool IsSubCommand<TCommand>() where TCommand : CliCommand
+        => SubCommandIs(CliCommand.GetInstructionName(typeof(TCommand)));
+
+    /// <summary>
     /// Determines whether the attached instruction has any argument of the given type, optionally filtered by name.
     /// </summary>
     /// <typeparam name="TArgumentType">The argument value type to look for.</typeparam>
@@ -121,17 +130,75 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     }
 
     /// <summary>
-    /// Determines whether the given command type is the most recently run command, based on whether a
-    /// matching <c>RanCliCommandArtefact</c> exists in the attached artefacts.
+    /// Determines whether the given command type ran at any earlier point in the run, based on whether a
+    /// matching <c>RanCliCommandArtefact</c> exists in the attached artefacts. To check only the command
+    /// that ran immediately before, use <see cref="LastCommandIs{TRanCliCommand}"/>.
     /// </summary>
     /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
     /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran previously; otherwise <see langword="false"/>.</returns>
-    protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
+    protected bool AnyLastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
     {
         var artefact = GetArtefact<CliCommand>(typeof(TRanCliCommand).Name);
 
         return artefact != null;
     }
+
+    /// <summary>
+    /// Determines whether the given command type ran at any earlier point in the run.
+    /// </summary>
+    /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
+    /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran previously; otherwise <see langword="false"/>.</returns>
+    [Obsolete("Despite its name, this matches any earlier run of the command. Use AnyLastCommandIs<T>() for that, or LastCommandIs<T>() for the command that ran immediately before.")]
+    protected bool LastCommandWas<TRanCliCommand>() where TRanCliCommand : CliCommand
+        => AnyLastCommandIs<TRanCliCommand>();
+
+    /// <summary>
+    /// Determines whether the given command type is the command that ran immediately before, based on the
+    /// last <c>RanCliCommandArtefact</c> in the attached artefacts. A command that ran earlier, with
+    /// another command run since, does not match.
+    /// </summary>
+    /// <typeparam name="TRanCliCommand">The command type to check for.</typeparam>
+    /// <returns><see langword="true"/> if <typeparamref name="TRanCliCommand"/> ran most recently; otherwise <see langword="false"/>.</returns>
+    protected bool LastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
+    {
+        var artefact = GetArtefact<CliCommand>();
+
+        return artefact?.Name == typeof(TRanCliCommand).Name;
+    }
+
+    /// <summary>
+    /// Determines whether the command that ran immediately before is one of the given command types.
+    /// See <see cref="LastCommandIs{TRanCliCommand}"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if one of the given types ran most recently; otherwise <see langword="false"/>.</returns>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        => LastCommandIs<TRanCliCommand1>() || LastCommandIs<TRanCliCommand2>();
+
+    /// <inheritdoc cref="LastCommandIsOneOf{TRanCliCommand1, TRanCliCommand2}"/>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        => LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2>() || LastCommandIs<TRanCliCommand3>();
+
+    /// <inheritdoc cref="LastCommandIsOneOf{TRanCliCommand1, TRanCliCommand2}"/>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        where TRanCliCommand4 : CliCommand
+        => LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3>() || LastCommandIs<TRanCliCommand4>();
+
+    /// <inheritdoc cref="LastCommandIsOneOf{TRanCliCommand1, TRanCliCommand2}"/>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4, TRanCliCommand5>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        where TRanCliCommand4 : CliCommand
+        where TRanCliCommand5 : CliCommand
+        => LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4>() || LastCommandIs<TRanCliCommand5>();
 
     /// <summary>
     /// Gets the last artefact of the given type from the attached artefacts, optionally filtered by name.

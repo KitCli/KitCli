@@ -166,7 +166,14 @@ public class CliWorkflowRun : ICliWorkflowRun
             await TriggerCommandReactions(allOutcomes);
             UpdateStateAfterOutcome(allOutcomes);
 
-            return allOutcomes;
+            if (State.WasLastChangedTo(ClIWorkflowRunStateStatus.MovePastAsk))
+            {
+                return allOutcomes;
+            }
+
+            var suggestedNextCommands = SuggestNextCommands(command);
+
+            return [..allOutcomes, ..suggestedNextCommands];
         }
         catch (Exception exception)
         {
@@ -251,9 +258,9 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private void UpdateStateAfterOutcome(Outcome[] outcomes)
     {
-        var lastOutcome = outcomes.LastOrDefault();
+        var lastOutcome = outcomes.LastOrDefault(outcome => outcome.Kind != OutcomeKind.Anonymous);
 
-        if (lastOutcome is null || !lastOutcome.IsReusable)
+        if (lastOutcome is null || lastOutcome.Kind == OutcomeKind.Final)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, outcomes);
             return;
@@ -320,11 +327,47 @@ public class CliWorkflowRun : ICliWorkflowRun
 
         var prefix = _instructionSettings.Prefix.ToString();
 
-        return possibleCommandsToMoveTo
-            .Select(Outcome (next) => new SuggestionOutcome(
-                $"{prefix}{next.Name}",
-                next.Description))
-            .ToArray();
+        return
+        [
+            new PauseOutcome(),
+            new SayOutcome("You might have meant:"),
+            
+            ..possibleCommandsToMoveTo
+                .Select(Outcome (next) => new SuggestionOutcome(
+                    $"{prefix}{next.Name}",
+                    next.Description))
+        ];
+    }
+
+    /// <summary>
+    /// The commands this run's just-executed command declares via <see cref="CliNextCommandCouldBeAttribute"/>,
+    /// printed once the run parks or finishes, never while it moves straight on to another command.
+    /// Empty when it declares none.
+    /// </summary>
+    private Outcome[] SuggestNextCommands(CliCommand command)
+    {
+        var possibleCommandsToMoveTo = command
+            .GetType()
+            .GetCliNextCommandCouldBeNames()
+            .ToList();
+
+        if (possibleCommandsToMoveTo.Count == 0)
+        {
+            return [];
+        }
+
+        var prefix = _instructionSettings.Prefix.ToString();
+
+        return
+        [
+            new PauseOutcome(),
+            new SayOutcome("All done. You might want to run:"),
+            
+            ..possibleCommandsToMoveTo
+                .Select(Outcome (next) => new SuggestionOutcome(
+                    $"{prefix}{next.Name}", 
+                    next.Description))
+        ];
     }
 
     // TODO: Perhaps move to extension somewhere

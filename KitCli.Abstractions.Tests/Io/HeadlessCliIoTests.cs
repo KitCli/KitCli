@@ -29,4 +29,32 @@ public class HeadlessCliIoTests
         // Assert
         Assert.That(ask, Throws.InstanceOf<NoInputException>());
     }
+
+    [Test]
+    public void GivenHeadlessCliIo_WhenOfferedAChoice_ThrowsNoInput()
+    {
+        // Arrange
+        var classUnderTest = new HeadlessCliIo();
+        CliChoice[] choices = [new CliChoice("a", "a")];
+
+        // Act
+        var choose = () => classUnderTest.ChooseAsync("Which?", choices, CancellationToken.None);
+
+        // Assert
+        Assert.That(choose, Throws.InstanceOf<NoInputException>());
+    }
+
+    [Test]
+    public void GivenHeadlessCliIo_WhenOfferedSeveralChoices_ThrowsNoInput()
+    {
+        // Arrange
+        var classUnderTest = new HeadlessCliIo();
+        CliChoice[] choices = [new CliChoice("a", "a")];
+
+        // Act
+        var chooseMany = () => classUnderTest.ChooseManyAsync("Which?", choices, CancellationToken.None);
+
+        // Assert
+        Assert.That(chooseMany, Throws.InstanceOf<NoInputException>());
+    }
 }

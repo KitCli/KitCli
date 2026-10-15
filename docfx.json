@@ -33,7 +33,7 @@
         "files": ["**.md", "**/toc.yml"],
         "src": "docs",
         "dest": "docs",
-        "exclude": ["**/0000-template.md"]
+        "exclude": ["**/0000-template.md", "**/template.md"]
       },
       {
         "files": ["index.md", "toc.yml"]

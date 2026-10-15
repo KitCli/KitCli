@@ -1,10 +1,14 @@
+using Spectre.Console;
+
 namespace KitCli.Abstractions.Io;
 
 /// <summary>
 /// Default <see cref="ICliIo"/> implementation backed by the standard <see cref="Console"/>.
 /// </summary>
-public class CliIo : ICliIo
+public class CliIo(IAnsiConsole? console = null, KitCliSettings? kitCliSettings = null) : ICliIo
 {
+    private readonly IAnsiConsole _console = console ?? AnsiConsole.Console;
+
     /// <inheritdoc/>
     public virtual async Task<string?> AskAsync(CancellationToken cancellationToken)
     {
@@ -21,12 +25,60 @@ public class CliIo : ICliIo
     }
 
     /// <inheritdoc/>
+    public virtual async Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
+    {
+        var prompt = new SelectionPrompt<CliChoice>()
+            .Title(Markup.Escape(title))
+            .UseConverter(ShowChoiceAsPlainText)
+            .AddChoices(choices);
+
+        try
+        {
+            return await prompt.ShowAsync(_console, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
+    {
+        var prompt = new MultiSelectionPrompt<CliChoice>()
+            .Title(Markup.Escape(title))
+            .Required(false)
+            .UseConverter(ShowChoiceAsPlainText)
+            .AddChoices(choices);
+
+        try
+        {
+            return await prompt.ShowAsync(_console, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return [];
+        }
+    }
+
+    /// <inheritdoc/>
     public void Pause()
         => Console.WriteLine();
 
     /// <inheritdoc/>
     public void Say(string something)
         => Console.WriteLine(something);
+
+    /// <inheritdoc/>
+    public void Say(string something, MessageLevel level)
+    {
+        if (level < (kitCliSettings?.MinimumMessageLevel ?? new KitCliSettings().MinimumMessageLevel))
+        {
+            return;
+        }
+
+        Say(something);
+    }
 
     /// <inheritdoc/>
     public void SetTitle(string title)
@@ -39,6 +91,9 @@ public class CliIo : ICliIo
             SuppressDefaultAbruptTermination(e);
             cancel();
         };
+
+    private static string ShowChoiceAsPlainText(CliChoice choice)
+        => Markup.Escape(choice.Label);
 
     private static void SuppressDefaultAbruptTermination(ConsoleCancelEventArgs e)
         => e.Cancel = true;

@@ -22,7 +22,7 @@ await app.Run();
 
 Run it and it prompts in a loop, executing whatever command each line
 resolves to, until a command ends the session (see
-[0012-exiting-the-app.md](0012-exiting-the-app.md)) or the input runs out.
+[0014-exiting-the-app.md](0014-exiting-the-app.md)) or the input runs out.
 
 ### Hooking into the session lifecycle
 
@@ -52,12 +52,13 @@ nothing by default. Override only what you need.
 
 **Subclassing `CliApp` to change static output text.** To reword a built-in
 message, write an `IOutcomeIoWriter` (see
-[../concepts/0004-outcome-writing.md](../concepts/0004-outcome-writing.md)).
+[../concepts/outcome-writing.md](../concepts/outcome-writing.md)).
 Hooks govern *when* something happens, writers *how* an outcome renders.
 
-**Doing setup in `OnRunStarted` or `OnMovingPastAsk`.** Both fire while the
-run executes, neither before nor after. Use them for progress, never for
-work a run depends on.
+**Doing setup in `OnMovingPastAsk`.** It fires while its step executes,
+neither before nor after. Use it for progress, never for work a run
+depends on. `OnRunStarted` fires just before the command starts, so a line
+it writes appears ahead of the command's own output.
 
 **Passing a `HeadlessCliApp` subclass to `WithApp<T>()`, then calling
 `Run()` with no arguments.** The base class you extend decides the mode,
@@ -75,5 +76,5 @@ for a hook first.
   one-invocation alternative.
 - [0004-creating-a-registry.md](0004-creating-a-registry.md) — wiring up the
   commands, and settings, an app runs.
-- [../concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — what
+- [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
   `CliApp.Run` does each iteration, and when each hook fires.

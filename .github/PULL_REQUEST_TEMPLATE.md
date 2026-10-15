@@ -3,10 +3,19 @@ Title must follow Conventional Commits: <type>(scope): <description>
   types: feat | fix | docs | chore | refactor | test | ci
   scope (optional): abstractions | instructions | commands | workflow | host | tooling
   breaking change: add "!" right before the colon, e.g. refactor(host)!: ...
-  example: feat(instructions): add quoting support to the tokenizer
+  example: feat(commands): give a command extra names
   example (breaking): refactor(host)!: rename RespondToNext to MoveToNext
 Description is lowercase, imperative mood, no trailing period, no "fix stuff."
 This becomes the squash-merge commit title, i.e. the CHANGELOG line.
+
+Keep the whole description under 30 lines. Explain the problem before the
+fix, in plain language a reader with no context on this repo can follow.
+Use a code snippet or diagram instead of a paragraph whenever one shows the
+change faster.
+
+Write "Linked issue: #N". Only write "Fixes #N" or "Closes #N" if the
+issue's reporter already agreed this PR resolves it — GitHub closes the
+issue automatically when either phrase merges.
 -->
 
 ## What
@@ -15,13 +24,7 @@ This becomes the squash-merge commit title, i.e. the CHANGELOG line.
 
 Linked issue: #
 
-## How
-
-## Tested
-
-- [ ] Unit tests
-- [ ] `KitCli.Playground.Scenarios` scenario
-- [ ] Manual
+Tested: unit tests, a `KitCli.Playground.Scenarios` scenario, or manual — say which.
 
 ## Kind of change
 
@@ -32,7 +35,6 @@ Linked issue: #
 - [ ] Tech debt
 - [ ] Docs / process
 
-If **Breaking change** or a new cross-cutting pattern/project boundary
-change: needs an ADR in `docs/adr/` in this PR. If this changes behavior:
-update `CHANGELOG.md` under `[Unreleased]`. If this changes behavior a
-concept doc describes: update that doc in `docs/concepts/`.
+If this is a breaking change or a new cross-cutting pattern, add an ADR in
+`docs/adr/`. If it changes behaviour, update `CHANGELOG.md` and any concept
+doc it affects.

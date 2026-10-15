@@ -7,6 +7,10 @@ namespace KitCli.Instructions.Extraction;
 /// <summary>
 /// Extracts the raw prefix, name, sub-name, and argument tokens from terminal input, given their positions.
 /// </summary>
+/// <remarks>
+/// The argument prefix starts a new argument only where it begins a word and is followed by the first
+/// letter of an argument name, so a value may contain it, as in <c>--range 10--20</c>.
+/// </remarks>
 public class InstructionTokenExtractor
 {
     /// <summary>
@@ -55,8 +59,7 @@ public class InstructionTokenExtractor
         
         var argumentInput = terminalInput.ExtractTokenContent(argumentIndex);
 
-        return argumentInput
-            .Split(InstructionConstants.DefaultArgumentPrefix)
+        return SplitWhereAnArgumentStarts(argumentInput)
             .Where(i => !string.IsNullOrWhiteSpace(i))
             .Select(i => i.Trim())
             .Select(ParseArgumentInput)
@@ -80,4 +83,45 @@ public class InstructionTokenExtractor
         
         return new KeyValuePair<string, string?>(argumentName, argumentValue);
     }
+
+    private static IEnumerable<string> SplitWhereAnArgumentStarts(string argumentInput)
+    {
+        var tokenStartIndex = 0;
+
+        for (var index = 0; index < argumentInput.Length; index++)
+        {
+            if (!StartsAnArgument(argumentInput, index))
+            {
+                continue;
+            }
+
+            yield return argumentInput[tokenStartIndex..index];
+
+            index += InstructionConstants.DefaultArgumentPrefix.Length - 1;
+            tokenStartIndex = index + 1;
+        }
+
+        yield return argumentInput[tokenStartIndex..];
+    }
+
+    private static bool StartsAnArgument(string argumentInput, int index)
+    {
+        var isAtStartOfWord = index == 0
+            || argumentInput[index - 1] == InstructionConstants.DefaultSpaceCharacter;
+
+        if (!isAtStartOfWord || !StartsWithArgumentPrefix(argumentInput, index))
+        {
+            return false;
+        }
+
+        var argumentNameIndex = index + InstructionConstants.DefaultArgumentPrefix.Length;
+
+        return argumentNameIndex < argumentInput.Length
+            && char.IsLetter(argumentInput[argumentNameIndex]);
+    }
+
+    private static bool StartsWithArgumentPrefix(string argumentInput, int index)
+        => argumentInput
+            .AsSpan(index)
+            .StartsWith(InstructionConstants.DefaultArgumentPrefix, StringComparison.Ordinal);
 }

@@ -23,10 +23,10 @@ public class SetPageSizeCliCommandHandler : CliCommandHandler<SetPageSizeCliComm
 }
 ```
 
-**The `Reusable` outcome has to be last.** Only the final outcome in the
-array decides what the run does next, so `ByRememberingPageSize` follows
-`BySaying`. Put a `Final` outcome last instead and the run ends, taking the
-page size with it.
+**The `Reusable` outcome has to come after any `Final` one.** The last
+outcome that is not anonymous decides what the run does next. `BySaying` is
+anonymous, so it can go before or after `ByRememberingPageSize`. Put a
+`Final` outcome after it and the run ends, taking the page size with it.
 
 `OutcomeList` carries a `By...` method for each built-in reusable outcome:
 `ByRememberingPageSize`, `ByRememberingPageNumber`, `ByRememberingFilter`,
@@ -48,16 +48,19 @@ thing, and the difference catches people out:
 
 **Ending the handler on `ByFinallySaying` after remembering something.**
 This is the usual way to lose state you just saved. Say the confirmation
-with `BySaying`, and let the reusable outcome be last.
+with `BySaying`, which has no effect on the run.
 
 **Expecting a `Reusable` outcome to run something at once.** It only makes
 state available to whatever the user asks for *next*. To run the next step
 without new input, use `ByMovingToCommand`.
 
 **Assuming remembered state outlives the run.** Reaching a `Final` outcome
-discards everything the run remembered. Reusable state carries across asks
-*within* one run, never across runs — separate one-shot invocations
-included.
+discards everything the run remembered. The built-in outcomes, page size
+included, all last one run. To keep a value of your own for every later
+run, give its outcome a session lifetime — see
+[../concepts/outcomes.md](../concepts/outcomes.md#how-long-an-outcome-lasts).
+Nothing survives the app exiting, so separate one-shot invocations never
+share state.
 
 **Returning two reusable outcomes a later command reads by type, with no
 distinguishing name.** Should two values in one run both become
@@ -70,7 +73,7 @@ set *most recently*. Give each a `Name` whenever more than one could exist.
   fresh ask" half of this picture.
 - [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md) —
   remembering a value of your own, not just the built-ins.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — how a
+- [../concepts/artefacts.md](../concepts/artefacts.md) — how a
   `Reusable` outcome becomes something a later factory can query.
-- [../concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
+- [../concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
   the state machine beneath: `ReachedReusableOutcome` against `MovePastAsk`.

@@ -97,7 +97,7 @@ whichever was set most recently.
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   the built-in `Reusable` outcomes this pattern generalises.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) — registration,
+- [../concepts/artefacts.md](../concepts/artefacts.md) — registration,
   "last match wins" lookup, and where a factory's artefact list comes from.
-- [../concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — the full
+- [../concepts/outcomes.md](../concepts/outcomes.md) — the full
   `Outcome` and `OutcomeKind` model a custom outcome plugs into.

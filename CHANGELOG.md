@@ -8,27 +8,168 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ### Added
 
+- An outcome can last the whole session: pass `OutcomeLifetime.Session` to
+  `Outcome`'s constructor and every later run reads it ([#311](https://github.com/KitCli/KitCli/issues/311)).
+- `ByPausing()` writes a blank line between a command's messages
+  ([#106](https://github.com/KitCli/KitCli/issues/106)).
+- `LastCommandIsOneOf<A, B>()` checks whether the last command was any of up to
+  five types ([#330](https://github.com/KitCli/KitCli/issues/330)).
+- A command can read `CanAsk` on its `ICliIo` to skip a prompt in a headless app,
+  where prompting throws `NoInputException` ([ADR 0021](docs/adr/0021-let-a-command-ask-its-io-whether-anyone-can-answer.md)).
+
+### Changed
+
+- A run's status history now starts with a `Created → Created` change holding
+  the session's kept outcomes, so code reading the first change sees that first.
+
+### Removed
+
+- **Breaking:** `AddCliAbstractions()` is gone, because `CliAppBuilder` now
+  registers the `ICliIo` itself. Delete the call.
+
+### Fixed
+
+- An anonymous outcome such as `BySaying` no longer ends the run when it comes
+  last. The run decides on the last outcome that is not anonymous
+  ([#297](https://github.com/KitCli/KitCli/issues/297)).
+
+## [3.3.0] - 2026-10-15
+
+### Added
+
+- `ICliWorkflowRunState.WasLastChangedTo(...)` checks the run's latest status
+  change, where `WasChangedTo(...)` checks its whole history. An app with its
+  own `ICliWorkflowRunState` implementation needs to add it.
+- `ByMovingToCommand(Type)` moves to a command whose type is only known at run
+  time ([#314](https://github.com/KitCli/KitCli/issues/314)).
+- `IsSubCommand<TCommand>()` on a command factory checks the sub-command by
+  command type instead of a name string.
+- `cliIo.SayCommandSuggestion(name, description)` writes a suggested command in
+  the same indented block a suggestion outcome uses
+  ([#313](https://github.com/KitCli/KitCli/issues/313)).
+- `ICliIo.Say(message, level)` writes a message only when its `MessageLevel`
+  meets `KitCliSettings.MinimumMessageLevel`, the same rule `BySaying(message,
+  level)` follows. An app with its own `ICliIo` implementation needs to add it
+  ([#310](https://github.com/KitCli/KitCli/issues/310)).
+- `LastCommandIs<T>()` on a command factory is true only when `T` ran
+  immediately before. `LastCommandWas<T>()` is true when `T` ran at any earlier
+  point in the run, so two factories gated on different callers could both
+  match; gate on `LastCommandIs<T>()` to tell the callers apart.
+  `AnyLastCommandIs<T>()` is the explicit name for the any-earlier-run check
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
+
+### Deprecated
+
+- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
+  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
+  `LastCommandIs<T>()` for the command that ran immediately before
+  ([#321](https://github.com/KitCli/KitCli/issues/321)).
+
+### Fixed
+
+- A command's `[CliNextCommandCouldBe]` suggestions no longer print when it
+  moves straight on to another command with `ByMovingToCommand`. They print
+  when the run parks or finishes
+  ([#315](https://github.com/KitCli/KitCli/issues/315)).
+
+### Changed
+
+- **Breaking for `KitCli.Commands.Abstractions` users:** `MessageLevel` and
+  `KitCliSettings` moved to `KitCli.Abstractions.Io` so `ICliIo` can use them.
+  Add `using KitCli.Abstractions.Io;` where they are named. Code using only the
+  `KitCli` package is unaffected.
+
+## [3.2.0] - 2026-10-11
+
+### Added
+
+- `BySaying(message, level)` and `ByFinallySaying(message, level)` give a
+  message a `MessageLevel` (`Trace` through `Error`), shown only when it
+  meets `KitCliSettings.MinimumMessageLevel` (defaults to `Information`).
+  Configure it under a `KitCli` section, loaded via `WithJsonSettings`/
+  `WithUserSecretSettings`, same as any other KitCli-owned setting. The
+  existing `BySaying(message)` is unaffected — a plain message always shows
+  ([#299](https://github.com/KitCli/KitCli/issues/299)).
+- `[CliNextCommandCouldBe(name, description)]` suggests commands once a
+  command finishes, even outside a parked run — `[CliNextCommandIs]` only
+  ever fired when a parked run's next ask failed to resolve
+  ([#294](https://github.com/KitCli/KitCli/issues/294)).
+- `ICliIo.ChooseAsync` and `ICliIo.ChooseManyAsync` show a list the person
+  moves through with the arrow keys, picking one item with enter or ticking
+  several with the space bar. Each item is a `CliChoice` — a `Label` to show
+  and an optional `Value` handed back with the pick. An app with its own
+  `ICliIo` implementation needs to add both
+  ([#255](https://github.com/KitCli/KitCli/issues/255)).
+
+### Changed
+
+- `CliApp.OnRunStarted` now runs just before the command starts instead of
+  just after, so a line it writes no longer lands on top of a list the
+  command shows.
+- A suggested-next-command now prints under a header line instead of bare,
+  with its name and description indented on separate lines instead of flush
+  left.
+
+### Deprecated
+
+- `CliApp.OnRunStarted` now runs straight after `OnRunCreated`, so it tells
+  an app nothing that hook does not. Override `OnRunCreated` instead; removal
+  is tracked in [#305](https://github.com/KitCli/KitCli/issues/305).
+
+### Fixed
+
+- An app whose entry project has no commands now starts when a registry adds
+  them from another project ([#118](https://github.com/KitCli/KitCli/issues/118)).
+
+## [3.1.2] - 2026-09-18
+
+### Fixed
+
+- `ByMovingToCommand<T>()` no longer prints a blank line for every command it
+  chains through. One now prints after the whole chain, same as any other
+  command ([#290](https://github.com/KitCli/KitCli/issues/290)).
+
+## [3.1.1] - 2026-09-16
+
+### Added
+
+- `Table.Style`, and `TableBuilder.WithStyle(...)`, choose how a table's lines
+  are drawn, from nineteen `CliTableStyle` values. `Ascii` is the box every
+  table has drawn until now and stays the default. `None` draws nothing and
+  lines the columns up by spacing alone, `HeaderLine` draws only a rule under
+  the column headers, and `Markdown` writes a table that renders as one when
+  pasted into an issue or a document. Lines between rows travel with the
+  choice: only the styles that draw a box draw them
+  ([#263](https://github.com/KitCli/KitCli/issues/263)).
 - `ByReacting<TReaction>()` names a reaction by type instead of building it, the
   way `ByMovingToCommand<TCommand>()` names the next command. The run constructs
   it through a `CliCommandReactionFactory<TReaction>` — auto-registered for
   parameterless reactions — so the factory sees the run's artefacts
   ([#204](https://github.com/KitCli/KitCli/issues/204)).
-- `ICliIo.CanAsk` says whether anything is attached to the input to answer an
-  ask. A `HeadlessCliApp` now runs with `HeadlessCliIo`, which answers false and
-  throws `NoInputException` on `AskAsync`, so a handler or factory can skip a
-  confirmation or prompt nobody would answer. `CanAsk` has a default body, so an
-  `ICliIo` of your own keeps compiling.
+
+### Fixed
+
+- `AddCommandsFromAssembly` no longer throws at startup when a command type has
+  more than one `CliCommandFactory<T>`. Each is registered, and the first
+  whose `CanCreateWhen()` returns `true` builds the command, same as before
+  the regression ([#283](https://github.com/KitCli/KitCli/issues/283)).
+- An argument value can now contain `--`, as in `--range 10--20` or
+  `--note see -- there`. Until now any `--` anywhere in the line started a new
+  argument and cut the value short. A `--` written directly in front of a word
+  still starts an argument, which is what `--name` has always meant
+  ([#39](https://github.com/KitCli/KitCli/issues/39)).
+- A table cell holding line breaks no longer breaks the box around it. Its
+  lines now render inside the cell's own row
+  ([#214](https://github.com/KitCli/KitCli/issues/214)).
 
 ### Changed
 
-- `CliAppBuilder.Run` registers the `ICliIo` from the app it was given, unless a
-  registry registered one first. `AddCli<TCliApp>` no longer registers it.
-
-### Removed
-
-- **Breaking:** `AddCliAbstractions()`, which only registered `CliIo`. Register
-  an `ICliIo` in a registry, or let `CliAppBuilder` register it. See
-  [0017-let-a-command-ask-its-io-whether-anyone-can-answer.md](docs/adr/0017-let-a-command-ask-its-io-whether-anyone-can-answer.md).
+- Tables render through Spectre.Console instead of ConsoleTables, so every
+  table looks slightly different. A table is now sized to fit the console it is
+  printed to, so a long value wraps inside its own column instead of running off
+  the side. `Table.MaxColumnWidth` keeps its name, and now holds a column
+  narrower than that. See
+  [ADR 0017](docs/adr/0017-render-tables-with-spectre-console.md).
 
 ## [3.1.0] - 2026-08-27
 

@@ -71,7 +71,7 @@ and an ADR, not the sized-13 bug fix #8 started as.
    `Exception` becomes `ArgumentIsRequired`, making #21's codes real.
    Delete the seven builders and `IInstructionArgumentBuilder`. The ADR
    superseding ADR 0004's parser row rides in this PR, as do the
-   rewrites of [concept 0005](../concepts/0005-instruction-parsing-pipeline.md)
+   rewrites of [concept 0005](../concepts/instruction-parsing-pipeline.md)
    and [user guide 0005](../user-guides/0005-reading-command-arguments.md)
    and the `CHANGELOG.md` breaking entry. If the file count passes 20,
    split the doc rewrites out, nothing else.

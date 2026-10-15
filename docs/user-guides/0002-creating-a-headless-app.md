@@ -43,9 +43,8 @@ All six lifecycle hooks work (see
 
 ## Telling headless from interactive inside a command
 
-A command that would confirm, prompt, or page in an interactive session has
-nobody to ask here. Inject `ICliIo` into its handler or factory and read
-`CanAsk`:
+If you want a command to work in both a headless and an interactive app, read
+`CanAsk` before it prompts. Inject `ICliIo` into its handler or factory:
 
 ```csharp
 public class GreetCliCommandHandler(ICliIo io) : CliCommandHandler<GreetCliCommand>
@@ -82,6 +81,6 @@ interactive app fed by piped input.
   interactive alternative, and the hooks both modes share.
 - [0007-chaining-commands.md](0007-chaining-commands.md) — running several commands
   from one ask.
-- [../concepts/0002-cli-app-host.md](../concepts/0002-cli-app-host.md) — what
+- [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
   `HeadlessCliApp.Run` does, and why the choice between the two hosts is
   made at compile time.

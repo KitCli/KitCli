@@ -29,14 +29,14 @@ factory existed.
 
 ### Gating on what already happened in this run
 
-Any `CliCommandFactory<T>` can call `LastCommandWas<TPriorCommand>()` or
+Any `CliCommandFactory<T>` can call `LastCommandIs<TPriorCommand>()` or
 query an artefact, offering a command only once an earlier step has
 happened:
 
 ```csharp
 public class ConfirmDeleteCliCommandFactory : CliCommandFactory<ConfirmDeleteCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<RequestDeleteCliCommand>();
+    public override bool CanCreateWhen() => LastCommandIs<RequestDeleteCliCommand>();
 
     public override CliCommand Create() => new ConfirmDeleteCliCommand();
 }
@@ -45,12 +45,16 @@ public class ConfirmDeleteCliCommandFactory : CliCommandFactory<ConfirmDeleteCli
 Typing `/confirm-delete` before `/request-delete` fails to resolve, so
 nobody reaches the confirmation step out of order. This needs
 `AddArtefactFactoriesForAssembly` in your registry — without it
-`LastCommandWas` always returns `false`. See
+`LastCommandIs` always returns `false`. See
 [0004-creating-a-registry.md](0004-creating-a-registry.md).
 
-Despite its name, `LastCommandWas<T>()` is `true` when `T` ran at any point
-in the current run, not only most recently. Use it to ask "has this step
-happened yet", never "is this the step immediately before".
+`LastCommandIs<T>()` is `true` only when `T` is the step immediately before,
+and `false` once another command has run since. To accept a repeat of the
+same step, such as turning a page twice, check for both:
+`LastCommandIsOneOf<List, NextPage>()`, which takes up to five. To ask
+"has `T` run at any earlier point", use `AnyLastCommandIs<T>()`. The older
+`LastCommandWas<T>()` does the same but is obsolete, since its name suggests
+the latest only.
 
 ## Common mistakes
 
@@ -63,13 +67,7 @@ logic runs.
 resolve to any command, like a typo would, and no "almost matched but
 rejected" message exists. To tell the user why, declare the valid moves on
 the *previous* command with `[CliNextCommandIs(name, description)]`
-([0014-suggesting-what-to-run-next.md](0014-suggesting-what-to-run-next.md)).
-
-**Writing a second factory for the same command type to route between two
-behaviours.** `AddCommandsFromAssembly` throws at startup ("Multiple
-factories found for command type"). `CanCreateWhen` gates whether *one*
-factory's command is offered. For genuinely different behaviour, branch
-inside one `Create()`, or give each variant its own command type.
+([0016-suggesting-what-to-run-next.md](0016-suggesting-what-to-run-next.md)).
 
 ## Learn more
 
@@ -77,6 +75,9 @@ inside one `Create()`, or give each variant its own command type.
   need a factory at all.
 - [0005-reading-command-arguments.md](0005-reading-command-arguments.md) — the
   argument helpers `CanCreateWhen` can also read.
-- [../concepts/0001-command-registration.md](../concepts/0001-command-registration.md) —
+- [../concepts/command-registration.md](../concepts/command-registration.md) —
   where `CanCreateWhen` sits in resolution: keyed DI narrows the
   candidates, `CanCreateWhen` picks among them, first match wins.
+- [0017-creating-sub-commands.md](0017-creating-sub-commands.md) —
+  writing several `CliCommandFactory<T>` for one command type, one per
+  sub-command word.

@@ -1,4 +1,6 @@
+using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions.Io;
+using KitCli.Commands.Abstractions.Outcomes;
 using KitCli.Commands.Abstractions.Outcomes.Final;
 using KitCli.Commands.Abstractions.Tests.TestHelpers;
 using NUnit.Framework;
@@ -12,7 +14,7 @@ public class OutputOutcomeIoWriterTests
     public void GivenFinalSayOutcome_WhenCanWriteFor_ThenTrue()
     {
         // Arrange
-        var writer = new OutputOutcomeIoWriter(new TestCliIo());
+        var writer = new OutputOutcomeIoWriter(new TestCliIo(), new KitCliSettings());
 
         // Act & Assert
         Assert.That(writer.CanWriteFor(new FinalSayOutcome("done")), Is.True);
@@ -22,7 +24,7 @@ public class OutputOutcomeIoWriterTests
     public void GivenOtherOutcome_WhenCanWriteFor_ThenFalse()
     {
         // Arrange
-        var writer = new OutputOutcomeIoWriter(new TestCliIo());
+        var writer = new OutputOutcomeIoWriter(new TestCliIo(), new KitCliSettings());
 
         // Act & Assert
         Assert.That(writer.CanWriteFor(new NothingOutcome()), Is.False);
@@ -33,12 +35,40 @@ public class OutputOutcomeIoWriterTests
     {
         // Arrange
         var cliIo = new TestCliIo();
-        var writer = new OutputOutcomeIoWriter(cliIo);
+        var writer = new OutputOutcomeIoWriter(cliIo, new KitCliSettings());
 
         // Act
         writer.Write(new FinalSayOutcome("done"));
 
         // Assert
         Assert.That(cliIo.Lines, Is.EqualTo(new[] { "done" }).AsCollection);
+    }
+
+    [Test]
+    public void GivenLeveledFinalSayOutcomeAtMinimumLevel_WhenWrite_ThenSaysItsMessage()
+    {
+        // Arrange
+        var cliIo = new TestCliIo();
+        var writer = new OutputOutcomeIoWriter(cliIo, new KitCliSettings { MinimumMessageLevel = MessageLevel.Warning });
+
+        // Act
+        writer.Write(new LeveledFinalSayOutcome("careful", MessageLevel.Warning));
+
+        // Assert
+        Assert.That(cliIo.Lines, Is.EqualTo(new[] { "careful" }).AsCollection);
+    }
+
+    [Test]
+    public void GivenLeveledFinalSayOutcomeBelowMinimumLevel_WhenWrite_ThenSaysNothing()
+    {
+        // Arrange
+        var cliIo = new TestCliIo();
+        var writer = new OutputOutcomeIoWriter(cliIo, new KitCliSettings { MinimumMessageLevel = MessageLevel.Warning });
+
+        // Act
+        writer.Write(new LeveledFinalSayOutcome("quiet", MessageLevel.Debug));
+
+        // Assert
+        Assert.That(cliIo.Lines, Is.Empty);
     }
 }

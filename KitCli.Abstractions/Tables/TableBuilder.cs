@@ -16,6 +16,7 @@ public abstract class TableBuilder<TSource, TAggregate>
     private int? _pageSize;
     private int? _pageNumber;
     private int? _maxColumnWidth;
+    private CliTableStyle? _style;
 
     /// <summary>
     /// Sets the aggregator used to turn the source sequence into aggregate results.
@@ -71,6 +72,18 @@ public abstract class TableBuilder<TSource, TAggregate>
     public TableBuilder<TSource, TAggregate> WithMaxColumnWidth(int maxColumnWidth)
     {
         _maxColumnWidth = maxColumnWidth;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets how the built table's lines are drawn. Left unset, the built table carries
+    /// <see cref="CliTableStyle.Ascii"/>.
+    /// </summary>
+    /// <param name="style">The style to draw the table in.</param>
+    /// <returns>The same <see cref="TableBuilder{TSource, TAggregate}"/> instance, to allow chaining.</returns>
+    public TableBuilder<TSource, TAggregate> WithStyle(CliTableStyle style)
+    {
+        _style = style;
         return this;
     }
 
@@ -137,7 +150,8 @@ public abstract class TableBuilder<TSource, TAggregate>
 
         return new Table(headerNames, rows)
         {
-            MaxColumnWidth = _maxColumnWidth ?? Table.DefaultMaxColumnWidth
+            MaxColumnWidth = _maxColumnWidth ?? Table.DefaultMaxColumnWidth,
+            Style = _style ?? CliTableStyle.Ascii
         };
     }
 }

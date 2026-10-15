@@ -1,3 +1,4 @@
+using KitCli.Abstractions.Io;
 using KitCli.Abstractions.Aggregators;
 using KitCli.Abstractions.Tables;
 using KitCli.Commands.Abstractions.Outcomes;
@@ -67,6 +68,26 @@ public class OutcomeListTests
             new SayOutcome("first"),
             new SayOutcome("second")
         }).AsCollection);
+    }
+
+    [Test]
+    public void GivenMessageAndLevel_WhenBySaying_ThenAppendsLeveledSayOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().BySaying("careful", MessageLevel.Warning).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new LeveledSayOutcome("careful", MessageLevel.Warning) }).AsCollection);
+    }
+
+    [Test]
+    public void WhenByPausing_ThenAppendsPauseOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByPausing().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new PauseOutcome() }).AsCollection);
     }
 
     [Test]
@@ -162,6 +183,30 @@ public class OutcomeListTests
             Assert.That(outcome!.SpecifiedCommandType, Is.EqualTo(typeof(TestNextCliCommand)));
             Assert.That(outcome.Arguments, Is.Empty);
         });
+    }
+
+    [Test]
+    public void GivenCommandTypeKnownAtRunTime_WhenByMovingToCommand_ThenAppendsOutcomeCarryingThatType()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByMovingToCommand(typeof(TestNextCliCommand)).End();
+
+        // Assert
+        var outcome = outcomes.Single() as SpecifiedNextCliCommandOutcome;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(outcome, Is.Not.Null);
+            Assert.That(outcome!.SpecifiedCommandType, Is.EqualTo(typeof(TestNextCliCommand)));
+            Assert.That(outcome.Arguments, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void GivenTypeThatIsNotACommand_WhenByMovingToCommand_ThenThrows()
+    {
+        // Assert
+        Assert.That(() => new OutcomeList().ByMovingToCommand(typeof(string)), Throws.ArgumentException);
     }
 
     [Test]
@@ -320,6 +365,16 @@ public class OutcomeListTests
 
         // Assert
         Assert.That(outcomes, Is.EqualTo(new Outcome[] { new FinalSayOutcome("done") }).AsCollection);
+    }
+
+    [Test]
+    public void GivenMessageAndLevel_WhenByFinallySaying_ThenAppendsLeveledFinalSayOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByFinallySaying("careful", MessageLevel.Warning).End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new LeveledFinalSayOutcome("careful", MessageLevel.Warning) }).AsCollection);
     }
 
     [Test]

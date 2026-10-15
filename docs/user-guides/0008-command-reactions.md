@@ -91,8 +91,8 @@ the others alone.** Neither is guaranteed. Design around neither.
 
 - [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
   the pattern to use when a later command must read state.
-- [../concepts/0006-outcomes.md](../concepts/0006-outcomes.md) — how
+- [../concepts/outcomes.md](../concepts/outcomes.md) — how
   `ByReacting` fits the outcome model. A `ReactionOutcome` is
   `Anonymous`-kind and leaves the run's state machine alone.
-- [../concepts/0010-workflow-run-state-machine.md](../concepts/0010-workflow-run-state-machine.md) —
+- [../concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
   what an exception during a reaction does to the run.

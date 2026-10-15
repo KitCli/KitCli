@@ -1,4 +1,5 @@
-using ConsoleTables;
+using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace KitCli.Abstractions.Tables;
 
@@ -9,16 +10,23 @@ namespace KitCli.Abstractions.Tables;
 public class Table
 {
     /// <summary>
-    /// The <see cref="MaxColumnWidth"/> at which no cell is ever broken across lines. Breaking one
-    /// gains no width back, because columns are sized from the full text.
+    /// The <see cref="MaxColumnWidth"/> at which no column is given a width of its own, leaving the
+    /// renderer to size every column to fit the console.
     /// </summary>
     public const int DefaultMaxColumnWidth = int.MaxValue;
 
     /// <summary>
-    /// The width a column's text may reach before a cell is broken across lines. Defaults to
-    /// <see cref="DefaultMaxColumnWidth"/>.
+    /// The width a column is held to, breaking its text across lines to fit. Applied only to a
+    /// column already wider than this. Defaults to <see cref="DefaultMaxColumnWidth"/>.
     /// </summary>
     public int MaxColumnWidth { get; set; } = DefaultMaxColumnWidth;
+
+    /// <summary>
+    /// How the table's lines are drawn: the frame around it, the dividers between its columns, the
+    /// rule under its headers, and whether a line separates each row. Defaults to
+    /// <see cref="CliTableStyle.Ascii"/>.
+    /// </summary>
+    public CliTableStyle Style { get; set; } = CliTableStyle.Ascii;
 
     /// <summary>
     /// The column headers, in display order.
@@ -54,21 +62,88 @@ public class Table
     /// <returns>The formatted table.</returns>
     public override string ToString()
     {
-        var table = new ConsoleTable
+        var (border, linesBetweenRows) = Drawn(Style);
+
+        var table = new Spectre.Console.Table
         {
-            Options =
-            {
-                // I do it in the output formatting
-                EnableCount = false
-            },
-            MaxWidth = MaxColumnWidth
+            Border = border,
+            ShowRowSeparators = linesBetweenRows
         };
 
-        table.AddColumn(Columns.ToArray());
-       
+        for (var index = 0; index < Columns.Count; index++)
+            table.AddColumn(ColumnAt(index));
+
         foreach (var row in Rows)
-            table.AddRow(row.ToArray());
-        
-        return table.ToString();
+            table.AddRow(row.Select(AsPlainText).ToArray<IRenderable>());
+
+        return Render(table);
+    }
+
+    private static (TableBorder Border, bool LinesBetweenRows) Drawn(CliTableStyle style) => style switch
+    {
+        CliTableStyle.AsciiGrid => (TableBorder.Ascii2, true),
+        CliTableStyle.AsciiDoubleHeader => (TableBorder.AsciiDoubleHead, true),
+        CliTableStyle.Box => (TableBorder.Square, true),
+        CliTableStyle.RoundedBox => (TableBorder.Rounded, true),
+        CliTableStyle.ThickBox => (TableBorder.Heavy, true),
+        CliTableStyle.ThickEdgedBox => (TableBorder.HeavyEdge, true),
+        CliTableStyle.ThickHeaderBox => (TableBorder.HeavyHead, true),
+        CliTableStyle.DoubleBox => (TableBorder.Double, true),
+        CliTableStyle.DoubleEdgedBox => (TableBorder.DoubleEdge, true),
+        CliTableStyle.Dividers => (TableBorder.Minimal, false),
+        CliTableStyle.ThickHeaderDividers => (TableBorder.MinimalHeavyHead, false),
+        CliTableStyle.DoubleHeaderDividers => (TableBorder.MinimalDoubleHead, false),
+        CliTableStyle.HeaderLine => (TableBorder.Simple, false),
+        CliTableStyle.ThickHeaderLine => (TableBorder.SimpleHeavy, false),
+        CliTableStyle.CompactHeaderLine => (TableBorder.Minimalist, false),
+        CliTableStyle.HeaderAndEdgeLines => (TableBorder.Horizontal, false),
+        CliTableStyle.Markdown => (TableBorder.Markdown, false),
+        CliTableStyle.None => (TableBorder.None, false),
+        _ => (TableBorder.Ascii, true)
+    };
+
+    private TableColumn ColumnAt(int index)
+    {
+        var column = new TableColumn(AsPlainText(Columns[index]));
+
+        if (MaxColumnWidth != DefaultMaxColumnWidth && WidestLineIn(index) > MaxColumnWidth)
+            column.Width = MaxColumnWidth;
+
+        return column;
+    }
+
+    private int WidestLineIn(int index)
+        => Rows
+            .Select(row => index < row.Count ? row[index] : null)
+            .Append(Columns[index])
+            .SelectMany(value => (value?.ToString() ?? string.Empty).Split('\n'))
+            .Max(line => line.TrimEnd('\r').Length);
+
+    /// <summary>
+    /// Wraps a value so the renderer prints it literally, rather than reading square brackets in it
+    /// as markup.
+    /// </summary>
+    private static Text AsPlainText(object? value)
+        => new(value?.ToString() ?? string.Empty);
+
+    /// <summary>
+    /// Renders to a string that fits the console it is about to be printed to, falling back to
+    /// eighty columns when there is no console to measure.
+    /// </summary>
+    private static string Render(Spectre.Console.Table table)
+    {
+        var writer = new StringWriter();
+
+        var console = AnsiConsole.Create(new AnsiConsoleSettings
+        {
+            Ansi = AnsiSupport.No,
+            ColorSystem = ColorSystemSupport.NoColors,
+            Interactive = InteractionSupport.No,
+            Out = new AnsiConsoleOutput(writer)
+        });
+
+        console.Write(table);
+
+        return writer.ToString();
     }
 }

@@ -1,6 +1,7 @@
 using KitCli.Abstractions;
 using KitCli.Abstractions.Io;
 using KitCli.Commands.Abstractions;
+using KitCli.Commands.Abstractions.Exceptions;
 using KitCli.Commands.Abstractions.Extensions;
 using KitCli.Commands.Abstractions.Handlers;
 using KitCli.Commands.Abstractions.Io;
@@ -50,6 +51,36 @@ public class CliAppBuilderTests
             .With.Message.Contains(nameof(TestScopedDependency)));
     }
 
+    [Test]
+    public void GivenAnEntryAssemblyWithNoCommandsAndACommandRegistry_WhenRun_BuildsTheServiceProvider()
+    {
+        // Arrange
+        var classUnderTest = new CliAppBuilder()
+            .WithApp<TestHeadlessCliApp>()
+            .WithRegistry<TestCommandsOnlyRegistry>();
+
+        // Act
+        var run = () => classUnderTest.Run();
+
+        // Assert
+        Assert.That(run, Throws.ArgumentException
+            .With.Message.Contains("requires at least one argument"));
+    }
+
+    [Test]
+    public void GivenNoCommandsRegisteredBesidesTheWorkflowCommands_WhenRun_Throws()
+    {
+        // Arrange
+        var classUnderTest = new CliAppBuilder()
+            .WithApp<TestHeadlessCliApp>();
+
+        // Act
+        var run = () => classUnderTest.Run(["/some-ask"]);
+
+        // Assert
+        Assert.That(run, Throws.InstanceOf<NoCommandsException>());
+    }
+
     private class TestHeadlessCliApp(ICliWorkflow workflow, ICliIo io) : HeadlessCliApp(workflow, io);
 
     private record TestBuilderCliCommand : CliCommand;
@@ -81,6 +112,12 @@ public class CliAppBuilderTests
 
             services.AddSingleton<CliApp, TestHeadlessCliApp>();
         }
+    }
+
+    private class TestCommandsOnlyRegistry : ICliAppRegistry
+    {
+        public void Register(IServiceCollection services)
+            => services.AddCommandsFromAssembly(typeof(TestBuilderCliCommand).Assembly);
     }
 
     private class TestScopedDependency;

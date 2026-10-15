@@ -27,7 +27,7 @@ link.
     [issue area](#issues) — `abstractions`, `instructions`, `commands`,
     `workflow`, `host`, `tooling`
   - `description`: lowercase, imperative, no trailing period —
-    `feat(instructions): add quoting support to the tokenizer`
+    `feat(commands): give a command extra names`
   - breaking: add `!` before the colon
     (`refactor(host)!: rename RespondToNext to MoveToNext`) **and** check
     **Breaking change** in the body
@@ -70,7 +70,9 @@ for why, and add an entry to it when a release or a change of shape lands.
 
 - **Copy the kind's `0000-template.md`** and number it sequentially,
   `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
-  Technology pages take their dependency's name instead.
+  Technology pages take their dependency's name instead, and concept docs
+  take their topic's name with no number — `toc.yml` gives the reading
+  order instead.
 - **Verify every name, signature and sample against source** before it
   lands. Readers trust a doc they cannot check, so a wrong one costs more
   than a missing one.
@@ -94,6 +96,10 @@ An [ADR](docs/adr/) records a decision, its alternatives, and its
 consequences. How something works today belongs in
 [`docs/concepts/`](docs/concepts/).
 
+**Keep it under 100 lines, for a reader with no context on this
+codebase** — plain words, the problem before the decision, and a type
+named only when they'd have to type it.
+
 **Write one when you are:**
 
 - introducing a cross-cutting pattern ("commands dispatch through MediatR")
@@ -107,6 +113,10 @@ record, and nobody reads a folder of fifty.
 
 Open the ADR in the PR it justifies, or alone if the decision precedes the
 code.
+
+`toc.yml` groups them by the release their work shipped in, oldest first,
+under a short label with no number. Work not shipped yet sits under
+`Unreleased` until it ships.
 
 ## Concepts
 
@@ -122,6 +132,10 @@ Q&A that re-answers the body.
 
 Describe the code as it is. Aspirational behaviour reads exactly like
 shipped behaviour, and nothing flags the difference.
+
+`toc.yml` groups them by area — `abstractions`, `instructions`,
+`commands`, `workflow`, `host`, `tooling` — in the order a reader should
+meet them within that area.
 
 ## User guides
 
@@ -152,6 +166,10 @@ put the evidence under it. An investigation records what was *found*; what was
 replaces. It ships through a PR with a Status like any other work. Durable
 facts about a dependency belong in that dependency's own docs too, not
 only here.
+
+`toc.yml` groups them by the release their work shipped in, oldest first,
+under a short label with no number. Work not shipped yet sits under
+`Unreleased` until it ships.
 
 ## Technology
 
@@ -237,8 +255,9 @@ commitments to defend.
    place in the codebase, so it outlives any single piece of work.
 4. **Inception spike** — plans the *next* milestone in real detail.
    Everything past that is a rough forecast, re-planned on arrival
-   (rolling-wave, not a full plan up front). Refresh `Validated Estimate
-   (months)` as you learn, not once.
+   (rolling-wave, not a full plan up front). Fill in `Actual (months)`
+   and `Finished On` as you build, so a past guess can be read against
+   what the work took.
 5. **Backlog refinement, just-in-time** — only the next handful of tickets
    need full ordering and estimates. The rest of the milestone stays a
    loosely-ordered backlog. A milestone-scale re-planning pass helps when
@@ -276,16 +295,16 @@ commitments to defend.
    a repo that no longer exists. Replace the rows rather than adding to
    them, and leave estimates set under an earlier scale alone.
 
-   Current scale, derived 2026-08-26:
+   Current scale, derived 2026-09-12:
 
    | Points | Reference | Shape |
    |---|---|---|
-   | 0.5 | [#175](https://github.com/KitCli/KitCli/pull/175) | A version string bumped for a release. One file, and CI proves it. |
-   | 1 | [#129](https://github.com/KitCli/KitCli/pull/129) | XML doc comments corrected on two types. You know the answer before you open the file. |
-   | 2 | [#177](https://github.com/KitCli/KitCli/pull/177) | A behaviour reproduced as a playground scenario and written into the two guides that cover it. The shape is known throughout. |
-   | 3 | [#112](https://github.com/KitCli/KitCli/pull/112) | One decision, settled before coding: how to tell a changed package from an unchanged one. Reaches the release tool alone. |
-   | 5 | [#126](https://github.com/KitCli/KitCli/pull/126) | Scope validation at build time. A small decision with wide reach — every app the framework builds — and what it flags appears only once it runs. |
-   | 8 | [#107](https://github.com/KitCli/KitCli/pull/107) | Three questions open at the start: what an unresolved ask returns, where suggestions come from, how they render. Adds public API, changes the run loop, lands an ADR. |
+   | 0.5 | [#207](https://github.com/KitCli/KitCli/pull/207) | Package versions bumped for a release. Nothing to decide, and CI proves it. |
+   | 1 | [#269](https://github.com/KitCli/KitCli/pull/269) | The readme pointed at the docs site. You know the answer before you open the file. |
+   | 2 | [#246](https://github.com/KitCli/KitCli/pull/246) | Tests written for one factory's accessors. The shape is known the whole way through. |
+   | 3 | [#245](https://github.com/KitCli/KitCli/pull/245) | Eight writers covered by tests. One decision settled before coding: how to fake the writing surface once for all eight. |
+   | 5 | [#252](https://github.com/KitCli/KitCli/pull/252) | Table rendering moved onto Spectre.Console. A small decision with wide reach — every table in every app — and what it breaks appears only when it runs. |
+   | 8 | [#268](https://github.com/KitCli/KitCli/pull/268) | A table choosing how its lines are drawn. Three questions open at the start: which styles exist, how a caller picks one, how it meets the renderer. Adds public API. |
    | 13 | [#154](https://github.com/KitCli/KitCli/pull/154) | Construction changed for every chained command, across two packages and registration. The design settles while you build it, with test helpers and an ADR. |
 
 This repo follows [SoloCAIRN](https://github.com/joshuaedwardcrowe/SoloCAIRN)
@@ -326,22 +345,21 @@ Changelog](https://keepachangelog.com/) format.
 Releasing has two halves: you decide the version numbers, CI does the
 rest.
 
-**1. Bump the versions** with the release CLI, itself a KitCli app:
+**1. Bump the versions by hand.** Read the diff since each package's own
+last release — pickaxe-search history for the commit that set its current
+`<Version>` — and size the bump from what that diff does to the package's
+own public API: a fix with no public change is a patch, a new public
+member is a minor, a removed or incompatibly-changed one is a major. Only
+count what a consumer can actually reach through that package's own
+types — a change three layers down that never surfaces through this
+package's own surface doesn't earn it more than a patch.
 
-```bash
-dotnet run --project KitCli.Tooling.Release -- /release --dry-run   # report what would change
-dotnet run --project KitCli.Tooling.Release -- /release             # write the bumps
-```
-
-It finds every csproj carrying both `<PackageId>` and `<Version>`, orders
-them dependencies-first, and bumps a project when that project changed
-since its own last release, or when anything it references is bumping.
-"Last release" comes from pickaxe-searching history for the commit that
-set the current `<Version>`, so no tags are involved. Pass `--publish` to
-pack and push from your machine — reserve that for a broken pipeline.
-
-**It only ever bumps the patch number**, whatever changed —
-[#127](https://github.com/KitCli/KitCli/issues/127).
+A package that didn't change at all still needs a new version if anything
+it references bumped, since `dotnet pack` pins exact versions between
+packages rather than ranges — bump it patch, on the reasoning above.
+Working dependencies-first (leaf packages before whatever references
+them) means each package's own bump already accounts for what its
+dependencies picked up.
 
 **2. Merge the bumps to `main`.** The `publish` job in
 [`ci.yml`](.github/workflows/ci.yml) does the rest automatically on every

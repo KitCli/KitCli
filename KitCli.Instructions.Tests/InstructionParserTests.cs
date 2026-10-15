@@ -87,4 +87,63 @@ public class InstructionParserTests
         
         Assert.That(argument, Is.Not.Null);
     }
+
+    [Test]
+    public void GivenArgumentValueWithTheArgumentPrefixInsideAWord_WhenParse_ThenReturnsOneArgumentKeepingThePrefix()
+    {
+        var result = _parser.Parse("/command --flag a--b");
+
+        var argument = result.Arguments
+            .OfType<InstructionArgument<string>>()
+            .Single();
+        
+        Assert.That(argument.Name, Is.EqualTo("flag"));
+        Assert.That(argument.Value, Is.EqualTo("a--b"));
+    }
+
+    [Test]
+    public void GivenArgumentValueWithTheArgumentPrefixStandingAlone_WhenParse_ThenReturnsOneArgumentKeepingThePrefix()
+    {
+        var result = _parser.Parse("/command --note see -- there");
+
+        var argument = result.Arguments
+            .OfType<InstructionArgument<string>>()
+            .Single();
+        
+        Assert.That(argument.Name, Is.EqualTo("note"));
+        Assert.That(argument.Value, Is.EqualTo("see -- there"));
+    }
+
+    [Test]
+    public void GivenArgumentValueEndingInTheArgumentPrefix_WhenParse_ThenReturnsOneArgumentKeepingThePrefix()
+    {
+        var result = _parser.Parse("/command --note abc--");
+
+        var argument = result.Arguments
+            .OfType<InstructionArgument<string>>()
+            .Single();
+        
+        Assert.That(argument.Value, Is.EqualTo("abc--"));
+    }
+
+    [Test]
+    public void GivenTwoArgumentsWhereTheFirstValueHoldsTheArgumentPrefix_WhenParse_ThenReturnsBothArguments()
+    {
+        var result = _parser.Parse("/command --flag a--b --count 1");
+
+        var flagArgument = result.Arguments
+            .OfType<InstructionArgument<string>>()
+            .Single();
+        
+        Assert.That(flagArgument.Name, Is.EqualTo("flag"));
+        Assert.That(flagArgument.Value, Is.EqualTo("a--b"));
+
+        var countArgument = result.Arguments
+            .OfType<InstructionArgument<int>>()
+            .Single();
+        
+        Assert.That(countArgument.Name, Is.EqualTo("count"));
+        Assert.That(countArgument.Value, Is.EqualTo(1));
+    }
+
 }

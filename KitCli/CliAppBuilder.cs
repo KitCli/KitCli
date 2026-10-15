@@ -1,8 +1,11 @@
 using System.Reflection;
-using KitCli.Abstractions;
 using KitCli.Abstractions.Io;
+using KitCli.Abstractions;
+using KitCli.Commands.Abstractions.Exceptions;
+using KitCli.Commands.Abstractions.Extensions;
 using KitCli.Commands.Abstractions.Io;
 using KitCli.Instructions.Abstractions;
+using KitCli.Workflow.Commands.Exit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -170,9 +173,15 @@ public class CliAppBuilder
     /// Thrown if the resolved app is a <see cref="HeadlessCliApp"/> and no <paramref name="args"/> were
     /// provided — it has no way to ask for one.
     /// </exception>
+    /// <exception cref="NoCommandsException">
+    /// Thrown if no command was registered besides the built-in workflow commands, whether by the entry
+    /// assembly or by a registry.
+    /// </exception>
     public Task Run(string[]? args = null)
     {
+        EnsureCommandsRegisteredBeyondWorkflowCommands();
         EnsureInstructionSettingsRegistered();
+        EnsureKitCliSettingsRegistered();
         EnsureCliIoRegistered();
 
         var serviceProvider = _services.BuildServiceProvider(ServiceProviderOptions);
@@ -212,7 +221,12 @@ public class CliAppBuilder
         {
             return new InstructionSettings() as TSettings;
         }
-        
+
+        if (_configurationBuilder == null && typeof(TSettings) == typeof(KitCliSettings))
+        {
+            return new KitCliSettings() as TSettings;
+        }
+
         if (_configurationBuilder == null)
         {
             throw new Exception("You must call With[..]Settings before calling WithSettings.");
@@ -236,6 +250,11 @@ public class CliAppBuilder
             return new InstructionSettings() as TSettings;
         }
 
+        if (!sectionExists && typeof(TSettings) == typeof(KitCliSettings))
+        {
+            return new KitCliSettings() as TSettings;
+        }
+
         if (!sectionExists)
         {
             throw new Exception($"No configuration section found for {configurationName}");
@@ -244,6 +263,19 @@ public class CliAppBuilder
         return section.Get<TSettings>();
     }
     
+    private void EnsureCommandsRegisteredBeyondWorkflowCommands()
+    {
+        var workflowCommandsAssembly = typeof(ExitCliCommand).Assembly;
+
+        if (_services.AnyCommandsRegisteredOutside(workflowCommandsAssembly))
+        {
+            return;
+        }
+
+        throw new NoCommandsException(
+            "No CliCommand implementations were registered. Add commands to the entry assembly, or register them from another assembly with a registry calling AddCommandsFromAssembly.");
+    }
+
     private void EnsureCliIoRegistered()
     {
         var cliAppType = _services
@@ -276,5 +308,12 @@ public class CliAppBuilder
         var options = new OptionsWrapper<InstructionSettings>(instructionSettings!);
         
         _services.AddSingleton<IOptions<InstructionSettings>>(options);
+    }
+
+    private void EnsureKitCliSettingsRegistered()
+    {
+        var kitCliSettings = GetSettings<KitCliSettings>() ?? new KitCliSettings();
+
+        _services.AddSingleton(kitCliSettings);
     }
 }

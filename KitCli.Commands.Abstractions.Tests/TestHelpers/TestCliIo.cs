@@ -13,10 +13,19 @@ public class TestCliIo : ICliIo
     public Task<string?> AskAsync(CancellationToken cancellationToken)
         => Task.FromResult<string?>(null);
 
+    public Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
+        => Task.FromResult<CliChoice?>(null);
+
+    public Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyList<CliChoice>>([]);
+
     public void Pause()
         => Lines.Add(string.Empty);
 
     public void Say(string something)
+        => Lines.Add(something);
+
+    public void Say(string something, MessageLevel level)
         => Lines.Add(something);
 
     public void SetTitle(string title)

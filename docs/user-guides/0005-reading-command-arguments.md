@@ -30,6 +30,10 @@ public class GreetCliCommandFactory : CliCommandFactory<GreetCliCommand>
 following the usual CLI idiom. `/greet --name Alex` leaves `shout` unset,
 so the `?? false` default applies.
 
+A value can contain `--`: `/note --text a--b` sets `text` to `a--b`. The one
+place it cannot is directly in front of a word, as in `--text see --help`,
+which reads as a second argument named `help`.
+
 Three helpers exist, each generic over the argument's target type:
 
 ```csharp
@@ -61,7 +65,7 @@ wins:
 The "has a letter" rule on `string` keeps `--count 5` an `int`. Conversely
 `--name 42` is an `int`, not a `string`. Consuming code cannot add a type
 beyond this list today; see
-[../concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md)
+[../concepts/instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md)
 for why.
 
 ## Common mistakes
@@ -84,8 +88,8 @@ instance holds whatever data it needs.
 
 - [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — where a
   factory fits, and when you need one.
-- [../concepts/0005-instruction-parsing-pipeline.md](../concepts/0005-instruction-parsing-pipeline.md) —
+- [../concepts/instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md) —
   how a raw ask becomes typed arguments.
-- [../concepts/0008-artefacts.md](../concepts/0008-artefacts.md) —
+- [../concepts/artefacts.md](../concepts/artefacts.md) —
   `GetArtefact` and `GetRequiredArtefact`, the equivalents for data from
   *prior* commands in the same run.

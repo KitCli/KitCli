@@ -25,7 +25,7 @@ public class TestTableBuilderCliCommandHandler : CliCommandHandler<TestTableBuil
     public override Task<Outcome[]> HandleCommand(TestTableBuilderCliCommand command, CancellationToken cancellationToken)
     {
         var faker = new Faker<TestSource>()
-            .RuleFor(f => f.Category, f => f.Random.Word())
+            .CustomInstantiator(f => new TestSource(f.Random.Word()))
             .RuleFor(f => f.Cost, f => f.Random.Decimal(10, 100));
         
         var source = faker.Generate(1000);
@@ -37,6 +37,7 @@ public class TestTableBuilderCliCommandHandler : CliCommandHandler<TestTableBuil
         var tableBuilder = new TestTableBuilder()
             .WithAggregator(aggregator)
             .WithMap<TestTableMap>()
+            .WithMaxColumnWidth(12)
             .WithPageSize(2)
             .WithPageNumber(1);
         
@@ -55,7 +56,7 @@ public record TestTableBuilderPageChangeCliCommand(TableBuilder<TestSource, Test
 
 public class TestTableBuilderPageChangeCliCommandFactory : PagedCliCommandFactory<TestTableBuilderPageChangeCliCommand>
 {
-    public override bool CanCreateWhen() => LastCommandWas<TestTableBuilderCliCommand>();
+    public override bool CanCreateWhen() => LastCommandIs<TestTableBuilderCliCommand>() || LastCommandIs<TestTableBuilderPageChangeCliCommand>();
 
     public override CliCommand Create()
     {
