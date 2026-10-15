@@ -3,7 +3,9 @@
 An outcome belongs to the command that returned it, and nothing else can
 reach it. An artefact is that same data made queryable by type and name
 across the whole run — so a later command's factory can read what an
-earlier command produced.
+earlier command produced. An outcome with a session lifetime stays
+queryable in every later run too; see
+[outcomes.md](outcomes.md#how-long-an-outcome-lasts).
 
 Three types make one:
 

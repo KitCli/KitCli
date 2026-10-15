@@ -2,7 +2,8 @@
 
 A run is one arc from an ask to a final outcome, across as many commands as
 that takes. It is the boundary everything else hangs off: state survives
-inside a run and dies with it, and a run owns one DI scope.
+inside a run and dies with it, unless its outcome lasts the session, and a
+run owns one DI scope.
 
 `CliWorkflowRun` enforces it as a state machine — an append-only history of
 status changes, plus a fixed table of legal from/to pairs. Anything else
@@ -50,7 +51,10 @@ it as still active.
 
 `NextRun()` reuses the single run short of `Finished`, creating one only
 when none exists. `CreateNewRun()` gives each run its own DI scope and the
-workflow's cancellation token.
+workflow's cancellation token. It also starts the run's history with one
+`Created → Created` change carrying the session outcomes kept so far —
+empty in the first run. The run is still at `Created` afterwards, so the
+table above is unchanged.
 
 ## When an ask leads nowhere
 

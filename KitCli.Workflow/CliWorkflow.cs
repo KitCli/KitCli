@@ -3,6 +3,7 @@ using KitCli.Instructions.Abstractions.Validators;
 using KitCli.Instructions.Parsers;
 using KitCli.Workflow.Abstractions;
 using KitCli.Workflow.Commands;
+using KitCli.Workflow.Extensions;
 using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
 using MediatR;
@@ -52,7 +53,9 @@ public class CliWorkflow(IServiceScopeFactory serviceScopeFactory) : ICliWorkflo
 
     private ICliWorkflowRun CreateNewRun()
     {
-        var state = new CliWorkflowRunState();
+        var sessionOutcomes = Runs.AllSessionOutcomes();
+
+        var state = new CliWorkflowRunState(sessionOutcomes);
 
         var serviceScope = serviceScopeFactory.CreateScope();
 
