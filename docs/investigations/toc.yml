@@ -16,3 +16,5 @@
   href: 0009-how-many-sub-commands-can-one-instruction-address.md
 - name: "0010. What would a built-in /help command list?"
   href: 0010-what-would-a-built-in-help-command-list.md
+- name: "0011. Can an artefact outlive the run that made it?"
+  href: 0011-can-an-artefact-outlive-the-run-that-made-it.md
