@@ -24,8 +24,8 @@ breaks. `HeadlessCliIo` derives from `CliIo`, answers `false`, and throws
 `NoInputException` from `AskAsync`, `ChooseAsync` and `ChooseManyAsync` —
 a programming error, not an end of input. `CliAppBuilder.Run` registers the I/O from the app it was given,
 unless a registry registered an `ICliIo` first, so a consumer's own I/O
-still wins. `AddCliAbstractions()`, which only ever registered `CliIo`,
-goes.
+still wins. `AddCli<TCliApp>` no longer calls `AddCliAbstractions()`, which only
+ever registered `CliIo`, and the method is deprecated rather than removed.
 
 ## Alternatives considered
 
@@ -49,8 +49,8 @@ goes.
 
 ## Consequences
 
-- Breaking for a consumer that called `AddCliAbstractions()` directly;
-  additive for everyone else.
+- Additive. An app that still calls `AddCliAbstractions()` keeps `CliIo`,
+  as it does today, and gets a deprecation warning.
 - The builder reads the registered app's type to pick the I/O. That is
   the one runtime choice left, and it sits in the composition root beside
   the existing "headless app with no args" check.

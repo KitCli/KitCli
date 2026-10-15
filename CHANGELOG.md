@@ -22,10 +22,10 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - A run's status history now starts with a `Created → Created` change holding
   the session's kept outcomes, so code reading the first change sees that first.
 
-### Removed
+### Deprecated
 
-- **Breaking:** `AddCliAbstractions()` is gone, because `CliAppBuilder` now
-  registers the `ICliIo` itself. Delete the call.
+- `AddCliAbstractions()`, because `CliAppBuilder` now registers the `ICliIo`
+  itself. Delete the call.
 
 ### Fixed
 
