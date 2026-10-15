@@ -258,9 +258,9 @@ public class CliWorkflowRun : ICliWorkflowRun
 
     private void UpdateStateAfterOutcome(Outcome[] outcomes)
     {
-        var lastOutcome = outcomes.LastOrDefault();
+        var lastOutcome = outcomes.LastOrDefault(outcome => outcome.Kind != OutcomeKind.Anonymous);
 
-        if (lastOutcome is null || !lastOutcome.IsReusable)
+        if (lastOutcome is null || lastOutcome.Kind == OutcomeKind.Final)
         {
             State.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, outcomes);
             return;

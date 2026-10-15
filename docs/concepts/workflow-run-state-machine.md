@@ -34,9 +34,11 @@ loop is how a multi-turn or multi-page run keeps going.
 
 ## What decides the next status
 
-`UpdateStateAfterOutcome` reads the **last** outcome only:
+`UpdateStateAfterOutcome` reads the **last** outcome that is not
+anonymous. The run's own `RanCliCommandOutcome` comes first and is
+reusable, so a handler returning only anonymous outcomes parks the run:
 
-- none, or not reusable → `ReachedFinalOutcome`
+- none, or final → `ReachedFinalOutcome`
 - a `NextCliCommandOutcome` → `MovePastAsk`, awaiting `MoveToNext()`.
   `MoveToNext()` then builds the command: a `SpecifiedNextCliCommandOutcome`
   is resolved through its factory, and a factory that cannot build it moves
