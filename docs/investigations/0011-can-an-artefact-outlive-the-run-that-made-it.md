@@ -63,8 +63,8 @@ sequenceDiagram
 
 One delivery ticket, `release:minor`.
 
-**1. Two lifetimes, set by the artefact's constructor.** `Run` keeps a value
-until the next final outcome. `Session` keeps it until the app exits. Artefacts
+**1. Two lifetimes, set by the outcome's constructor.** `Run` keeps an outcome
+until the next final outcome. `Session` keeps it until the app exits. Outcomes
 default to `Run`, so existing apps behave as today.
 
 ```mermaid
@@ -79,66 +79,58 @@ stateDiagram-v2
     Forgotten --> [*]
 ```
 
-The lifetime and a second constructor are new on both artefact types:
+The lifetime and a second constructor are new on `Outcome`:
 
 ```mermaid
 classDiagram
-    class ArtefactLifetime {
+    class OutcomeLifetime {
         <<enumeration>>
         Run
         Session
     }
-    class AnonymousArtefact {
+    class Outcome {
         <<abstract>>
-        +string Name
-        +ArtefactLifetime Lifetime = Run
-        +AnonymousArtefact(name)
-        #AnonymousArtefact(name, lifetime)
+        +OutcomeKind Kind
+        +OutcomeLifetime Lifetime = Run
+        +Outcome(kind)
+        #Outcome(lifetime, kind)
     }
-    class Artefact~TArtefactValue~ {
-        <<abstract>>
-        +TArtefactValue Value
-        +Artefact(name, value)
-        #Artefact(name, value, lifetime)
-    }
-    class EnvironmentArtefact {
+    class EnvironmentChosenOutcome {
         +string Environment
     }
-    AnonymousArtefact <|-- Artefact
-    Artefact <|-- EnvironmentArtefact : passes Session
-    AnonymousArtefact --> ArtefactLifetime
+    Outcome <|-- EnvironmentChosenOutcome : passes Session
+    Outcome --> OutcomeLifetime
 ```
 
 ```csharp
-public enum ArtefactLifetime { Run, Session }
+public enum OutcomeLifetime { Run, Session }
 
-public abstract record AnonymousArtefact(string Name)
+public abstract record Outcome(OutcomeKind Kind)
 {
-    public ArtefactLifetime Lifetime { get; protected init; } = ArtefactLifetime.Run;
+    public OutcomeLifetime Lifetime { get; protected init; } = OutcomeLifetime.Run;
 
-    protected AnonymousArtefact(string name, ArtefactLifetime lifetime) : this(name)
-        => Lifetime = lifetime;
-}
-
-public abstract record Artefact<TArtefactValue>(string Name, TArtefactValue Value) : AnonymousArtefact(Name)
-{
-    protected Artefact(string name, TArtefactValue value, ArtefactLifetime lifetime) : this(name, value)
+    protected Outcome(OutcomeLifetime lifetime, OutcomeKind kind) : this(kind)
         => Lifetime = lifetime;
 }
 ```
 
-The artefact's lifetime is a new overload constructor, leaving the existing one
-in place. Changing the constructor signature for a third parameter would be a
+The lifetime lives on the outcome because the workflow keeps outcomes and
+rebuilds artefacts from them on every lookup. Reading it off the outcome needs
+no artefact built just to ask.
+
+The lifetime is a new overload constructor, leaving the existing one in place.
+Changing the constructor signature for a second parameter would be a
 [major release](../adr/0012-derive-version-bumps-from-the-public-api-diff.md).
 
-**2. An app keeps a value by passing `Session`.** The outcome and factory stay
-as they are today:
+**2. An app keeps a value by passing `Session`.** The artefact and its factory
+stay as they are today:
 
 ```csharp
-public record EnvironmentChosenOutcome(string Environment) : Outcome(OutcomeKind.Anonymous);
+public record EnvironmentChosenOutcome(string Environment)
+    : Outcome(OutcomeLifetime.Session, OutcomeKind.Anonymous);
 
 public record EnvironmentArtefact(string Environment)
-    : Artefact<string>(nameof(EnvironmentArtefact), Environment, ArtefactLifetime.Session);
+    : Artefact<string>(nameof(EnvironmentArtefact), Environment);
 
 public class EnvironmentArtefactFactory : ArtefactFactory<EnvironmentChosenOutcome>
 {
@@ -174,7 +166,7 @@ public class ExecuteCliCommandFactory : BasicCreationCliCommandFactory<ExecuteCl
 }
 ```
 
-**3. Each new run starts with the kept outcomes.**
+**3. Each new run's history starts with the kept outcomes.**
 
 ```mermaid
 flowchart LR
@@ -182,42 +174,45 @@ flowchart LR
         O1["EnvironmentChosenOutcome"]
         O2["RanCliCommandOutcome"]
     end
-    subgraph R2["Run 2 — current"]
-        O3["run 2's own outcomes"]
-    end
-    O1 -->|"its artefact says Session"| K["kept outcomes"]
-    O2 -.->|"its artefact says Run"| D["dropped"]
-    K -->|first| P["converted to artefacts"]
-    O3 -->|then| P
+    O1 -->|"its lifetime is Session"| K["kept outcomes"]
+    O2 -.->|"its lifetime is Run"| D["dropped"]
+    K -->|"first entry"| H[("run 2's history")]
+    O3["run 2's own outcomes"] -->|then| H
+    H --> P["converted to artefacts"]
     P --> C["command, chained command<br/>and reaction factories"]
 ```
 
-`CliWorkflow.CreateNewRun` keeps the outcomes whose artefact says `Session`:
+`CliWorkflow.CreateNewRun` starts the new run's history with the kept outcomes:
 
 ```csharp
-var sessionOutcomes = Runs
-    .SelectMany(run => run.State.AllOutcomeStateChanges())
-    .SelectMany(change => change.Outcomes)
-    .Where(outcome => artefactFactories
-        .FirstOrDefault(factory => factory.For(outcome))?
-        .Create(outcome)
-        .Lifetime == ArtefactLifetime.Session)
-    .ToList();
+var sessionOutcomes = Runs.AllSessionOutcomes();
+
+var state = new CliWorkflowRunState(sessionOutcomes);
 ```
 
-`CliWorkflowRun` puts them first in all three places it builds artefacts. #311
-names one:
+`AllSessionOutcomes()` is a new extension method on the workflow's runs. It
+reads only the last run, whose history already starts with the outcomes it was
+handed:
 
 ```csharp
-_workflowCommandProvider.GetCommand(instruction, [..sessionOutcomes, ..priorOutcomes]);
-_workflowCommandProvider.GetCommand(instruction, [..sessionOutcomes, ..allPriorOutcomes]);
-_workflowReactionProvider.GetReaction(type, [..sessionOutcomes, ..AllPriorOutcomes(), ..currentOutcomes]);
+public Outcome[] AllSessionOutcomes()
+    => runs
+        .TakeLast(1)
+        .SelectMany(lastRun => lastRun.State.AllOutcomeStateChanges())
+        .SelectMany(change => change.Outcomes)
+        .Where(outcome => outcome.Lifetime == OutcomeLifetime.Session)
+        .ToArray();
 ```
 
-Suggestions and moving to the next command still read only the run's own
-outcomes.
+The new `CliWorkflowRunState` constructor records them as one
+`Created → Created` change. The run is still at `Created` afterwards, so the
+transition table and `CliWorkflowRun` are unchanged: the run reads the kept
+outcomes like its own. Suggestions and moving to the next command read them
+too, but both look for outcomes that last a run, so neither changes.
 
-The same PR updates [artefacts.md](../concepts/artefacts.md) and
+The same PR updates [outcomes.md](../concepts/outcomes.md),
+[artefacts.md](../concepts/artefacts.md),
+[workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) and
 [user guide 0010](../user-guides/0010-reusable-outcomes-and-the-workflow-run.md),
 which says values never cross runs.
 
@@ -240,10 +235,10 @@ flowchart LR
 |---|---|
 | A finished run stays in `CliWorkflow.Runs` until the app exits. | The outcomes to keep are already in memory. |
 | A run's history is a plain object, not one of the run's services. | It stays readable after the run's services are disposed. |
-| Every artefact factory is a singleton. | The workflow can convert outcomes outside any run. |
-| Factories already convert the run's whole history before every command. | One more conversion per new run asks nothing new of a factory. |
-| The factory picks each artefact's lifetime. | One outcome type can last a run in one place and a session in another. |
-| `LastCommandIs<T>()` reads the run's last command artefact. | That artefact stays `Run`, so a new run never sees the previous run's command. |
+| Factories already convert the run's whole history before every command. | Outcomes at the start of a run's history reach every factory with no change to `CliWorkflowRun`. |
+| A run is at `Created` until its first change, and stays there after a `Created → Created` change. | Kept outcomes can enter a run's history without a new status. |
+| The outcome's type picks its lifetime. | Reading the lifetime needs no artefact built. |
+| `LastCommandIs<T>()` reads the run's last command artefact. | Its outcome, `RanCliCommandOutcome`, stays `Run`, so a new run never sees the previous run's command. |
 | The other built-ins hold page size, page number, filters, aggregators and table builders. | Each belongs to one listing, so all stay `Run`. |
 | A headless app makes exactly one run, chained commands included. | `Session` behaves like `Run` there. |
 
@@ -268,18 +263,21 @@ Read against `3bf1f78` and checked line by line by a second reader.
 | `KitCli.Workflow/Run/CliWorkflowRun.cs:104, 224, 255` | The three calls that turn outcomes into artefacts. |
 | `KitCli.Workflow/Run/CliWorkflowRun.cs:374` | `AllPriorOutcomes()` reads only this run's history. |
 | `KitCli.Workflow.Commands/CliWorkflowCommandProvider.cs:46` and `CliWorkflowReactionProvider.cs:44` | The two copies of the conversion. |
-| `KitCli.Commands.Abstractions/Extensions/ArtefactServiceCollectionExtensions.cs:50, 64, 88, 113` | Every registration path is `AddSingleton`. |
-| `KitCli.Commands.Abstractions/Artefacts/AnonymousArtefact.cs:8` and `Artefact.cs:9` | Both artefact types are positional records. |
+| `KitCli.Commands.Abstractions/Outcomes/Outcome.cs:9` | `Outcome` is a positional record. |
+| `KitCli.Workflow/Run/State/CliWorkflowRunState.cs:89` | An empty history counts as `Created`. |
 | `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:162` | `LastCommandIs<T>()` reads the last command artefact. |
 | `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:175-182` | Lookup filters by type, then name, and takes `LastOrDefault`. |
 | `KitCli/CliApp.cs:78` | One `NextRun()` per ask. Chained commands call `MoveToNext()` on the same run. |
 
-Recommendation 1's constructor compiles and runs in .NET 10:
+The recommendation is built, with a playground scenario in
+`KitCli.Playground.Scenarios/TestEnvironmentCliCommand.cs`. Its commands print
+both values after each step:
 
 ```text
-new EnvironmentArtefact("prod").Lifetime      →  Session
-new PageSizeArtefact(20).Lifetime             →  Run
-var (name, value) = new PageSizeArtefact(20)  →  "PageSize 20"
+/test-environment prod  →  Environment: prod. Page size: none.
+/test-page-size 20      →  Environment: prod. Page size: 20.
+/test-execute           →  Environment: prod. Page size: 20.
+/test-execute           →  Environment: prod. Page size: none.
 ```
 
 `protected init` lets the new constructor set a lifetime its base declares.
@@ -298,6 +296,3 @@ None.
   ([#48](https://github.com/KitCli/KitCli/issues/48)) and *No way to persist
   run history so a run can be resumed after it finishes*
   ([#123](https://github.com/KitCli/KitCli/issues/123)).
-- **Factories with constructor dependencies.** See *construct artefact
-  factories through DI instead of Activator*
-  ([#144](https://github.com/KitCli/KitCli/issues/144)).

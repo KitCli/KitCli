@@ -31,11 +31,54 @@ appends: `SpecifiedNextCliCommandOutcome` when a handler names a type, and
 **Only the last outcome decides the run's next state.** That is the rule
 people get wrong: end on `ByFinallySaying` after remembering something and
 the run ends, discarding what you just saved. Put the reusable outcome
-last.
+last, or give the outcome a session lifetime.
 
 `Kind` decides that and nothing else. Whether a later command can query an
 outcome depends on whether an artefact factory claims its type —
 `AggregatorFilterOutcome` is `Anonymous` and still becomes an artefact.
+
+## How long an outcome lasts
+
+`Kind` decides when a run ends; `Lifetime` decides whether an outcome
+outlives it. Every outcome lasts its run (`OutcomeLifetime.Run`) unless
+its type passes `OutcomeLifetime.Session` to `Outcome`'s second
+constructor:
+
+```csharp
+public record EnvironmentChosenOutcome(string Environment)
+    : Outcome(OutcomeLifetime.Session, OutcomeKind.Anonymous);
+```
+
+When a run ends, the workflow hands its session outcomes to the next run,
+which reads them like its own until the app exits. The playground's
+`/test-environment` keeps an environment for the session; `/test-page-size`
+keeps a page size for one run:
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant A as App
+
+    rect rgba(128,128,128,0.12)
+    Note over U,A: Run 1
+    U->>A: /test-environment prod
+    A-->>U: environment: prod · page size: none
+    end
+
+    rect rgba(128,128,128,0.12)
+    Note over U,A: Run 2
+    U->>A: /test-page-size 20
+    A-->>U: environment: prod · page size: 20
+    U->>A: /test-execute
+    A-->>U: environment: prod · page size: 20
+    end
+
+    rect rgba(128,128,128,0.12)
+    Note over U,A: Run 3
+    U->>A: /test-execute
+    A-->>U: environment: prod · page size: none
+    end
+```
 
 ## Gaps
 

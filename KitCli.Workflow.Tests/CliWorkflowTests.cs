@@ -7,6 +7,7 @@ using KitCli.Workflow.Abstractions;
 using KitCli.Workflow.Commands;
 using KitCli.Workflow.Run;
 using KitCli.Workflow.Run.State;
+using KitCli.Workflow.Tests.TestHelpers;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -206,6 +207,59 @@ public class CliWorkflowTests
         Assert.That(nextRun, Is.Not.EqualTo(reusableRun));
     }
     
+    [Test]
+    public void GivenFinishedRunKeptSessionOutcome_WhenNextRun_ThenNewRunStartsWithOnlyThatOutcome()
+    {
+        // Arrange
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IInstructionParser)))
+            .Returns(new Mock<IInstructionParser>().Object);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IInstructionValidator)))
+            .Returns(new Mock<IInstructionValidator>().Object);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(ICliWorkflowCommandProvider)))
+            .Returns(new Mock<ICliWorkflowCommandProvider>().Object);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(ICliWorkflowReactionProvider)))
+            .Returns(new Mock<ICliWorkflowReactionProvider>().Object);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IOptions<InstructionSettings>)))
+            .Returns(DefaultInstructionSettings);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(ISender)))
+            .Returns(new Mock<ISender>().Object);
+
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IPublisher)))
+            .Returns(new Mock<IPublisher>().Object);
+
+        var sessionOutcome = new TestSessionOutcome("prod");
+        var runOutcome = new FinalSayOutcome("Using prod.");
+
+        var finishedRunState = new CliWorkflowRunState();
+        finishedRunState.ChangeTo(ClIWorkflowRunStateStatus.Running);
+        finishedRunState.ChangeTo(ClIWorkflowRunStateStatus.ReachedFinalOutcome, [sessionOutcome, runOutcome]);
+        finishedRunState.ChangeTo(ClIWorkflowRunStateStatus.Finished);
+
+        var finishedRun = new TestCliWorkflowRun(finishedRunState);
+
+        _classUnderTest.Runs.Add(finishedRun);
+
+        // Act
+        var nextRun = _classUnderTest.NextRun();
+
+        // Assert
+        var firstChange = nextRun.State.AllOutcomeStateChanges().First();
+
+        Assert.That(firstChange.Outcomes, Is.EqualTo(new Outcome[] { sessionOutcome }).AsCollection);
+    }
+
     [Test]
     public void GivenRunning_WhenStop_ThenWorkflowStopsRunning()
     {

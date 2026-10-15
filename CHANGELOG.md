@@ -6,6 +6,16 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+### Added
+
+- An outcome can last the whole session: pass `OutcomeLifetime.Session` to
+  `Outcome`'s constructor and every later run reads it ([#311](https://github.com/KitCli/KitCli/issues/311)).
+
+### Changed
+
+- A run's status history now starts with a `Created → Created` change holding
+  the session's kept outcomes, so code reading the first change sees that first.
+
 ## [3.3.0] - 2026-10-15
 
 ### Added

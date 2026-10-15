@@ -22,6 +22,30 @@ public class CliWorkflowRunState : ICliWorkflowRunState
     /// <inheritdoc/>
     public List<ICliWorkflowRunStateChange> Changes { get; } = [];
 
+    /// <summary>
+    /// Creates a run's history at <see cref="ClIWorkflowRunStateStatus.Created"/>, with no changes recorded.
+    /// </summary>
+    public CliWorkflowRunState()
+    {
+    }
+
+    /// <summary>
+    /// Creates a run's history at <see cref="ClIWorkflowRunStateStatus.Created"/>, starting with the outcomes
+    /// earlier runs kept for the whole session. They are recorded as a change from <c>Created</c> to
+    /// <c>Created</c>, so the run's legal transitions are unaffected.
+    /// </summary>
+    /// <param name="sessionOutcomes">The outcomes earlier runs kept for the whole session.</param>
+    public CliWorkflowRunState(Outcome[] sessionOutcomes)
+    {
+        var stateChange = new OutcomeCliWorkflowRunStateChange(
+            Stopwatch.Elapsed,
+            ClIWorkflowRunStateStatus.Created,
+            ClIWorkflowRunStateStatus.Created,
+            sessionOutcomes);
+
+        Changes.Add(stateChange);
+    }
+
     /// <inheritdoc/>
     public bool WasChangedTo(params ClIWorkflowRunStateStatus[] oneOfStatuses)
         => Changes.Any(change => oneOfStatuses.Contains(change.To));

@@ -55,9 +55,12 @@ state available to whatever the user asks for *next*. To run the next step
 without new input, use `ByMovingToCommand`.
 
 **Assuming remembered state outlives the run.** Reaching a `Final` outcome
-discards everything the run remembered. Reusable state carries across asks
-*within* one run, never across runs — separate one-shot invocations
-included.
+discards everything the run remembered. The built-in outcomes, page size
+included, all last one run. To keep a value of your own for every later
+run, give its outcome a session lifetime — see
+[../concepts/outcomes.md](../concepts/outcomes.md#how-long-an-outcome-lasts).
+Nothing survives the app exiting, so separate one-shot invocations never
+share state.
 
 **Returning two reusable outcomes a later command reads by type, with no
 distinguishing name.** Should two values in one run both become
