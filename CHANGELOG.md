@@ -87,26 +87,12 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   an app nothing that hook does not. Override `OnRunCreated` instead; removal
   is tracked in [#305](https://github.com/KitCli/KitCli/issues/305).
 
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
-
 ### Fixed
 
 - An app whose entry project has no commands now starts when a registry adds
   them from another project ([#118](https://github.com/KitCli/KitCli/issues/118)).
 
 ## [3.1.2] - 2026-09-18
-
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -131,13 +117,6 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   it through a `CliCommandReactionFactory<TReaction>` — auto-registered for
   parameterless reactions — so the factory sees the run's artefacts
   ([#204](https://github.com/KitCli/KitCli/issues/204)).
-
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -171,13 +150,6 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   column's text may reach before a cell is broken across lines. Unset, no cell
   breaks.
 
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
-
 ### Fixed
 
 - A table cell longer than 40 characters is no longer chopped in half and ruled
@@ -187,13 +159,6 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   ([#182](https://github.com/KitCli/KitCli/issues/182)).
 
 ## [3.0.0] - 2026-08-25
-
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -236,13 +201,6 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [1.0.13] - 2026-08-24
 
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
-
 ### Fixed
 
 - `CliAppBuilder.Run` built its service provider with no validation, so a
@@ -270,13 +228,6 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   run now suggests these instead of returning silently. Repeatable for more
   than one next command.
   See [0008-suggest-next-commands-attribute.md](docs/adr/0008-suggest-next-commands-attribute.md).
-
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
@@ -314,13 +265,6 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - **Breaking:** `CliApp.Run` no longer exists on the base class — it now
   lives on `TerminalCliApp`/`ArgsCliApp` depending on which an app extends.
   `CliAppBuilder.Run()` dispatches to the right one automatically. (#81)
-
-### Deprecated
-
-- `LastCommandWas<T>()` on a command factory is obsolete. Despite its name it
-  matches any earlier run of `T`; use `AnyLastCommandIs<T>()` for that, or
-  `LastCommandIs<T>()` for the command that ran immediately before
-  ([#321](https://github.com/KitCli/KitCli/issues/321)).
 
 ### Fixed
 
