@@ -23,10 +23,10 @@ public class SetPageSizeCliCommandHandler : CliCommandHandler<SetPageSizeCliComm
 }
 ```
 
-**The `Reusable` outcome has to be last.** Only the final outcome in the
-array decides what the run does next, so `ByRememberingPageSize` follows
-`BySaying`. Put a `Final` outcome last instead and the run ends, taking the
-page size with it.
+**The `Reusable` outcome has to come after any `Final` one.** The last
+outcome that is not anonymous decides what the run does next. `BySaying` is
+anonymous, so it can go before or after `ByRememberingPageSize`. Put a
+`Final` outcome after it and the run ends, taking the page size with it.
 
 `OutcomeList` carries a `By...` method for each built-in reusable outcome:
 `ByRememberingPageSize`, `ByRememberingPageNumber`, `ByRememberingFilter`,
@@ -48,7 +48,7 @@ thing, and the difference catches people out:
 
 **Ending the handler on `ByFinallySaying` after remembering something.**
 This is the usual way to lose state you just saved. Say the confirmation
-with `BySaying`, and let the reusable outcome be last.
+with `BySaying`, which has no effect on the run.
 
 **Expecting a `Reusable` outcome to run something at once.** It only makes
 state available to whatever the user asks for *next*. To run the next step

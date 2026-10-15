@@ -16,6 +16,12 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - A run's status history now starts with a `Created → Created` change holding
   the session's kept outcomes, so code reading the first change sees that first.
 
+### Fixed
+
+- An anonymous outcome such as `BySaying` no longer ends the run when it comes
+  last. The run decides on the last outcome that is not anonymous
+  ([#297](https://github.com/KitCli/KitCli/issues/297)).
+
 ## [3.3.0] - 2026-10-15
 
 ### Added

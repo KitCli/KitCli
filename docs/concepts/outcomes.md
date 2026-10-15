@@ -28,10 +28,11 @@ appends one outcome and returns `this`. The API reference lists them all.
 appends: `SpecifiedNextCliCommandOutcome` when a handler names a type, and
 `ProvidedNextCliCommandOutcome` when it hands over a command it built.
 
-**Only the last outcome decides the run's next state.** That is the rule
+**Only the last outcome that is not anonymous decides the run's next
+state.** An anonymous outcome has no say, wherever it sits. That is the rule
 people get wrong: end on `ByFinallySaying` after remembering something and
-the run ends, discarding what you just saved. Put the reusable outcome
-last, or give the outcome a session lifetime.
+the run ends, discarding what you just saved. Say it with `BySaying`
+instead, or give the outcome a session lifetime.
 
 `Kind` decides that and nothing else. Whether a later command can query an
 outcome depends on whether an artefact factory claims its type —

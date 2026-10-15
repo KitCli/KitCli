@@ -330,6 +330,176 @@ public class CliWorkflowRunTests
     }
 
     [Test]
+    public async Task GivenReusableOutcomeThenAnonymousOutcome_WhenRespondToAsk_StateChangesToReachedReusableOutcome()
+    {
+        // Arrange
+        var aggregator = new TestListAggregator();
+        var reusableOutcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
+        var anonymousOutcome = new SayOutcome("Remembered.");
+
+        SetUpEveryAskToSend([reusableOutcome, anonymousOutcome]);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenFinalOutcomeThenAnonymousOutcome_WhenRespondToAsk_StateChangesToFinished()
+    {
+        // Arrange
+        var finalOutcome = new NothingOutcome();
+        var anonymousOutcome = new SayOutcome("Goodbye.");
+
+        SetUpEveryAskToSend([finalOutcome, anonymousOutcome]);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedFinalOutcome,
+            ClIWorkflowRunStateStatus.Finished,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenNextCliCommandOutcomeThenAnonymousOutcome_WhenRespondToAsk_StateChangesToMovePastAsk()
+    {
+        // Arrange
+        var nextCommand = new TestChainedToCliCommand("next");
+        var nextOutcome = new ProvidedNextCliCommandOutcome(nextCommand);
+        var anonymousOutcome = new SayOutcome("Moving on.");
+
+        SetUpEveryAskToSend([nextOutcome, anonymousOutcome]);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenOnlyAnonymousOutcomes_WhenRespondToAsk_StateChangesToReachedReusableOutcome()
+    {
+        // Arrange
+        var anonymousOutcome = new SayOutcome("Hello.");
+
+        SetUpEveryAskToSend([anonymousOutcome]);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenOnlyAnonymousOutcomesAfterReachingReusableOutcome_WhenRespondToAsk_LeavesRunAtReusableOutcome()
+    {
+        // Arrange
+        var aggregator = new TestListAggregator();
+        var reusableOutcome = new AggregatorOutcome<TestAggregate, TestAggregate>(aggregator);
+        var anonymousOutcome = new SayOutcome("Hello.");
+
+        SetUpEveryAskToSend([reusableOutcome]);
+
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        SetUpEveryAskToSend([anonymousOutcome]);
+
+        // Act
+        _ = await _classUnderTest.RespondToAsk("some valid ask");
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
+    public async Task GivenNextCommandReturnsOnlyAnonymousOutcomes_WhenMoveToNext_ParksRatherThanMovingOnAgain()
+    {
+        // Arrange
+        var nextCommand = new TestChainedToCliCommand("next");
+
+        await RespondToAskWithNextCommands(nextCommand);
+
+        _sender
+            .Setup(mediator => mediator.Send(nextCommand, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new SayOutcome("Hello.")]);
+
+        // Act
+        _ = await _classUnderTest.MoveToNext();
+
+        // Assert
+        var expectedStateChangeTypes = new[]
+        {
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.MovePastAsk,
+            ClIWorkflowRunStateStatus.Running,
+            ClIWorkflowRunStateStatus.ReachedReusableOutcome,
+        };
+
+        var stateChangeTypes = _cliWorkflowRunState
+            .Changes
+            .Select(x => x.To);
+
+        Assert.That(expectedStateChangeTypes, Is.EqualTo(stateChangeTypes).AsCollection);
+    }
+
+    [Test]
     public async Task GivenCommandProviderFailsAfterReachingReusableOutcome_WhenRespondToAsk_LeavesRunAtReusableOutcome()
     {
         // Arrange
@@ -1007,6 +1177,28 @@ public class CliWorkflowRunTests
     /// Drives the run through one ask whose handler provides the given commands, leaving it at
     /// <see cref="ClIWorkflowRunStateStatus.MovePastAsk"/> with those commands waiting.
     /// </summary>
+    /// <summary>
+    /// Makes every ask parse, validate and resolve to a plain command whose handler returns the given outcomes.
+    /// </summary>
+    private void SetUpEveryAskToSend(Outcome[] outcomes)
+    {
+        _cliInstructionParser
+            .Setup(parser => parser.Parse(It.IsAny<string>()))
+            .Returns(OriginatingInstruction);
+
+        _cliInstructionValidator
+            .Setup(civ => civ.IsValid(It.IsAny<Instruction>()))
+            .Returns(true);
+
+        _cliWorkflowCommandProvider
+            .Setup(provider => provider.GetCommand(It.IsAny<Instruction>(), It.IsAny<List<Outcome>>()))
+            .Returns(new CliCommand());
+
+        _sender
+            .Setup(mediator => mediator.Send(It.IsAny<CliCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(outcomes);
+    }
+
     private Task RespondToAskWithNextCommands(params CliCommand[] nextCommands)
         => RespondToAskWithNextOutcomes(nextCommands
             .Select(NextCliCommandOutcome (nextCommand) => new ProvidedNextCliCommandOutcome(nextCommand))
