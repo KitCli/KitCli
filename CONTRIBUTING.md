@@ -114,8 +114,9 @@ record, and nobody reads a folder of fifty.
 Open the ADR in the PR it justifies, or alone if the decision precedes the
 code.
 
-`toc.yml` groups them by the release they shipped in, oldest first, under
-a short label with no number. A new one goes under `Unreleased`.
+`toc.yml` groups them by the release their work shipped in, oldest first,
+under a short label with no number. Work not shipped yet sits under
+`Unreleased` until it ships.
 
 ## Concepts
 
@@ -166,8 +167,9 @@ replaces. It ships through a PR with a Status like any other work. Durable
 facts about a dependency belong in that dependency's own docs too, not
 only here.
 
-`toc.yml` groups them by the release they shipped in, oldest first, under
-a short label with no number. A new one goes under `Unreleased`.
+`toc.yml` groups them by the release their work shipped in, oldest first,
+under a short label with no number. Work not shipped yet sits under
+`Unreleased` until it ships.
 
 ## Technology
 
