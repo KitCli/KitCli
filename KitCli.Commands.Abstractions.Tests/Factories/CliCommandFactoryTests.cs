@@ -502,6 +502,77 @@ public class CliCommandFactoryTests
         Assert.That(ran, Is.False);
     }
 
+    [Test]
+    public void GivenTheSecondCommandRanLast_WhenLastCommandIsOneOfTwoIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty, [new RanCliCommandArtefact(new TestVariantNextCliCommand())]);
+
+        // Act
+        var ran = _factory.LastCommandIsOneOf<TestNextCliCommand, TestVariantNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenTheThirdCommandRanLast_WhenLastCommandIsOneOfThreeIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty, [new RanCliCommandArtefact(new TestVariantNextCliCommand())]);
+
+        // Act
+        var ran = _factory.LastCommandIsOneOf<TestNextCliCommand, TestNextCliCommand, TestVariantNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenTheFourthCommandRanLast_WhenLastCommandIsOneOfFourIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty, [new RanCliCommandArtefact(new TestVariantNextCliCommand())]);
+
+        // Act
+        var ran = _factory.LastCommandIsOneOf<TestNextCliCommand, TestNextCliCommand, TestNextCliCommand,
+            TestVariantNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenTheFifthCommandRanLast_WhenLastCommandIsOneOfFiveIsCalled_ThenItMatches()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty, [new RanCliCommandArtefact(new TestVariantNextCliCommand())]);
+
+        // Act
+        var ran = _factory.LastCommandIsOneOf<TestNextCliCommand, TestNextCliCommand, TestNextCliCommand,
+            TestNextCliCommand, TestVariantNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.True);
+    }
+
+    [Test]
+    public void GivenOneOfTheCommandsRanBeforeAnotherCommand_WhenLastCommandIsOneOfIsCalled_ThenItDoesNotMatch()
+    {
+        // Arrange
+        _factory.Attach(Instruction.Empty,
+        [
+            new RanCliCommandArtefact(new TestNextCliCommand()),
+            new RanCliCommandArtefact(new TestParameterisedNextCliCommand("budget"))
+        ]);
+
+        // Act
+        var ran = _factory.LastCommandIsOneOf<TestNextCliCommand, TestVariantNextCliCommand>();
+
+        // Assert
+        Assert.That(ran, Is.False);
+    }
+
     private static Instruction InstructionWith(string subInstructionName,
         params AnonymousInstructionArgument[] arguments)
         => new("/", "test", subInstructionName, arguments.ToList());

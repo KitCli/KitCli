@@ -12,6 +12,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   `Outcome`'s constructor and every later run reads it ([#311](https://github.com/KitCli/KitCli/issues/311)).
 - `ByPausing()` writes a blank line between a command's messages
   ([#106](https://github.com/KitCli/KitCli/issues/106)).
+- `LastCommandIsOneOf<A, B>()` checks whether the last command was any of up to
+  five types ([#330](https://github.com/KitCli/KitCli/issues/330)).
 
 ### Changed
 

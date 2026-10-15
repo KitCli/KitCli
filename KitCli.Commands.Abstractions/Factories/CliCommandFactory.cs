@@ -167,6 +167,40 @@ public abstract class CliCommandFactory<TCliCommand> : ICliCommandFactory where 
     }
 
     /// <summary>
+    /// Determines whether the command that ran immediately before is one of the given command types.
+    /// See <see cref="LastCommandIs{TRanCliCommand}"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if one of the given types ran most recently; otherwise <see langword="false"/>.</returns>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        => LastCommandIs<TRanCliCommand1>() || LastCommandIs<TRanCliCommand2>();
+
+    /// <inheritdoc cref="LastCommandIsOneOf{TRanCliCommand1, TRanCliCommand2}"/>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        => LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2>() || LastCommandIs<TRanCliCommand3>();
+
+    /// <inheritdoc cref="LastCommandIsOneOf{TRanCliCommand1, TRanCliCommand2}"/>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        where TRanCliCommand4 : CliCommand
+        => LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3>() || LastCommandIs<TRanCliCommand4>();
+
+    /// <inheritdoc cref="LastCommandIsOneOf{TRanCliCommand1, TRanCliCommand2}"/>
+    protected bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4, TRanCliCommand5>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        where TRanCliCommand4 : CliCommand
+        where TRanCliCommand5 : CliCommand
+        => LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4>() || LastCommandIs<TRanCliCommand5>();
+
+    /// <summary>
     /// Gets the last artefact of the given type from the attached artefacts, optionally filtered by name.
     /// </summary>
     /// <typeparam name="TArtefactType">The artefact value type to look for.</typeparam>
