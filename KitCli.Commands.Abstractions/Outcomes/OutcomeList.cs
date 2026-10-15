@@ -70,6 +70,13 @@ public class OutcomeList : List<Outcome>
         => ByResultingIn(new LeveledSayOutcome(message, level));
 
     /// <summary>
+    /// Appends a <see cref="PauseOutcome"/>, writing a blank line between the outcomes either side of it.
+    /// </summary>
+    /// <returns>This list, for chaining.</returns>
+    public OutcomeList ByPausing()
+        => ByResultingIn(new PauseOutcome());
+
+    /// <summary>
     /// Appends a <see cref="TableOutcome"/> carrying the given table.
     /// </summary>
     /// <param name="table">The table to show.</param>

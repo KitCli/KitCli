@@ -10,6 +10,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 - An outcome can last the whole session: pass `OutcomeLifetime.Session` to
   `Outcome`'s constructor and every later run reads it ([#311](https://github.com/KitCli/KitCli/issues/311)).
+- `ByPausing()` writes a blank line between a command's messages
+  ([#106](https://github.com/KitCli/KitCli/issues/106)).
 
 ### Changed
 

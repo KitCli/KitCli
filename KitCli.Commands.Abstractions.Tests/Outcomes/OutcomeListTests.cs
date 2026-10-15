@@ -81,6 +81,16 @@ public class OutcomeListTests
     }
 
     [Test]
+    public void WhenByPausing_ThenAppendsPauseOutcome()
+    {
+        // Act
+        var outcomes = new OutcomeList().ByPausing().End();
+
+        // Assert
+        Assert.That(outcomes, Is.EqualTo(new Outcome[] { new PauseOutcome() }).AsCollection);
+    }
+
+    [Test]
     public void GivenTable_WhenByShowingTable_ThenAppendsTableOutcome()
     {
         // Arrange
