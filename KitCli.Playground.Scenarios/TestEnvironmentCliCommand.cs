@@ -49,7 +49,7 @@ public class TestEnvironmentCliCommandFactory : BasicCreationCliCommandFactory<T
 }
 
 public record TestEnvironmentChosenOutcome(string Environment)
-    : Outcome(OutcomeLifetime.Session, OutcomeKind.Anonymous);
+    : Outcome(OutcomeKind.Anonymous, OutcomeLifetime.Session);
 
 public record TestEnvironmentArtefact(string Environment)
     : Artefact<string>(nameof(TestEnvironmentArtefact), Environment);

@@ -22,8 +22,8 @@ public abstract record Outcome(OutcomeKind Kind)
     /// <summary>
     /// Creates an outcome that stays readable for the given lifetime.
     /// </summary>
-    /// <param name="lifetime">How long this outcome stays readable.</param>
     /// <param name="kind">Whether this outcome has no effect on the run, is queryable by later commands, or ends the run.</param>
-    protected Outcome(OutcomeLifetime lifetime, OutcomeKind kind) : this(kind)
+    /// <param name="lifetime">How long this outcome stays readable.</param>
+    protected Outcome(OutcomeKind kind, OutcomeLifetime lifetime) : this(kind)
         => Lifetime = lifetime;
 }

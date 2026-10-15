@@ -93,7 +93,7 @@ classDiagram
         +OutcomeKind Kind
         +OutcomeLifetime Lifetime = Run
         +Outcome(kind)
-        #Outcome(lifetime, kind)
+        #Outcome(kind, lifetime)
     }
     class EnvironmentChosenOutcome {
         +string Environment
@@ -109,7 +109,7 @@ public abstract record Outcome(OutcomeKind Kind)
 {
     public OutcomeLifetime Lifetime { get; protected init; } = OutcomeLifetime.Run;
 
-    protected Outcome(OutcomeLifetime lifetime, OutcomeKind kind) : this(kind)
+    protected Outcome(OutcomeKind kind, OutcomeLifetime lifetime) : this(kind)
         => Lifetime = lifetime;
 }
 ```
@@ -127,7 +127,7 @@ stay as they are today:
 
 ```csharp
 public record EnvironmentChosenOutcome(string Environment)
-    : Outcome(OutcomeLifetime.Session, OutcomeKind.Anonymous);
+    : Outcome(OutcomeKind.Anonymous, OutcomeLifetime.Session);
 
 public record EnvironmentArtefact(string Environment)
     : Artefact<string>(nameof(EnvironmentArtefact), Environment);

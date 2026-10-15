@@ -46,7 +46,7 @@ constructor:
 
 ```csharp
 public record EnvironmentChosenOutcome(string Environment)
-    : Outcome(OutcomeLifetime.Session, OutcomeKind.Anonymous);
+    : Outcome(OutcomeKind.Anonymous, OutcomeLifetime.Session);
 ```
 
 When a run ends, the workflow hands its session outcomes to the next run,
