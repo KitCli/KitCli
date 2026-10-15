@@ -10,7 +10,7 @@ public class CliIo(IAnsiConsole? console = null, KitCliSettings? kitCliSettings 
     private readonly IAnsiConsole _console = console ?? AnsiConsole.Console;
 
     /// <inheritdoc/>
-    public async Task<string?> AskAsync(CancellationToken cancellationToken)
+    public virtual async Task<string?> AskAsync(CancellationToken cancellationToken)
     {
         var abandonableBackgroundConsoleRead = Task.Run(Console.ReadLine, CancellationToken.None);
 
@@ -25,7 +25,7 @@ public class CliIo(IAnsiConsole? console = null, KitCliSettings? kitCliSettings 
     }
 
     /// <inheritdoc/>
-    public async Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
+    public virtual async Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
     {
         var prompt = new SelectionPrompt<CliChoice>()
             .Title(Markup.Escape(title))
@@ -43,7 +43,7 @@ public class CliIo(IAnsiConsole? console = null, KitCliSettings? kitCliSettings 
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
+    public virtual async Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken)
     {
         var prompt = new MultiSelectionPrompt<CliChoice>()
             .Title(Markup.Escape(title))

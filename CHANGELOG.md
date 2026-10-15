@@ -14,11 +14,18 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   ([#106](https://github.com/KitCli/KitCli/issues/106)).
 - `LastCommandIsOneOf<A, B>()` checks whether the last command was any of up to
   five types ([#330](https://github.com/KitCli/KitCli/issues/330)).
+- A command can read `CanAsk` on its `ICliIo` to skip a prompt in a headless app,
+  where prompting throws `NoInputException` ([ADR 0021](docs/adr/0021-let-a-command-ask-its-io-whether-anyone-can-answer.md)).
 
 ### Changed
 
 - A run's status history now starts with a `Created → Created` change holding
   the session's kept outcomes, so code reading the first change sees that first.
+
+### Deprecated
+
+- `AddCliAbstractions()`, because `CliAppBuilder` now registers the `ICliIo`
+  itself. Delete the call.
 
 ### Fixed
 

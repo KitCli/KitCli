@@ -23,6 +23,16 @@ public class CliIoTests
         => _console.Dispose();
 
     [Test]
+    public void GivenCliIo_WhenAskedWhetherItCanAsk_SaysYes()
+    {
+        // Arrange
+        ICliIo classUnderTest = new CliIo(_console);
+
+        // Assert
+        Assert.That(classUnderTest.CanAsk, Is.True);
+    }
+
+    [Test]
     [TestCase(MessageLevel.Debug, false)]
     [TestCase(MessageLevel.Information, true)]
     [TestCase(MessageLevel.Error, true)]

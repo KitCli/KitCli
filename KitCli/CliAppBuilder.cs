@@ -8,6 +8,7 @@ using KitCli.Instructions.Abstractions;
 using KitCli.Workflow.Commands.Exit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace KitCli;
@@ -156,9 +157,11 @@ public class CliAppBuilder
     }
 
     /// <summary>
-    /// Builds the service provider, resolves the registered <see cref="CliApp"/>, and runs it through
-    /// <see cref="CliApp.Run"/>, passing <paramref name="args"/> for an app that sources its ask from
-    /// them.
+    /// Registers the <see cref="ICliIo"/> the chosen app needs — <see cref="HeadlessCliIo"/> for a
+    /// <see cref="HeadlessCliApp"/>, <see cref="CliIo"/> otherwise — unless a registry already
+    /// registered one, then builds the service provider, resolves the registered <see cref="CliApp"/>,
+    /// and runs it through <see cref="CliApp.Run"/>, passing <paramref name="args"/> for an app that
+    /// sources its ask from them.
     /// </summary>
     /// <param name="args">The process args to run a <see cref="HeadlessCliApp"/> with; ignored by an interactive app.</param>
     /// <returns>The running task for the resolved app's <see cref="CliApp.Run"/> call.</returns>
@@ -179,6 +182,7 @@ public class CliAppBuilder
         EnsureCommandsRegisteredBeyondWorkflowCommands();
         EnsureInstructionSettingsRegistered();
         EnsureKitCliSettingsRegistered();
+        EnsureCliIoRegistered();
 
         var serviceProvider = _services.BuildServiceProvider(ServiceProviderOptions);
 
@@ -270,6 +274,24 @@ public class CliAppBuilder
 
         throw new NoCommandsException(
             "No CliCommand implementations were registered. Add commands to the entry assembly, or register them from another assembly with a registry calling AddCommandsFromAssembly.");
+    }
+
+    private void EnsureCliIoRegistered()
+    {
+        var cliAppType = _services
+            .LastOrDefault(sd => sd.ServiceType == typeof(CliApp))
+            ?.ImplementationType;
+
+        var isHeadless = cliAppType is not null && typeof(HeadlessCliApp).IsAssignableFrom(cliAppType);
+
+        if (isHeadless)
+        {
+            _services.TryAddSingleton<ICliIo, HeadlessCliIo>();
+        }
+        else
+        {
+            _services.TryAddSingleton<ICliIo, CliIo>();
+        }
     }
 
     private void EnsureInstructionSettingsRegistered()

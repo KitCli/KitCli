@@ -102,7 +102,6 @@ public class CliAppBuilderTests
     {
         public void Register(IServiceCollection services)
         {
-            services.AddCliAbstractions();
             services.AddCliInstructions();
             services.AddCommandAbstractions();
 

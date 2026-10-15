@@ -54,3 +54,5 @@
       href: 0015-version-the-packages-in-lockstep.md
     - name: Running queued hops depth-first
       href: 0016-run-every-queued-hop-depth-first.md
+    - name: Asking the I/O whether anyone can answer
+      href: 0021-let-a-command-ask-its-io-whether-anyone-can-answer.md

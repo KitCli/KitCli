@@ -38,5 +38,10 @@ public enum CliExceptionCode
     /// <summary>
     /// No command was registered for the app to run.
     /// </summary>
-    NoCommands
+    NoCommands,
+
+    /// <summary>
+    /// Nothing was attached to the input to answer an ask.
+    /// </summary>
+    NoInput
 }

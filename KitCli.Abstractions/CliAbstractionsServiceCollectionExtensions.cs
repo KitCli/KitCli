@@ -13,6 +13,7 @@ public static class CliAbstractionsServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection to register services with.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance, to allow chaining.</returns>
+    [Obsolete("CliAppBuilder now registers the ICliIo itself, choosing HeadlessCliIo for a HeadlessCliApp. Delete this call, or register your own ICliIo in a registry.")]
     public static IServiceCollection AddCliAbstractions(this IServiceCollection services)
     {
         services.AddSingleton<ICliIo, CliIo>();
