@@ -53,6 +53,32 @@ public class TestCliCommandFactory : CliCommandFactory<TestNextCliCommand>
     public new bool LastCommandIs<TRanCliCommand>() where TRanCliCommand : CliCommand
         => base.LastCommandIs<TRanCliCommand>();
 
+    public new bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        => base.LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2>();
+
+    public new bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        => base.LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3>();
+
+    public new bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        where TRanCliCommand4 : CliCommand
+        => base.LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4>();
+
+    public new bool LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4, TRanCliCommand5>()
+        where TRanCliCommand1 : CliCommand
+        where TRanCliCommand2 : CliCommand
+        where TRanCliCommand3 : CliCommand
+        where TRanCliCommand4 : CliCommand
+        where TRanCliCommand5 : CliCommand
+        => base.LastCommandIsOneOf<TRanCliCommand1, TRanCliCommand2, TRanCliCommand3, TRanCliCommand4, TRanCliCommand5>();
+
     public new Artefact<TArtefactType>? GetArtefact<TArtefactType>(string? artefactName = null)
         where TArtefactType : notnull
         => base.GetArtefact<TArtefactType>(artefactName);
