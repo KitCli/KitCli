@@ -114,6 +114,9 @@ record, and nobody reads a folder of fifty.
 Open the ADR in the PR it justifies, or alone if the decision precedes the
 code.
 
+`toc.yml` groups them by the release they shipped in, oldest first, under
+a short label with no number. A new one goes under `Unreleased`.
+
 ## Concepts
 
 A [concept doc](docs/concepts/) explains how a subsystem works today, to
