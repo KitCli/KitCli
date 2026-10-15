@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-10-15
+
 ### Added
 
 - `ICliWorkflowRunState.WasLastChangedTo(...)` checks the run's latest status
