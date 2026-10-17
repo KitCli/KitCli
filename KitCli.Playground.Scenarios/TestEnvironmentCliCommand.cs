@@ -29,7 +29,7 @@ public record TestVisibleValues(string? Environment, int? PageSize)
 /// <summary>
 /// Chooses an environment for the whole session. Its run ends straight away, yet every later run sees
 /// the environment, because <see cref="TestEnvironmentChosenOutcome"/> lasts the session. Recorded in
-/// <c>docs/investigations/0011-can-an-artefact-outlive-the-run-that-made-it.md</c>.
+/// <c>docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md</c>.
 /// </summary>
 /// <param name="Environment">The environment to use, or null when none was typed.</param>
 /// <param name="VisibleValues">The values this command saw when it started.</param>
