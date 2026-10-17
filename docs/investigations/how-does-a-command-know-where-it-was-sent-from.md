@@ -11,9 +11,10 @@
 
 ## Verdict
 
-**New complexity.** An app can already pass "where to carry on" along by hand,
-with fewer pieces than the guide shows. Building it into KitCli needs #152 plus
-one new check for factories.
+**No new complexity.** "Where" and "when" both work today: `/export` passes
+where to carry on along with the move, and Choose source decides when.
+Building it into KitCli, so it also works when one question leads to another,
+is optional extra work after #152.
 
 `/export` needs a source to export from. When the user has not chosen one,
 `/export` sends them to Choose source, which asks "Which source?". Once they
@@ -113,13 +114,14 @@ public override CliCommand Create()
 
 ## Recommendation
 
-Two tickets, the first now and the second after #152.
+One ticket now, and one optional ticket after #152.
 
 **1. Rewrite the guide to pass `return-to` with the move.** Docs only: it
 replaces one factory per sending command with a single factory.
 
-**2. Let a factory check which command is queued after the one it builds.**
-New public API, so a minor release. It covers "where" for nested sends.
+**2. Optional: let a factory check which command is queued after the one it
+builds.** New public API, so a minor release. Only worth it if apps need one
+question to lead to another.
 
 ## What was established
 
