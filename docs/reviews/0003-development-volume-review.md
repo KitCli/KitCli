@@ -32,15 +32,22 @@ July 2026, 25 since.
 ## Findings
 
 ```mermaid
+---
+config:
+  themeVariables:
+    xyChart:
+      plotColorPalette: "#D97757, #6B7280"
+---
 xychart-beta
     title "Lines changed each month"
-    x-axis ["Feb 25", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan 26", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"]
+    x-axis ["Feb 2025", "Mar 2025", "Apr 2025", "May 2025", "Jun 2025", "Jul 2025", "Aug 2025", "Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"]
     y-axis "Lines" 0 --> 27000
     bar [1307, 11, 59, 0, 0, 0, 0, 0, 5802, 5912, 268, 316, 6714, 0, 0, 0, 0, 2621, 25940, 2912, 4745]
+    bar [1307, 11, 59, 0, 0, 0, 0, 0, 5802, 5912, 268, 316, 6714, 0, 0, 0, 0, 1798, 1851, 0, 488]
 ```
 
-Claude Code wrote with the maintainer from July 2026 onwards. 171 of
-the 196 commits since then carry its `Co-authored-by` trailer.
+Grey is lines from commits written without Claude. Orange is lines from
+commits written with it, which carry its `Co-authored-by` trailer.
 
 ## Caveats
 
