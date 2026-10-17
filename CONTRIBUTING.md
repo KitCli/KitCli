@@ -73,6 +73,10 @@ for why, and add an entry to it when a release or a change of shape lands.
   order instead. Technology pages take their dependency's name. Reviews
   take their kind and month, `test-coverage-review-2026-08.md`, and
   `toc.yml` groups them by kind, then month.
+- **Explain with diagrams, code and tables; prose only connects them.**
+  Each kind's `template.md` says how, and
+  [the artefact-lifetime investigation](docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md)
+  is the model.
 - **Verify every name, signature and sample against source** before it
   lands. Readers trust a doc they cannot check, so a wrong one costs more
   than a missing one.

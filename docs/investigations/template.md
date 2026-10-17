@@ -1,23 +1,34 @@
 <!--
-An investigation is what a technical spike produces. It records what was
-found, so the finding survives the gap between work sessions.
+An investigation is what a technical spike produces: what was found, and
+what to do. Lead with the verdict. Evidence goes underneath, for the reader
+who wants to check the reasoning or reuse a fact later.
 
-Lead with the verdict. A spike's deliverable is a decision, not a
-report — if a reader has to reach the evidence before they know what to
-do, the order is wrong. Evidence goes underneath, for the reader who
-wants to check the reasoning or reuse a fact two years later.
+- Investigation: "what did we find out, and what should we do?"
+- ADR: "what did we decide, and why did the alternatives lose?"
+- Concept: "how does this work today?"
 
-Use the right doc type:
-- Investigation — "what did we find out, and what should we do?"
-- ADR           — "what did we decide, and why did the alternatives lose?"
-- Concept       — "how does this work today?"
+An investigation that leads to a decision justifies an ADR. Write both and
+link them.
 
-An investigation that leads to a decision doesn't become an ADR — it
-justifies one. Write both and link them.
+How to explain. The model is
+docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md.
 
-Durable facts about a dependency belong in that dependency's own
-reference docs as well, not only here. Record them in both places and
-say where the permanent home is.
+- Lead with the answer, in one or two bold sentences.
+- Using more than two KitCli terms? Define them first in a
+  Term | Meaning table, with the codebase's real names.
+- Let diagrams carry the explanation. Pick the mermaid type by what it shows:
+  - sequenceDiagram: what happens over time. `Note over` shows the state
+    at each step. Show a change as a "before" and an "after" diagram.
+  - stateDiagram-v2: a lifetime or a status.
+  - classDiagram: the types a reader writes or extends. Generics are `Artefact~T~`.
+  - flowchart LR: data moving through stages. One `subgraph` per run,
+    request or package.
+- Show usage with real code that compiles on `main`.
+- Put facts in tables: Fact | Consequence, File | Shows.
+- Prose only connects the visuals: a sentence or two saying what the next
+  one shows. No paragraph that a diagram, snippet or table could replace.
+  Keep prose under 60 lines; diagrams, code and tables don't count.
+- Verify every name, signature and sample against source.
 -->
 
 # The question being answered
@@ -30,36 +41,61 @@ say where the permanent home is.
 
 ## Verdict
 
-New complexity, or no new complexity. One paragraph, no hedging.
+**New complexity, or no new complexity.** One or two sentences saying why.
 
-If no new complexity: say so plainly. The spike closes and a fresh
-ticket carries the work.
+| Term | Meaning |
+|---|---|
+| Run | Every command from the first one up to a final outcome. |
 
-If new complexity: say what it is, in the terms a breakdown needs.
+### Today
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant A as App
+    U->>A: /command
+    Note over A: the state today
+```
+
+### After this work
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant A as App
+    U->>A: /command
+    Note over A: the state after
+```
 
 ## Recommendation
 
-What should happen next, concretely enough to slice into a parent ticket
-and estimable sub-tickets.
+How many delivery tickets, and their release level.
+
+**1. The first ticket, as a bold one-line summary.** One sentence, then the
+shape it adds:
+
+```csharp
+public enum ExampleLifetime { Run, Session }
+```
 
 ## What was established
 
-The durable facts — the ones that stay true regardless of what gets
-decided. Note where each one's permanent home is if it belongs somewhere
-other than this file.
+| Fact | Consequence |
+|---|---|
+| A fact that stays true whatever gets decided. | What it means for the work. |
 
 ## Evidence
 
-How each fact above was established. Real commands, real files, real
-versions. Enough that a reader can re-run it rather than trust it.
+Read against `<commit>`.
+
+| File | Shows |
+|---|---|
+| `KitCli.Workflow/CliWorkflow.cs:34` | What that line proves. |
 
 ## Open questions
 
-What remains unanswered, phrased as questions. Include anything the
-time-box cut short — a spike that stops at the box with questions open
-is working correctly, not failing.
+What remains unanswered, as questions. "None." if nothing does.
 
 ## Out of scope
 
-What this deliberately didn't examine, so the next reader doesn't assume
-it was checked.
+- **The thing not examined.** Why, and where it is tracked.
