@@ -120,7 +120,7 @@ no artefact built just to ask.
 
 The lifetime is a new overload constructor, leaving the existing one in place.
 Changing the constructor signature for a second parameter would be a
-[major release](../adr/0012-derive-version-bumps-from-the-public-api-diff.md).
+[major release](../adr/derive-version-bumps-from-the-public-api-diff.md).
 
 **2. An app keeps a value by passing `Session`.** The artefact and its factory
 stay as they are today:

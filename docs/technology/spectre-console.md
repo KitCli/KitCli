@@ -6,7 +6,7 @@
 "can I change how a table looks" — which of the library's features KitCli uses,
 and where each one stops. For how a table is *built*, see
 [tables.md](../concepts/tables.md). Why the library changed is in
-[ADR 0017](../adr/0017-render-tables-with-spectre-console.md).
+the [Spectre.Console ADR](../adr/render-tables-with-spectre-console.md).
 
 ```csharp
 var table = new Spectre.Console.Table

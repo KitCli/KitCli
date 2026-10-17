@@ -66,7 +66,7 @@ can be asked — so a run left waiting at a reusable checkpoint stops there,
 unfinished, its DI scope undisposed. Which class you extend decides the
 mode for the life of the class, and `CliAppBuilder.Run` throws if a
 `HeadlessCliApp` gets no args
-([ADR 0013](../adr/0013-merge-the-hosts-and-name-the-variant-headless.md)).
+(the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md)).
 
 Six `protected virtual` hooks — `OnSessionStart`, `OnRunCreated`,
 `OnRunStarted`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd` — let an

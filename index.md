@@ -65,7 +65,7 @@ await app.Run();</code></pre>
       <p class="kit-card-q">How does X work?</p>
       <p>A guide left you wondering why.</p>
     </a>
-    <a class="kit-card" href="docs/adr/0001-mediatr-for-command-dispatch.md">
+    <a class="kit-card" href="docs/adr/mediatr-for-command-dispatch.md">
       <h3>ADRs</h3>
       <p class="kit-card-q">Why is X like this?</p>
       <p>You want to change something and need the reason it is that way.</p>
@@ -80,7 +80,7 @@ await app.Run();</code></pre>
       <p class="kit-card-q">What can I do with KitCli's dependency X?</p>
       <p>You are asking "does the container support…".</p>
     </a>
-    <a class="kit-card" href="docs/reviews/0001-architectural-review.md">
+    <a class="kit-card" href="docs/reviews/architectural-review-2026-07.md">
       <h3>Reviews</h3>
       <p class="kit-card-q">What was wrong on a given date?</p>
       <p>Historical only. Never current state.</p>

@@ -1,58 +1,64 @@
 - name: "1.0.0"
   items:
     - name: MediatR for command dispatch
-      href: 0001-mediatr-for-command-dispatch.md
+      href: mediatr-for-command-dispatch.md
     - name: Registering by reflection
-      href: 0003-reflection-based-automatic-registration.md
+      href: reflection-based-automatic-registration.md
     - name: First match wins
-      href: 0004-first-match-wins-resolution.md
+      href: first-match-wins-resolution.md
     - name: Envelopes over dynamic
-      href: 0009-non-generic-envelopes-over-dynamic.md
+      href: non-generic-envelopes-over-dynamic.md
 - name: "1.0.11"
   items:
     - name: A DI scope per workflow run
-      href: 0002-di-scope-per-workflow-run.md
+      href: di-scope-per-workflow-run.md
     - name: Splitting CliApp in two
-      href: 0005-args-driven-cli-app.md
+      href: args-driven-cli-app.md
     - name: Ctrl+C through a CancellationToken
-      href: 0006-cooperative-cancellation.md
+      href: cooperative-cancellation.md
 - name: "1.0.12"
   items:
     - name: Extra command names
-      href: 0007-cli-command-alias-attribute.md
+      href: cli-command-alias-attribute.md
     - name: Suggesting the next command
-      href: 0008-suggest-next-commands-attribute.md
+      href: suggest-next-commands-attribute.md
 - name: "2.0.0"
   items:
     - name: Chaining to a command by type
-      href: 0011-chain-to-a-command-by-type.md
+      href: chain-to-a-command-by-type.md
 - name: "3.0.0"
   items:
     - name: Merging the hosts
-      href: 0013-merge-the-hosts-and-name-the-variant-headless.md
+      href: merge-the-hosts-and-name-the-variant-headless.md
 - name: "3.1.0"
   items:
     - name: A roadmap page
-      href: 0014-a-roadmap-page-outside-the-documentation-kinds.md
+      href: a-roadmap-page-outside-the-documentation-kinds.md
 - name: "3.1.1"
   items:
     - name: Tables on Spectre.Console
-      href: 0017-render-tables-with-spectre-console.md
+      href: render-tables-with-spectre-console.md
 - name: "3.2.0"
   items:
     - name: Suggesting commands that could be next
-      href: 0018-suggest-commands-that-could-be-next.md
+      href: suggest-commands-that-could-be-next.md
     - name: Asking the person to pick
-      href: 0019-ask-through-cli-io-with-cli-choice.md
+      href: ask-through-cli-io-with-cli-choice.md
+- name: "3.3.0"
+  items:
+    - name: Keeping message levels beside the I/O
+      href: keep-message-level-and-settings-beside-cli-io.md
+- name: "3.4.0"
+  items:
+    - name: Asking the I/O whether anyone can answer
+      href: let-a-command-ask-its-io-whether-anyone-can-answer.md
 - name: Unreleased
   items:
     - name: Resolving the run from its scope
-      href: 0010-resolve-the-whole-run-from-its-scope.md
+      href: resolve-the-whole-run-from-its-scope.md
     - name: Version bumps from the API diff
-      href: 0012-derive-version-bumps-from-the-public-api-diff.md
+      href: derive-version-bumps-from-the-public-api-diff.md
     - name: Versioning packages in lockstep
-      href: 0015-version-the-packages-in-lockstep.md
+      href: version-the-packages-in-lockstep.md
     - name: Running queued hops depth-first
-      href: 0016-run-every-queued-hop-depth-first.md
-    - name: Asking the I/O whether anyone can answer
-      href: 0021-let-a-command-ask-its-io-whether-anyone-can-answer.md
+      href: run-every-queued-hop-depth-first.md

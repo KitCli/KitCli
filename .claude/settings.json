@@ -1,16 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "defaultMode": "plan",
     "allow": [
       "Bash(dotnet restore *)",
       "Bash(dotnet build *)",
       "Bash(dotnet test *)",
-
       "Bash(docfx docfx.json --warningsAsErrors)",
       "Bash(rm -f api/*.yml api/.manifest)",
       "Bash(rm -rf _site)",
-      "Bash(pkill -f 'http.server 8765')"
+      "Bash(pkill -f 'http.server 8765')",
+      "Bash(curl -s https://api.nuget.org/v3-flatcontainer/kitcli/index.json)"
+    ],
+    "deny": [
+      "Bash(gh repo delete *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)"
     ],
     "ask": [
       "Bash(gh project create *)",
@@ -28,7 +32,6 @@
       "Bash(gh project item-edit *)",
       "Bash(gh project item-delete *)",
       "Bash(gh project item-archive *)",
-
       "Bash(gh issue create *)",
       "Bash(gh issue edit *)",
       "Bash(gh issue close *)",
@@ -38,7 +41,6 @@
       "Bash(gh issue transfer *)",
       "Bash(gh issue pin *)",
       "Bash(gh issue unpin *)",
-
       "Bash(gh pr create *)",
       "Bash(gh pr edit *)",
       "Bash(gh pr merge *)",
@@ -47,17 +49,14 @@
       "Bash(gh pr comment *)",
       "Bash(gh pr review *)",
       "Bash(gh pr ready *)",
-
       "Bash(gh label create *)",
       "Bash(gh label edit *)",
       "Bash(gh label delete *)",
       "Bash(gh label clone *)",
-
       "Bash(gh release create *)",
       "Bash(gh release edit *)",
       "Bash(gh release delete *)",
       "Bash(gh release upload *)",
-
       "Bash(gh repo edit *)",
       "Bash(gh repo rename *)",
       "Bash(gh repo archive *)",
@@ -66,7 +65,6 @@
       "Bash(gh workflow disable *)",
       "Bash(gh secret set *)",
       "Bash(gh variable set *)",
-
       "Bash(gh api -X *)",
       "Bash(gh api * -X *)",
       "Bash(gh api --method *)",
@@ -75,7 +73,6 @@
       "Bash(gh api * -F *)",
       "Bash(gh api * --field *)",
       "Bash(gh api * --raw-field *)",
-
       "Bash(git push *)",
       "Bash(git merge *)",
       "Bash(git rebase *)",
@@ -84,10 +81,6 @@
       "Bash(git restore *)",
       "Bash(git clean *)"
     ],
-    "deny": [
-      "Bash(gh repo delete *)",
-      "Bash(git push --force *)",
-      "Bash(git push -f *)"
-    ]
+    "defaultMode": "plan"
   }
 }

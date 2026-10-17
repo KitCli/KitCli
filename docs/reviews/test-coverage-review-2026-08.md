@@ -1,4 +1,4 @@
-# 0002. Test coverage review
+# Test coverage review, August 2026
 
 Date: 2026-08-29
 
@@ -22,8 +22,8 @@ follow one before assuming a gap still stands.
 
 A dotCover report from Rider (`dotnet test` over `KitCli.sln`) was walked
 project by project. Every 0%-covered production type was checked against
-existing issues by title search **and** against
-[review 0001](0001-architectural-review.md)'s findings table before
+existing issues by title search **and** against the findings table in
+[the July 2026 architectural review](architectural-review-2026-07.md) before
 filing — the title search alone missed one and produced a duplicate,
 closed as [#223](https://github.com/KitCli/KitCli/issues/223).
 

@@ -1,8 +1,9 @@
-# 0003. Discover commands, factories, and handlers by reflection over manual DI wiring
+# Discover commands, factories, and handlers by reflection over manual DI wiring
 
 Status: Accepted (retroactive — reconstructed from KitCli and SpendfulnessCli
 history, not original notes)
 Date: 2026-07-26
+Release: 1.0.0
 
 ## Context
 

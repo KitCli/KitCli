@@ -53,6 +53,6 @@ stem to `ta`.
 - [../concepts/command-registration.md](../concepts/command-registration.md) —
   how a type name becomes an instruction name, and how the keyed
   registration an alias adds to works.
-- [../adr/0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md) —
+- [../adr/cli-command-alias-attribute.md](../adr/cli-command-alias-attribute.md) —
   why extra names are declared on the type rather than configured
   anywhere else.

@@ -1,7 +1,8 @@
-# 0017. Render tables with Spectre.Console
+# Render tables with Spectre.Console
 
 Status: Accepted
 Date: 2026-09-10
+Release: 3.1.1
 
 ## Context
 

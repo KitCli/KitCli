@@ -1,8 +1,9 @@
-# 0009. Transport typed payloads in non-generic envelopes, never `dynamic`
+# Transport typed payloads in non-generic envelopes, never `dynamic`
 
 Status: Accepted (retroactive — reconstructed from the current source, not
 original notes)
 Date: 2026-08-24
+Release: 1.0.0
 
 ## Context
 
@@ -69,7 +70,7 @@ the run. The two are unrelated.
   [#117](https://github.com/KitCli/KitCli/issues/117).
 - **This does not make KitCli AOT-safe.** The five `MakeGenericType` and
   `Activator.CreateInstance` sites from
-  [ADR 0003](0003-reflection-based-automatic-registration.md) are
+  the [reflection-registration ADR](reflection-based-automatic-registration.md) are
   trim-hostile for the same reason `dynamic` is. No project sets
   `IsTrimmable` or `IsAotCompatible`, so the warnings are unmeasured.
 

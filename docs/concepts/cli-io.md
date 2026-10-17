@@ -82,4 +82,4 @@ its token runs to completion.**
 ## See also
 
 [cli-app-host.md](cli-app-host.md) · [outcome-writing.md](outcome-writing.md) ·
-[../adr/0006-cooperative-cancellation.md](../adr/0006-cooperative-cancellation.md)
+[../adr/cooperative-cancellation.md](../adr/cooperative-cancellation.md)

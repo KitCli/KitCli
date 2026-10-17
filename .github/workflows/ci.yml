@@ -219,10 +219,11 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: ${{ steps.changelog.outputs.notes }}
         run: |
           gh release create "v${{ needs.release_gate.outputs.version }}" \
             --title "v${{ needs.release_gate.outputs.version }}" \
-            --notes "${{ steps.changelog.outputs.notes }}"
+            --notes "$NOTES"
 
       # main requires status checks to pass before any push lands, including a
       # direct push from this workflow's own bot commit — so the CHANGELOG.md

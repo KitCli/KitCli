@@ -1,7 +1,8 @@
-# 0019. Ask the person to pick through ICliIo, using CliChoice
+# Ask the person to pick through ICliIo, using CliChoice
 
 Status: Accepted
 Date: 2026-10-11
+Release: 3.2.0
 
 ## Context
 

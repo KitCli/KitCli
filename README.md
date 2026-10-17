@@ -123,7 +123,7 @@ opens the page that starts that kind.
   — how to do one task, without needing to know the machinery underneath.
 - [Concepts](https://kitcli.github.io/KitCli/docs/concepts/command-registration.html)
   — how each subsystem works today, for when a guide left you wondering why.
-- [Decision records](https://kitcli.github.io/KitCli/docs/adr/0001-mediatr-for-command-dispatch.html)
+- [Decision records](https://kitcli.github.io/KitCli/docs/adr/mediatr-for-command-dispatch.html)
   — a decision, its alternatives and what it cost, for when you want to
   change something and need the reason it is that way.
 - [Investigations](https://kitcli.github.io/KitCli/docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.html)
@@ -131,7 +131,7 @@ opens the page that starts that kind.
   it scoped.
 - [Technology](https://kitcli.github.io/KitCli/docs/technology/microsoft-dependency-injection.html)
   — what KitCli's dependencies can do.
-- [Reviews](https://kitcli.github.io/KitCli/docs/reviews/0001-architectural-review.html)
+- [Reviews](https://kitcli.github.io/KitCli/docs/reviews/architectural-review-2026-07.html)
   — past architectural reviews. Historical only; never current state.
 
 The [documentation home](https://kitcli.github.io/KitCli/docs/README.html)

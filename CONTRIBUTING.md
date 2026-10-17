@@ -65,14 +65,16 @@ link.
 Five kinds live in [`docs/`](docs/): ADRs, concept docs, user guides,
 investigations, technology pages. Three rules cover all of them. The
 [roadmap](docs/roadmap.md) is the one page belonging to no kind — see
-[ADR 0014](docs/adr/0014-a-roadmap-page-outside-the-documentation-kinds.md)
+the [roadmap ADR](docs/adr/a-roadmap-page-outside-the-documentation-kinds.md)
 for why, and add an entry to it when a release or a change of shape lands.
 
 - **Copy the kind's `0000-template.md`** and number it sequentially,
   `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
-  Technology pages take their dependency's name instead, and concept docs
-  take their topic's name with no number — `toc.yml` gives the reading
-  order instead.
+  Technology pages take their dependency's name instead. ADRs and concept
+  docs take their topic's name with no number, and copy `template.md` —
+  `toc.yml` gives the reading order instead. Reviews take their kind and month,
+  `test-coverage-review-2026-08.md`, and `toc.yml` groups them by kind,
+  then month.
 - **Verify every name, signature and sample against source** before it
   lands. Readers trust a doc they cannot check, so a wrong one costs more
   than a missing one.
@@ -116,7 +118,9 @@ code.
 
 `toc.yml` groups them by the release their work shipped in, oldest first,
 under a short label with no number. Work not shipped yet sits under
-`Unreleased` until it ships.
+`Unreleased` until it ships. Each ADR's `Release:` line names the same
+group, so move both together. Refer to an ADR by a short name for its
+decision, such as "the lockstep ADR", linked to its file.
 
 ## Concepts
 

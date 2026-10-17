@@ -8,7 +8,7 @@
 ## Verdict
 
 **New complexity.** The per-run scope from
-[ADR 0002](../adr/0002-di-scope-per-workflow-run.md) exists and works, but
+the [scope-per-run ADR](../adr/di-scope-per-workflow-run.md) exists and works, but
 only command handlers resolve from it. Every other extension point is a
 singleton resolved from the root provider, so a consumer's `Scoped`
 registration fails loudly at startup and their `Transient` registration is
@@ -21,7 +21,7 @@ milestone-scale, not a ticket.
 
 ## Recommendation
 
-Accept [ADR 0010](../adr/0010-resolve-the-whole-run-from-its-scope.md),
+Accept the [run-scope ADR](../adr/resolve-the-whole-run-from-its-scope.md),
 which supersedes 0002: every KitCli service that executes during a run is
 registered `Transient` and resolved from the run's scope; only `ICliIo`,
 `ICliWorkflow` and `CliApp` stay `Singleton`.
@@ -114,7 +114,7 @@ registration, not as a DI error.
   tech-debt rather than a floated idea, which the routing convention does
   not obviously cover.
 - Should the `Activator`-built artefact factories move to DI construction
-  in this milestone or a separate one? ADR 0010 deliberately excludes it.
+  in this milestone or a separate one? The run-scope ADR deliberately excludes it.
 - Does per-run construction of the instruction pipeline and the eight
   writers cost anything measurable on a long interactive session? Not
   benchmarked.
@@ -127,7 +127,7 @@ registration, not as a DI error.
 - **MediatR's own dispatch behaviour.** Only its DI registrations were
   examined. Its technology page does not exist yet and is explicitly not
   part of this milestone.
-- **Whether the per-run boundary is right at all.** ADR 0002 chose run
+- **Whether the per-run boundary is right at all.** The scope-per-run ADR chose run
   over command and that choice was re-affirmed, not re-examined.
 - **Consumer-facing docs.** No user guide or concept doc was written or
   checked for staleness against these findings.

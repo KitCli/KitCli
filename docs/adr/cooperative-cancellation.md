@@ -1,9 +1,10 @@
-# 0006. Drive Ctrl+C shutdown with a CancellationToken, not Environment.Exit
+# Drive Ctrl+C shutdown with a CancellationToken, not Environment.Exit
 
 Status: Proposed
 Date: 2026-08-22
+Release: 1.0.11
 
-Written before [ADR 0013](0013-merge-the-hosts-and-name-the-variant-headless.md)
+Written before the [host-merge ADR](merge-the-hosts-and-name-the-variant-headless.md)
 renamed the hosts. Where this says `TerminalCliApp`, read `CliApp`; where it
 says `ArgsCliApp`, read `HeadlessCliApp`.
 
@@ -37,7 +38,7 @@ Replace the abrupt exit with cooperative cancellation, owned by
 - `CliWorkflow` owns a `CancellationTokenSource`, exposing
   `CancellationToken` and `InterruptCurrentRun()`. It hands the token to
   each run's constructor, exactly as it already hands over the
-  `IServiceScope` ([ADR 0002](0002-di-scope-per-workflow-run.md)) — not
+  `IServiceScope` (the [scope-per-run ADR](di-scope-per-workflow-run.md)) — not
   threaded through `RespondToAsk`/`MoveToNext` on every call.
 - `CliApp.SetUpEventHandlers` wires `Io.OnCancel` to
   `Workflow.InterruptCurrentRun`, and nothing else.

@@ -1,7 +1,7 @@
 # 0005. How much of the run loop can the two hosts share?
 
 - **Status:** In Review
-- **Superseded in part by** [ADR 0013](../adr/0013-merge-the-hosts-and-name-the-variant-headless.md):
+- **Superseded in part by** the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md):
   the shape recommended below — the loop hoisted onto `CliApp` behind an
   ask-source seam — was not built. `TerminalCliApp` held nothing `CliApp`
   did not, so it folded in and the seam disappeared with it. Every finding
@@ -32,7 +32,7 @@ The complexity is what that exposes. Once a one-shot invocation ends when its
 waiting instead of exiting early — a worse failure than the one being fixed,
 and reason enough that #168 is a blocker rather than a neighbour. Around
 that: `Run`'s signature moves, which breaks any consumer not going through
-`CliAppBuilder`; [ADR 0005](../adr/0005-args-driven-cli-app.md) chose this
+`CliAppBuilder`; the [CliApp-split ADR](../adr/args-driven-cli-app.md) chose this
 split deliberately and has to be amended, not quietly contradicted;
 `OnMovingPastAsk` starts firing in one-shot mode, which a concept doc
 currently promises it never does; and the loop being rewritten has one test.
@@ -45,7 +45,7 @@ currently promises it never does; and the loop being rewritten has one test.
    queued step does: reach a named terminal state, or return a diagnostic
    outcome. Today `Workflow.Stop()` hides the question in one-shot mode.
    Nothing below is safe until an unterminated chain has a defined ending.
-2. **An ADR**, amending [ADR 0005](../adr/0005-args-driven-cli-app.md), which
+2. **An ADR**, amending the [CliApp-split ADR](../adr/args-driven-cli-app.md), which
    is still `Proposed`.
 3. **The host change itself**, closing #167 rather than a follow-up ticket
    doing so: the truncation *is* the second copy.
@@ -61,7 +61,7 @@ currently promises it never does; and the loop being rewritten has one test.
 
 [#172](https://github.com/KitCli/KitCli/pull/172) shipped 2 through 5 as one
 change, recorded in
-[ADR 0013](../adr/0013-merge-the-hosts-and-name-the-variant-headless.md). Two
+the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md). Two
 departures worth the paper trail.
 
 **The seam was the wrong answer, twice over.** This document proposed hoisting
@@ -77,7 +77,7 @@ No seam exists.
 **#168 did not go first.** The order above was not followed — the host change
 shipped ahead of it, so a chain that hands on forever now leaves a headless
 invocation running rather than truncating silently. That trade is recorded in
-ADR 0013's consequences and in the chaining guide, and
+the host-merge ADR's consequences and in the chaining guide, and
 [`/test-unending-chain`](https://github.com/KitCli/KitCli/blob/main/KitCli.Playground.Scenarios/TestUnendingChainCliCommand.cs)
 demonstrates it. The blocker call stands: this is a worse failure than the one
 fixed, and it is live.
@@ -102,7 +102,7 @@ fixed, and it is live.
   spends `OnRunComplete`, which consumers override; a separate seam keeps all
   six hooks theirs.
 - **Stopping the workflow is the sanctioned move.** `ExitCliCommandHandler`
-  ends an interactive session with `Workflow.Stop()`, and ADR 0005 rejected
+  ends an interactive session with `Workflow.Stop()`, and the CliApp-split ADR rejected
   reaching into `run.State` for the same purpose. A host may stop a workflow;
   it may not finish a run.
 - **Only one host handles an exceptional run.** `RethrowIfExceptional` is
@@ -115,7 +115,7 @@ fixed, and it is live.
   string[])` and `TerminalCliApp.Run(List<IOutcomeIoWriter>, string[]?)` are
   both public, and `CliAppBuilder.Run` dispatches on the concrete type.
   Collapsing them to one `Run` is a major bump under
-  [ADR 0012](../adr/0012-derive-version-bumps-from-the-public-api-diff.md).
+  the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md).
   `CliAppBuilder`'s no-args guard survives unchanged.
 
 ## Evidence
@@ -164,7 +164,7 @@ and `KitCli.Workflow/CliWorkflow.cs`.
   [#124](https://github.com/KitCli/KitCli/issues/124) and
   [#147](https://github.com/KitCli/KitCli/issues/147). This is about who
   drives the chain, not what it selects.
-- Letting one class run in both modes. ADR 0005's rejection of a runtime
+- Letting one class run in both modes. The CliApp-split ADR's rejection of a runtime
   `args.Length` branch stands.
 - `CliAppBuilder`'s configuration and registry surface.
 - Instruction parsing and validation.

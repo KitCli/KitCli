@@ -26,7 +26,7 @@ the revisit never done. It is a second deliverable, not a free consequence.
 
 1. **Cover `CliCommandFactory`** ([#114](https://github.com/KitCli/KitCli/issues/114)) — its contract is what changes, and it has no tests.
 2. **The builder** — `SubCommandIs`, `HasNoSubCommand`, `LastCommandWas<T>`, `RequiresArgument<T>`, `RequiresArtefact<T>`, `RequiresOneOf`, `ProducesOutcome<T>`. `OnDescribing` chains up the inheritance line. Build at registration, so startup checks it and `--help` renders without instantiating a factory.
-3. **Merge identity into the same descriptor** — `OnDescribing` fills it from the factory, the [`[CliCommandAlias]`](../adr/0007-cli-command-alias-attribute.md) and [`[CliNextCommandIs]`](../adr/0008-suggest-next-commands-attribute.md) readers from the command type. Neither ADR is superseded, and a command with no factory still gets a descriptor.
+3. **Merge identity into the same descriptor** — `OnDescribing` fills it from the factory, the [`[CliCommandAlias]`](../adr/cli-command-alias-attribute.md) and [`[CliNextCommandIs]`](../adr/suggest-next-commands-attribute.md) readers from the command type. Neither ADR is superseded, and a command with no factory still gets a descriptor.
 4. **Default `CanCreateWhen()` to the declaration** — `abstract` becomes `virtual`; existing overrides still compile.
 5. **An ADR**, since a hook on every factory is a cross-cutting pattern.
 6. **The reporting path, its own ticket** — unmet requirements render as a table and travel as an exception. No factory and no attributes means no descriptor, so no table. Shared with [#183](https://github.com/KitCli/KitCli/issues/183): decide both together, or the app grows two vocabularies for "that didn't work".
@@ -66,5 +66,5 @@ KitCli derives a command's name from its type.
 
 - Instruction and argument-value validation — [#183](https://github.com/KitCli/KitCli/issues/183).
 - Making the produces/requires join checkable: a second type parameter on `ArtefactFactory<>`, breaking six untested implementations ([#116](https://github.com/KitCli/KitCli/issues/116)).
-- Most-specific-match instead of first-match-wins, which would supersede [ADR 0004](../adr/0004-first-match-wins-resolution.md).
+- Most-specific-match instead of first-match-wins, which would supersede the [first-match-wins ADR](../adr/first-match-wins-resolution.md).
 - Whether `ICliCommandFactory` becomes keyed transient ([#142](https://github.com/KitCli/KitCli/issues/142)).

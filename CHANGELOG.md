@@ -17,7 +17,7 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - `LastCommandIsOneOf<A, B>()` checks whether the last command was any of up to
   five types ([#330](https://github.com/KitCli/KitCli/issues/330)).
 - A command can read `CanAsk` on its `ICliIo` to skip a prompt in a headless app,
-  where prompting throws `NoInputException` ([ADR 0021](docs/adr/0021-let-a-command-ask-its-io-whether-anyone-can-answer.md)).
+  where prompting throws `NoInputException` (the [CanAsk ADR](docs/adr/let-a-command-ask-its-io-whether-anyone-can-answer.md)).
 
 ### Changed
 
@@ -171,7 +171,7 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   printed to, so a long value wraps inside its own column instead of running off
   the side. `Table.MaxColumnWidth` keeps its name, and now holds a column
   narrower than that. See
-  [ADR 0017](docs/adr/0017-render-tables-with-spectre-console.md).
+  the [Spectre.Console ADR](docs/adr/render-tables-with-spectre-console.md).
 
 ## [3.1.0] - 2026-08-27
 
@@ -209,7 +209,7 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - **Breaking:** `ArgsCliApp` is now `HeadlessCliApp`, `BasicTerminalCliApp`
   is `BasicCliApp`, and `CliAppBuilder.WithBasicTerminalApp()` is
   `WithBasicApp()`. See
-  [0013-merge-the-hosts-and-name-the-variant-headless.md](docs/adr/0013-merge-the-hosts-and-name-the-variant-headless.md).
+  [merge-the-hosts-and-name-the-variant-headless.md](docs/adr/merge-the-hosts-and-name-the-variant-headless.md).
 - A headless app rethrows an `ExceptionOutcome` as an interactive one
   always has, so a throwing handler ends the process non-zero rather than
   at 0.
@@ -221,7 +221,7 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - `ByMovingToCommand<TCommand>(arguments)` — chain by naming the next command's
   type; its factory builds it from the run's artefacts and any
   `NextCliCommandArgument<TValue>`s you pass.
-  See [0011-chain-to-a-command-by-type.md](docs/adr/0011-chain-to-a-command-by-type.md).
+  See [chain-to-a-command-by-type.md](docs/adr/chain-to-a-command-by-type.md).
 - `CliCommand.GetInstructionName(Type)` — a command's instruction name,
   without needing an instance of it.
 
@@ -252,13 +252,13 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 - `[CliCommandAlias("...")]` — declare extra instruction names a `CliCommand`
   responds to, alongside its mechanically-derived full and shorthand
   names, without renaming the type. Repeatable for more than one alias.
-  See [0007-cli-command-alias-attribute.md](docs/adr/0007-cli-command-alias-attribute.md).
+  See [cli-command-alias-attribute.md](docs/adr/cli-command-alias-attribute.md).
 - `[CliNextCommandIs("...", "...")]` — declare the instruction name(s) and
   description(s) a `CliCommand` expects next once it reaches a reusable
   outcome. When a later ask doesn't resolve to any command, the workflow
   run now suggests these instead of returning silently. Repeatable for more
   than one next command.
-  See [0008-suggest-next-commands-attribute.md](docs/adr/0008-suggest-next-commands-attribute.md).
+  See [suggest-next-commands-attribute.md](docs/adr/suggest-next-commands-attribute.md).
 
 ### Fixed
 
@@ -286,7 +286,7 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   args in one shot (`myapp /command --flag value`), instead of only through
   an interactive prompt. `TerminalCliApp` carries the pre-existing
   interactive loop under its own name. See
-  [0005-args-driven-cli-app.md](docs/adr/0005-args-driven-cli-app.md).
+  [args-driven-cli-app.md](docs/adr/args-driven-cli-app.md).
 
 ### Changed
 
@@ -309,4 +309,4 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
   `ICliWorkflow` gained `CancellationToken` and `InterruptCurrentRun()`, so
   an in-flight run can unwind through its own `catch`/`finally` instead of
   being killed out from under it. See
-  [0006-cooperative-cancellation.md](docs/adr/0006-cooperative-cancellation.md). (#74)
+  [cooperative-cancellation.md](docs/adr/cooperative-cancellation.md). (#74)

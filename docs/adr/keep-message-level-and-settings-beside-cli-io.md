@@ -1,7 +1,8 @@
-# 0020. Keep MessageLevel and KitCliSettings beside ICliIo
+# Keep MessageLevel and KitCliSettings beside ICliIo
 
 Status: Accepted
 Date: 2026-10-12
+Release: 3.3.0
 
 ## Context
 

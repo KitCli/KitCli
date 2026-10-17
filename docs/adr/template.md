@@ -1,7 +1,8 @@
-# NNNN. Short title in imperative mood
+# Short title in imperative mood
 
-Status: Proposed | Accepted | Superseded by NNNN
+Status: Proposed | Accepted | Superseded by <ADR title>
 Date: YYYY-MM-DD
+Release: Unreleased | X.Y.Z
 
 Keep the whole thing under 100 lines, for a reader with no context on this
 codebase: plain words, the problem before the decision, a type named only

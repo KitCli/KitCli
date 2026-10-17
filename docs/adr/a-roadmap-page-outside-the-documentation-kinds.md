@@ -1,7 +1,8 @@
-# 0014. Give the roadmap a page of its own, outside the five kinds
+# Give the roadmap a page of its own, outside the five kinds
 
 Status: Proposed
 Date: 2026-08-26
+Release: 3.1.0
 
 ## Context
 

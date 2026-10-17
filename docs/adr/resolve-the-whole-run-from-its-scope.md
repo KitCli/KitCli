@@ -1,18 +1,19 @@
-# 0010. Resolve the whole run from its scope
+# Resolve the whole run from its scope
 
 Status: Proposed
 Date: 2026-08-24
+Release: Unreleased
 
-Supersedes [0002](0002-di-scope-per-workflow-run.md).
+Supersedes the [scope-per-run ADR](di-scope-per-workflow-run.md).
 
 ## Context
 
-[ADR 0002](0002-di-scope-per-workflow-run.md) created one DI scope per run,
+The [scope-per-run ADR](di-scope-per-workflow-run.md) created one DI scope per run,
 and decided `ICliWorkflowCommandProvider` stays `Singleton` because it only
 resolves other singletons. That reasoning holds today, and is circular:
 those factories are singletons because nothing made them otherwise.
 
-The consequence 0002 did not state is that **a command handler is the only
+The consequence the scope-per-run ADR did not state is that **a command handler is the only
 extension point that can reach run-scoped state.** Two mechanisms cause it.
 
 `CliWorkflowCommandProvider` is a singleton injecting `IServiceProvider`.
@@ -67,10 +68,10 @@ holder.
 
 ## Alternatives considered
 
-- **Keep 0002 and document the limit** — free and honest, but the framework
+- **Keep the scope-per-run ADR and document the limit** — free and honest, but the framework
   advertises a per-run scope only one extension point can use, which is the
   more expensive kind of surprise.
-- **A scope per command** — rejected in 0002 and still rejected: it breaks
+- **A scope per command** — rejected in the scope-per-run ADR and still rejected: it breaks
   any multi-turn run expecting a scoped service to survive between steps.
 - **Leave writers alone; tell consumers to use `IDbContextFactory<T>`** —
   solves one library's case, and still hands the writer a different

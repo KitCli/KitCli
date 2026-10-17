@@ -1,4 +1,12 @@
-- name: "0001. Architectural review"
-  href: 0001-architectural-review.md
-- name: "0002. Test coverage review"
-  href: 0002-test-coverage-review.md
+- name: Architecture
+  items:
+    - name: July 2026
+      href: architectural-review-2026-07.md
+- name: Test coverage
+  items:
+    - name: August 2026
+      href: test-coverage-review-2026-08.md
+- name: Development volume
+  items:
+    - name: October 2026
+      href: development-volume-review-2026-10.md
