@@ -41,11 +41,11 @@ config:
       plotColorPalette: "#D97757, #6B7280"
 ---
 xychart-beta horizontal
-    title "Lines changed each month"
+    title "Lines changed each month, in thousands"
     x-axis ["Feb 2025", "Mar 2025", "Apr 2025", "May 2025", "Jun 2025", "Jul 2025", "Aug 2025", "Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"]
-    y-axis "Lines" 0 --> 27000
-    bar [1307, 11, 59, 0, 0, 0, 0, 0, 5802, 5912, 268, 316, 6714, 0, 0, 0, 0, 2621, 25940, 2912, 4745]
-    bar [1307, 11, 59, 0, 0, 0, 0, 0, 5802, 5912, 268, 316, 6714, 0, 0, 0, 0, 1798, 1851, 0, 488]
+    y-axis "Thousands of lines" 0 --> 27
+    bar [1.3, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 5.8, 5.9, 0.3, 0.3, 6.7, 0.0, 0.0, 0.0, 0.0, 2.6, 25.9, 2.9, 4.7]
+    bar [1.3, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 5.8, 5.9, 0.3, 0.3, 6.7, 0.0, 0.0, 0.0, 0.0, 1.8, 1.9, 0.0, 0.5]
 ```
 
 Grey is lines from commits written without Claude. Orange is lines from
