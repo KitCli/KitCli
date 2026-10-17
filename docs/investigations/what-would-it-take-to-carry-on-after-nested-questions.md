@@ -10,7 +10,7 @@
 ## Verdict
 
 **New complexity.** When the user comes back to a command, KitCli must give
-that command back the note it had the first time, so it can carry on in turn.
+that command back the note it had the first time, so it can move back in turn.
 
 `/order` sends the user to Choose book. The user picks "Browse by author", so
 Choose book sends them on to Choose author. After they pick an author, the app
@@ -22,7 +22,7 @@ should carry on with Choose book, now listing that author's books, then
 | Command | One step the app runs, such as `/order`. |
 | Move | One command handing over to the next, written `ByMovingToCommand`. |
 | Note | What KitCli writes when it follows a move: "Choose book was sent here by `/order`". |
-| Carry on | A command telling KitCli it is done, written `ByCarryingOn()`, so KitCli sends the user back. |
+| Move back | A command telling KitCli it is done, written `ByMovingBackToPriorCommand()`. KitCli sends the user to its prior command: the one that moved the user to it, not the one that ran last. |
 
 ### With one note per command
 
@@ -39,7 +39,7 @@ sequenceDiagram
     Note over S: note: sent by /order
     S->>F: move
     Note over F: note: sent by Choose book
-    F->>S: carry on
+    F->>S: move back
     Note over S: no note this time
     Note over E,S: /order is never reached
 ```
@@ -58,24 +58,24 @@ sequenceDiagram
     Note over S: note: sent by /order
     S->>F: move
     Note over F: note: sent by Choose book
-    F->>S: carry on
+    F->>S: move back
     Note over S: note again: sent by /order
-    S->>E: carry on
+    S->>E: move back
 ```
 
-The app's developer writes nothing extra. Each question still ends with `ByCarryingOn()`.
+The app's developer writes nothing extra. Each question still ends with `ByMovingBackToPriorCommand()`.
 
 ## Recommendation
 
-**One delivery ticket, after the previous investigation's tickets: carrying
-on restores the note the command had when it first ran.** Part of the same
+**One delivery ticket, after the previous investigation's tickets: moving
+back restores the note the command had when it first ran.** Part of the same
 minor release.
 
 ## What was established
 
 | Fact | Consequence |
 |---|---|
-| Notes stack up like a pile: a move adds one, carrying on removes one. | Working out a command's note means reading the run's history from the start, not just one step back. |
+| Notes stack up like a pile: a move adds one, moving back removes one. | Working out a command's note means reading the run's history from the start, not just one step back. |
 | The run keeps every command it ran, in order. | The pile can be worked out from that history, with nothing new stored. |
 | #152 proposes reading the history the same way to find queued moves. | The two can share one way of reading the history. |
 

@@ -11,7 +11,7 @@
 ## Verdict
 
 **New complexity.** KitCli needs new code to write down which command sent the
-user to a question, and to send them back when the question says "carry on".
+user to a question, and to send them back when the question says "move back".
 
 A book shop app has an `/order` command, which needs a book to order. When
 the user has not chosen one, `/order` sends them to Choose book, which asks
@@ -29,6 +29,7 @@ know two things:
 | Command | One step the app runs, such as `/order`. |
 | Run | Every command from what the user typed up to the one that ends it. |
 | Move | One command handing over to the next, written `ByMovingToCommand`. |
+| Prior command | The command that moved the user to this one: `/order`, for Choose book. |
 | Factory | Builds a command just before it runs. It can read notes earlier commands left. |
 
 ### Today
@@ -56,7 +57,7 @@ Asking again needs another factory, which must copy `ReturnTo` across.
 ### After this work
 
 KitCli writes a note when it follows a move: "Choose book was sent here by
-`/order`." When Choose book says "carry on", KitCli reads the note and runs
+`/order`." When Choose book says "move back", KitCli reads the note and runs
 `/order` again:
 
 ```mermaid
@@ -71,7 +72,7 @@ sequenceDiagram
     K->>C: run
     C-->>U: Which book would you like?
     U->>C: Dune
-    C->>K: carry on
+    C->>K: move back
     Note over K: reads the note
     K->>E: run again
 ```
@@ -84,7 +85,7 @@ The developer's code loses the `ReturnTo` field, the per-sender factories and th
 // Choose book's handler, after a good answer
 return FinishThisCommand()
     .ByResultingIn(new ChosenBookOutcome(chosenBook))
-    .ByCarryingOn()
+    .ByMovingBackToPriorCommand()
     .End();
 
 // Choose book's factory, to word a message such as "Back to your order"
@@ -96,9 +97,9 @@ KitCli handles each case:
 
 | What happens | What KitCli does |
 |---|---|
-| The user types Choose book on its own. | No note is written, so `ByCarryingOn()` does nothing and the command just finishes. |
+| The user types Choose book on its own. | No note is written, so `ByMovingBackToPriorCommand()` does nothing and the command just finishes. |
 | Choose book asks again by moving to itself. | It keeps the note it already has, instead of writing "sent by Choose book". |
-| Choose book carries on. | It sends the user back without writing a new note. |
+| Choose book moves back. | It sends the user back without writing a new note. |
 | The user cancels. | Choose book ends the run as it does today, and the note goes with it. |
 
 ## Recommendation
@@ -108,7 +109,7 @@ the first, because the note is a new pattern every command can use.
 
 **1. Write the "sent by" note when following a move, and add `WasSentFrom<T>()`.**
 
-**2. Add `ByCarryingOn()`.** It sends the user back to the command in the note.
+**2. Add `ByMovingBackToPriorCommand()`.** It sends the user back to the command in the note.
 
 **3. Rewrite the asking guide around the two.**
 
