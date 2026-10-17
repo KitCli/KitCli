@@ -1,6 +1,7 @@
-# 0008. Should table rendering be rebuilt on Spectre.Console?
+# Should table rendering be rebuilt on Spectre.Console?
 
 - **Status:** In Review
+- **Release:** 3.1.1
 - **Spike:** [#215](https://github.com/KitCli/KitCli/issues/215)
 - **Time-box:** 60 minutes
 - **Date:** 2026-09-11

@@ -15,7 +15,7 @@
       homepage: docs/adr/mediatr-for-command-dispatch.md
     - name: Investigations
       href: docs/investigations/
-      homepage: docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md
+      homepage: docs/investigations/which-extension-points-can-use-a-consumers-lifetimes.md
     - name: Technology
       href: docs/technology/
       homepage: docs/technology/microsoft-dependency-injection.md

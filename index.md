@@ -70,7 +70,7 @@ await app.Run();</code></pre>
       <p class="kit-card-q">Why is X like this?</p>
       <p>You want to change something and need the reason it is that way.</p>
     </a>
-    <a class="kit-card" href="docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md">
+    <a class="kit-card" href="docs/investigations/which-extension-points-can-use-a-consumers-lifetimes.md">
       <h3>Investigations</h3>
       <p class="kit-card-q">What did we find out?</p>
       <p>You are picking up work a spike scoped.</p>

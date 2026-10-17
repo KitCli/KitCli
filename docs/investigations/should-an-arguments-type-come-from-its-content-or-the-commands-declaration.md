@@ -1,6 +1,7 @@
-# 0007. Should an instruction argument's type come from its content or the command's declaration?
+# Should an instruction argument's type come from its content or the command's declaration?
 
 - **Status:** In Review
+- **Release:** Unreleased
 - **Spike:** [#8](https://github.com/KitCli/KitCli/issues/8)
 - **Time-box:** none agreed — the estimate was removed when #8 became a spike
 - **Date:** 2026-08-29
@@ -52,7 +53,7 @@ and an ADR, not the sized-13 bug fix #8 started as.
 1. **Cover `CliCommandFactory`'s retrieval helpers**
    ([#114](https://github.com/KitCli/KitCli/issues/114)) — the contract
    that changes, already the first step of the descriptor build
-   (investigation 0006). One prerequisite, shared by both workstreams.
+   (the factory-needs investigation). One prerequisite, shared by both workstreams.
 2. **`feat(instructions)`: a converter registry** — additive.
    `IInstructionArgumentConverter` chosen by *target CLR type*, not by
    content, so there is no ordering and nothing to shadow. Ship the
@@ -174,4 +175,4 @@ parser row is superseded.
 - The descriptor build itself (#189, #190, #191), past sharing the
   registry.
 - Most-specific-match for the first-match-wins ADR's other three points, out of scope
-  here exactly as it was in investigation 0006.
+  here exactly as it was in the factory-needs investigation.

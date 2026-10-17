@@ -1,6 +1,7 @@
-# 0003. How should a chained command be selected and constructed?
+# How should a chained command be selected and constructed?
 
 - **Status:** In Review
+- **Release:** 2.0.0
 - **Superseded in part by** the [chain-by-type ADR](../adr/chain-to-a-command-by-type.md):
   the finding below that `ICliWorkflowCommandProvider` should gain a
   type-resolving method as a default interface member was not built. A chained

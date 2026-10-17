@@ -1,6 +1,7 @@
-# 0005. How much of the run loop can the two hosts share?
+# How much of the run loop can the two hosts share?
 
 - **Status:** In Review
+- **Release:** 3.0.0
 - **Superseded in part by** the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md):
   the shape recommended below — the loop hoisted onto `CliApp` behind an
   ask-source seam — was not built. `TerminalCliApp` held nothing `CliApp`

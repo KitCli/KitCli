@@ -5,7 +5,7 @@ Date: 2026-08-25
 Release: 2.0.0
 
 Justified by
-[investigation 0003](../investigations/0003-how-should-a-chained-command-be-selected-and-constructed.md),
+the [chained-command investigation](../investigations/how-should-a-chained-command-be-selected-and-constructed.md),
 the spike on [#148](https://github.com/KitCli/KitCli/issues/148).
 
 ## Context
@@ -50,7 +50,7 @@ build makes the run `Exceptional`.
 - **Keep the instance overload and document passing data through
   artefacts** — nothing makes the factory path happen.
 - **A type-resolving method on the provider as a default interface member
-  that throws**, per investigation 0003 — a second lookup path, and a
+  that throws**, per the chained-command investigation — a second lookup path, and a
   published method whose body is a throw.
 - **Register factories under an extra `Type` key**, sliced as
   [#150](https://github.com/KitCli/KitCli/issues/150) — the full-name

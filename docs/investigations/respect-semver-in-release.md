@@ -1,6 +1,7 @@
-# 0004. Respect SEMVER in Release
+# Respect SEMVER in Release
 
 - **Status:** In Review
+- **Release:** Unreleased
 - **Spike:** [#135](https://github.com/KitCli/KitCli/issues/135)
 - **Time-box:** none agreed — #135 was an inline TODO promoted to an issue, not an estimated spike
 - **Date:** 2026-08-25

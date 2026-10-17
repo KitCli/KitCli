@@ -5,7 +5,7 @@ Date: 2026-08-25
 Release: Unreleased
 
 Justified by
-[investigation 0004](../investigations/0004-respect-semver-in-release.md),
+the [SemVer investigation](../investigations/respect-semver-in-release.md),
 the spike on [#135](https://github.com/KitCli/KitCli/issues/135).
 
 ## Context

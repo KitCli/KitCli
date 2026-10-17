@@ -1,6 +1,7 @@
-# 0002. Which extension points can use a consumer's registered lifetimes?
+# Which extension points can use a consumer's registered lifetimes?
 
 - **Status:** In Review
+- **Release:** Unreleased
 - **Spike:** not yet filed
 - **Time-box:** none agreed — ran inline
 - **Date:** 2026-08-24

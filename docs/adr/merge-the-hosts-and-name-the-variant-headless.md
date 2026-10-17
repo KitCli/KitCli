@@ -5,7 +5,7 @@ Date: 2026-08-26
 Release: 3.0.0
 
 Reverses the [CliApp-split ADR](args-driven-cli-app.md). Informed by
-[investigation 0005](../investigations/0005-how-much-of-the-run-loop-can-the-two-hosts-share.md).
+the [shared-run-loop investigation](../investigations/how-much-of-the-run-loop-can-the-two-hosts-share.md).
 
 ## Context
 

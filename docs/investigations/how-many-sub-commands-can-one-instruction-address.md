@@ -1,6 +1,7 @@
-# 0009. How many sub-commands can one instruction address?
+# How many sub-commands can one instruction address?
 
 - **Status:** In Review
+- **Release:** Unreleased
 - **Spike:** not yet filed
 - **Time-box:** none agreed — ran inline
 - **Date:** 2026-09-11

@@ -1,6 +1,7 @@
-# 0006. Should a command factory declare what it needs instead of overriding CanCreateWhen?
+# Should a command factory declare what it needs instead of overriding CanCreateWhen?
 
 - **Status:** In Review
+- **Release:** Unreleased
 - **Spike:** [#184](https://github.com/KitCli/KitCli/issues/184)
 - **Time-box:** 45 minutes
 - **Date:** 2026-08-26

@@ -1,6 +1,7 @@
-# 0011. Can an artefact outlive the run that made it?
+# Can an artefact outlive the run that made it?
 
 - **Status:** In Review
+- **Release:** 3.4.0
 - **Spike:** none filed — tests the shape proposed on
   [#311](https://github.com/KitCli/KitCli/issues/311), *No way to keep an
   artefact across runs in one session*

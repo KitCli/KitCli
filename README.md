@@ -126,7 +126,7 @@ opens the page that starts that kind.
 - [Decision records](https://kitcli.github.io/KitCli/docs/adr/mediatr-for-command-dispatch.html)
   — a decision, its alternatives and what it cost, for when you want to
   change something and need the reason it is that way.
-- [Investigations](https://kitcli.github.io/KitCli/docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.html)
+- [Investigations](https://kitcli.github.io/KitCli/docs/investigations/which-extension-points-can-use-a-consumers-lifetimes.html)
   — what a spike found, verdict first, for when you are picking up the work
   it scoped.
 - [Technology](https://kitcli.github.io/KitCli/docs/technology/microsoft-dependency-injection.html)

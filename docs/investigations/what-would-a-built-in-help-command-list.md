@@ -1,6 +1,7 @@
-# 0010. What would a built-in /help command list?
+# What would a built-in /help command list?
 
 - **Status:** In Review
+- **Release:** Unreleased
 - **Spike:** not yet filed
 - **Time-box:** none agreed — ran inline
 - **Date:** 2026-09-12

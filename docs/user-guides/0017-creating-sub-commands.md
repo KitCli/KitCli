@@ -36,7 +36,7 @@ is a runnable copy of this.
 
 A sub-command is one word today. `/user edit team lead` arrives as a single
 glued string, `"edit team lead"`, not three words to match against — see
-[0009-how-many-sub-commands-can-one-instruction-address.md](../investigations/0009-how-many-sub-commands-can-one-instruction-address.md).
+[how-many-sub-commands-can-one-instruction-address.md](../investigations/how-many-sub-commands-can-one-instruction-address.md).
 
 ### Building a different command for a sub-command word
 

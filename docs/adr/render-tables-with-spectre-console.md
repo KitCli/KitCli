@@ -16,7 +16,7 @@ up on the right, a row count, and a per-column format.
 Its author closed the same line-break request upstream with "I don't think this
 library supports it", recommended Spectre.Console, and described his project as
 "a fun experiment". The spike that followed is
-[investigation 0008](../investigations/0008-should-table-rendering-be-rebuilt-on-spectre-console.md).
+the [Spectre.Console investigation](../investigations/should-table-rendering-be-rebuilt-on-spectre-console.md).
 
 ## Decision
 
