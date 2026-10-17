@@ -30,3 +30,5 @@
       href: what-would-a-built-in-help-command-list.md
     - name: Knowing where a command was sent from
       href: how-does-a-command-know-where-it-was-sent-from.md
+    - name: Carrying on after nested questions
+      href: what-would-it-take-to-carry-on-after-nested-questions.md
