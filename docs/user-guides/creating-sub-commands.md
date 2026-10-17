@@ -1,16 +1,32 @@
 # Creating sub-commands
 
-## What this is for
+**Give each sub-command word its own `CliCommandFactory<T>`, gated by `SubCommandIs(...)`.** `/user add` and `/user edit` then both start `user` and each does something different, with no branching inside one `Create()`.
 
-One instruction name can behave differently depending on the word that
-follows it — `/user add` and `/user edit` both start a `user` command, but
-each should do something different. Give each word its own
-`CliCommandFactory<T>`, gated by `SubCommandIs(...)`, instead of branching
-inside a single `Create()`.
+| Term | Meaning |
+|---|---|
+| Sub-command word | The word after the command name: `add` in `/user add`. |
+| Factory | The `CliCommandFactory<T>` that builds a command from the ask. |
+| `CanCreateWhen()` | The factory's yes-or-no on whether it builds this ask. |
+
+## How it looks
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant R as Registration (name: user)
+    participant A as AddUserCliCommandFactory
+    participant E as EditUserCliCommandFactory
+    U->>R: /user edit
+    R->>A: CanCreateWhen?
+    A-->>R: no
+    R->>E: CanCreateWhen?
+    E-->>R: yes
+    R-->>U: UserCliCommand("edit") runs
+```
 
 ## How to do it
 
-Write one `CliCommandFactory<T>` per sub-command word:
+**1. Write one factory per sub-command word.**
 
 ```csharp
 public record UserCliCommand(string Action) : CliCommand;
@@ -28,23 +44,11 @@ public class EditUserCliCommandFactory : CliCommandFactory<UserCliCommand>
 }
 ```
 
-`AddCommandsFromAssembly` registers every factory it finds for
-`UserCliCommand` under the one name, `user`. Typing `/user add` or `/user
-edit` tries each factory in turn and runs the first whose `CanCreateWhen()`
-says yes. `TestMultipleFactoriesCliCommand` in `KitCli.Playground.Scenarios`
-is a runnable copy of this.
+`AddCommandsFromAssembly` registers every factory for `UserCliCommand` under the one name, `user`. Each ask tries the factories in turn and runs the first whose `CanCreateWhen()` says yes. `TestMultipleFactoriesCliCommand` in `KitCli.Playground.Scenarios` is a runnable copy.
 
-A sub-command is one word today. `/user edit team lead` arrives as a single
-glued string, `"edit team lead"`, not three words to match against — see
-[how-many-sub-commands-can-one-instruction-address.md](../investigations/how-many-sub-commands-can-one-instruction-address.md).
+A sub-command is one word today. `/user edit team lead` arrives as the single string `"edit team lead"`. See [how many sub-commands one instruction can address](../investigations/how-many-sub-commands-can-one-instruction-address.md).
 
-### Building a different command for a sub-command word
-
-A factory's type argument sets the name the user types, but `Create()` can
-return any command. To let users type `/source choose` and run the asking
-command from
-[Asking for a missing value and carrying on](asking-for-a-missing-value-and-carrying-on.md),
-add a command that only supplies the word `source`:
+**2. Build a different command for a sub-command word.** A factory's type argument sets the name the user types, but `Create()` can return any command. This makes `/source choose` run the asking command from [Asking for a missing value and carrying on](asking-for-a-missing-value-and-carrying-on.md):
 
 ```csharp
 public record SourceCliCommand : CliCommand;
@@ -56,26 +60,15 @@ public class SourceChooseCliCommandFactory : CliCommandFactory<SourceCliCommand>
 }
 ```
 
-`SourceCliCommand` never runs, so it needs no handler. In an interactive
-app, the user's choice is remembered, and their next `/export` reads it.
+`SourceCliCommand` never runs, so it needs no handler. In an interactive app the user's choice is remembered, and their next `/export` reads it.
 
 ## Common mistakes
 
-**Typing an unlisted word and expecting an error.** `/user delete`, with no
-matching factory, fails to resolve exactly like a typo.
-
-**Two factories matching the same word.** Whichever one KitCli finds first
-wins, silently. Keep every `CanCreateWhen()` mutually exclusive.
-
-**Splitting into factories with nothing to split.** If every sub-command
-builds the same fields, one factory branching on `SubCommandIs(...)` inside
-`Create()` is simpler than several. Split only when a sub-command needs its
-own constructor arguments.
+- **Typing an unlisted word and expecting an error.** `/user delete`, with no matching factory, fails to resolve like a typo.
+- **Two factories matching the same word.** Whichever KitCli finds first wins, silently. Keep every `CanCreateWhen()` mutually exclusive.
+- **Splitting into factories with nothing to split.** If every sub-command builds the same fields, one factory branching on `SubCommandIs(...)` inside `Create()` is simpler. Split when a sub-command needs its own constructor arguments.
 
 ## Learn more
 
-- [Gating a command with CanCreateWhen](gating-a-command-with-cancreatewhen.md) —
-  how `CanCreateWhen` decides whether one factory's command is offered at
-  all.
-- [../concepts/command-registration.md](../concepts/command-registration.md) —
-  how registration keys factories by name and resolves them first-match-wins.
+- [Gating a command with CanCreateWhen](gating-a-command-with-cancreatewhen.md): how `CanCreateWhen` decides whether one factory's command is offered.
+- [Command registration](../concepts/command-registration.md): how registration keys factories by name and resolves them first-match-wins.

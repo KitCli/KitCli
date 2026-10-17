@@ -1,42 +1,13 @@
 # Styling a table
 
-## What this is for
+**Choose how a table's lines are drawn: the frame around it, the dividers between its columns, the rule under its headers.** Nineteen styles are on this page, drawn.
 
-Choosing how a table's lines are drawn — the frame around it, the dividers
-between its columns, the rule under its headers. All nineteen are on this
-page, drawn.
+| Term | Meaning |
+|---|---|
+| Style | A `CliTableStyle` value that sets how the table's lines are drawn. |
+| Table builder | Builds a `Table` from an aggregator and a map. See [Showing a table](showing-a-table.md). |
 
-```csharp
-var table = new ExpenseTableBuilder()
-    .WithAggregator(aggregator)
-    .WithMap<ExpenseTableMap>()
-    .WithPageSize(20)
-    .WithPageNumber(1)
-    .WithStyle(CliTableStyle.None)
-    .Build();
-```
-
-Or on a table you built yourself:
-
-```csharp
-var table = new Table(columns, rows) { Style = CliTableStyle.None };
-```
-
-## Which one to reach for
-
-| You want | Use |
-| --- | --- |
-| Data somebody reads across | `Ascii`, the default |
-| A listing — commands, names, files | `None` |
-| Output pasted into an issue or a doc | `Markdown` |
-| A modern terminal, drawn lines | `Box` or `RoundedBox` |
-| The headings set apart, nothing else | `HeaderLine` |
-
-**A box draws a line between every row. Nothing else does.** That is not
-separately settable — a frameless table with lines between its rows reads
-as clutter.
-
-## Every style
+## How it looks
 
 ### A box around everything
 
@@ -120,20 +91,44 @@ Markdown                None
 | Tea  | 3.20    |
 ```
 
+## How to do it
+
+**1. Pick a style.**
+
+| You want | Use |
+| --- | --- |
+| Data somebody reads across | `Ascii`, the default |
+| A listing: commands, names, files | `None` |
+| Output pasted into an issue or a doc | `Markdown` |
+| A modern terminal, drawn lines | `Box` or `RoundedBox` |
+| The headings set apart, nothing else | `HeaderLine` |
+
+**2. Set it on the builder.**
+
+```csharp
+var table = new ExpenseTableBuilder()
+    .WithAggregator(aggregator)
+    .WithMap<ExpenseTableMap>()
+    .WithPageSize(20)
+    .WithPageNumber(1)
+    .WithStyle(CliTableStyle.None)
+    .Build();
+```
+
+**3. Or set it on a table you built yourself.**
+
+```csharp
+var table = new Table(columns, rows) { Style = CliTableStyle.None };
+```
+
+A box draws a line between every row. Nothing else does. That is not separately settable, because a frameless table with lines between its rows reads as clutter.
+
 ## Common mistakes
 
-**Expecting a drawn box on any terminal.** Five styles use nothing but
-keyboard characters — `Ascii`, `AsciiGrid`, `AsciiDoubleHeader`, `Markdown`
-and `None`. The other fourteen need a font carrying line-drawing
-characters. `Ascii` is the default because it needs nothing.
-
-**Reaching for a style to make one column stand out.** The frame is drawn
-around the whole table. Nothing styles a single column yet —
-[#260](https://github.com/KitCli/KitCli/issues/260).
+- **Expecting a drawn box on any terminal.** Five styles use nothing but keyboard characters: `Ascii`, `AsciiGrid`, `AsciiDoubleHeader`, `Markdown` and `None`. The other fourteen need a font carrying line-drawing characters. `Ascii` is the default because it needs nothing.
+- **Reaching for a style to make one column stand out.** The frame is drawn around the whole table. Nothing styles a single column yet: [#260](https://github.com/KitCli/KitCli/issues/260).
 
 ## Learn more
 
-- [Showing a table](showing-a-table.md) — building the table
-  in the first place.
-- [../concepts/tables.md](../concepts/tables.md) — how a table
-  renders itself.
+- [Showing a table](showing-a-table.md): building the table in the first place.
+- [Tables](../concepts/tables.md): how a table renders itself.

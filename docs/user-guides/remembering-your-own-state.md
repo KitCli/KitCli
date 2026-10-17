@@ -1,30 +1,46 @@
 # Remembering your own state
 
-## What this is for
+**Keep a value of your own, such as a selected account, so a later command in the same run reads it back. It takes three types and one registry call.**
 
-[Remembering state across asks](reusable-outcomes-and-the-workflow-run.md)
-covers the built-in `Reusable` outcomes — page size, filters, and the rest.
-Sooner or later you need something of your own: a selected account, a
-chosen budget ID, anything a later command in the same run should read
-back. This is the three-type recipe.
+| Term | Meaning |
+|---|---|
+| Outcome | What a command returns. A `Reusable` outcome keeps the run going and its data available. |
+| Artefact | An outcome turned into a value a later command looks up by type and name. |
+| Artefact factory | The class that turns one outcome type into its artefact. |
+| Run | Every command from the first one up to a final outcome. |
+
+[Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) covers the built-in `Reusable` outcomes, such as page size and filters. This guide is the same recipe for your own value.
+
+## How it looks
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant A as Your app
+    U->>A: /select-account acc-1
+    Note over A: SelectedAccountOutcome kept
+    A-->>U: Selected account acc-1.
+    U->>A: /balance
+    Note over A: factory reads SelectedAccountArtefact = acc-1
+    A-->>U: Balance for acc-1
+```
 
 ## How to do it
 
-**1. A `Reusable` outcome**, what your handler returns. `Reusable` keeps
-the run going and its data available for the next ask:
+**1. Write a `Reusable` outcome.** Your handler returns it.
 
 ```csharp
 public record SelectedAccountOutcome(string AccountId) : Outcome(OutcomeKind.Reusable);
 ```
 
-**2. An artefact**, the queryable form a later factory looks up:
+**2. Write an artefact.** A later factory looks it up.
 
 ```csharp
 public record SelectedAccountArtefact(string AccountId)
     : Artefact<string>(nameof(SelectedAccountArtefact), AccountId);
 ```
 
-**3. A factory converting one into the other:**
+**3. Write a factory that turns one into the other.**
 
 ```csharp
 public class SelectedAccountArtefactFactory : ArtefactFactory<SelectedAccountOutcome>
@@ -34,7 +50,7 @@ public class SelectedAccountArtefactFactory : ArtefactFactory<SelectedAccountOut
 }
 ```
 
-Raise the outcome with `ByResultingIn`, which takes any `Outcome`:
+**4. Raise the outcome with `ByResultingIn`.** It takes any `Outcome`. Keep the reusable outcome last.
 
 ```csharp
 return FinishThisCommand()
@@ -43,9 +59,7 @@ return FinishThisCommand()
     .EndAsync();
 ```
 
-To read like the built-ins do, give `OutcomeList` an extension member.
-Yours returns `OutcomeList` too, so it chains wherever
-`ByRememberingPageSize` would:
+**5. Optional: add a `By...` method, as the built-ins have.** It returns `OutcomeList`, so it chains wherever `ByRememberingPageSize` would.
 
 ```csharp
 public static class OutcomeListExtensions
@@ -58,46 +72,24 @@ public static class OutcomeListExtensions
 }
 ```
 
-Keep the reusable outcome last. Only the final outcome decides what the run
-does next, so ending on `ByFinallySaying` would finish the run and discard
-the account you just selected.
-
-Read it back in a later command's factory, like any built-in artefact:
+**6. Read it back in a later command's factory.**
 
 ```csharp
 var accountId = GetRequiredArtefact<string>(nameof(SelectedAccountArtefact)).Value;
 ```
 
-**Discovery is automatic; the call that starts it is not.** Your registry
-must call `AddArtefactFactoriesForAssembly(assembly)`, separate from
-`AddCommandsFromAssembly`. Given that one call, every `ArtefactFactory<>`
-in the assembly is found, and you name `SelectedAccountArtefactFactory`
-nowhere. See [Creating a registry](creating-a-registry.md).
+**7. Call `AddArtefactFactoriesForAssembly(assembly)` in your registry.** It is separate from `AddCommandsFromAssembly`. It finds every `ArtefactFactory<>` in the assembly, so you never name `SelectedAccountArtefactFactory`. See [Creating a registry](creating-a-registry.md).
 
 ## Common mistakes
 
-**Forgetting `AddArtefactFactoriesForAssembly`.** All three types compile,
-and the outcome returns happily. The failure appears when
-`GetRequiredArtefact` throws at runtime in the later command.
-
-**Skipping the artefact and factory to re-read the run's history
-yourself.** That bypasses the type-and-name lookup every other piece of
-remembered state uses. Write the three types, however small the value.
-
-**Making an outcome `Reusable` when nothing reads it back.** With no later
-factory querying the value, it needs no artefact pair. An `Anonymous`
-outcome suffices for something purely informational.
-
-**Giving two custom artefacts the same `Name`, or none when more than one
-could exist.** `GetArtefact<T>` filters by type, then by name if given, and
-takes the *last* match. An unnamed or colliding lookup silently returns
-whichever was set most recently.
+- **Forgetting `AddArtefactFactoriesForAssembly`.** All three types compile and the outcome returns. `GetRequiredArtefact` then throws at runtime in the later command.
+- **Ending on `ByFinallySaying`.** Only the final outcome decides what the run does next. It finishes the run and discards the account you just selected.
+- **Skipping the artefact and factory to re-read the run's history yourself.** That bypasses the type-and-name lookup every other piece of remembered state uses. Write the three types, however small the value.
+- **Making an outcome `Reusable` when nothing reads it back.** With no factory querying it, it needs no artefact pair. An `Anonymous` outcome suffices for something informational.
+- **Giving two custom artefacts the same `Name`, or none.** `GetArtefact<T>` filters by type, then by name if given, and takes the last match. An unnamed or colliding lookup silently returns whichever was set most recently.
 
 ## Learn more
 
-- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) —
-  the built-in `Reusable` outcomes this pattern generalises.
-- [../concepts/artefacts.md](../concepts/artefacts.md) — registration,
-  "last match wins" lookup, and where a factory's artefact list comes from.
-- [../concepts/outcomes.md](../concepts/outcomes.md) — the full
-  `Outcome` and `OutcomeKind` model a custom outcome plugs into.
+- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md): the built-in `Reusable` outcomes this pattern generalises.
+- [Artefacts](../concepts/artefacts.md): registration, "last match wins" lookup, and where a factory's artefact list comes from.
+- [Outcomes](../concepts/outcomes.md): the full `Outcome` and `OutcomeKind` model a custom outcome plugs into.

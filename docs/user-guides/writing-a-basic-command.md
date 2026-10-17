@@ -1,38 +1,46 @@
 # Writing a basic command
 
-## What this is for
+**Write two small types and the user can type your command's name. A third type, a factory, is only for commands that need arguments or a decision.**
 
-Every piece of behaviour in a KitCli app is a command. Write one and the
-user can type its name. This is the smallest version — two types, no
-registration code.
+| Term | Meaning |
+|---|---|
+| Command | What the user types, e.g. `/greet`. A `CliCommand` record holds its data, never behaviour. |
+| Handler | The class that does the work for one command. |
+| Factory | The class that decides whether a command applies right now, and builds it. |
+| Outcome | What a handler returns: "show this", or "here's what happens next". |
+
+## How it looks
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant F as GreetCliCommandFactory
+    participant H as GreetCliCommandHandler
+    U->>F: /greet --name Alex
+    Note over F: CanCreateWhen() is true<br/>Create() reads the name
+    F->>H: GreetCliCommand
+    H-->>U: Hello!
+```
 
 ## How to do it
 
-Put both in the assembly your app registers:
+**1. Write the command and its handler.** Put both in the assembly your app registers.
 
 ```csharp
-// 1. The command — a marker type. It holds data, never behaviour.
 public record GreetCliCommand : CliCommand;
 
-// 2. The handler — does the work.
 public class GreetCliCommandHandler : CliCommandHandler<GreetCliCommand>
 {
-    public override Task<Outcome[]> HandleCommand(GreetCliCommand command, CancellationToken ct)
+    public override Task<Outcome[]> HandleCommand(GreetCliCommand command, CancellationToken cancellationToken)
         => FinishThisCommand()
             .ByFinallySaying("Hello!")
             .EndAsync();
 }
 ```
 
-The name comes from the type name: `GreetCliCommand` answers to `/greet`,
-plus the shorthand `/g` — the first letter of each capitalised word.
+`GreetCliCommand` answers to `/greet` and the shorthand `/g`, the first letter of each capitalised word. KitCli derives both by stripping the word `CliCommand` from the type name.
 
-**Name the type `...CliCommand`, not `...Command`.** The derivation strips
-the word `CliCommand`. A type called `GreetCommand` keeps its suffix and
-answers to `/greet-command`.
-
-Commands beside your `Program.cs` register themselves. For commands
-anywhere else, name that assembly once from your `ICliAppRegistry`:
+**2. Register commands that live outside your `Program.cs` assembly.** Commands beside `Program.cs` register themselves.
 
 ```csharp
 public class MyAppRegistry : ICliAppRegistry
@@ -42,12 +50,7 @@ public class MyAppRegistry : ICliAppRegistry
 }
 ```
 
-### When you need a factory
-
-A factory decides whether the command applies right now, and builds it.
-Write one when your command needs the ask's arguments, an earlier command's
-data, or a runtime decision — which includes every command with constructor
-parameters:
+**3. Add a factory when the command needs arguments, earlier data or a runtime decision.** That includes every command with constructor parameters.
 
 ```csharp
 public record GreetCliCommand(string Name) : CliCommand;
@@ -57,41 +60,33 @@ public class GreetCliCommandFactory : CliCommandFactory<GreetCliCommand>
     public override bool CanCreateWhen() => true;
 
     public override CliCommand Create()
-        => new GreetCliCommand(GetRequiredArgument<string>("name").Value);
+    {
+        var name = GetRequiredArgument<string>("name");
+
+        return new GreetCliCommand(name.Value);
+    }
 }
 ```
 
-Three base classes exist, so you write only the half you care about:
+Pick the base class by the half you need to write:
 
 | Base class | Write | Use when |
 |---|---|---|
-| `CliCommandFactory<T>` | both methods | you need custom building *and* gating |
+| `CliCommandFactory<T>` | both methods | you need custom building and gating |
 | `BasicCreationCliCommandFactory<T>` | `Create()` only | the command always applies, but needs building |
 | `BasicDecisionCliCommandFactory<T>` | `CanCreateWhen()` only | the command is `new T()`, but applies only sometimes |
 
-Skip the factory when the command has a public parameterless constructor
-and needs no gating. KitCli registers `BasicCliCommandFactory<T>` for it,
-which is what makes the first example work with no factory code.
+A command with a public parameterless constructor and no gating needs no factory. KitCli registers `BasicCliCommandFactory<T>` for it, which is why step 1 works alone.
 
 ## Common mistakes
 
-**Writing a factory for every command out of habit.** With a parameterless
-constructor and no need for arguments, artefacts, or a decision, a factory
-is pure boilerplate.
-
-**Giving a command constructor parameters but no factory.** The automatic
-factory covers only types KitCli can build with `new`. A record like
-`GreetCliCommand(string Name)` with no factory gets none at all, startup
-says nothing, and the command is unreachable when someone types its name.
-
-**Expecting the handler to see the raw ask.** Parsing finishes before
-`HandleCommand` runs. The command instance is all the handler gets.
+- **Naming the type `...Command`.** The derivation strips only `CliCommand`. `GreetCommand` answers to `/greet-command`.
+- **Writing a factory for every command out of habit.** With a parameterless constructor and no need for arguments, artefacts or a decision, a factory is boilerplate.
+- **Giving a command constructor parameters but no factory.** The automatic factory covers only types KitCli can build with `new`. Startup says nothing and the command is unreachable when someone types its name.
+- **Expecting the handler to see the raw ask.** Parsing finishes before `HandleCommand` runs. The command instance is all the handler gets.
 
 ## Learn more
 
-- [Reading command arguments](reading-command-arguments.md) — the
-  arguments a factory reads.
-- [Gating a command with CanCreateWhen](gating-a-command-with-cancreatewhen.md) —
-  what `CanCreateWhen` is for, and how a `false` fails.
-- [../concepts/command-registration.md](../concepts/command-registration.md) —
-  how the name is derived and how the factory is chosen.
+- [Reading command arguments](reading-command-arguments.md): the arguments a factory reads.
+- [Gating a command with CanCreateWhen](gating-a-command-with-cancreatewhen.md): what `CanCreateWhen` is for, and how a `false` fails.
+- [Command registration](../concepts/command-registration.md): how the name is derived and how the factory is chosen.

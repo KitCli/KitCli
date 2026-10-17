@@ -1,25 +1,36 @@
 # Creating a headless app
 
-## What this is for
+**Subclass `HeadlessCliApp` and your app takes one ask from the command line, runs it and exits.** Use it for scripting, CI, or anything invoked once. For a session someone sits in, see [Creating an interactive app](creating-an-interactive-app.md).
 
-A headless app has nothing attached to its input. It takes one ask from the
-command line — `dotnet run -- /greet --name Alex` — runs it, and exits. Use
-it for scripting, CI, or anything invoked once. For a session someone sits
-in, see
-[Creating an interactive app](creating-an-interactive-app.md).
+| Term | Meaning |
+|---|---|
+| Ask | One line of input, e.g. `/greet --name Alex`. |
+| Run | Every command from the first one up to a final outcome. |
+| Hook | A `virtual` method on `CliApp` that fires at one point in the session. |
+
+## How it looks
+
+```mermaid
+sequenceDiagram
+    actor U as Command line
+    participant A as Headless app
+    U->>A: dotnet run -- /greet --name Alex
+    Note over A: args join into one ask<br/>one run, chained commands included
+    A-->>U: Hello, Alex.
+    Note over A: the workflow stops, the process exits
+```
 
 ## How to do it
 
-Subclass `HeadlessCliApp`. There is no ready-made basic version, as
-interactive apps have, because every headless app needs a constructor
-forwarding to the base class:
+**1. Subclass `HeadlessCliApp`.** There is no ready-made basic version, because every headless app needs a constructor forwarding to the base class.
 
 ```csharp
 public class MyHeadlessApp(ICliWorkflow workflow, ICliIo io) : HeadlessCliApp(workflow, io);
 ```
 
+**2. Register it in `Program.cs`.**
+
 ```csharp
-// Program.cs
 var app = new CliAppBuilder()
     .WithApp<MyHeadlessApp>()
     .WithRegistry<MyAppRegistry>();
@@ -27,24 +38,17 @@ var app = new CliAppBuilder()
 await app.Run(args);
 ```
 
-`args` — everything after `--` on the command line — joins into a single
-ask string and parses exactly like a line of typed input.
-`dotnet run -- /greet --name Alex` resolves to the same `GreetCliCommand`
-that an interactive app's `/greet --name Alex` would.
+`args` joins into a single ask string and parses like a line of typed input. `dotnet run -- /greet --name Alex` resolves to the same `GreetCliCommand` an interactive app's `/greet --name Alex` does.
 
-A command that chains to another with `ByMovingToCommand` (see
-[Chaining commands together](chaining-commands.md)) runs every step
-here, same as anywhere else. The limit is not how many commands run — it is
-that they all belong to one run, and no second run can start.
+A command that chains with `ByMovingToCommand` (see [Chaining commands together](chaining-commands.md)) runs every step. The limit is one run: no second run can start.
 
-All six lifecycle hooks work (see
-[Creating an interactive app](creating-an-interactive-app.md)),
-`OnMovingPastAsk` firing once per chained step.
+| Fact | Consequence |
+|---|---|
+| Five hooks fire: `OnSessionStart`, `OnRunCreated`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd`. | They work as in [Creating an interactive app](creating-an-interactive-app.md). |
+| `OnMovingPastAsk` fires once per chained step. | `OnRunComplete` fires after each step too. |
+| `OnRunStarted` is obsolete. | Override `OnRunCreated` instead. |
 
-## Telling headless from interactive inside a command
-
-If you want a command to work in both a headless and an interactive app, read
-`CanAsk` before it prompts. Inject `ICliIo` into its handler or factory:
+**3. Check `CanAsk` before a command prompts, to serve both app kinds.** A headless app's I/O has nothing attached to its input, so `CanAsk` is false for the life of the process.
 
 ```csharp
 public class GreetCliCommandHandler(ICliIo io) : CliCommandHandler<GreetCliCommand>
@@ -56,31 +60,16 @@ public class GreetCliCommandHandler(ICliIo io) : CliCommandHandler<GreetCliComma
 }
 ```
 
-A headless app runs with an I/O that has nothing attached to its input, so
-`CanAsk` is false for the life of the process, whatever the console is
-doing. `/test-can-ask` in the playground prints which answer it got.
+`/test-can-ask` in the playground prints which answer it got.
 
 ## Common mistakes
 
-**Calling `app.Run()` with no arguments.** A headless app has no way to ask
-for one, so `CliAppBuilder.Run` throws an `ArgumentException` naming your
-app type rather than sitting there doing nothing.
-
-**Expecting a command to prompt for something.** Where an interactive
-session would stop at a reusable checkpoint and take another ask, a
-headless session ends there with the run unfinished. Everything a command
-needs has to arrive in the args.
-
-**Reaching for a headless app when you want scripted, repeated input.** To
-drive several asks programmatically, use one invocation per ask, or an
-interactive app fed by piped input.
+- **Calling `app.Run()` with no arguments.** A headless app cannot ask for one, so `CliAppBuilder.Run` throws an `ArgumentException` naming your app type.
+- **Expecting a command to prompt.** Where an interactive session would stop at a reusable checkpoint and take another ask, a headless session ends there with the run unfinished. Put everything a command needs in the args.
+- **Reaching for a headless app to script repeated input.** Use one invocation per ask, or an interactive app fed by piped input.
 
 ## Learn more
 
-- [Creating an interactive app](creating-an-interactive-app.md) — the
-  interactive alternative, and the hooks both modes share.
-- [Chaining commands together](chaining-commands.md) — running several commands
-  from one ask.
-- [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
-  `HeadlessCliApp.Run` does, and why the choice between the two hosts is
-  made at compile time.
+- [Creating an interactive app](creating-an-interactive-app.md): the interactive alternative, and the hooks both modes share.
+- [Chaining commands together](chaining-commands.md): running several commands from one ask.
+- [CLI app host](../concepts/cli-app-host.md): what `HeadlessCliApp.Run` does, and why the choice between the two hosts is made at compile time.

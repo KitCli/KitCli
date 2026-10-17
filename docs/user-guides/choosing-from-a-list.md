@@ -1,15 +1,29 @@
 # Choosing from a list
 
-## What this is for
+**Ask the person to pick from a list with the arrow keys, rather than make them type a name or number back.** `ChooseAsync` picks one item and `ChooseManyAsync` picks several.
 
-Ask the person to pick from a list with the arrow keys, rather than make
-them type a name or number back. `ChooseAsync` picks one item and
-`ChooseManyAsync` picks several.
+| Term | Meaning |
+|---|---|
+| `ICliIo` | What a handler asks through. Inject it into the handler. |
+| `CliChoice` | One list entry: a `Label` to show and an optional `Value` handed back with the pick. |
+
+## How it looks
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant A as Your app
+    U->>A: /test-choices
+    A-->>U: Which fruit is your favourite? (arrows, enter)
+    U->>A: Banana
+    A-->>U: Which fruits do you like? (arrows, space, enter)
+    U->>A: Apple, Cherry
+    A-->>U: Liked: Apple, Cherry
+```
 
 ## How to do it
 
-Inject `ICliIo` into the handler and hand it a list of `CliChoice`. Each has
-a `Label` to show and an optional `Value` handed back with the pick:
+**1. Inject `ICliIo` and hand it a list of `CliChoice`.** This is the playground's `/test-choices`.
 
 ```csharp
 public class TestChoicesCliCommandHandler(ICliIo io) : CliCommandHandler<TestChoicesCliCommand>
@@ -34,24 +48,22 @@ public class TestChoicesCliCommandHandler(ICliIo io) : CliCommandHandler<TestCho
 }
 ```
 
-That is the playground's `/test-choices`. Move with the up and down arrows
-and press enter. In the second list, tick with the space bar first.
+**2. Read the answer.** Cast `Value` back to what you stored.
 
-Cast `Value` back to what you stored. If the person presses Ctrl+C,
-`ChooseAsync` returns `null` and `ChooseManyAsync` returns an empty list;
-pressing enter with nothing ticked returns an empty list too.
+| The person | `ChooseAsync` returns | `ChooseManyAsync` returns |
+|---|---|---|
+| Picks with enter | The picked `CliChoice` | The ticked choices |
+| Presses enter with nothing ticked | n/a | An empty list |
+| Presses Ctrl+C | `null` | An empty list |
 
 ## Common mistakes
 
-**Printing while the list is showing.** A line written then scrambles the
-list. Print before you ask, or after the answer.
-
-**Passing an empty list.** It throws `InvalidOperationException`. Check
-first.
-
-**Asking from a headless app.** Nobody is there to answer, so the app breaks.
+- **Printing while the list is showing.** A line written then scrambles the list. Print before you ask, or after the answer.
+- **Passing an empty list.** It throws `InvalidOperationException`. Check first.
+- **Asking from a headless app.** Nobody is there to answer, so `ChooseAsync` and `ChooseManyAsync` throw `NoInputException`. Check `io.CanAsk` ahead of time, and skip the list when it is `false`.
 
 ## Learn more
 
-[../concepts/cli-io.md](../concepts/cli-io.md) ·
-[../adr/ask-through-cli-io-with-cli-choice.md](../adr/ask-through-cli-io-with-cli-choice.md)
+- [CLI I/O](../concepts/cli-io.md)
+- [Ask through CLI I/O with `CliChoice`](../adr/ask-through-cli-io-with-cli-choice.md)
+- [Creating a headless app](creating-a-headless-app.md): telling headless from interactive inside a command.

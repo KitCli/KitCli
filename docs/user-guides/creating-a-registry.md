@@ -1,15 +1,31 @@
 # Creating a registry
 
-## What this is for
+**Write one class that names your command assemblies and services, and wire it in with `WithRegistry<T>()`.** `CliAppBuilder` reads it before it builds the DI container.
 
-Before `CliAppBuilder` builds the DI container, it needs to know which
-assemblies hold your commands, and what services those commands depend on.
-A registry tells it: one class, wired in with `WithRegistry<T>()`.
+| Term | Meaning |
+|---|---|
+| Registry | A class that registers your commands and services into the DI container. |
+| Artefact factory | Turns an earlier outcome into a value a later command can look up. |
+| Settings | A class bound to a section of your configuration, e.g. `MySettings`. |
+
+## How it looks
+
+```mermaid
+flowchart LR
+    subgraph P["Program.cs"]
+        B["CliAppBuilder"] -->|"WithRegistry"| R["your registry"]
+    end
+    R -->|"AddCommandsFromAssembly"| C["commands, factories, handlers"]
+    R -.->|"AddArtefactFactoriesForAssembly"| A["artefact factories"]
+    R --> S["your other services"]
+    C --> D[("DI container")]
+    A --> D
+    S --> D
+```
 
 ## How to do it
 
-When your commands need no configuration to register, implement
-`ICliAppRegistry`:
+**1. Implement `ICliAppRegistry` when registration needs no configuration.**
 
 ```csharp
 public class MyAppRegistry : ICliAppRegistry
@@ -20,7 +36,6 @@ public class MyAppRegistry : ICliAppRegistry
 ```
 
 ```csharp
-// Program.cs
 var app = new CliAppBuilder()
     .WithBasicApp()
     .WithRegistry<MyAppRegistry>();
@@ -28,18 +43,9 @@ var app = new CliAppBuilder()
 await app.Run();
 ```
 
-`AddCommandsFromAssembly` scans the assembly for every `CliCommand` and
-wires up its factory and MediatR handler. Call it once per assembly that
-defines commands. The assembly holding your `Program.cs` is scanned
-already, so a registry serves commands living elsewhere.
+`AddCommandsFromAssembly` scans the assembly for every `CliCommand` and wires up its factory and MediatR handler. Call it once per assembly. The assembly holding your `Program.cs` is scanned already, so a registry serves commands living elsewhere. Register any other services your handlers need as in any DI setup.
 
-Register any other services your handlers and factories need exactly as you
-would in any DI setup.
-
-### If your commands remember anything
-
-A *second*, separate call registers artefact factories, which is what lets
-a later command read what an earlier one produced:
+**2. Add a second call if your commands remember anything.** It registers the built-in artefact factories as well as yours.
 
 ```csharp
 var assembly = typeof(GreetCliCommand).Assembly;
@@ -48,19 +54,13 @@ services.AddCommandsFromAssembly(assembly);
 services.AddArtefactFactoriesForAssembly(assembly);
 ```
 
-Add it whenever a command remembers state (see
-[Remembering your own state](remembering-your-own-state.md)),
-a factory calls `LastCommandIs<T>()`, or a table needs a "next page" step
-(see [Showing a paged table](showing-a-paged-table.md)). It
-registers the built-in artefact factories as well as yours, so all three
-depend on it.
+| Add it when | See |
+|---|---|
+| a command remembers state | [Remembering your own state](remembering-your-own-state.md) |
+| a factory calls `LastCommandIs<T>()` | [Gating a command with CanCreateWhen](gating-a-command-with-cancreatewhen.md) |
+| a table needs a "next page" step | [Showing a paged table](showing-a-paged-table.md) |
 
-### When a registry needs settings
-
-When registration depends on configuration — an API key, a connection
-string — implement `IConfigurableCliAppRegistry<TSettings>` instead. Pair
-it with `WithJsonSettings` or `WithUserSecretSettings`, plus the
-two-type-parameter `WithRegistry<TSettings, TRegistry>()`:
+**3. Implement `IConfigurableCliAppRegistry<TSettings>` when registration needs configuration**, such as an API key or connection string.
 
 ```csharp
 public class MyConfiguredRegistry : IConfigurableCliAppRegistry<MySettings>
@@ -73,38 +73,32 @@ public class MyConfiguredRegistry : IConfigurableCliAppRegistry<MySettings>
 }
 ```
 
-Build it with `.WithJsonSettings("appsettings.json")` before
-`.WithRegistry<MySettings, MyConfiguredRegistry>()`.
+Call `WithJsonSettings` or `WithUserSecretSettings` first, then the two-type-parameter `WithRegistry`:
 
-The configuration section name is `TSettings`'s type name with `Settings`
-removed, so `MySettings` reads the `My` section. To read a different
-section, rename the settings type; nothing names it explicitly.
+```csharp
+var app = new CliAppBuilder()
+    .WithBasicApp()
+    .WithJsonSettings("appsettings.json")
+    .WithRegistry<MySettings, MyConfiguredRegistry>();
+```
+
+The section name is `TSettings`'s type name with `Settings` removed, so `MySettings` reads the `My` section. To read a different section, rename the settings type.
+
+| Fact | Consequence |
+|---|---|
+| `WithRegistry<TSettings, TRegistry>()` needs a `With...Settings` call first. | Without one, `CliAppBuilder` throws. |
+| `InstructionSettings` and `KitCliSettings` are exempt. | They fall back to their defaults with no call and no section. |
+| Any other `TSettings` needs its section in the configuration. | A missing section throws "No configuration section found for ...". |
 
 ## Common mistakes
 
-**Calling `WithRegistry<TSettings, TRegistry>()` with no preceding
-`With...Settings` call.** `CliAppBuilder` throws. It needs a configuration
-source before it can bind settings to your type.
-
-**Registering one assembly's commands from two registries.** Call
-`AddCommandsFromAssembly` exactly once per assembly, and remember your
-`Program.cs` assembly counts as registered already.
-
-**Forgetting `AddArtefactFactoriesForAssembly`.** Startup stays silent. The
-first symptom is a later command's `GetRequiredArtefact` throwing at
-runtime, or `LastCommandIs<T>()` quietly returning `false`.
-
-**Passing a marker type from the wrong assembly.** Point
-`AddCommandsFromAssembly` at an assembly holding no commands and it throws
-`ArgumentException` ("No ICommand Implementations Found"); point it at the
-wrong one holding some, and your intended commands go unregistered in
-silence while another assembly's register instead.
+- **Calling `WithRegistry<TSettings, TRegistry>()` with no preceding `With...Settings` call.** `CliAppBuilder` throws, unless `TSettings` is `InstructionSettings` or `KitCliSettings`.
+- **Registering one assembly's commands from two registries.** Call `AddCommandsFromAssembly` once per assembly. Your `Program.cs` assembly counts as registered already.
+- **Forgetting `AddArtefactFactoriesForAssembly`.** Startup stays silent. The first symptom is a later command's `GetRequiredArtefact` throwing at runtime, or `LastCommandIs<T>()` quietly returning `false`.
+- **Passing a marker type from the wrong assembly.** An assembly with no commands throws `ArgumentException` ("No ICommand Implementations Found"). The wrong assembly with some commands registers those and silently skips yours.
 
 ## Learn more
 
-- [Writing a basic command](writing-a-basic-command.md) — what
-  `AddCommandsFromAssembly` finds and registers.
-- [../concepts/command-registration.md](../concepts/command-registration.md) —
-  the full mechanics behind that call.
-- [../concepts/artefacts.md](../concepts/artefacts.md) — what the
-  second call registers.
+- [Writing a basic command](writing-a-basic-command.md): what `AddCommandsFromAssembly` finds and registers.
+- [Command registration](../concepts/command-registration.md): the full mechanics behind that call.
+- [Artefacts](../concepts/artefacts.md): what the second call registers.

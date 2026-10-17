@@ -1,8 +1,6 @@
 # Showing a table
 
-## What this is for
-
-Turning a list of things into columns a reader can scan:
+**Turn a list of things into columns a reader can scan.** You say what a row is, name its columns, and build the table.
 
 ```
 +------------------------+
@@ -14,8 +12,24 @@ Turning a list of things into columns a reader can scan:
 +------------------------+
 ```
 
-Paging a long list is the next guide,
-[Showing a paged table](showing-a-paged-table.md).
+| Term | Meaning |
+|---|---|
+| Row type | A record with one property per column, e.g. `ExpenseRow`. |
+| Aggregator | Turns your source items into row-type items. |
+| Table map | Names each column of the row type. |
+| Table builder | Joins aggregator, map and paging into a `Table`. |
+
+## How it looks
+
+```mermaid
+flowchart LR
+    S["expenses"] --> G["ExpenseAggregator"]
+    G --> R["ExpenseRow items"]
+    R --> B["ExpenseTableBuilder"]
+    M["ExpenseTableMap"] --> B
+    B -->|"Build()"| T["Table"]
+    T -->|"ByShowingTable"| O["what the user sees"]
+```
 
 ## How to do it
 
@@ -47,13 +61,13 @@ public class ExpenseTableMap : TableMap<ExpenseRow>
 }
 ```
 
-**3. Subclass the builder.** It adds nothing; the type is the point.
+**3. Subclass the builder.** It adds nothing. The type is the point.
 
 ```csharp
 public class ExpenseTableBuilder : TableBuilder<Expense, ExpenseRow>;
 ```
 
-**4. Build it and show it.**
+**4. Build it and show it.** Give a page size and number even when you never page: `Build()` throws without them.
 
 ```csharp
 var table = new ExpenseTableBuilder()
@@ -68,9 +82,6 @@ var table = new ExpenseTableBuilder()
 return FinishThisCommand().ByShowingTable(table).EndAsync();
 ```
 
-Say a page size and number even when you never page — `Build()` throws
-without them.
-
 ### Choosing the style
 
 ```csharp
@@ -83,7 +94,7 @@ Groceries 412.80
 Rent      1150.00
 ```
 
-`CliTableStyle.Markdown` instead, for output somebody pastes into an issue:
+`CliTableStyle.Markdown` suits output somebody pastes into an issue:
 
 ```
 | Category  | Total Cost |
@@ -92,8 +103,7 @@ Rent      1150.00
 | Rent      | 1150.00    |
 ```
 
-Nineteen in all. `Ascii` is the default — the box at the top of this page.
-Every one is drawn in [Styling a table](styling-a-table.md).
+There are nineteen styles. `Ascii` is the default, the box at the top of this page. [Styling a table](styling-a-table.md) draws every one.
 
 ### Holding a column narrow
 
@@ -110,7 +120,7 @@ Every one is drawn in [Styling a table](styling-a-table.md).
 +--------------------------------------------+
 ```
 
-Without it the note takes one long line and the table grows to fit.
+Without it, the note takes one long line and the table grows to fit.
 
 ### When you already have the rows
 
@@ -122,20 +132,12 @@ var table = new Table(
 
 ## Common mistakes
 
-**Mapping only the columns you want shown.** Every public property of the
-row type is looked up in the map, and an unmapped one throws. Keep it off
-the table by keeping it off the row type.
-
-**Sorting after `Build()`.** Sort on the aggregator; a built table is
-columns and rows with no pipeline behind it.
+- **Mapping only the columns you want shown.** Every public property of the row type is looked up in the map, and an unmapped one throws. Keep a property off the table by keeping it off the row type.
+- **Sorting after `Build()`.** Sort on the aggregator. A built table is columns and rows with no pipeline behind it.
 
 ## Learn more
 
-- [Showing a paged table](showing-a-paged-table.md) — walking
-  a reader through a long list.
-- [Styling a table](styling-a-table.md) — all
-  nineteen frames, drawn.
-- [../concepts/tables.md](../concepts/tables.md) — why the map is
-  mandatory, and what a column still cannot say.
-- [../concepts/aggregators.md](../concepts/aggregators.md) — the
-  pipeline beneath step 1.
+- [Showing a paged table](showing-a-paged-table.md): walking a reader through a long list.
+- [Styling a table](styling-a-table.md): all nineteen frames, drawn.
+- [Tables](../concepts/tables.md): why the map is mandatory, and what a column still cannot say.
+- [Aggregators](../concepts/aggregators.md): the pipeline beneath step 1.
