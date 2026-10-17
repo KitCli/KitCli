@@ -1,11 +1,12 @@
-# 0018. Suggest commands that could be next via a `[CliNextCommandCouldBe]` attribute
+# Suggest commands that could be next via a `[CliNextCommandCouldBe]` attribute
 
 Status: Proposed
 Date: 2026-10-10
+Release: 3.2.0
 
 ## Context
 
-[ADR 0008](0008-suggest-next-commands-attribute.md) added
+The [next-command ADR](suggest-next-commands-attribute.md) added
 `[CliNextCommandIs]`: declare a command's likely next step, and the run
 suggests it if a later ask doesn't resolve to anything. That only happens
 while a run is still open, waiting on one more valid ask.
@@ -40,7 +41,7 @@ Both now print under a header line instead of bare, so a reader knows why
 they're seeing suggestions at all: `"You might have meant:"` for `Is`,
 `"All done. You might want to run:"` for `CouldBe`. That header needs a
 blank line in front of it, so a small `PauseOutcome` type exists again —
-[ADR 0008](0008-suggest-next-commands-attribute.md) had rejected this exact
+the [next-command ADR](suggest-next-commands-attribute.md) had rejected this exact
 type for having only one use; it now has two.
 
 ## Alternatives considered
@@ -64,6 +65,6 @@ type for having only one use; it now has two.
 - A command can declare both: `CouldBe` shows once on finishing, `Is`
   shows again only if the run stays open and the next ask fails — never
   for the same event, so never twice.
-- `PauseOutcome` exists again, reversing that part of ADR 0008. ADR 0008's
+- `PauseOutcome` exists again, reversing that part of the next-command ADR. The next-command ADR's
   core decision — the `[CliNextCommandIs]` attribute itself — still
   stands.

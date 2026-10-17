@@ -7,14 +7,14 @@ assumes them. Then pick a folder.
 | --- | --- | --- |
 | [`user-guides/`](user-guides/0001-writing-a-basic-command.md) | How do I do X? | You are building an app with KitCli. |
 | [`concepts/`](concepts/command-registration.md) | How does X work? | A guide left you wondering why. |
-| [`adr/`](adr/0001-mediatr-for-command-dispatch.md) | Why is X like this? | You want to change something and need the reason it is that way. |
+| [`adr/`](adr/mediatr-for-command-dispatch.md) | Why is X like this? | You want to change something and need the reason it is that way. |
 | [`investigations/`](investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md) | What did we find out? | You are picking up work a spike scoped. |
 | [`technology/`](technology/microsoft-dependency-injection.md) | What can I do with KitCli's dependency X? | You are asking "does the container support…". |
 | [`reviews/`](reviews/architectural-review-2026-07.md) | What was wrong on a given date? | Historical only. Never current state. |
 
 Start at [writing a basic command](user-guides/0001-writing-a-basic-command.md).
 [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md) says when to write each kind, and
-`0000-template.md` in each folder is the skeleton to copy. The
+`0000-template.md` (`template.md` for ADRs and concept docs) in each folder is the skeleton to copy. The
 [roadmap](roadmap.md) tells the other story: how the framework got here,
 month by month.
 

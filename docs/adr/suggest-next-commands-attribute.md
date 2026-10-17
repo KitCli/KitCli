@@ -1,7 +1,8 @@
-# 0008. Suggest declared next commands via a `[CliNextCommandIs]` attribute
+# Suggest declared next commands via a `[CliNextCommandIs]` attribute
 
 Status: Accepted
 Date: 2026-08-23
+Release: 1.0.12
 
 ## Context
 
@@ -53,7 +54,7 @@ way the run's state is untouched: it stays parked exactly as before.
   is the builder *handlers* use for their own outcomes. `CliWorkflowRun` is
   not a handler and builds raw `Outcome[]` everywhere else in that method.
 - **One attribute taking an array** — settled the same way
-  [ADR 0007](0007-cli-command-alias-attribute.md) settled it.
+  the [command-alias ADR](cli-command-alias-attribute.md) settled it.
 
 ## Consequences
 
@@ -62,6 +63,6 @@ machinery, at the cost of one more attribute to know about. A command that
 declares none behaves exactly as before, so this is purely additive.
 
 The rejected `PauseOutcome`/writer pair above was reintroduced in
-[ADR 0018](0018-suggest-commands-that-could-be-next.md) once a second call
+the [could-be-next ADR](suggest-commands-that-could-be-next.md) once a second call
 site needed a bare blank line. This ADR's decision — the
 `[CliNextCommandIs]` attribute itself — is otherwise unaffected.

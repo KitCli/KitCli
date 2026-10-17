@@ -54,4 +54,4 @@ first.
 ## Learn more
 
 [../concepts/cli-io.md](../concepts/cli-io.md) ·
-[../adr/0019-ask-through-cli-io-with-cli-choice.md](../adr/0019-ask-through-cli-io-with-cli-choice.md)
+[../adr/ask-through-cli-io-with-cli-choice.md](../adr/ask-through-cli-io-with-cli-choice.md)

@@ -1,7 +1,8 @@
-# 0011. Chain to a command by type, and let its factory build it
+# Chain to a command by type, and let its factory build it
 
 Status: Proposed
 Date: 2026-08-25
+Release: 2.0.0
 
 Justified by
 [investigation 0003](../investigations/0003-how-should-a-chained-command-be-selected-and-constructed.md),

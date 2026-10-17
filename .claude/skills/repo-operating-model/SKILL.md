@@ -79,7 +79,7 @@ match.
 
 ## 4. ADRs and concept docs
 
-- **ADR** (`docs/adr/`, copy `0000-template.md`): a decision + its
+- **ADR** (`docs/adr/`, copy `template.md`): a decision + its
   alternatives + its consequences. Write one only for a new
   cross-cutting pattern, a project/package boundary change, a breaking
   public API change, or reversing a prior ADR. Skip it for bug fixes and

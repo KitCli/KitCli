@@ -1,16 +1,17 @@
-# 0013. Merge the hosts and name the variant headless
+# Merge the hosts and name the variant headless
 
 Status: Proposed
 Date: 2026-08-26
+Release: 3.0.0
 
-Reverses [0005](0005-args-driven-cli-app.md). Informed by
+Reverses the [CliApp-split ADR](args-driven-cli-app.md). Informed by
 [investigation 0005](../investigations/0005-how-much-of-the-run-loop-can-the-two-hosts-share.md).
 
 ## Context
 
 [#167](https://github.com/KitCli/KitCli/issues/167): a one-shot invocation
 ran the first command of a chain and exited 0, dropping the rest in
-silence. [ADR 0005](0005-args-driven-cli-app.md) had split `CliApp` into
+silence. The [CliApp-split ADR](args-driven-cli-app.md) had split `CliApp` into
 `TerminalCliApp` and `ArgsCliApp`, which copied the host loop into two
 places; the args copy is the one that never drove a queued step.
 
@@ -51,7 +52,7 @@ behind #167. Prose may still say "a one-shot invocation".
 
 ## Consequences
 
-- Reverses ADR 0005, which is still `Proposed`. Breaking for every consumer
+- Reverses the CliApp-split ADR, which is still `Proposed`. Breaking for every consumer
   naming the old types.
 - `KitCli.Tooling.Release` consumes the published `KitCli` package, not the
   project, so it stays on `ArgsCliApp` until a release ships the new name

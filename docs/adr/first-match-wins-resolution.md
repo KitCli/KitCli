@@ -1,8 +1,9 @@
-# 0004. Resolve ambiguous candidates by first match in registration order
+# Resolve ambiguous candidates by first match in registration order
 
 Status: Accepted (retroactive — reconstructed from current source, not
 original notes)
 Date: 2026-07-26
+Release: 1.0.0
 
 ## Context
 
@@ -55,5 +56,5 @@ registration order, and that order lives in whichever `Add...` call wired
 things up, not in the candidate types. Moving or inserting a registration
 can silently change which candidate wins, with no error anywhere. This is
 an accepted cost of keeping registration out of consuming code
-([ADR 0003](0003-reflection-based-automatic-registration.md)), not an
+(the [reflection-registration ADR](reflection-based-automatic-registration.md)), not an
 oversight repeated four times.

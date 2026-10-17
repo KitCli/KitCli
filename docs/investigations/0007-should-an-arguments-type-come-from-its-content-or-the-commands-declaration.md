@@ -38,7 +38,7 @@ So the fix is: parse keeps every argument as its raw text, and the
 retrieval helpers convert to the type the caller asked for, failing
 loudly when the text will not convert. That deletes the builder chain —
 a published extension point — reverses one of
-[ADR 0004](../adr/0004-first-match-wins-resolution.md)'s four points,
+the [first-match-wins ADR](../adr/first-match-wins-resolution.md)'s four points,
 changes what run history records, needs a converter registry and a live
 error code, rewrites a concept doc and a user guide, and lands as a major
 bump. It also settles #9 and #40 outright, fixes #22 as a side effect,
@@ -70,7 +70,7 @@ and an ADR, not the sized-13 bug fix #8 started as.
    text, and the requested type; `GetRequiredArgument<T>`'s bare
    `Exception` becomes `ArgumentIsRequired`, making #21's codes real.
    Delete the seven builders and `IInstructionArgumentBuilder`. The ADR
-   superseding ADR 0004's parser row rides in this PR, as do the
+   superseding the first-match-wins ADR's parser row rides in this PR, as do the
    rewrites of [concept 0005](../concepts/instruction-parsing-pipeline.md)
    and [user guide 0005](../user-guides/0005-reading-command-arguments.md)
    and the `CHANGELOG.md` breaking entry. If the file count passes 20,
@@ -113,7 +113,7 @@ established that `BoolInstructionArgumentBuilder.For` returns `true`
 unconditionally and sits ahead of any builder a consumer appends after
 `AddCliInstructions()`, so the extension point is unreachable from
 consuming code. Still a public-surface break: packages version in
-lockstep ([ADR 0015](../adr/0015-version-the-packages-in-lockstep.md)),
+lockstep (the [lockstep ADR](../adr/version-the-packages-in-lockstep.md)),
 so the set takes a major.
 
 **Raw history is truer history.** Run state records the instruction
@@ -122,7 +122,7 @@ types — which #22 shows are locale-dependent. Raw text plus
 invariant-culture conversion makes a recorded run mean the same thing on
 every host.
 
-**ADR 0004's other three points stand.** Command factories, artefact
+**The first-match-wins ADR's other three points stand.** Command factories, artefact
 factories, and outcome writers resolve a *handler* for a value that
 genuinely exists; the parser was minting a *type* for one. Only the
 parser row is superseded.
@@ -173,5 +173,5 @@ parser row is superseded.
 - Rebuilding validation on FluentValidation (#183).
 - The descriptor build itself (#189, #190, #191), past sharing the
   registry.
-- Most-specific-match for ADR 0004's other three points, out of scope
+- Most-specific-match for the first-match-wins ADR's other three points, out of scope
   here exactly as it was in investigation 0006.

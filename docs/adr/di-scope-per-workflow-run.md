@@ -1,9 +1,10 @@
-# 0002. Create a DI scope per workflow run
+# Create a DI scope per workflow run
 
 Status: Accepted
 Date: 2026-08-22
+Release: 1.0.11
 
-[ADR 0010](0010-resolve-the-whole-run-from-its-scope.md) proposes to
+The [run-scope ADR](resolve-the-whole-run-from-its-scope.md) proposes to
 supersede this. It keeps the per-run scope and extends it to the whole run;
 read it before relying on the lifetimes decided here.
 
@@ -48,7 +49,7 @@ implementations, so it doesn't need to participate in the per-run scope.
 The actual per-run isolation guarantee comes from `ISender`/`IPublisher`
 being resolved from the run's scope, since that's what MediatR uses to
 resolve `IRequestHandler<T>` instances — and their constructor-injected
-dependencies — at `Send()` time. That reasoning is what ADR 0010 revisits.
+dependencies — at `Send()` time. That reasoning is what the run-scope ADR revisits.
 
 ## Alternatives considered
 

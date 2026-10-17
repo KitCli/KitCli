@@ -95,5 +95,5 @@ static or a singleton.
   what "reusable" means, and how a chain maps onto the run's state.
 - [../concepts/artefacts.md](../concepts/artefacts.md) — passing data
   from an earlier step to a later one.
-- [../adr/0011-chain-to-a-command-by-type.md](../adr/0011-chain-to-a-command-by-type.md) —
+- [../adr/chain-to-a-command-by-type.md](../adr/chain-to-a-command-by-type.md) —
   why there are two ways to name the next command.

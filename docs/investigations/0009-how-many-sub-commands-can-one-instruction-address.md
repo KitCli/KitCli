@@ -79,4 +79,4 @@ named a command and which was a value.
 - **Quoting.** `"hello!"` keeps its quote marks. Already
   [#39](https://github.com/KitCli/KitCli/issues/39).
 - **How commands are registered.** Factories stay keyed on the first word
-  only; nothing here changes [ADR 0004](../adr/0004-first-match-wins-resolution.md).
+  only; nothing here changes the [first-match-wins ADR](../adr/first-match-wins-resolution.md).

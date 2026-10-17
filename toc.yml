@@ -12,7 +12,7 @@
       homepage: docs/concepts/command-registration.md
     - name: ADRs
       href: docs/adr/
-      homepage: docs/adr/0001-mediatr-for-command-dispatch.md
+      homepage: docs/adr/mediatr-for-command-dispatch.md
     - name: Investigations
       href: docs/investigations/
       homepage: docs/investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md

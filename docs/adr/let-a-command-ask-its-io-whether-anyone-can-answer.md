@@ -1,7 +1,8 @@
-# 0021. Let a command ask its I/O whether anyone can answer
+# Let a command ask its I/O whether anyone can answer
 
 Status: Proposed
 Date: 2026-09-05
+Release: 3.4.0
 
 ## Context
 

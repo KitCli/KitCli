@@ -16,7 +16,7 @@ stands.
   queryable directly from GitHub:
   [open findings from this review](https://github.com/KitCli/KitCli/issues?q=is%3Aissue+created%3A2026-07-25).
 - This review is what the [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md)
-  operating model, [ADRs](../adr/0001-mediatr-for-command-dispatch.md), and [concept docs](../concepts/command-registration.md) in
+  operating model, [ADRs](../adr/mediatr-for-command-dispatch.md), and [concept docs](../concepts/command-registration.md) in
   this repo were built in direct response to — several of the doc/CI/test
   gaps below were fixed in the same pass that produced this review,
   before the corresponding finding was ever filed (noted where relevant).

@@ -38,7 +38,7 @@ When an ask arrives, `CliWorkflowCommandProvider.GetCommand` fetches every
 factory keyed under that name, attaches the instruction and the run's
 artefacts, and takes the **first** whose `CanCreateWhen()` returns `true` —
 the same first-match-wins rule used for argument builders and outcome
-writers ([ADR 0004](../adr/0004-first-match-wins-resolution.md)). This is
+writers (the [first-match-wins ADR](../adr/first-match-wins-resolution.md)). This is
 what lets several `CliCommandFactory<T>` share one command type, each
 picking a different subcommand with `CanCreateWhen()`.
 
@@ -70,4 +70,4 @@ ask resolves there, not at startup. Tracked as
 [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) ·
 [artefacts.md](artefacts.md) ·
 [../user-guides/0015-giving-a-command-extra-names.md](../user-guides/0015-giving-a-command-extra-names.md) ·
-[../adr/0007-cli-command-alias-attribute.md](../adr/0007-cli-command-alias-attribute.md)
+[../adr/cli-command-alias-attribute.md](../adr/cli-command-alias-attribute.md)

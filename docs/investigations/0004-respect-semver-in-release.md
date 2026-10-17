@@ -4,7 +4,7 @@
 - **Spike:** [#135](https://github.com/KitCli/KitCli/issues/135)
 - **Time-box:** none agreed — #135 was an inline TODO promoted to an issue, not an estimated spike
 - **Date:** 2026-08-25
-- **Justifies** [ADR 0012](../adr/0012-derive-version-bumps-from-the-public-api-diff.md)
+- **Justifies** the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md)
 
 ## Verdict
 
@@ -34,7 +34,7 @@ the model it serves is agreed:
 1. **Blocked on #128.** It decides per-package vs lockstep versioning. Everything
    below assumes per-package.
 2. **ADR — derive bumps from the public API diff.** Written as
-   [ADR 0012](../adr/0012-derive-version-bumps-from-the-public-api-diff.md).
+   the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md).
 3. **Adopt `Microsoft.CodeAnalysis.PublicApiAnalyzers`** across the nine packable
    projects, with a committed `PublicAPI.Shipped.txt` baseline. Standalone value:
    silent signature breaks become build failures whether or not the tool ever
@@ -96,7 +96,7 @@ the model it serves is agreed:
   Newtonsoft.Json 13, MediatR 14, AutoMapper 16. KitCli moved 1.0.13 to 3.0.0 in
   roughly 36 hours. Deriving the level correctly, as recommended above, makes
   that rate legible — it does not slow it. Only a deprecation policy does.
-- **Deprecation would have downgraded most of ADR 0013.** `TerminalCliApp`,
+- **Deprecation would have downgraded most of the host-merge ADR.** `TerminalCliApp`,
   `ArgsCliApp`, `BasicTerminalCliApp` and `WithBasicTerminalApp()` could each
   have stayed as an `[Obsolete]` forwarder, leaving a minor. `ExecuteRunOperation`
   is the exception: its `protected` signature changed, which breaks a subclass

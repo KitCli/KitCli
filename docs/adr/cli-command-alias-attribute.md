@@ -1,7 +1,8 @@
-# 0007. Add extra instruction names via a `[CliCommandAlias]` attribute
+# Add extra instruction names via a `[CliCommandAlias]` attribute
 
 Status: Accepted
 Date: 2026-08-23
+Release: 1.0.12
 
 ## Context
 
@@ -13,7 +14,7 @@ Renaming the type was the only way to change either. So a command could not
 have a memorable user-facing name that does not fit the PascalCase
 convention, nor more than one name, without renaming the type everywhere.
 
-[ADR 0003](0003-reflection-based-automatic-registration.md) rejected
+The [reflection-registration ADR](reflection-based-automatic-registration.md) rejected
 supplying names at registration time, to avoid returning to hand-maintained
 lists. That is about how names are *supplied*, not how many a command may
 have — declaring extras on the type keeps naming type-driven, so it does
@@ -42,7 +43,7 @@ public record SpareMoneyCliCommand : CliCommand;
   [CliCommandAlias("b")]` reads better at the declaration site and needs no
   array syntax explained.
 - **A free-standing map from command type to names** — reintroduces the
-  place to forget to update, for the reason ADR 0003 gave.
+  place to forget to update, for the reason the reflection-registration ADR gave.
 
 ## Consequences
 

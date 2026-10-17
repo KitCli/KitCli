@@ -4,7 +4,7 @@ KitCli builds one container, in `CliAppBuilder.Run()`, from
 `Microsoft.Extensions.DependencyInjection` 10.0.2 on `net10.0`. This page
 answers "can I do X with the container" — which features KitCli supports,
 and where each one stops. For *why* the run scope exists, see
-[ADR 0002](../adr/0002-di-scope-per-workflow-run.md).
+the [scope-per-run ADR](../adr/di-scope-per-workflow-run.md).
 
 ```csharp
 var serviceProvider = _services.BuildServiceProvider(new ServiceProviderOptions
@@ -30,10 +30,10 @@ command and every ask in that run.
 
 Everything that executes while the run's scope is alive should resolve
 from it. Today only command handlers do —
-[ADR 0010](../adr/0010-resolve-the-whole-run-from-its-scope.md) closes the
+the [run-scope ADR](../adr/resolve-the-whole-run-from-its-scope.md) closes the
 gap for the rest.
 
-| Extension point | Today | After 0010 | Registration |
+| Extension point | Today | After the run-scope ADR | Registration |
 |---|---|---|---|
 | Command handler | Yes | Yes | MediatR transient |
 | MediatR pipeline behaviour | Yes | Yes | MediatR transient |
@@ -54,7 +54,7 @@ gap for the rest.
 `ICliIo`, `ICliWorkflow`, and `CliApp` stay singletons deliberately —
 the host loop uses them between runs, so a run-scoped instance would be
 wrong. `IOutcomeIoWriter` is excluded **today** only by timing: it runs
-after the scope is disposed. ADR 0010 moves that disposal past the write
+after the scope is disposed. The run-scope ADR moves that disposal past the write
 and resolves writers per run, which is why its column reads Yes.
 
 Your own `ArtefactFactory<>`, `Aggregator<,>`, and `TableBuilder<,>`
@@ -62,7 +62,7 @@ subclasses are a separate problem. They are created by
 `Activator.CreateInstance` during `AddArtefactFactoriesForAssembly` and
 registered as instances, so they take no constructor dependencies at any
 lifetime — adding one throws `MissingMethodException` at registration, not
-a DI error. ADR 0010 does not fix this.
+a DI error. The run-scope ADR does not fix this.
 
 Handlers reach the scope today because `ISender` is a MediatR *transient*
 constructed inside the run's scope, so the provider it captures is the
@@ -170,7 +170,7 @@ Injection Per Workflow Run* milestone.
 
 ## See also
 
-- [ADR 0002 — DI scope per workflow run](../adr/0002-di-scope-per-workflow-run.md)
-- [ADR 0010 — resolve the whole run from its scope](../adr/0010-resolve-the-whole-run-from-its-scope.md)
+- [DI scope per workflow run](../adr/di-scope-per-workflow-run.md)
+- [Resolve the whole run from its scope](../adr/resolve-the-whole-run-from-its-scope.md)
 - [Workflow run state machine](../concepts/workflow-run-state-machine.md)
 - [CliApp host loop](../concepts/cli-app-host.md)

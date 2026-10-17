@@ -145,7 +145,7 @@ layout: landing
     <h3>A paper trail</h3>
     <p>
       Process, not code: <code>CONTRIBUTING.md</code>, the first
-      <a href="adr/0001-mediatr-for-command-dispatch.md">ADRs</a> and
+      <a href="adr/mediatr-for-command-dispatch.md">ADRs</a> and
       <a href="concepts/command-registration.md">concept docs</a>, and an
       automated release workflow. A framework other people's code depends on
       needs to be able to answer "why is it like this".
@@ -158,12 +158,12 @@ layout: landing
     <span class="tl-when">August 2026</span>
     <h3>Hosts, scopes and attributes</h3>
     <p>
-      A <a href="adr/0013-merge-the-hosts-and-name-the-variant-headless.md">headless
+      A <a href="adr/merge-the-hosts-and-name-the-variant-headless.md">headless
       host</a> runs a command straight from process args, Ctrl+C becomes
-      <a href="adr/0006-cooperative-cancellation.md">cooperative cancellation</a>,
-      and every run gets <a href="adr/0002-di-scope-per-workflow-run.md">its own
+      <a href="adr/cooperative-cancellation.md">cooperative cancellation</a>,
+      and every run gets <a href="adr/di-scope-per-workflow-run.md">its own
       DI scope</a>. A command can now declare its extra names, what should
-      follow it, and <a href="adr/0011-chain-to-a-command-by-type.md">the type
+      follow it, and <a href="adr/chain-to-a-command-by-type.md">the type
       it chains to</a>.
     </p>
   </div>

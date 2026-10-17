@@ -1,9 +1,10 @@
-# 0015. Version all nine packages in lockstep
+# Version all nine packages in lockstep
 
 Status: Proposed
 Date: 2026-08-29
+Release: Unreleased
 
-Answers the question [ADR 0012](0012-derive-version-bumps-from-the-public-api-diff.md)
+Answers the question the [API-diff versioning ADR](derive-version-bumps-from-the-public-api-diff.md)
 deferred, on [#128](https://github.com/KitCli/KitCli/issues/128).
 
 ## Context
@@ -32,8 +33,8 @@ Every packable project shares one version number, bumped together on every
 release, whether or not that project changed.
 
 The release tool keeps deriving the *level* from the public API diff as
-ADR 0012 sets out. What changes is the scope: one level for the release,
-the highest any package earned, applied to all nine. ADR 0012's
+the API-diff versioning ADR sets out. What changes is the scope: one level for the release,
+the highest any package earned, applied to all nine. The API-diff versioning ADR's
 `max(own level, highest level of anything referenced)` walk collapses into
 a single maximum over the set, and the dependencies-first ordering it
 relies on stops mattering for versioning.

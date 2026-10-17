@@ -1,7 +1,8 @@
-# 0001. Use MediatR for command dispatch
+# Use MediatR for command dispatch
 
 Status: Accepted (retroactive — reconstructed from code, not original notes)
 Date: 2026-07-24
+Release: 1.0.0
 
 ## Context
 

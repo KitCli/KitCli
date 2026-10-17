@@ -1,7 +1,8 @@
-# 0012. Derive each package's version bump from its public API diff
+# Derive each package's version bump from its public API diff
 
 Status: Proposed
 Date: 2026-08-25
+Release: Unreleased
 
 Justified by
 [investigation 0004](../investigations/0004-respect-semver-in-release.md),
@@ -16,7 +17,7 @@ produce anything but a patch.
 
 v2.0.0 is what that costs. `NextCliCommandOutcome` went from a concrete
 record to an abstract base
-([ADR 0011](0011-chain-to-a-command-by-type.md)), so
+(the [chain-by-type ADR](chain-to-a-command-by-type.md)), so
 `new NextCliCommandOutcome(cmd)` stopped compiling for consumers. The tool
 proposed 1.0.14, and six `<Version>` elements were written by hand instead.
 That puts the semver call on whoever runs the release, weeks after the
@@ -30,7 +31,7 @@ the only signal in the repo pointing at a major.
 
 This ADR assumes per-package versioning, which is what ships today. It
 decides how a bump is *sized*, not whether packages share a number —
-[ADR 0015](0015-version-the-packages-in-lockstep.md) since decided they
+the [lockstep ADR](version-the-packages-in-lockstep.md) since decided they
 share one, which narrows the propagation below to a single maximum over
 the set.
 
@@ -75,7 +76,7 @@ nothing looked.
   needs the network and the previous package, and reports after the change
   has landed rather than failing the PR that made it.
 - **Version all nine packages in lockstep** — a separate question, since
-  answered by [ADR 0015](0015-version-the-packages-in-lockstep.md). It
+  answered by the [lockstep ADR](version-the-packages-in-lockstep.md). It
   changes how a level propagates, not how one is detected.
 
 ## Consequences

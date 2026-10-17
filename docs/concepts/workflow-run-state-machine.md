@@ -65,7 +65,7 @@ one case. Parked at a reusable checkpoint the run makes **zero** state
 changes and returns the last command's `[CliNextCommandIs]` moves as
 `SuggestionOutcome`s; none declared, a silent `NothingOutcome`. Anywhere
 else all three fail into `InvalidAsk` and finish. See
-[../adr/0008-suggest-next-commands-attribute.md](../adr/0008-suggest-next-commands-attribute.md).
+[../adr/suggest-next-commands-attribute.md](../adr/suggest-next-commands-attribute.md).
 
 ## Gaps
 
@@ -82,4 +82,4 @@ else all three fail into `InvalidAsk` and finish. See
 
 [outcomes.md](outcomes.md) · [cli-app-host.md](cli-app-host.md) ·
 [specified-vs-provided-outcomes.md](specified-vs-provided-outcomes.md) ·
-[../adr/0010-resolve-the-whole-run-from-its-scope.md](../adr/0010-resolve-the-whole-run-from-its-scope.md)
+[../adr/resolve-the-whole-run-from-its-scope.md](../adr/resolve-the-whole-run-from-its-scope.md)

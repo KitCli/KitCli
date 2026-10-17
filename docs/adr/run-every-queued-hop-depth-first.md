@@ -1,7 +1,8 @@
-# 0016. Run every queued hop, depth-first
+# Run every queued hop, depth-first
 
 Status: Proposed
 Date: 2026-08-29
+Release: Unreleased
 
 Settles the selection rule left open by
 [#152](https://github.com/KitCli/KitCli/issues/152), ticket 3 of
@@ -76,7 +77,7 @@ interpretation, not the outcomes.
   A behavior change, so a `CHANGELOG.md` entry ships with the code.
 - The public API only gains: no type changes shape and the interface
   gains no member, so this is a minor release, not a major.
-- Rewrites ADR 0011's "still takes the last queued hop" consequence.
+- Rewrites the chain-by-type ADR's "still takes the last queued hop" consequence.
 - The move-past-ask guard asks the state, so hops consumed steps ago no
   longer count as pending — a latent bug gone.
 - Depth-first costs a replay instead of a skip-count; it is one
