@@ -34,11 +34,13 @@ July 2026, 25 since.
 ```mermaid
 ---
 config:
+  xyChart:
+    height: 640
   themeVariables:
     xyChart:
       plotColorPalette: "#D97757, #6B7280"
 ---
-xychart-beta
+xychart-beta horizontal
     title "Lines changed each month"
     x-axis ["Feb 2025", "Mar 2025", "Apr 2025", "May 2025", "Jun 2025", "Jul 2025", "Aug 2025", "Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"]
     y-axis "Lines" 0 --> 27000
