@@ -4,61 +4,49 @@ Date: 2026-10-17
 
 **This is a snapshot, not current state.** It compares how much work
 landed in KitCli before and after the maintainer started using Claude
-Code on 2026-07-22, up to `main` on the date above. It measures volume,
-not pace: lines changed say how much was written, not how fast finished
-work shipped.
+Code on 2026-07-22. It measures volume, not pace: lines changed say how
+much was written, not how fast finished work shipped.
 
 ## Summary
 
-A working day produces 8 commits in both periods. Since July, more of
-each day goes to tests and documentation and less to code. Tests grew
-from 129 to 389, and documentation pages from 4 to 83.
+Before Claude, a working day changed about 420 lines. Since July it
+changes about 1,450: about 590 lines of code and tests, and 860 of
+documentation. Code and tests alone are up by about 40%.
 
 ## Methodology
 
-Each commit on `main` counts once (`git log main --first-parent`), so a
-squash-merged pull request is one commit. 167 of the 192 commits since
-July carry a `Co-authored-by: Claude` trailer. The release bot's 9
-version bumps are left out. A working day is a date with at least one
-commit. Changed lines are lines added plus lines deleted: `.md` files
-count as docs, `.cs` files in a test project as tests, other `.cs` files
-as code.
+KitCli started inside the
+[SpendfulnessCli](https://github.com/joshuaedwardcrowe/SpendfulnessCli)
+repository and moved to its own on 2026-01-28. Its history up to then
+is the SpendfulnessCli folders that became KitCli: `Cli` and every
+`Cli.*` folder except `Cli.Spendfulness.*`, plus `YnabCli.Instructions`
+and `YnabProgressConsole.Instructions`, which became `Cli.Instructions`.
+From 2026-01-28 it is every commit on KitCli's `main`, leaving out the
+commits that copied the code across and the release bot's version
+bumps.
 
-February is the baseline, with 8 working days against 24 since July.
-January holds the first scaffolding, which is half of all lines added
-before July.
+A changed line is a line added or deleted. A moved file counts only
+its edits. A working day is a date with at least one commit: 49 before
+July 2026, 25 since.
 
 ## Findings
 
 ```mermaid
 xychart-beta
-    title "Code lines changed per working day"
-    x-axis ["February", "July to October"]
-    y-axis "Lines" 0 --> 900
-    bar [496, 229]
+    title "Lines changed each month"
+    x-axis ["Feb 25", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan 26", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"]
+    y-axis "Lines" 0 --> 27000
+    bar [1307, 11, 59, 0, 0, 0, 0, 0, 5802, 5912, 268, 316, 6714, 0, 0, 0, 0, 2621, 25940, 2912, 4745]
 ```
 
-```mermaid
-xychart-beta
-    title "Test lines changed per working day"
-    x-axis ["February", "July to October"]
-    y-axis "Lines" 0 --> 900
-    bar [200, 263]
-```
-
-```mermaid
-xychart-beta
-    title "Docs lines changed per working day"
-    x-axis ["February", "July to October"]
-    y-axis "Lines" 0 --> 900
-    bar [3, 875]
-```
+Claude Code wrote with the maintainer from July 2026 onwards. 171 of
+the 196 commits since then carry its `Co-authored-by` trailer.
 
 ## Caveats
 
 - **Working days are not hours.** Git records the day of a commit, not
   how long the work took.
-- **Squash merges hide intermediate commits**, so commit counts since
-  July understate the steps taken.
+- **Documentation is most of the growth.** 21,548 of the 36,218 lines
+  changed since July are in `.md` files, against 25 lines before.
 - **Lines are not value.** Tidying code lowers its line count, and a
   line of documentation takes different effort from a line of code.
