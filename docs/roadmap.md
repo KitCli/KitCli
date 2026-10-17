@@ -172,11 +172,42 @@ layout: landing
 <div class="tl-item tl-left">
   <div class="tl-card">
     <span class="tl-when">August 2026</span>
-    <h3>Three majors in five days</h3>
+    <h3>Five releases in five days</h3>
     <p>
       v1.0.11 on the 22nd through to v3.0.0 on the 26th, cut by a release tool
       that is itself a KitCli app — so publishing the packages uses them. These
       docs go up as a site in the same week.
+    </p>
+  </div>
+</div>
+
+<div class="tl-item tl-right">
+  <div class="tl-card">
+    <span class="tl-when">September 2026</span>
+    <h3>Tables on Spectre.Console</h3>
+    <p>
+      v3.1.1 and v3.1.2. Tables
+      <a href="adr/render-tables-with-spectre-console.md">render through
+      Spectre.Console</a> in a choice of styles, a reaction can be named by
+      type, and an argument value can contain <code>--</code>. The release tool
+      retires: versions are bumped by hand, and CI publishes on merge.
+    </p>
+  </div>
+</div>
+
+<div class="tl-item tl-left">
+  <div class="tl-card">
+    <span class="tl-when">October 2026</span>
+    <h3>Asking, choosing and remembering</h3>
+    <p>
+      v3.2.0 on the 11th, then v3.3.0 and v3.4.0 on the 15th. A command can
+      <a href="adr/ask-through-cli-io-with-cli-choice.md">show a list to choose
+      from</a>, <a href="adr/suggest-commands-that-could-be-next.md">suggest
+      what could come next</a>, and write messages at a level. An outcome can
+      <a href="user-guides/reusable-outcomes-and-the-workflow-run.md">last the
+      whole session</a>, and a command can
+      <a href="adr/let-a-command-ask-its-io-whether-anyone-can-answer.md">check
+      whether anyone can answer</a> before it asks.
     </p>
   </div>
 </div>
