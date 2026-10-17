@@ -10,7 +10,7 @@ assumes them. Then pick a folder.
 | [`adr/`](adr/0001-mediatr-for-command-dispatch.md) | Why is X like this? | You want to change something and need the reason it is that way. |
 | [`investigations/`](investigations/0002-which-extension-points-can-use-a-consumers-lifetimes.md) | What did we find out? | You are picking up work a spike scoped. |
 | [`technology/`](technology/microsoft-dependency-injection.md) | What can I do with KitCli's dependency X? | You are asking "does the container support…". |
-| [`reviews/`](reviews/0001-architectural-review.md) | What was wrong on a given date? | Historical only. Never current state. |
+| [`reviews/`](reviews/architectural-review-2026-07.md) | What was wrong on a given date? | Historical only. Never current state. |
 
 Start at [writing a basic command](user-guides/0001-writing-a-basic-command.md).
 [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md) says when to write each kind, and

@@ -131,7 +131,7 @@ opens the page that starts that kind.
   it scoped.
 - [Technology](https://kitcli.github.io/KitCli/docs/technology/microsoft-dependency-injection.html)
   — what KitCli's dependencies can do.
-- [Reviews](https://kitcli.github.io/KitCli/docs/reviews/0001-architectural-review.html)
+- [Reviews](https://kitcli.github.io/KitCli/docs/reviews/architectural-review-2026-07.html)
   — past architectural reviews. Historical only; never current state.
 
 The [documentation home](https://kitcli.github.io/KitCli/docs/README.html)

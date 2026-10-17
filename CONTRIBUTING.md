@@ -72,7 +72,9 @@ for why, and add an entry to it when a release or a change of shape lands.
   `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
   Technology pages take their dependency's name instead, and concept docs
   take their topic's name with no number — `toc.yml` gives the reading
-  order instead.
+  order instead. Reviews take their kind and month,
+  `test-coverage-review-2026-08.md`, and `toc.yml` groups them by kind,
+  then month.
 - **Verify every name, signature and sample against source** before it
   lands. Readers trust a doc they cannot check, so a wrong one costs more
   than a missing one.

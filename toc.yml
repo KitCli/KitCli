@@ -21,9 +21,9 @@
       homepage: docs/technology/microsoft-dependency-injection.md
     - name: Reviews
       href: docs/reviews/
-      homepage: docs/reviews/0001-architectural-review.md
+      homepage: docs/reviews/architectural-review-2026-07.md
     - name: Test coverage
-      href: docs/reviews/0002-test-coverage-review.md
+      href: docs/reviews/test-coverage-review-2026-08.md
 - name: API reference
   href: api/
   homepage: api/index.md

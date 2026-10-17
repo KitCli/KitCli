@@ -16,7 +16,7 @@ real change volume, since calendar time alone doesn't mean anything
 architectural actually moved.
 
 **Last full architectural review: 2026-07-25** (write-up:
-[`docs/reviews/0001-architectural-review.md`](../../docs/reviews/0001-architectural-review.md)),
+[`docs/reviews/architectural-review-2026-07.md`](../../docs/reviews/architectural-review-2026-07.md)),
 at commit `1290121160171b232b3d52bb12a5ac14bcd80a98`.
 
 Before starting a new *full* review pass (not before every invocation of
@@ -40,7 +40,7 @@ and scope the work to whatever's actually being asked (a specific area,
 a specific concern) instead of running a full sweep.
 
 After completing a full review, write it up as
-`docs/reviews/<date>-architectural-review.md` (see the existing one for
+`docs/reviews/architectural-review-<yyyy-mm>.md` (see the existing one for
 the shape: summary counts, methodology, a findings table grouped by
 severity linking each GitHub issue, and any skipped/already-resolved
 findings), then update the date, write-up link, and commit hash above to

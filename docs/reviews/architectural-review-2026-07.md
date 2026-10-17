@@ -1,4 +1,4 @@
-# 0001. Architectural review
+# Architectural review, July 2026
 
 Date: 2026-07-25
 
