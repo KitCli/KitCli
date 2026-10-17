@@ -77,21 +77,65 @@ sequenceDiagram
     K->>E: run again
 ```
 
-The developer's code loses the `ReturnTo` field, the per-sender factories and the
-`null` check. `/order` is unchanged. The names below are proposals, not on
-`main`:
+Here is Choose book's code today, as the guide teaches it. It shows the
+list, remembers the pick, then works out where to send the user:
 
 ```csharp
-// Choose book's handler, after a good answer
-return FinishThisCommand()
-    .ByResultingIn(new ChosenBookOutcome(chosenBook))
-    .ByMovingBackToPriorCommand()
-    .End();
+public record ChooseBookCliCommand(Type? ReturnTo) : CliCommand;
 
-// Choose book's factory, to word a message such as "Back to your order"
-public override CliCommand Create()
-    => new ChooseBookCliCommand(BackToOrder: WasSentFrom<OrderCliCommand>());
+public class ChooseBookCliCommandHandler(ICliIo io) : CliCommandHandler<ChooseBookCliCommand>
+{
+    public override async Task<Outcome[]> HandleCommand(ChooseBookCliCommand command, CancellationToken ct)
+    {
+        var chosenBook = await io.ChooseAsync("Which book would you like?", [new("Dune", "dune"), new("Emma", "emma")], ct);
+        if (chosenBook is null)
+        {
+            return FinishThisCommand().ByFinallySaying("No book chosen.").End();
+        }
+
+        var outcomes = FinishThisCommand().ByResultingIn(new ChosenBookOutcome(chosenBook));
+
+        return command.ReturnTo is null
+            ? outcomes.End()
+            : outcomes.ByMovingToCommand(command.ReturnTo).End();
+    }
+}
 ```
+
+The developer also writes one factory per command that can send the user
+here, to fill in `ReturnTo`.
+
+After this work, KitCli works out where to send the user. The `ReturnTo`
+field, the factories and the `null` check go. `ByMovingBackToPriorCommand()`
+is a proposed name, not on `main`:
+
+```csharp
+public record ChooseBookCliCommand : CliCommand;
+
+public class ChooseBookCliCommandHandler(ICliIo io) : CliCommandHandler<ChooseBookCliCommand>
+{
+    public override async Task<Outcome[]> HandleCommand(ChooseBookCliCommand command, CancellationToken ct)
+    {
+        var chosenBook = await io.ChooseAsync("Which book would you like?", [new("Dune", "dune"), new("Emma", "emma")], ct);
+        if (chosenBook is null)
+        {
+            return FinishThisCommand().ByFinallySaying("No book chosen.").End();
+        }
+
+        return FinishThisCommand()
+            .ByResultingIn(new ChosenBookOutcome(chosenBook))
+            .ByMovingBackToPriorCommand()
+            .End();
+    }
+}
+```
+
+| Line | What it does |
+|---|---|
+| `io.ChooseAsync(...)` | Shows the list and waits. It returns `null` when the user cancels. |
+| `ByFinallySaying("No book chosen.")` | Shows the message and ends the run. |
+| `ByResultingIn(new ChosenBookOutcome(chosenBook))` | Remembers the chosen book, so `/order` can read it when it runs again. `ChosenBookOutcome` is the app's own type. |
+| `ByMovingBackToPriorCommand()` | Sends the user back to `/order`, the command that moved them here. |
 
 KitCli handles each case:
 
@@ -107,7 +151,9 @@ KitCli handles each case:
 Three delivery tickets, in this order, as one minor release. An ADR comes with
 the first, because the note is a new pattern every command can use.
 
-**1. Write the "sent by" note when following a move, and add `WasSentFrom<T>()`.**
+**1. Write the "sent by" note when following a move.** Add
+`WasSentFrom<OrderCliCommand>()` too, so a command can check the note, for
+example to say "Back to your order".
 
 **2. Add `ByMovingBackToPriorCommand()`.** It sends the user back to the command in the note.
 
