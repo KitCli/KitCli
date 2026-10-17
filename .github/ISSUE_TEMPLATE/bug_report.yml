@@ -2,23 +2,46 @@ name: Bug report
 description: Something in KitCli doesn't work as documented.
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Show the bug rather than describe it: the shortest code that triggers it, then what you saw.
+        Use a mermaid diagram when the bug is about order or timing, and a table for facts.
+        [This investigation](https://github.com/KitCli/KitCli/blob/main/docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md) shows the style.
   - type: textarea
     id: repro
     attributes:
       label: Repro steps
-      description: Minimal steps to reproduce, ideally a snippet using CliAppBuilder.
+      description: The shortest code that shows the bug, ideally a snippet using CliAppBuilder, plus the input to type.
+      placeholder: |
+        ```csharp
+        new CliAppBuilder()
+            .WithJsonSettings("settings.json")
+            .WithSettings<ExampleSettings>();
+        ```
+
+        Then type `/example`.
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: Expected behavior
+      description: One bold sentence, then a table or diagram if it helps.
+      placeholder: "**`ExampleSettings.Value` is `\"a\"`.**"
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
       label: Actual behavior
+      description: One bold sentence saying what happens instead. Add the cause as `File.cs:line` if you know it.
+      placeholder: |
+        **`ExampleSettings.Value` is `null`, and nothing warns you.**
+
+        | File | Shows |
+        |---|---|
+        | `KitCli/CliAppBuilder.cs:110` | The settings are read once. |
     validations:
       required: true
   - type: input

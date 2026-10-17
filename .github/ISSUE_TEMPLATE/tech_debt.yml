@@ -2,20 +2,39 @@ name: Tech debt
 description: Something works but the implementation has a known cost.
 labels: ["tech-debt"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Point at the code, then say what it costs. Put facts in tables, and use a mermaid diagram when the cost is about how pieces connect.
+        Keep prose to a sentence or two between them.
+        [This investigation](https://github.com/KitCli/KitCli/blob/main/docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md) shows the style.
   - type: textarea
     id: evidence
     attributes:
       label: File/line evidence
       description: Where the debt lives, concretely.
+      placeholder: |
+        | File | Shows |
+        |---|---|
+        | `KitCli.Workflow.Commands/CliWorkflowCommandProvider.cs:46` | The outcome-to-artefact conversion. |
+        | `KitCli.Workflow.Commands/CliWorkflowReactionProvider.cs:44` | The same code, copied. |
     validations:
       required: true
   - type: textarea
     id: cost
     attributes:
       label: What it costs to leave alone
+      description: One bold sentence, then a table if there's more than one cost.
+      placeholder: |
+        **A fix to one copy misses the other.**
+
+        | Fact | Consequence |
+        |---|---|
+        | Two copies of the conversion exist. | A change must be made twice. |
     validations:
       required: true
   - type: textarea
     id: fix
     attributes:
       label: Proposed fix
+      description: The shape of the fix, as code where you can.

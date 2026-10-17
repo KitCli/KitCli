@@ -2,19 +2,44 @@ name: Feature request
 description: Propose new functionality or a shape change to an existing API.
 labels: ["feature"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Lead with the problem in one bold sentence, then show it: a mermaid diagram of what happens today, and code for the shape you want.
+        Keep prose to a sentence or two between them.
+        [This investigation](https://github.com/KitCli/KitCli/blob/main/docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md) shows the style.
   - type: textarea
     id: problem
     attributes:
       label: Problem
       description: What can't you do today? Start here, not with the solution.
+      placeholder: |
+        **A value a command chooses is gone by the next run.**
+
+        ```mermaid
+        sequenceDiagram
+            actor U as User
+            participant A as App
+            U->>A: /environment choose prod
+            A-->>U: Using prod. Run 1 ends
+            U->>A: /execute
+            Note over A: run 2 sees environment: gone
+        ```
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
       label: Proposed shape
-      description: Sketch the API/behavior you'd want, if you have one in mind.
+      description: The code you'd want to write, if you have it in mind. One line on what it does.
+      placeholder: |
+        ```csharp
+        public record EnvironmentChosenOutcome(string Environment)
+            : Outcome(OutcomeKind.Anonymous, OutcomeLifetime.Session);
+        ```
   - type: textarea
     id: alternatives
     attributes:
       label: Alternatives considered
+      description: One bullet each, with a bold name and why it lost.
+      placeholder: "- **Save the value to a file.** Survives a restart, which nobody asked for."
