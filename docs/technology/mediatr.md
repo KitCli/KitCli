@@ -33,20 +33,25 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
-    class IRequest~Outcome[]~
-    class INotification
+    class IRequest~T~ {
+        <<interface>>
+    }
+    class INotification {
+        <<interface>>
+    }
     class CliCommand
     class CliCommandHandler~TCliCommand~ {
-        +HandleCommand(command, token) Task~Outcome[]~
+        +HandleCommand(command, token) Task
     }
     class CliCommandReaction
     class CliCommandReactionHandler~TReaction~ {
         +HandleReaction(reaction, token) Task
     }
-    IRequest~Outcome[]~ <|-- CliCommand
+    IRequest <|-- CliCommand
     INotification <|-- CliCommandReaction
-    CliCommandHandler~TCliCommand~ ..> CliCommand : handles
-    CliCommandReactionHandler~TReaction~ ..> CliCommandReaction : handles
+    CliCommandHandler ..> CliCommand : handles
+    CliCommandReactionHandler ..> CliCommandReaction : handles
+    note for IRequest "T is Outcome[]: a handler returns the command's outcomes"
 ```
 
 ```csharp
