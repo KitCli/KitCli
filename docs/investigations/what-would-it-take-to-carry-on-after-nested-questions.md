@@ -12,35 +12,36 @@
 **New complexity.** When the user comes back to a command, KitCli must give
 that command back the note it had the first time, so it can carry on in turn.
 
-`/export` sends the user to Choose source. Choose source sends them on to
-Choose folder. After both answers, the app should carry on with Choose source,
-then `/export`.
+`/order` sends the user to Choose book. The user picks "Browse by author", so
+Choose book sends them on to Choose author. After they pick an author, the app
+should carry on with Choose book, now listing that author's books, then
+`/order`.
 
 | Term | Meaning |
 |---|---|
-| Command | One step the app runs, such as `/export`. |
+| Command | One step the app runs, such as `/order`. |
 | Move | One command handing over to the next, written `ByMovingToCommand`. |
-| Note | What KitCli writes when it follows a move: "Choose source was sent here by `/export`". |
+| Note | What KitCli writes when it follows a move: "Choose book was sent here by `/order`". |
 | Carry on | A command telling KitCli it is done, written `ByCarryingOn()`, so KitCli sends the user back. |
 
 ### With one note per command
 
 The [previous investigation](how-does-a-command-know-where-it-was-sent-from.md)
-writes no note when the user is sent back. So Choose source comes back from
-Choose folder with no note, and stops:
+writes no note when the user is sent back. So Choose book comes back from
+Choose author with no note, and stops:
 
 ```mermaid
 sequenceDiagram
-    participant E as /export
-    participant S as Choose source
-    participant F as Choose folder
+    participant E as /order
+    participant S as Choose book
+    participant F as Choose author
     E->>S: move
-    Note over S: note: sent by /export
+    Note over S: note: sent by /order
     S->>F: move
-    Note over F: note: sent by Choose source
+    Note over F: note: sent by Choose book
     F->>S: carry on
     Note over S: no note this time
-    Note over E,S: /export is never reached
+    Note over E,S: /order is never reached
 ```
 
 ### After this work
@@ -50,19 +51,19 @@ it had the first time:
 
 ```mermaid
 sequenceDiagram
-    participant E as /export
-    participant S as Choose source
-    participant F as Choose folder
+    participant E as /order
+    participant S as Choose book
+    participant F as Choose author
     E->>S: move
-    Note over S: note: sent by /export
+    Note over S: note: sent by /order
     S->>F: move
-    Note over F: note: sent by Choose source
+    Note over F: note: sent by Choose book
     F->>S: carry on
-    Note over S: note again: sent by /export
+    Note over S: note again: sent by /order
     S->>E: carry on
 ```
 
-The author writes nothing extra. Each question still ends with `ByCarryingOn()`.
+The app's developer writes nothing extra. Each question still ends with `ByCarryingOn()`.
 
 ## Recommendation
 
@@ -83,14 +84,14 @@ rejected. Going back writes a note over the one still needed:
 
 ```mermaid
 sequenceDiagram
-    participant E as /export
-    participant S as Choose source
-    participant F as Choose folder
-    E->>S: move, note: sent by /export
-    S->>F: move, note: sent by Choose source
-    F->>S: go back, note: sent by Choose folder
+    participant E as /order
+    participant S as Choose book
+    participant F as Choose author
+    E->>S: move, note: sent by /order
+    S->>F: move, note: sent by Choose book
+    F->>S: go back, note: sent by Choose author
     S->>F: go back to the newest note
-    Note over E,F: /export is never reached
+    Note over E,F: /order is never reached
 ```
 
 ## Evidence

@@ -13,92 +13,93 @@
 **New complexity.** KitCli needs new code to write down which command sent the
 user to a question, and to send them back when the question says "carry on".
 
-`/export` needs a source to export from. When the user has not chosen one,
-`/export` sends them to Choose source, which asks "Which source?". Once they
-answer, the app should carry on with `/export`. For that, Choose source must
+A book shop app has an `/order` command, which needs a book to order. When
+the user has not chosen one, `/order` sends them to Choose book, which asks
+"Which book would you like?". Once they answer, the app should carry on with
+`/order`. For that, Choose book must
 know two things:
 
-| Choose source must know | So that |
+| Choose book must know | So that |
 |---|---|
-| **Where** it was sent from | It carries on with `/export`. Typed on its own, it just finishes. |
+| **Where** it was sent from | It carries on with `/order`. Typed on its own, it just finishes. |
 | **When** to carry on | It carries on only after a good answer. A bad answer asks again; cancelling stops. |
 
 | Term | Meaning |
 |---|---|
-| Command | One step the app runs, such as `/export`. |
+| Command | One step the app runs, such as `/order`. |
 | Run | Every command from what the user typed up to the one that ends it. |
 | Move | One command handing over to the next, written `ByMovingToCommand`. |
 | Factory | Builds a command just before it runs. It can read notes earlier commands left. |
 
 ### Today
 
-The app's author builds both halves by hand. Choose source holds a `ReturnTo`
+The app's developer builds both halves by hand. Choose book holds a `ReturnTo`
 field, and one factory per sending command fills it in:
 
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant E as /export
-    participant C as Choose source
-    U->>E: /export
+    participant E as /order
+    participant C as Choose book
+    U->>E: /order
     E->>C: move
-    Note over C: the author's factory for /export<br/>sets ReturnTo = /export
-    C-->>U: Which source?
-    U->>C: Warehouse
-    Note over C: the author's handler checks<br/>ReturnTo is not null
+    Note over C: the developer's factory for /order<br/>sets ReturnTo = /order
+    C-->>U: Which book would you like?
+    U->>C: Dune
+    Note over C: the developer's handler checks<br/>ReturnTo is not null
     C->>E: move to ReturnTo
 ```
 
-Every command that can send the user to Choose source needs its own factory.
+Every command that can send the user to Choose book needs its own factory.
 Asking again needs another factory, which must copy `ReturnTo` across.
 
 ### After this work
 
-KitCli writes a note when it follows a move: "Choose source was sent here by
-`/export`." When Choose source says "carry on", KitCli reads the note and runs
-`/export` again:
+KitCli writes a note when it follows a move: "Choose book was sent here by
+`/order`." When Choose book says "carry on", KitCli reads the note and runs
+`/order` again:
 
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant E as /export
+    participant E as /order
     participant K as KitCli
-    participant C as Choose source
-    U->>E: /export
-    E->>K: move to Choose source
-    Note over K: note: Choose source was sent by /export
+    participant C as Choose book
+    U->>E: /order
+    E->>K: move to Choose book
+    Note over K: note: Choose book was sent by /order
     K->>C: run
-    C-->>U: Which source?
-    U->>C: Warehouse
+    C-->>U: Which book would you like?
+    U->>C: Dune
     C->>K: carry on
     Note over K: reads the note
     K->>E: run again
 ```
 
-The author's code loses the `ReturnTo` field, the per-sender factories and the
-`null` check. `/export` is unchanged. The names below are proposals, not on
+The developer's code loses the `ReturnTo` field, the per-sender factories and the
+`null` check. `/order` is unchanged. The names below are proposals, not on
 `main`:
 
 ```csharp
-// Choose source's handler, after a good answer
+// Choose book's handler, after a good answer
 return FinishThisCommand()
-    .ByResultingIn(new ChosenSourceOutcome(chosenSource))
+    .ByResultingIn(new ChosenBookOutcome(chosenBook))
     .ByCarryingOn()
     .End();
 
-// Choose source's factory, to word a message such as "Back to export"
+// Choose book's factory, to word a message such as "Back to your order"
 public override CliCommand Create()
-    => new ChooseSourceCliCommand(BackToExport: WasSentFrom<ExportCliCommand>());
+    => new ChooseBookCliCommand(BackToOrder: WasSentFrom<OrderCliCommand>());
 ```
 
 KitCli handles each case:
 
 | What happens | What KitCli does |
 |---|---|
-| The user types Choose source on its own. | No note is written, so `ByCarryingOn()` does nothing and the command just finishes. |
-| Choose source asks again by moving to itself. | It keeps the note it already has, instead of writing "sent by Choose source". |
-| Choose source carries on. | It sends the user back without writing a new note. |
-| The user cancels. | Choose source ends the run as it does today, and the note goes with it. |
+| The user types Choose book on its own. | No note is written, so `ByCarryingOn()` does nothing and the command just finishes. |
+| Choose book asks again by moving to itself. | It keeps the note it already has, instead of writing "sent by Choose book". |
+| Choose book carries on. | It sends the user back without writing a new note. |
+| The user cancels. | Choose book ends the run as it does today, and the note goes with it. |
 
 ## Recommendation
 
@@ -117,8 +118,8 @@ the first, because the note is a new pattern every command can use.
 |---|---|
 | The run can already tell a typed command from a moved-to one. | KitCli knows when to write a note and when not to. |
 | Factories already read earlier notes, such as the record of which command ran. | `WasSentFrom<T>()` can read the new note the same way. |
-| The guide's factory checks only which command ran last. | Typing Choose source straight after `/export`, in the same run, wrongly sends the user back. The note fixes this. |
-| `/export` runs again from the top, rebuilt by its factory. | A typed flag such as `--dry-run` is lost unless remembered first. |
+| The guide's factory checks only which command ran last. | Typing Choose book straight after `/order`, in the same run, wrongly sends the user back. The note fixes this. |
+| `/order` runs again from the top, rebuilt by its factory. | A typed flag such as `--gift-wrap` is lost unless remembered first. |
 
 ## Evidence
 
@@ -138,8 +139,8 @@ Read against `eec501a`.
 
 - Should asking again be its own call, such as `ByAskingAgain()`, or any move
   from a command to itself?
-- When KitCli runs `/export` again, should it replay what the user first typed,
-  so flags such as `--dry-run` survive?
+- When KitCli runs `/order` again, should it replay what the user first typed,
+  so flags such as `--gift-wrap` survive?
 
 ## Out of scope
 
