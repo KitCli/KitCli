@@ -1,4 +1,4 @@
-# 0012. Showing a paged table
+# Showing a paged table
 
 ## What this is for
 
@@ -16,9 +16,9 @@ next, and gets it — while your second command rebuilds nothing:
 +------------------------+          +------------------------+
 ```
 
-Start from [0011-showing-a-table.md](0011-showing-a-table.md). Your
+Start from [Showing a table](showing-a-table.md). Your
 registry must call `AddArtefactFactoriesForAssembly` (see
-[0004-creating-a-registry.md](0004-creating-a-registry.md)), or the second
+[Creating a registry](creating-a-registry.md)), or the second
 command finds nothing.
 
 ## How to do it
@@ -103,7 +103,7 @@ every time.
 
 ## Learn more
 
-- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
+- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) —
   remembering anything between commands.
 - [../concepts/artefacts.md](../concepts/artefacts.md) — how a
   remembered builder reaches the next factory.

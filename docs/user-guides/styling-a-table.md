@@ -1,4 +1,4 @@
-# 0013. Styling a table
+# Styling a table
 
 ## What this is for
 
@@ -133,7 +133,7 @@ around the whole table. Nothing styles a single column yet —
 
 ## Learn more
 
-- [0011-showing-a-table.md](0011-showing-a-table.md) — building the table
+- [Showing a table](showing-a-table.md) — building the table
   in the first place.
 - [../concepts/tables.md](../concepts/tables.md) — how a table
   renders itself.

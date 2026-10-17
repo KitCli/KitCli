@@ -55,8 +55,10 @@ currently promises it never does; and the loop being rewritten has one test.
    [#26](https://github.com/KitCli/KitCli/issues/26) and the *Add Tests for
    the App Host and Scenarios* milestone.
 5. **Docs, in the same PR as the change they describe** —
-   [`cli-app-host.md`](../concepts/cli-app-host.md), user guides
-   0002, 0003 and 0007, and `CHANGELOG.md`.
+   [`cli-app-host.md`](../concepts/cli-app-host.md), the user guides on
+   [headless apps](../user-guides/creating-a-headless-app.md),
+   [interactive apps](../user-guides/creating-an-interactive-app.md) and
+   [chaining](../user-guides/chaining-commands.md), and `CHANGELOG.md`.
 
 ## What was built, and where it departed
 

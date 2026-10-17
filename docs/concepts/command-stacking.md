@@ -4,7 +4,7 @@ A task often takes several steps that share one decision. An export, for
 example, needs to know where to read from, its **source**: chosen once,
 then used to connect, check, write and summarise. Command stacking builds
 the task from small commands, one per step. Each command
-[chains](../user-guides/0007-chaining-commands.md) to the next and passes
+[chains](../user-guides/chaining-commands.md) to the next and passes
 on what it decided.
 
 ```mermaid
@@ -54,7 +54,7 @@ public override CliCommand Create()
 ```
 
 `SourceOutcome`, `SourceArtefact` and `ConnectCliCommand` are the app's own
-types. [Remembering your own state](../user-guides/0009-remembering-your-own-state.md)
+types. [Remembering your own state](../user-guides/remembering-your-own-state.md)
 shows how to write the first two.
 
 ## Why a decision travels as an outcome
@@ -85,4 +85,4 @@ one. An artefact ends with its run.
 ## See also
 
 [Artefacts](artefacts.md) · [Outcomes](outcomes.md) ·
-[Asking for a missing value and carrying on](../user-guides/0019-asking-for-a-missing-value-and-carrying-on.md)
+[Asking for a missing value and carrying on](../user-guides/asking-for-a-missing-value-and-carrying-on.md)

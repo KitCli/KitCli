@@ -15,7 +15,7 @@ layout: landing
     command hand-rolling it.
   </p>
   <p class="hero-actions">
-    <a class="kit-btn kit-btn-solid" href="docs/user-guides/0001-writing-a-basic-command.md">Write your first command</a>
+    <a class="kit-btn kit-btn-solid" href="docs/user-guides/writing-a-basic-command.md">Write your first command</a>
     <a class="kit-btn kit-btn-quiet" href="api/index.md">API reference</a>
   </p>
   <p class="hero-install"><code>dotnet add package KitCli</code></p>
@@ -55,7 +55,7 @@ await app.Run();</code></pre>
 <section class="cards">
   <h2>Find your way around</h2>
   <div class="card-grid">
-    <a class="kit-card" href="docs/user-guides/0001-writing-a-basic-command.md">
+    <a class="kit-card" href="docs/user-guides/writing-a-basic-command.md">
       <h3>User guides</h3>
       <p class="kit-card-q">How do I do X?</p>
       <p>You are building an app with KitCli.</p>

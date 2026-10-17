@@ -1,4 +1,4 @@
-# 0018. Choosing from a list
+# Choosing from a list
 
 ## What this is for
 

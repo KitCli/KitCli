@@ -72,8 +72,8 @@ and an ADR, not the sized-13 bug fix #8 started as.
    `Exception` becomes `ArgumentIsRequired`, making #21's codes real.
    Delete the seven builders and `IInstructionArgumentBuilder`. The ADR
    superseding the first-match-wins ADR's parser row rides in this PR, as do the
-   rewrites of [concept 0005](../concepts/instruction-parsing-pipeline.md)
-   and [user guide 0005](../user-guides/0005-reading-command-arguments.md)
+   rewrites of the [instruction parsing pipeline](../concepts/instruction-parsing-pipeline.md)
+   concept doc and the [reading command arguments](../user-guides/reading-command-arguments.md) guide
    and the `CHANGELOG.md` breaking entry. If the file count passes 20,
    split the doc rewrites out, nothing else.
 4. **Settle the satellites** — #9 and #40 close as moot (no builder
@@ -159,8 +159,8 @@ parser row is superseded.
 - `GetArgument<T>(null)` — "the last argument of that type, any name" —
   has no meaning over raw text, where every value converts to `string`.
   Either the name becomes required or null means "the last argument"
-  outright. [User guide 0005](../user-guides/0005-reading-command-arguments.md)
-  currently blesses the null form for single-argument commands.
+  outright. The [reading command arguments](../user-guides/reading-command-arguments.md)
+  guide currently blesses the null form for single-argument commands.
 - A chain-typed `InstructionArgument<int>` retrieved as
   `GetArgument<decimal>`: convert through the registry, or miss? Decide
   in step 3's ticket.

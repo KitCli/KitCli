@@ -1,4 +1,4 @@
-# 0007. Chaining commands together
+# Chaining commands together
 
 ## What this is for
 
@@ -39,7 +39,7 @@ than all at the end.
 **End every chain with a `Final`-kind outcome**, such as
 `ByFinallySaying`. Without one, KitCli treats the run as reusable and waits
 for something else to move it forward. See
-[0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md).
+[Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md).
 
 ## Giving the next command its data
 
@@ -79,7 +79,7 @@ Nothing detects this
 **Expecting the chain to pause for input.** Every step runs back to back,
 with no ask in between. A step that needs something from the user has to be
 reached by a fresh ask — and a headless app has none (see
-[0002-creating-a-headless-app.md](0002-creating-a-headless-app.md)).
+[Creating a headless app](creating-a-headless-app.md)).
 
 **Chaining to a command with constructor arguments and no factory.** KitCli
 only auto-registers a factory for a command it can build with `new`, so
@@ -91,7 +91,7 @@ static or a singleton.
 
 ## Learn more
 
-- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
+- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) —
   what "reusable" means, and how a chain maps onto the run's state.
 - [../concepts/artefacts.md](../concepts/artefacts.md) — passing data
   from an earlier step to a later one.

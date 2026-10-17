@@ -214,7 +214,7 @@ too, but both look for outcomes that last a run, so neither changes.
 The same PR updates [outcomes.md](../concepts/outcomes.md),
 [artefacts.md](../concepts/artefacts.md),
 [workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) and
-[user guide 0010](../user-guides/0010-reusable-outcomes-and-the-workflow-run.md),
+the [remembering state across separate asks](../user-guides/reusable-outcomes-and-the-workflow-run.md) guide,
 which says values never cross runs.
 
 ## What was established

@@ -40,7 +40,7 @@ flowchart LR
 with `ByMovingToCommand<TCommand>()` has that command built by its factory,
 attached to the same artefacts — so data reaches a chain through artefacts
 rather than through the previous handler's local variables. See
-[../user-guides/0007-chaining-commands.md](../user-guides/0007-chaining-commands.md).
+[Chaining commands together](../user-guides/chaining-commands.md).
 
 ## Registration takes a second call
 

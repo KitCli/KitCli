@@ -1,4 +1,4 @@
-# 0004. Creating a registry
+# Creating a registry
 
 ## What this is for
 
@@ -49,9 +49,9 @@ services.AddArtefactFactoriesForAssembly(assembly);
 ```
 
 Add it whenever a command remembers state (see
-[0009-remembering-your-own-state.md](0009-remembering-your-own-state.md)),
+[Remembering your own state](remembering-your-own-state.md)),
 a factory calls `LastCommandIs<T>()`, or a table needs a "next page" step
-(see [0012-showing-a-paged-table.md](0012-showing-a-paged-table.md)). It
+(see [Showing a paged table](showing-a-paged-table.md)). It
 registers the built-in artefact factories as well as yours, so all three
 depend on it.
 
@@ -102,7 +102,7 @@ silence while another assembly's register instead.
 
 ## Learn more
 
-- [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — what
+- [Writing a basic command](writing-a-basic-command.md) — what
   `AddCommandsFromAssembly` finds and registers.
 - [../concepts/command-registration.md](../concepts/command-registration.md) —
   the full mechanics behind that call.

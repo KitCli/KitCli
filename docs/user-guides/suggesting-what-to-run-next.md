@@ -1,4 +1,4 @@
-# 0016. Suggesting what to run next
+# Suggesting what to run next
 
 ## What this is for
 
@@ -42,7 +42,7 @@ The same command, by its shorthand name.
 
 Give the name without a prefix character — the run adds the app's
 configured one. Any name the user could type works, including a shorthand
-or an [alias](0015-giving-a-command-extra-names.md).
+or an [alias](giving-a-command-extra-names.md).
 
 ## Suggesting after commands that move on
 
@@ -77,7 +77,7 @@ cannot act on prints them — an unknown name, a command gated off by
 
 ## Learn more
 
-- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
+- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) —
   what parks a run at a reusable outcome in the first place.
 - [../concepts/workflow-run-state-machine.md](../concepts/workflow-run-state-machine.md) —
   where suggestions sit in the run's state machine.

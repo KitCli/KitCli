@@ -1,8 +1,8 @@
-# 0009. Remembering your own state
+# Remembering your own state
 
 ## What this is for
 
-[Remembering state across asks](0010-reusable-outcomes-and-the-workflow-run.md)
+[Remembering state across asks](reusable-outcomes-and-the-workflow-run.md)
 covers the built-in `Reusable` outcomes — page size, filters, and the rest.
 Sooner or later you need something of your own: a selected account, a
 chosen budget ID, anything a later command in the same run should read
@@ -72,7 +72,7 @@ var accountId = GetRequiredArtefact<string>(nameof(SelectedAccountArtefact)).Val
 must call `AddArtefactFactoriesForAssembly(assembly)`, separate from
 `AddCommandsFromAssembly`. Given that one call, every `ArtefactFactory<>`
 in the assembly is found, and you name `SelectedAccountArtefactFactory`
-nowhere. See [0004-creating-a-registry.md](0004-creating-a-registry.md).
+nowhere. See [Creating a registry](creating-a-registry.md).
 
 ## Common mistakes
 
@@ -95,7 +95,7 @@ whichever was set most recently.
 
 ## Learn more
 
-- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
+- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) —
   the built-in `Reusable` outcomes this pattern generalises.
 - [../concepts/artefacts.md](../concepts/artefacts.md) — registration,
   "last match wins" lookup, and where a factory's artefact list comes from.

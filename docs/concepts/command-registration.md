@@ -69,5 +69,5 @@ ask resolves there, not at startup. Tracked as
 
 [instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) ·
 [artefacts.md](artefacts.md) ·
-[../user-guides/0015-giving-a-command-extra-names.md](../user-guides/0015-giving-a-command-extra-names.md) ·
+[Giving a command extra names](../user-guides/giving-a-command-extra-names.md) ·
 [../adr/cli-command-alias-attribute.md](../adr/cli-command-alias-attribute.md)

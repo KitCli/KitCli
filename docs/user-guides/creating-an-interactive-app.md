@@ -1,11 +1,11 @@
-# 0003. Creating an interactive app
+# Creating an interactive app
 
 ## What this is for
 
 An interactive app asks the user for input, one line at a time, until they
 exit — what most CLI tools call a REPL. Use it for a session someone sits
 in. For a single invocation driven from the command line, see
-[0002-creating-a-headless-app.md](0002-creating-a-headless-app.md).
+[Creating a headless app](creating-a-headless-app.md).
 
 ## How to do it
 
@@ -22,7 +22,7 @@ await app.Run();
 
 Run it and it prompts in a loop, executing whatever command each line
 resolves to, until a command ends the session (see
-[0014-exiting-the-app.md](0014-exiting-the-app.md)) or the input runs out.
+[Exiting the app](exiting-the-app.md)) or the input runs out.
 
 ### Hooking into the session lifecycle
 
@@ -72,9 +72,9 @@ for a hook first.
 
 ## Learn more
 
-- [0002-creating-a-headless-app.md](0002-creating-a-headless-app.md) — the
+- [Creating a headless app](creating-a-headless-app.md) — the
   one-invocation alternative.
-- [0004-creating-a-registry.md](0004-creating-a-registry.md) — wiring up the
+- [Creating a registry](creating-a-registry.md) — wiring up the
   commands, and settings, an app runs.
 - [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
   `CliApp.Run` does each iteration, and when each hook fires.

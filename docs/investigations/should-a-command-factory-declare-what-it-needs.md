@@ -31,7 +31,7 @@ the revisit never done. It is a second deliverable, not a free consequence.
 4. **Default `CanCreateWhen()` to the declaration** — `abstract` becomes `virtual`; existing overrides still compile.
 5. **An ADR**, since a hook on every factory is a cross-cutting pattern.
 6. **The reporting path, its own ticket** — unmet requirements render as a table and travel as an exception. No factory and no attributes means no descriptor, so no table. Shared with [#183](https://github.com/KitCli/KitCli/issues/183): decide both together, or the app grows two vocabularies for "that didn't work".
-7. **Docs in the same PR** — [command registration](../concepts/command-registration.md), [writing a basic command](../user-guides/0001-writing-a-basic-command.md), `CHANGELOG.md`.
+7. **Docs in the same PR** — [command registration](../concepts/command-registration.md), [writing a basic command](../user-guides/writing-a-basic-command.md), `CHANGELOG.md`.
 
 ## What was established
 

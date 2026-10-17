@@ -57,4 +57,4 @@ claimed by the one ahead of it silently changes type.
 
 [command-registration.md](command-registration.md) ·
 [artefacts.md](artefacts.md) ·
-[../user-guides/0005-reading-command-arguments.md](../user-guides/0005-reading-command-arguments.md)
+[Reading command arguments](../user-guides/reading-command-arguments.md)

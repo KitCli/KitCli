@@ -68,13 +68,11 @@ investigations, technology pages. Three rules cover all of them. The
 the [roadmap ADR](docs/adr/a-roadmap-page-outside-the-documentation-kinds.md)
 for why, and add an entry to it when a release or a change of shape lands.
 
-- **Copy the kind's `0000-template.md`** and number it sequentially,
-  `000x-topic-in-kebab-case.md`, in the order a reader should meet them.
-  Technology pages take their dependency's name instead. ADRs, concept docs
-  and investigations take their topic's name with no number, and copy
-  `template.md` — `toc.yml` gives the reading order instead. Reviews take
-  their kind and month, `test-coverage-review-2026-08.md`, and `toc.yml`
-  groups them by kind, then month.
+- **Copy the kind's `template.md`** and name the file after its topic,
+  `topic-in-kebab-case.md`, with no number — `toc.yml` gives the reading
+  order instead. Technology pages take their dependency's name. Reviews
+  take their kind and month, `test-coverage-review-2026-08.md`, and
+  `toc.yml` groups them by kind, then month.
 - **Verify every name, signature and sample against source** before it
   lands. Readers trust a doc they cannot check, so a wrong one costs more
   than a missing one.
@@ -155,7 +153,8 @@ reach for without caring how it works — artefacts, command reactions,
 continuous input, workflow commands. **Skip it for** internal machinery
 with no consumer-facing API; that is a concept doc.
 
-`toc.yml` holds the order a reader should meet them in.
+`toc.yml` groups them by what the reader is doing, in the order a reader
+should meet them.
 
 ## Investigations
 

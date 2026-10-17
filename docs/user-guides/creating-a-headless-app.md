@@ -1,4 +1,4 @@
-# 0002. Creating a headless app
+# Creating a headless app
 
 ## What this is for
 
@@ -6,7 +6,7 @@ A headless app has nothing attached to its input. It takes one ask from the
 command line — `dotnet run -- /greet --name Alex` — runs it, and exits. Use
 it for scripting, CI, or anything invoked once. For a session someone sits
 in, see
-[0003-creating-an-interactive-app.md](0003-creating-an-interactive-app.md).
+[Creating an interactive app](creating-an-interactive-app.md).
 
 ## How to do it
 
@@ -33,12 +33,12 @@ ask string and parses exactly like a line of typed input.
 that an interactive app's `/greet --name Alex` would.
 
 A command that chains to another with `ByMovingToCommand` (see
-[0007-chaining-commands.md](0007-chaining-commands.md)) runs every step
+[Chaining commands together](chaining-commands.md)) runs every step
 here, same as anywhere else. The limit is not how many commands run — it is
 that they all belong to one run, and no second run can start.
 
 All six lifecycle hooks work (see
-[0003-creating-an-interactive-app.md](0003-creating-an-interactive-app.md)),
+[Creating an interactive app](creating-an-interactive-app.md)),
 `OnMovingPastAsk` firing once per chained step.
 
 ## Telling headless from interactive inside a command
@@ -77,9 +77,9 @@ interactive app fed by piped input.
 
 ## Learn more
 
-- [0003-creating-an-interactive-app.md](0003-creating-an-interactive-app.md) — the
+- [Creating an interactive app](creating-an-interactive-app.md) — the
   interactive alternative, and the hooks both modes share.
-- [0007-chaining-commands.md](0007-chaining-commands.md) — running several commands
+- [Chaining commands together](chaining-commands.md) — running several commands
   from one ask.
 - [../concepts/cli-app-host.md](../concepts/cli-app-host.md) — what
   `HeadlessCliApp.Run` does, and why the choice between the two hosts is

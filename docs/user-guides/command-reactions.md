@@ -1,4 +1,4 @@
-# 0008. Running side effects with command reactions
+# Running side effects with command reactions
 
 ## What this is for
 
@@ -76,7 +76,7 @@ to the ask is an `Outcome`: `BySaying`, `ByShowingTable`, and the rest.
 returns `Task`, not `Task<Outcome[]>`, and its result is discarded. When a
 later command must read something, use a `Reusable` outcome and an artefact
 — see
-[0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md).
+[Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md).
 
 **Assuming a reaction cannot break the command that raised it.** It can.
 Reaction handlers are awaited before the command's outcomes return, inside
@@ -89,7 +89,7 @@ the others alone.** Neither is guaranteed. Design around neither.
 
 ## Learn more
 
-- [0010-reusable-outcomes-and-the-workflow-run.md](0010-reusable-outcomes-and-the-workflow-run.md) —
+- [Remembering state across separate asks](reusable-outcomes-and-the-workflow-run.md) —
   the pattern to use when a later command must read state.
 - [../concepts/outcomes.md](../concepts/outcomes.md) — how
   `ByReacting` fits the outcome model. A `ReactionOutcome` is

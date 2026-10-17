@@ -1,4 +1,4 @@
-# 0017. Creating sub-commands
+# Creating sub-commands
 
 ## What this is for
 
@@ -43,7 +43,7 @@ glued string, `"edit team lead"`, not three words to match against — see
 A factory's type argument sets the name the user types, but `Create()` can
 return any command. To let users type `/source choose` and run the asking
 command from
-[Asking for a missing value and carrying on](0019-asking-for-a-missing-value-and-carrying-on.md),
+[Asking for a missing value and carrying on](asking-for-a-missing-value-and-carrying-on.md),
 add a command that only supplies the word `source`:
 
 ```csharp
@@ -74,7 +74,7 @@ own constructor arguments.
 
 ## Learn more
 
-- [0006-gating-a-command-with-cancreatewhen.md](0006-gating-a-command-with-cancreatewhen.md) —
+- [Gating a command with CanCreateWhen](gating-a-command-with-cancreatewhen.md) —
   how `CanCreateWhen` decides whether one factory's command is offered at
   all.
 - [../concepts/command-registration.md](../concepts/command-registration.md) —

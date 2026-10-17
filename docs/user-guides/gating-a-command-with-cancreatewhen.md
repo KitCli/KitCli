@@ -1,4 +1,4 @@
-# 0006. Gating a command with CanCreateWhen
+# Gating a command with CanCreateWhen
 
 ## What this is for
 
@@ -46,7 +46,7 @@ Typing `/confirm-delete` before `/request-delete` fails to resolve, so
 nobody reaches the confirmation step out of order. This needs
 `AddArtefactFactoriesForAssembly` in your registry — without it
 `LastCommandIs` always returns `false`. See
-[0004-creating-a-registry.md](0004-creating-a-registry.md).
+[Creating a registry](creating-a-registry.md).
 
 `LastCommandIs<T>()` is `true` only when `T` is the step immediately before,
 and `false` once another command has run since. To accept a repeat of the
@@ -67,17 +67,17 @@ logic runs.
 resolve to any command, like a typo would, and no "almost matched but
 rejected" message exists. To tell the user why, declare the valid moves on
 the *previous* command with `[CliNextCommandIs(name, description)]`
-([0016-suggesting-what-to-run-next.md](0016-suggesting-what-to-run-next.md)).
+([Suggesting what to run next](suggesting-what-to-run-next.md)).
 
 ## Learn more
 
-- [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — when you
+- [Writing a basic command](writing-a-basic-command.md) — when you
   need a factory at all.
-- [0005-reading-command-arguments.md](0005-reading-command-arguments.md) — the
+- [Reading command arguments](reading-command-arguments.md) — the
   argument helpers `CanCreateWhen` can also read.
 - [../concepts/command-registration.md](../concepts/command-registration.md) —
   where `CanCreateWhen` sits in resolution: keyed DI narrows the
   candidates, `CanCreateWhen` picks among them, first match wins.
-- [0017-creating-sub-commands.md](0017-creating-sub-commands.md) —
+- [Creating sub-commands](creating-sub-commands.md) —
   writing several `CliCommandFactory<T>` for one command type, one per
   sub-command word.

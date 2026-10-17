@@ -1,4 +1,4 @@
-# 0019. Asking for a missing value and carrying on
+# Asking for a missing value and carrying on
 
 ## What this is for
 
@@ -22,7 +22,7 @@ public record ChooseSourceCliCommand(Type? ReturnTo) : CliCommand;
 command.** `LastCommandIs<ExportCliCommand>()` is true when `/export` ran
 immediately before, so this factory builds the asking command only when
 `/export` moves to it. It needs `AddArtefactFactoriesForAssembly` in your
-[registry](0004-creating-a-registry.md), or it is always `false`:
+[registry](creating-a-registry.md), or it is always `false`:
 
 ```csharp
 public class ChooseSourceAfterExportCliCommandFactory : CliCommandFactory<ChooseSourceCliCommand>
@@ -59,7 +59,7 @@ public class ChooseSourceCliCommandHandler(ICliIo io) : CliCommandHandler<Choose
 
 `SourceOutcome` is a `Reusable` outcome of your own, with an artefact and
 an artefact factory beside it. See
-[Remembering your own state](0009-remembering-your-own-state.md).
+[Remembering your own state](remembering-your-own-state.md).
 
 **4. In `/export`, move to the asking command when the source is
 missing.** Have `/export`'s factory read the source with
@@ -77,7 +77,7 @@ Typing `/export` with no source chosen now asks for one, then carries on
 to `ConnectCliCommand`, your next step.
 
 To let users run the asking command themselves, as `/source choose`, see
-[Creating sub-commands](0017-creating-sub-commands.md).
+[Creating sub-commands](creating-sub-commands.md).
 
 ## Common mistakes
 
@@ -94,5 +94,5 @@ command. Use `LastCommandIs`.
 ## Learn more
 
 [Command stacking](../concepts/command-stacking.md) ·
-[Chaining commands together](0007-chaining-commands.md) ·
-[Choosing from a list](0018-choosing-from-a-list.md)
+[Chaining commands together](chaining-commands.md) ·
+[Choosing from a list](choosing-from-a-list.md)

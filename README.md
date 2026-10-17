@@ -119,7 +119,7 @@ opens the page that starts that kind.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — conventions, branching, how to
   propose a change, and when to write each kind of doc below. Lives in the
   repository, not on the site.
-- [User guides](https://kitcli.github.io/KitCli/docs/user-guides/0001-writing-a-basic-command.html)
+- [User guides](https://kitcli.github.io/KitCli/docs/user-guides/writing-a-basic-command.html)
   — how to do one task, without needing to know the machinery underneath.
 - [Concepts](https://kitcli.github.io/KitCli/docs/concepts/command-registration.html)
   — how each subsystem works today, for when a guide left you wondering why.

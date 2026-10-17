@@ -41,7 +41,7 @@ type's declaration order; the `Map(...)` calls decide names only.
 
 `Style`, or `WithStyle(...)` on the builder, picks one of nineteen
 `CliTableStyle` values — all of them drawn in
-[../user-guides/0013-styling-a-table.md](../user-guides/0013-styling-a-table.md).
+[Styling a table](../user-guides/styling-a-table.md).
 `Ascii` is the default and the look every table had before the setting
 existed.
 
@@ -86,5 +86,5 @@ has, inside its own row, and square brackets print literally.
 
 [aggregators.md](aggregators.md) · [outcomes.md](outcomes.md) ·
 [artefacts.md](artefacts.md) ·
-[../user-guides/0011-showing-a-table.md](../user-guides/0011-showing-a-table.md) ·
+[Showing a table](../user-guides/showing-a-table.md) ·
 [Spectre.Console](../technology/spectre-console.md)

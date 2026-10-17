@@ -1,4 +1,4 @@
-# 0014. Exiting the app
+# Exiting the app
 
 ## What this is for
 

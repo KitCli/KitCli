@@ -1,40 +1,48 @@
-- name: Writing a basic command
-  href: 0001-writing-a-basic-command.md
-- name: Creating a headless app
-  href: 0002-creating-a-headless-app.md
-- name: Creating an interactive app
-  href: 0003-creating-an-interactive-app.md
-- name: Creating a registry
-  href: 0004-creating-a-registry.md
-- name: Reading command arguments
-  href: 0005-reading-command-arguments.md
-- name: Gating a command with CanCreateWhen
-  href: 0006-gating-a-command-with-cancreatewhen.md
-- name: Chaining commands together
-  href: 0007-chaining-commands.md
-- name: Running side effects with command reactions
-  href: 0008-command-reactions.md
-- name: Remembering your own state
-  href: 0009-remembering-your-own-state.md
-- name: Remembering state across separate asks
-  href: 0010-reusable-outcomes-and-the-workflow-run.md
-- name: Showing a table
-  href: 0011-showing-a-table.md
-- name: Showing a paged table
-  href: 0012-showing-a-paged-table.md
-- name: Styling a table
-  href: 0013-styling-a-table.md
-- name: Exiting the app
-  href: 0014-exiting-the-app.md
-- name: Giving a command extra names
-  href: 0015-giving-a-command-extra-names.md
-- name: Suggesting what to run next
-  href: 0016-suggesting-what-to-run-next.md
-- name: Creating sub-commands
-  href: 0017-creating-sub-commands.md
-- name: Choosing from a list
-  href: 0018-choosing-from-a-list.md
+- name: Getting started
+  items:
+    - name: Writing a basic command
+      href: writing-a-basic-command.md
+    - name: Creating a headless app
+      href: creating-a-headless-app.md
+    - name: Creating an interactive app
+      href: creating-an-interactive-app.md
+    - name: Creating a registry
+      href: creating-a-registry.md
+    - name: Exiting the app
+      href: exiting-the-app.md
+- name: Commands
+  items:
+    - name: Reading command arguments
+      href: reading-command-arguments.md
+    - name: Gating a command with CanCreateWhen
+      href: gating-a-command-with-cancreatewhen.md
+    - name: Giving a command extra names
+      href: giving-a-command-extra-names.md
+    - name: Creating sub-commands
+      href: creating-sub-commands.md
+    - name: Suggesting what to run next
+      href: suggesting-what-to-run-next.md
+- name: Chaining and state
+  items:
+    - name: Chaining commands together
+      href: chaining-commands.md
+    - name: Running side effects with command reactions
+      href: command-reactions.md
+    - name: Remembering your own state
+      href: remembering-your-own-state.md
+    - name: Remembering state across separate asks
+      href: reusable-outcomes-and-the-workflow-run.md
+- name: Tables and choices
+  items:
+    - name: Showing a table
+      href: showing-a-table.md
+    - name: Showing a paged table
+      href: showing-a-paged-table.md
+    - name: Styling a table
+      href: styling-a-table.md
+    - name: Choosing from a list
+      href: choosing-from-a-list.md
 - name: Advanced techniques
   items:
     - name: Asking for a missing value and carrying on
-      href: 0019-asking-for-a-missing-value-and-carrying-on.md
+      href: asking-for-a-missing-value-and-carrying-on.md

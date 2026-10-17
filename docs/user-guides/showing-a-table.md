@@ -1,4 +1,4 @@
-# 0011. Showing a table
+# Showing a table
 
 ## What this is for
 
@@ -15,7 +15,7 @@ Turning a list of things into columns a reader can scan:
 ```
 
 Paging a long list is the next guide,
-[0012-showing-a-paged-table.md](0012-showing-a-paged-table.md).
+[Showing a paged table](showing-a-paged-table.md).
 
 ## How to do it
 
@@ -93,7 +93,7 @@ Rent      1150.00
 ```
 
 Nineteen in all. `Ascii` is the default — the box at the top of this page.
-Every one is drawn in [0013-styling-a-table.md](0013-styling-a-table.md).
+Every one is drawn in [Styling a table](styling-a-table.md).
 
 ### Holding a column narrow
 
@@ -131,9 +131,9 @@ columns and rows with no pipeline behind it.
 
 ## Learn more
 
-- [0012-showing-a-paged-table.md](0012-showing-a-paged-table.md) — walking
+- [Showing a paged table](showing-a-paged-table.md) — walking
   a reader through a long list.
-- [0013-styling-a-table.md](0013-styling-a-table.md) — all
+- [Styling a table](styling-a-table.md) — all
   nineteen frames, drawn.
 - [../concepts/tables.md](../concepts/tables.md) — why the map is
   mandatory, and what a column still cannot say.

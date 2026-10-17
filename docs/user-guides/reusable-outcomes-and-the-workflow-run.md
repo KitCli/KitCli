@@ -1,4 +1,4 @@
-# 0010. Remembering state across separate asks
+# Remembering state across separate asks
 
 ## What this is for
 
@@ -69,9 +69,9 @@ set *most recently*. Give each a `Name` whenever more than one could exist.
 
 ## Learn more
 
-- [0007-chaining-commands.md](0007-chaining-commands.md) — the "continue without a
+- [Chaining commands together](chaining-commands.md) — the "continue without a
   fresh ask" half of this picture.
-- [0009-remembering-your-own-state.md](0009-remembering-your-own-state.md) —
+- [Remembering your own state](remembering-your-own-state.md) —
   remembering a value of your own, not just the built-ins.
 - [../concepts/artefacts.md](../concepts/artefacts.md) — how a
   `Reusable` outcome becomes something a later factory can query.

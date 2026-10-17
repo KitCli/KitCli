@@ -1,4 +1,4 @@
-# 0005. Reading command arguments
+# Reading command arguments
 
 ## What this is for
 
@@ -86,7 +86,7 @@ instance holds whatever data it needs.
 
 ## Learn more
 
-- [0001-writing-a-basic-command.md](0001-writing-a-basic-command.md) — where a
+- [Writing a basic command](writing-a-basic-command.md) — where a
   factory fits, and when you need one.
 - [../concepts/instruction-parsing-pipeline.md](../concepts/instruction-parsing-pipeline.md) —
   how a raw ask becomes typed arguments.
