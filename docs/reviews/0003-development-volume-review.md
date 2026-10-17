@@ -3,31 +3,34 @@
 Date: 2026-10-17
 
 **This is a snapshot, not current state.** It compares how much work
-landed in KitCli before and after the maintainer started using Claude
-Code on 2026-07-22. It measures volume, not pace: lines changed say how
-much was written, not how fast finished work shipped.
+went into KitCli before and after its maintainer started using Claude
+Code, an AI coding assistant, on 2026-07-22.
 
 ## Summary
 
-Before Claude, a working day changed about 420 lines. Since July it
-changes about 1,450: about 590 lines of code and tests, and 860 of
-documentation. Code and tests alone are up by about 40%.
+Since the maintainer started using Claude, each day of work produces
+about 250% more: around 1,450 lines changed a day, up from 420. Most of
+the increase is documentation. Code and tests alone are up about 40%.
+
+This measures how much was written, not how fast finished features
+reached users.
 
 ## Methodology
 
-KitCli started inside the
-[SpendfulnessCli](https://github.com/joshuaedwardcrowe/SpendfulnessCli)
-repository and moved to its own on 2026-01-28. Its history up to then
-is the SpendfulnessCli folders that became KitCli: `Cli` and every
-`Cli.*` folder except `Cli.Spendfulness.*`, plus `YnabCli.Instructions`
-and `YnabProgressConsole.Instructions`, which became `Cli.Instructions`.
-From 2026-01-28 it is every commit on KitCli's `main`, leaving out the
-commits that copied the code across and the release bot's version
-bumps.
+Each saved change to the code is a commit. The count covers every line
+those commits added or removed, and moving a file counts only the lines
+edited in it. A working day is any date with at least one commit: 49
+before July 2026, 25 since. Commits written with Claude are marked as
+such in their message.
 
-A changed line is a line added or deleted. A moved file counts only
-its edits. A working day is a date with at least one commit: 49 before
-July 2026, 25 since.
+KitCli began as part of another project,
+[SpendfulnessCli](https://github.com/joshuaedwardcrowe/SpendfulnessCli),
+and moved to its own home on 2026-01-28. Before that date, the count
+covers only the SpendfulnessCli folders that became KitCli: `Cli` and
+every `Cli.*` folder except `Cli.Spendfulness.*`, plus
+`YnabCli.Instructions` and `YnabProgressConsole.Instructions`. After it,
+the count covers every KitCli commit, except the ones that copied the
+code across and the ones a bot makes to bump version numbers.
 
 ## Findings
 
@@ -48,14 +51,15 @@ xychart-beta horizontal
     bar [1.3, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 5.8, 5.9, 0.3, 0.3, 6.7, 0.0, 0.0, 0.0, 0.0, 1.8, 1.9, 0.0, 0.5]
 ```
 
-Grey is lines from commits written without Claude. Orange is lines from
-commits written with it, which carry its `Co-authored-by` trailer.
+Each bar is one month. Grey is work done without Claude. Orange is work
+done with Claude. Gaps are months with no work.
 
 ## Caveats
 
-- **Working days are not hours.** Git records the day of a commit, not
-  how long the work took.
+- **Working days are not hours.** A commit records the day it was made,
+  not how long the work took.
 - **Documentation is most of the growth.** 21,548 of the 36,218 lines
-  changed since July are in `.md` files, against 25 lines before.
-- **Lines are not value.** Tidying code lowers its line count, and a
-  line of documentation takes different effort from a line of code.
+  changed since July are documentation, against 25 lines before.
+- **More lines is not better work.** Tidying code often removes lines,
+  and a line of documentation takes different effort from a line of
+  code.
