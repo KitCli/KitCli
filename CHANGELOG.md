@@ -6,6 +6,8 @@ version together — see `CONTRIBUTING.md#versioning--releases` for why.
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-10-15
+
 ### Added
 
 - An outcome can last the whole session: pass `OutcomeLifetime.Session` to
