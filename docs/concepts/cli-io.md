@@ -1,18 +1,22 @@
 # CLI I/O
 
-A framework that calls `Console` directly cannot be tested and cannot be
-hosted anywhere else. So KitCli calls it in exactly one class. `ICliIo` is
-the seam: everything a KitCli app reads, writes, or learns about Ctrl+C
-goes through it, and nothing else in the framework touches `Console`.
+**`ICliIo` is the one place KitCli touches `Console`. Everything an app reads, writes or learns about Ctrl+C goes through it, so a test or another host can swap it.**
+
+| Term | Meaning |
+|---|---|
+| Ask | One line the user types. |
+| `ICliIo` | The interface for reading asks, picking from lists, saying messages and hearing Ctrl+C. |
+| `CliIo` | The `Console`-backed `ICliIo`. |
+| `HeadlessCliIo` | The `ICliIo` of a `HeadlessCliApp`: it writes, but nothing can answer a prompt. |
 
 ```csharp
 public interface ICliIo
 {
-    bool CanAsk => true;   // HeadlessCliIo answers false
+    bool CanAsk => true;
     Task<string?> AskAsync(CancellationToken cancellationToken);
     Task<CliChoice?> ChooseAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
     Task<IReadOnlyList<CliChoice>> ChooseManyAsync(string title, IEnumerable<CliChoice> choices, CancellationToken cancellationToken);
-    void Pause();          // CliIo writes a blank line
+    void Pause();
     void Say(string something);
     void Say(string something, MessageLevel level);
     void SetTitle(string title);
@@ -20,66 +24,68 @@ public interface ICliIo
 }
 ```
 
-`CliAppBuilder.Run` registers the I/O as a singleton from the app you chose,
-unless a registry registered an `ICliIo` first: register your own to assert
-on what a command printed, or to host KitCli somewhere with no console at
-all. `CliIo` is the `Console`-backed default.
+## Which I/O an app gets
 
-A `HeadlessCliApp` runs with `HeadlessCliIo` instead. It writes to the console like `CliIo`, but its
-input has nothing attached: `CanAsk` says so ahead of time, and asking or
-offering a choice anyway throws `NoInputException`, a programming error rather than an end
-of input. `CanAsk` has a default body, so an I/O
-of your own inherits an answer of true. A handler or factory that injects
-`ICliIo` reads it to decline a prompt nobody would answer.
+`CliAppBuilder.Run` registers the I/O as a singleton from the app you chose, unless a registry registered an `ICliIo` first. Register your own to assert on what a command printed, or to host KitCli with no console.
 
-## Cancelling a blocked read
+| App | I/O | `CanAsk` | Asking anyway |
+|---|---|---|---|
+| Console app | `CliIo` | `true` | Reads a line. |
+| `HeadlessCliApp` | `HeadlessCliIo` | `false` | Throws `NoInputException`, a programming error. |
+| Your own I/O | Yours | `true`, from the default body | Yours. |
 
-`Console.ReadLine` cannot be cancelled once it blocks. So `AskAsync` runs
-it on a background thread, races it against the token, and returns `null`
-if cancellation wins — abandoning the read where it stands rather than
-waiting for a keypress that may never come.
+A handler or factory that injects `ICliIo` reads `CanAsk` to skip a prompt nobody would answer.
 
-**`null` also means end-of-input**, and `RespondToAsk` treats both the same
-way. A piped stream running dry ends a run like a Ctrl+C does.
+## When an ask ends the session
+
+`Console.ReadLine` cannot be cancelled once it blocks. `AskAsync` runs it on a background thread, races it against the token, and returns `null` if cancellation wins.
+
+```mermaid
+sequenceDiagram
+    participant L as "CliApp.Run loop"
+    participant I as ICliIo
+    participant R as CliWorkflowRun
+    L->>I: AskAsync
+    I-->>L: "/spare-money"
+    L->>R: RespondToAsk("/spare-money")
+    L->>I: AskAsync
+    Note over I: Ctrl+C, or a piped stream runs dry
+    I-->>L: null
+    Note over L: break, OnSessionEnd
+```
+
+**`null` ends the session, and `RespondToAsk` never sees it.** `CliApp.Run` breaks its loop on a `null` ask. A blank ask is different: `RespondToAsk` rejects a `null` or empty ask and returns a `NothingOutcome`, and the session asks again.
 
 ## Picking from a list
 
-`ChooseAsync` and `ChooseManyAsync` show a Spectre selection prompt: arrow
-keys to move, enter to pick, space to tick in the many-choice list. A
-`CliChoice` is a `Label` to show and an optional `Value` handed back with the
-pick. Spectre's prompt takes the cancellation token itself, so a Ctrl+C
-returns `null` or an empty list without the background-thread race `AskAsync`
-needs. An empty list of choices throws.
+`ChooseAsync` and `ChooseManyAsync` show a Spectre selection prompt: arrow keys to move, enter to pick, space to tick in the many-choice list. A `CliChoice` is a `Label` to show and an optional `Value` handed back with the pick.
 
-**A prompt redraws itself in place, so a line printed while one is showing
-scrambles it.** Nothing in `CliIo` prevents that; print before asking or
-after the answer. `CliIo` takes an optional `IAnsiConsole`, so a test can
-drive the prompt with Spectre's `TestConsole`.
+| Fact | Consequence |
+|---|---|
+| Spectre's prompt takes the cancellation token itself. | Ctrl+C returns `null` or an empty list, with no background-thread race. |
+| An empty list of choices throws. | Check before you ask. |
+| A prompt redraws itself in place. | **A line printed while one is showing scrambles it.** Print before asking or after the answer. |
+| `CliIo` takes an optional `IAnsiConsole`. | A test drives the prompt with Spectre's `TestConsole`. |
 
 ## Saying a message at a level
 
-`Say(something, level)` writes only when `level` meets
-`KitCliSettings.MinimumMessageLevel`, the rule leveled outcomes follow
-([outcome writing](outcome-writing.md)). It is for code that has no outcome
-list to return, such as progress lines from a pipeline inside a command.
-`CliIo` reads the setting from its optional `KitCliSettings` argument and
-falls back to the default, `Information`.
+`Say(something, level)` writes only when `level` meets `KitCliSettings.MinimumMessageLevel`, the rule leveled outcomes follow ([Outcome writing](outcome-writing.md)). Use it where no outcome list is returned, such as progress lines from a pipeline inside a command. `CliIo` reads the setting from its optional `KitCliSettings` argument and falls back to `Information`.
 
 ## What a Ctrl+C does
 
-```
-Console.CancelKeyPress
-  → CliIo sets e.Cancel = true      (suppresses .NET's abrupt exit)
-      → the Action registered via OnCancel
-          → Workflow.InterruptCurrentRun()
+```mermaid
+flowchart LR
+    K["Console.CancelKeyPress"] --> C["CliIo sets e.Cancel = true"]
+    C --> A["the Action given to OnCancel"]
+    A --> W["Workflow.InterruptCurrentRun()"]
 ```
 
-`CliApp.SetUpEventHandlers` registers that action once and nothing else —
-no `OnSessionEnd`, no `Environment.Exit`. The token itself belongs to
-`ICliWorkflow`. Cancellation is cooperative, so **a handler that ignores
-its token runs to completion.**
+Setting `e.Cancel` suppresses .NET's abrupt exit. `CliApp.SetUpEventHandlers` registers that action once, with no `OnSessionEnd` and no `Environment.Exit`. The token belongs to `ICliWorkflow`.
+
+**Cancellation is cooperative: a handler that ignores its token runs to completion.**
 
 ## See also
 
-[cli-app-host.md](cli-app-host.md) · [outcome-writing.md](outcome-writing.md) ·
-[../adr/cooperative-cancellation.md](../adr/cooperative-cancellation.md)
+- [CliApp host loop](cli-app-host.md): which app, and so which I/O, runs.
+- [Outcome writing](outcome-writing.md): how outcomes reach `Say`.
+- [Cooperative cancellation ADR](../adr/cooperative-cancellation.md): why Ctrl+C asks a run to stop.

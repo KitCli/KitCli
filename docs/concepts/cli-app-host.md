@@ -1,12 +1,21 @@
 # CliApp host loop
 
-Something has to fetch what the user typed, run it, and print what came
-back. That is the host. `CliApp` is it: the shell around a workflow.
+**`CliApp` fetches what the user typed, runs it, and prints what came back.**
+It is the shell around a workflow. `CliApp` is the interactive app: ask, run,
+ask again. `HeadlessCliApp` handles `myapp /command --flag value`, where
+nothing is attached to the input.
 
-`CliApp` *is* the interactive app — ask, run, ask again. `HeadlessCliApp`
-overrides `Run` for `myapp /command --flag value`, where nothing is
-attached to the input. Both are abstract; `BasicCliApp` is the ready-made
-interactive one that `WithBasicApp()` gives you.
+| Term | Meaning |
+|---|---|
+| Host | The class that drives the ask, run, print loop. `CliApp` or `HeadlessCliApp`. |
+| Ask | What the user typed, or the process args joined. |
+| Run | Every command from the first one up to a final outcome. |
+| Hook | A `protected virtual` method an app overrides to watch a session. |
+
+## How it works
+
+Both hosts are abstract. `BasicCliApp` is the ready-made interactive one that
+`WithBasicApp()` gives you. The interactive loop is `CliApp.Run`:
 
 ```csharp
 OnSessionStart();
@@ -23,9 +32,9 @@ while (Workflow.Status != CliWorkflowStatus.Stopped)
 OnSessionEnd(Workflow.Runs);
 ```
 
-`ExecuteRunOperation` responds to the ask, then keeps calling `MoveToNext()`
-while the run's latest state change is `MovePastAsk`, writing each step's
-outcomes as it goes. That is why a chain arrives whole under either host.
+`ExecuteRunOperation` responds to the ask, then calls `MoveToNext()` while the
+run's latest state change is `MovePastAsk`, writing each step's outcomes. A
+chain arrives whole under either host.
 
 ```mermaid
 sequenceDiagram
@@ -38,7 +47,6 @@ sequenceDiagram
         App->>Io: AskAsync()
         App->>Workflow: NextRun()
         note over App: OnRunCreated
-        note over App: OnRunStarted
         App->>Run: RespondToAsk(ask)
         Run-->>App: outcomes, written
         note over App: OnRunComplete
@@ -52,38 +60,46 @@ sequenceDiagram
     note over App: OnSessionEnd
 ```
 
-`HeadlessCliApp` runs the outer loop's body once, with the process args
-joined into the ask; the inner loop still runs a whole chain. It runs with
+`HeadlessCliApp` runs the outer loop's body once, with the process args joined
+into the ask. The inner loop still runs a whole chain. It runs with
 `HeadlessCliIo`, so a command learns which host it is under from
-`ICliIo.CanAsk` ([cli-io.md](cli-io.md)).
+`ICliIo.CanAsk` ([CLI I/O](cli-io.md)).
 
-## A headless session is one run, however far it gets
+## Hooks
 
-`HeadlessCliApp.Run` opens the session, calls `ExecuteRunOperation` once
-with the process args joined into an ask, stops the workflow, and ends.
-Chained steps run. What cannot happen is a *second* run, because nothing
-can be asked — so a run left waiting at a reusable checkpoint stops there,
-unfinished, its DI scope undisposed. Which class you extend decides the
-mode for the life of the class, and `CliAppBuilder.Run` throws if a
-`HeadlessCliApp` gets no args
-(the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md)).
+Hooks let an app watch a session without overriding `Run`. None redirects
+flow. All fire under both hosts.
 
-Six `protected virtual` hooks — `OnSessionStart`, `OnRunCreated`,
-`OnRunStarted`, `OnMovingPastAsk`, `OnRunComplete`, `OnSessionEnd` — let an
-app watch a session without overriding `Run`. None redirects flow.
-`OnRunStarted` fires before the command starts, so a line it writes lands
-ahead of anything the command prints or asks. `OnMovingPastAsk` fires
-*while* its step executes, so it suits progress indicators rather than setup. All six fire under both hosts,
-`OnRunComplete` once per step rather than once per ask. An
-`ExceptionOutcome` is rethrown before its outcomes are written.
+| Hook | When it fires |
+|---|---|
+| `OnSessionStart` | Once, before the loop. |
+| `OnRunCreated` | After `NextRun()` hands back a run, before the run is driven. Writes land ahead of anything the command prints or asks. |
+| `OnMovingPastAsk` | While a queued step executes, so it suits progress indicators rather than setup. |
+| `OnRunComplete` | Once per step, not once per ask. |
+| `OnSessionEnd` | Once, after the loop. |
+| `OnRunStarted` | `[Obsolete]`. Fires straight after `OnRunCreated`. Override `OnRunCreated` instead. |
 
-## Everything outside a run is a singleton
+An `ExceptionOutcome` is rethrown before its outcomes are written.
 
-`CliAppBuilder.Run` registers the I/O the chosen app needs unless a registry
-did, builds the provider with `ValidateScopes` and `ValidateOnBuild` on,
-then resolves the `CliApp` and its writers once from the root. Those live for the whole app; only handlers get per-run
-instances. **A singleton depending on a `Scoped` service fails at
-startup**, naming both types, instead of silently capturing one.
+## The rule people miss
+
+**A headless session is one run, however far it gets.** `HeadlessCliApp.Run`
+opens the session, calls `ExecuteRunOperation` once, stops the workflow, and
+ends.
+
+| Fact | Consequence |
+|---|---|
+| Chained steps run. | A whole chain finishes under a headless app. |
+| Nothing can be asked, so no second run starts. | A run left waiting at a reusable checkpoint stops there, unfinished, its DI scope undisposed. |
+| The class you extend decides the mode for the life of the class. | There is no switching at runtime. |
+| `CliAppBuilder.Run` throws if a `HeadlessCliApp` gets no args. | See the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md). |
+
+**Everything outside a run is a singleton.** `CliAppBuilder.Run` registers the
+I/O the chosen app needs unless a registry did. It builds the provider with
+`ValidateScopes` and `ValidateOnBuild` on, then resolves the `CliApp` and its
+writers once from the root. Only handlers get per-run instances. A singleton
+depending on a `Scoped` service fails at startup, naming both types, instead
+of silently capturing one.
 
 ## Gaps
 
@@ -96,6 +112,7 @@ startup**, naming both types, instead of silently capturing one.
 
 ## See also
 
-[workflow-run-state-machine.md](workflow-run-state-machine.md) ·
-[cli-io.md](cli-io.md) · [outcome-writing.md](outcome-writing.md) ·
-[app-configuration.md](app-configuration.md)
+- [Workflow run state machine](workflow-run-state-machine.md): the statuses each run moves through.
+- [CLI I/O](cli-io.md): `CanAsk` and the I/O each host uses.
+- [Outcome writing](outcome-writing.md): how outcomes are written.
+- [App configuration](app-configuration.md): the builder chain before `Run`.

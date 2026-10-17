@@ -1,46 +1,40 @@
 # Command registration
 
-You never tell KitCli that a command exists. `AddCommandsFromAssembly`
-scans an assembly, finds every `CliCommand`, and wires each one to a name,
-a factory, and a MediatR handler. So the only question worth answering is
-the one you cannot see from your own code: **what name did my command end
-up with?**
+**You never tell KitCli that a command exists. `AddCommandsFromAssembly` scans an assembly and wires each `CliCommand` to a name, a factory and a MediatR handler. The question worth answering is the one you cannot see: what name did my command end up with?**
+
+| Term | Meaning |
+|---|---|
+| Instruction name | What the user types after `/`, such as `spare-money`. |
+| Shorthand | The instruction name's uppercase letters, such as `sm`. |
+| Factory | A `CliCommandFactory<T>` that turns what the user typed into a command object. |
+| Ask | One line the user types. |
 
 ## The name comes from the type name
 
-`GetInstructionName()` removes `CliCommand` from the type name, inserts `-`
-before each uppercase letter except the first, and lowercases it. The
-shorthand keeps only the uppercase letters:
+`GetInstructionName()` removes `CliCommand` from the type name, inserts `-` before each uppercase letter except the first, and lowercases it. The shorthand keeps only the uppercase letters.
 
+```mermaid
+flowchart LR
+    T["SpareMoneyCliCommand"] -->|"remove CliCommand"| S["SpareMoney"]
+    S -->|"hyphenate, lowercase"| N["spare-money"]
+    S -->|"keep uppercase"| H["sm"]
 ```
-SpareMoneyCliCommand  →  SpareMoney  →  spare-money   and   sm
-```
 
-**The string removed is `CliCommand`, not a trailing `Command`, and it goes
-wherever it appears.** So `SpareMoneyCommand` keeps its suffix and becomes
-`spare-money-command`. Name command types `...CliCommand`.
+**The string removed is `CliCommand`, not a trailing `Command`, and it goes wherever it appears.** `SpareMoneyCommand` keeps its suffix and becomes `spare-money-command`. Name command types `...CliCommand`.
 
-`[CliCommandAlias("gimme")]` adds further names, repeatable, author-chosen.
+`[CliCommandAlias("gimme")]` adds further author-chosen names. It is repeatable.
 
 ## Which factory runs
 
-A factory is what turns the name a user typed into a command object.
-Registration pairs each command type with the `CliCommandFactory<>` whose
-generic argument is that type:
+Registration pairs each command type with the `CliCommandFactory<>` whose generic argument is that type:
 
 | Factories found for the type | Result |
 |---|---|
-| one or more | each registered under the full name, shorthand, and aliases |
-| none, and the command has a parameterless constructor | `BasicCliCommandFactory<T>` registered for you |
-| none, and it has not | no factory, and nothing says so until a user types the name |
+| One or more | Each registered under the full name, shorthand and aliases. |
+| None, and the command has a parameterless constructor | `BasicCliCommandFactory<T>` registered for you. |
+| None, and it has not | No factory, and nothing says so until a user types the name. |
 
-When an ask arrives, `CliWorkflowCommandProvider.GetCommand` fetches every
-factory keyed under that name, attaches the instruction and the run's
-artefacts, and takes the **first** whose `CanCreateWhen()` returns `true` —
-the same first-match-wins rule used for argument builders and outcome
-writers (the [first-match-wins ADR](../adr/first-match-wins-resolution.md)). This is
-what lets several `CliCommandFactory<T>` share one command type, each
-picking a different subcommand with `CanCreateWhen()`.
+When an ask arrives, `CliWorkflowCommandProvider.GetCommand` fetches every factory keyed under that name, attaches the instruction and the run's artefacts, and takes the **first** whose `CanCreateWhen()` returns `true`. This is the same first-match-wins rule as argument builders and outcome writers (the [first-match-wins ADR](../adr/first-match-wins-resolution.md)). It lets several factories share one command type, each picking a different subcommand with `CanCreateWhen()`.
 
 Registration and resolution are two flows meeting at one keyed registry:
 
@@ -61,13 +55,11 @@ flowchart TB
 
 ## Gaps
 
-Two command types stemming to one instruction name fail only when a user's
-ask resolves there, not at startup. Tracked as
-[#19](https://github.com/KitCli/KitCli/issues/19).
+Two command types stemming to one instruction name fail only when a user's ask resolves there, not at startup: [#19](https://github.com/KitCli/KitCli/issues/19).
 
 ## See also
 
-[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md) ·
-[artefacts.md](artefacts.md) ·
-[Giving a command extra names](../user-guides/giving-a-command-extra-names.md) ·
-[../adr/cli-command-alias-attribute.md](../adr/cli-command-alias-attribute.md)
+- [Instruction parsing pipeline](instruction-parsing-pipeline.md): where the instruction name comes from.
+- [Artefacts](artefacts.md): what a factory reads from earlier outcomes.
+- [Giving a command extra names](../user-guides/giving-a-command-extra-names.md): the alias task, step by step.
+- [Command alias ADR](../adr/cli-command-alias-attribute.md): why aliases are an attribute.

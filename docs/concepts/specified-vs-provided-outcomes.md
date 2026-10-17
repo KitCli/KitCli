@@ -1,45 +1,65 @@
 # Specified vs provided outcomes
 
-Handing off to a command or a reaction comes in two flavors, for both
-`NextCliCommandOutcome` and reactions: build it yourself (**provided**),
-or just name its type (**specified**) and let the run build it through
-the normal factory path.
+**A handler can hand off to a command or reaction by building it
+(provided) or by naming its type (specified).** A specified one is built
+later by the run, so its factory sees the run's artefacts.
+
+| Term | Meaning |
+|---|---|
+| Provided | The handler builds the command or reaction and passes the instance. |
+| Specified | The handler names the type. The run builds it through the normal factory path. |
+| Artefact | An outcome turned into a value a later command can look up by type and name. |
+
+## How it works
+
+Provided:
 
 ```csharp
-.ByMovingToCommand(new ExportReport(reportId))  // provided — built here
-.ByMovingToCommand<ExportReport>()              // specified — built by the run
-.ByReacting(new SendEmail(address))             // provided
-.ByReacting<SendEmail>()                        // specified
+.ByMovingToCommand(new ExportReport(reportId))
+.ByReacting(new SendEmail(address))
 ```
 
-## What "the normal factory path" buys you
+Specified:
 
-A provided command or reaction is already built, so nothing it needs can
-come from the run — the handler must have everything in hand, by
-constructor, right now.
+```csharp
+.ByMovingToCommand<ExportReport>()
+.ByReacting<SendEmail>()
+```
 
-A specified one is resolved later, the same way an instruction-resolved
-command is: `CliWorkflowRun` puts the type through
-`ICliWorkflowCommandProvider.GetCommand` (for the next command) or
-`ICliWorkflowReactionProvider.GetReaction` (for a reaction), both of which
-convert every prior outcome into artefacts first. **That's the whole
-reason to specify instead of provide**: the factory sees the run's
-accumulated artefacts, including outcomes the current command just
-produced — data a handler, mid-execution, cannot build with yet.
+The run builds a specified one after the handler returns:
 
-`ByMovingToCommand<TCommand>(arguments)` adds one more thing a provided
-command can't offer: factory arguments decided by the handler itself,
-layered on top of whatever the run's artefacts already give the factory.
+```mermaid
+flowchart LR
+    subgraph R["One run"]
+        H["handler returns outcomes"] --> W{"provided or specified?"}
+        W -->|provided| U["instance used as-is"]
+        W -->|specified| P["command or reaction provider"]
+        PO[("prior outcomes + this command's outcomes")] -->|"converted to artefacts"| P
+        P --> F["factory builds it"]
+    end
+```
 
-## Where this resolves
+| Handoff | Resolved by |
+|---|---|
+| Command | `ICliWorkflowCommandProvider.GetCommand`, given a fresh `Instruction`. |
+| Reaction | `ICliWorkflowReactionProvider.GetReaction`, given `AllPriorOutcomes()` plus the current outcomes. |
 
-`CliWorkflowRun.GetNextCommandToMoveTo` and `.GetReactionToPublish` are
-the two call sites. A provided value is unwrapped and returned as-is; a
-specified one is turned into a fresh `Instruction` (for a command) or
-resolved straight from `AllPriorOutcomes()` plus the current outcomes (for
-a reaction) and handed to the matching provider.
+## The rule people miss
+
+**Specify when the thing you hand off to needs data the handler cannot build
+with yet.** A provided value must be complete in the handler, by constructor,
+right now. A specified one has its factory read the run's accumulated
+artefacts, including outcomes the current command just produced.
+
+| Fact | Consequence |
+|---|---|
+| A provided command or reaction is already built. | Nothing it needs can come from the run. |
+| Both providers convert every prior outcome into artefacts first. | A specified factory sees what the current command just returned. |
+| `ByMovingToCommand<TCommand>(arguments)` takes arguments the handler decides. | They layer on top of the artefacts the factory already gets. A provided command cannot offer this. |
+| `CliWorkflowRun.GetNextCommandToMoveTo` and `GetReactionToPublish` are the two call sites. | A provided value is unwrapped there. A specified one goes to the provider. |
 
 ## See also
 
-[outcomes.md](outcomes.md) · [artefacts.md](artefacts.md) ·
-[workflow-run-state-machine.md](workflow-run-state-machine.md)
+- [Outcomes](outcomes.md): the outcome kinds a handler returns.
+- [Artefacts](artefacts.md): what a specified factory reads.
+- [Workflow run state machine](workflow-run-state-machine.md): how a run moves to the next command.

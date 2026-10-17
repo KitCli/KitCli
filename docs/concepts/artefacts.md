@@ -1,11 +1,32 @@
 # Artefacts
 
-An outcome belongs to the command that returned it, and nothing else can
-reach it. An artefact is that same data made queryable by type and name
-across the whole run — so a later command's factory can read what an
-earlier command produced. An outcome with a session lifetime stays
-queryable in every later run too; see
-[outcomes.md](outcomes.md#how-long-an-outcome-lasts).
+**An artefact is an outcome that any later command can look up by type and
+name.** An outcome belongs to the command that returned it. An artefact makes
+the same data readable across the run, and across later runs when the outcome
+lasts the session.
+
+| Term | Meaning |
+|---|---|
+| Outcome | What a command returns: "show this", or "here's what happens next". |
+| Artefact | An outcome turned into a value a later command can look up by type and name. |
+| Artefact factory | The class that turns one outcome type into an artefact. |
+| Run | Every command from the first one up to a final outcome. |
+
+## How it works
+
+A handler returns an outcome. A registered artefact factory claims its type
+and creates the artefact. The next command's factory reads it back.
+
+```mermaid
+flowchart LR
+    subgraph R["One run"]
+        H["command A's handler"] -->|returns| O["outcome"]
+        O -->|"a factory's For()<br/>claims its type"| AF["artefact factory"]
+        AF -->|creates| L[("the run's artefacts")]
+        L -->|"GetArtefact, last match wins"| B["command B's factory"]
+        L -.->|"same list"| C["a chained command's factory"]
+    end
+```
 
 Three types make one:
 
@@ -22,40 +43,32 @@ public class ThresholdArtefactFactory : ArtefactFactory<ThresholdOutcome>
 }
 ```
 
-Read it back in a factory with `GetArtefact<T>(name)` or
-`GetRequiredArtefact<T>(name)`, which filter by type, then by name if
-given, and take the **last** match. Set a value twice in a run and later
-commands see the second.
+A factory reads the value with `GetArtefact<T>(name)` or
+`GetRequiredArtefact<T>(name)`. Both filter by type, then by name if given,
+and take the **last** match. Set a value twice in a run and later commands see
+the second.
 
-```mermaid
-flowchart LR
-    H["command A's handler"] -->|returns| O["outcome"]
-    O -->|"a registered factory's<br/>For() claims its type"| AF["artefact factory"]
-    AF -->|creates| L[("the run's artefacts")]
-    L -->|"GetArtefact, last match wins"| B["command B's factory"]
-    L -.->|"same list"| C["a chained command's factory"]
-```
-
-**A chained command reads artefacts too.** A handler naming its successor
-with `ByMovingToCommand<TCommand>()` has that command built by its factory,
-attached to the same artefacts — so data reaches a chain through artefacts
-rather than through the previous handler's local variables. See
+**A chained command reads artefacts too.** A handler naming its successor with
+`ByMovingToCommand<TCommand>()` has that command built by its factory, over the
+same artefacts. Data reaches a chain through artefacts, not through the
+previous handler's local variables. See
 [Chaining commands together](../user-guides/chaining-commands.md).
 
-## Registration takes a second call
+An outcome with a session lifetime stays readable in every later run too. See
+[Outcomes](outcomes.md#how-long-an-outcome-lasts).
 
-Your registry must call `AddArtefactFactoriesForAssembly(assembly)`.
-`AddCommandsFromAssembly` registers commands, factories, and handlers — but
-**not** artefact factories. That one call registers four built-ins,
-including the one behind `LastCommandIs<T>()`, then finds every
-`ArtefactFactory<>` in the assembly, plus one for every closed
-`Aggregator<,>` and `TableBuilder<,>`.
+## The rule people miss
 
-Miss the call and nothing fails at startup. The first symptom is
-`GetRequiredArtefact` throwing at runtime.
+**Registering commands does not register artefact factories.** The registry
+must also call `AddArtefactFactoriesForAssembly(assembly)`.
 
-`OutcomeKind` plays no part in any of this. An outcome becomes an artefact
-when some registered factory's `For()` claims its type, whatever its kind.
+| Fact | Consequence |
+|---|---|
+| `AddCommandsFromAssembly` registers commands, factories and handlers, not artefact factories. | Artefacts need their own call. |
+| `AddArtefactFactoriesForAssembly` registers four built-ins, including the one behind `LastCommandIs<T>()`. | Skip it and `LastCommandIs<T>()` breaks too. |
+| It then finds every `ArtefactFactory<>` in the assembly, plus one for every closed `Aggregator<,>` and `TableBuilder<,>`. | Aggregators and table builders need it as well. |
+| Nothing fails at startup when the call is missing. | The first symptom is `GetRequiredArtefact` throwing at runtime. |
+| An outcome becomes an artefact when a registered factory's `For()` claims its type. | `OutcomeKind` plays no part. |
 
 ## Gaps
 
@@ -65,5 +78,6 @@ despite a typed `CliException` hierarchy existing. Tracked as
 
 ## See also
 
-[outcomes.md](outcomes.md) · [command-registration.md](command-registration.md) ·
-[instruction-parsing-pipeline.md](instruction-parsing-pipeline.md)
+- [Outcomes](outcomes.md): the lifetimes that decide how long an artefact stays readable.
+- [Command registration](command-registration.md): where `AddArtefactFactoriesForAssembly` fits.
+- [Instruction parsing pipeline](instruction-parsing-pipeline.md): how a typed ask becomes a command.

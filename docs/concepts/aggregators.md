@@ -1,9 +1,13 @@
 # Aggregators
 
-Every list command does the same four things: filter, project, sort, page.
-`Aggregator<TSource, TAggregate>` is that pipeline as one reusable object.
-Subclass it, implement `DoAggregation`, and a later "next page" command can
-re-run the whole thing instead of rebuilding it.
+**Every list command filters, projects, sorts and pages. `Aggregator<TSource, TAggregate>` is that pipeline as one reusable object, so a later "next page" command re-runs it instead of rebuilding it.**
+
+| Term | Meaning |
+|---|---|
+| Aggregator | Subclass of `Aggregator<TSource, TAggregate>` that implements `DoAggregation`. |
+| `BeforeAggregation` | A function that filters the raw source. |
+| `AfterAggregation` | A function that sorts or filters the aggregated rows. |
+| `AggregatorFilter` | A labelled record of which filter a command applied. |
 
 ```csharp
 var aggregator = new TestAggregator(source)
@@ -13,30 +17,33 @@ var aggregator = new TestAggregator(source)
 
 ## Pipeline order
 
-`Aggregate(pageSize, pageNumber)` runs: clone the source → every
-`BeforeAggregation` function → `DoAggregation` → every `AfterAggregation`
-function → `Skip`/`Take`.
+`Aggregate(pageSize, pageNumber)` runs these steps:
 
-So `BeforeAggregation` filters raw source, `AfterAggregation` sorts or
-filters aggregated rows, and **paging always happens last**.
+```mermaid
+flowchart LR
+    C["clone the source"] --> B["every BeforeAggregation"]
+    B --> D["DoAggregation"]
+    D --> A["every AfterAggregation"]
+    A --> P["Skip and Take"]
+```
 
-Remember an aggregator across commands with `ByAggregating(aggregator)`;
-`AggregatorArtefactFactory` makes it queryable (see
-[artefacts.md](artefacts.md)). To re-run one with different
-paging, though, remember a `TableBuilder` instead — see
-[tables.md](tables.md).
+**Paging always happens last.**
 
-`AggregatorFilter` is a separate labelled record recording *which* filter a
-command applied. `Aggregator` never reads it; nothing ties it back to the
-function passed to `BeforeAggregation`.
+## Keeping one across commands
+
+| To... | Do |
+|---|---|
+| Remember an aggregator | `ByAggregating(aggregator)`. `AggregatorArtefactFactory` makes it queryable ([Artefacts](artefacts.md)). |
+| Re-run it with different paging | Remember a `TableBuilder` instead ([Tables](tables.md)). |
+
+`AggregatorFilter` is separate. `Aggregator` never reads it, and nothing ties it back to the function passed to `BeforeAggregation`.
 
 ## Gaps
 
-The base class is abstract, so even "page a list, no real aggregation"
-needs a subclass. Tracked as
-[#50](https://github.com/KitCli/KitCli/issues/50).
+The base class is abstract, so even "page a list, no real aggregation" needs a subclass: [#50](https://github.com/KitCli/KitCli/issues/50).
 
 ## See also
 
-[tables.md](tables.md) · [outcomes.md](outcomes.md) ·
-[artefacts.md](artefacts.md)
+- [Tables](tables.md): the builder that holds an aggregator and a page.
+- [Outcomes](outcomes.md): how an aggregator is remembered.
+- [Artefacts](artefacts.md): how a later command finds it.
