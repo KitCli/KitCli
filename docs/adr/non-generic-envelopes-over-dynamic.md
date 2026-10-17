@@ -7,24 +7,54 @@ Release: 1.0.0
 
 ## Context
 
-KitCli repeatedly has to move a value of an unknown type through machinery
-that cannot name that type. A run holds artefacts from every prior command,
-each carrying a different value type. A parsed instruction holds arguments
-whose types depend on what the user typed. A handler returns outcomes whose
-concrete types the workflow engine does not know.
+**KitCli keeps having to move a value of an unknown type through machinery that cannot name that type, and C# offers two ways to do it.**
 
-C# offers two ways out. `dynamic` defers member resolution to runtime. An
-envelope is a non-generic base type that a generic subtype derives from,
-with the concrete type recovered later by a type test.
+| Term | Meaning |
+|---|---|
+| Artefact | An outcome turned into a value a later command can look up by type and name. |
+| Outcome | What a command returns: "show this", or "here's what happens next". |
+| Run | Every command from the first one up to a final outcome. |
+| Envelope | A non-generic base type that a generic subtype derives from. The concrete type is recovered later by a type test. |
 
-The choice matters more here than in an application, because KitCli ships
-as nine NuGet packages. Whatever it picks constrains every consuming app.
+Three places hit the problem:
+
+| Where | Why the type is unknown |
+|---|---|
+| A run | It holds artefacts from every prior command, each carrying a different value type. |
+| A parsed instruction | Its arguments' types depend on what the user typed. |
+| A handler | It returns outcomes whose concrete types the workflow engine does not know. |
+
+The two ways out are `dynamic`, which defers member resolution to runtime, and an envelope. The choice matters more here than in an application, because KitCli ships as nine NuGet packages. Whatever it picks constrains every consuming app.
 
 ## Decision
 
-KitCli uses non-generic envelopes everywhere and does not use `dynamic` at
-all. There are zero occurrences of the keyword in the repository, and zero
-anonymous types. Eight envelopes carry the pattern:
+**KitCli uses non-generic envelopes everywhere and does not use `dynamic` at all.** The repository contains zero occurrences of the keyword, and zero anonymous types.
+
+```mermaid
+flowchart LR
+    subgraph Producer
+        G["Artefact of T"]
+    end
+    subgraph Machinery["Code that cannot name T"]
+        E["AnonymousArtefact"]
+    end
+    subgraph Consumer
+        R["OfType of Artefact of T"]
+    end
+    G -->|"derives from"| E
+    E -->|"type test recovers T"| R
+```
+
+The envelope and its generic subtype, as written in `KitCli.Commands.Abstractions/Artefacts`:
+
+```csharp
+public abstract record AnonymousArtefact(string Name);
+
+public abstract record Artefact<TArtefactValue>(string Name, TArtefactValue Value)
+    : AnonymousArtefact(Name);
+```
+
+Eight envelopes carry the pattern:
 
 | Envelope | Erased from | Recovered by |
 |---|---|---|
@@ -37,42 +67,23 @@ anonymous types. Eight envelopes carry the pattern:
 | `IInstructionArgumentBuilder` | never generic | `For(string?)` probe |
 | `ICliWorkflowRunStateChange` | `IOutcomeCliWorkflowRunStateChange` | `OfType<>` |
 
-**`Anonymous` in a type name means type-erased.** It does not mean the same
-thing as `OutcomeKind.Anonymous`, which means an outcome has no effect on
-the run. The two are unrelated.
+**`Anonymous` in a type name means type-erased.** It does not mean the same thing as `OutcomeKind.Anonymous`, which means an outcome has no effect on the run. The two are unrelated.
 
 ## Alternatives considered
 
-- **`dynamic` at the dispatch points** — would collapse the hand-rolled
-  double dispatch in the eight writers into one call site. It loses on
-  three counts. It removes the compiler as the contract, and for a
-  conventions framework the compile-time contract *is* the product. It is
-  not trim- or AOT-compatible: the binder is
-  `[RequiresUnreferencedCode]`, so one use emits IL2026 into every consumer
-  publishing trimmed or Native AOT. And it costs more per dispatch than a
-  type test.
-- **The visitor pattern** — forces a cyclic dependency: every new outcome
-  type means touching a visitor interface every writer implements.
-  Envelopes plus a type test leave both sides independent.
+- **`dynamic` at the dispatch points.** It would collapse the hand-rolled double dispatch in the eight writers into one call site. It loses on three counts:
+  - It removes the compiler as the contract, and for a conventions framework the compile-time contract *is* the product.
+  - It is not trim- or AOT-compatible. The binder is `[RequiresUnreferencedCode]`, so one use emits IL2026 into every consumer publishing trimmed or Native AOT.
+  - It costs more per dispatch than a type test.
+- **The visitor pattern.** It forces a cyclic dependency: every new outcome type means touching a visitor interface every writer implements. Envelopes plus a type test leave both sides independent.
 
 ## Consequences
 
-- Every public extension point is a compile-time contract. Getting one
-  wrong is a compiler error, not a `RuntimeBinderException` in front of a
-  user.
-- Recovering the type becomes the framework's own work, across roughly 31
-  sites. Each is a place a new subtype can be silently missed rather than
-  failing to compile.
-- The eight writers are the weakest of those. `ArtefactFactory.Create`
-  recovers its type with `is TOutcome` and throws a named exception on a
-  mismatch; the writers cast unchecked after a separate `CanWriteFor`, so a
-  misregistered writer throws `InvalidCastException`. Tracked as
-  [#117](https://github.com/KitCli/KitCli/issues/117).
-- **This does not make KitCli AOT-safe.** The five `MakeGenericType` and
-  `Activator.CreateInstance` sites from
-  the [reflection-registration ADR](reflection-based-automatic-registration.md) are
-  trim-hostile for the same reason `dynamic` is. No project sets
-  `IsTrimmable` or `IsAotCompatible`, so the warnings are unmeasured.
+| Gets easier | Gets harder |
+|---|---|
+| Every public extension point is a compile-time contract. Getting one wrong is a compiler error, not a `RuntimeBinderException` in front of a user. | Recovering the type becomes the framework's own work, across roughly 31 sites. Each is a place a new subtype can be silently missed rather than failing to compile. |
+| | The eight writers are the weakest of those. `ArtefactFactory.Create` recovers its type with `is TOutcome` and throws a named exception on a mismatch. The writers cast unchecked after a separate `CanWriteFor`, so a misregistered writer throws `InvalidCastException`. Tracked as [#117](https://github.com/KitCli/KitCli/issues/117). |
+| | **This does not make KitCli AOT-safe.** The five `MakeGenericType` and `Activator.CreateInstance` sites from the [reflection-registration ADR](reflection-based-automatic-registration.md) are trim-hostile for the same reason `dynamic` is. No project sets `IsTrimmable` or `IsAotCompatible`, so the warnings are unmeasured. |
 
 ## References
 

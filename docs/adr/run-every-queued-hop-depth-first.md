@@ -10,14 +10,16 @@ Settles the selection rule left open by
 
 ## Context
 
-A command can finish by queueing another command to run next — a hop. The
-user types one thing and the app runs a chain of commands before asking
-again. A handler can queue several hops, because the fluent builder
-appends whatever it is given, but the run executes only one of them:
-`MoveToNext()` scans everything the run has produced and takes the last
-hop queued. Queue five and four vanish, silently. Whether the run
-continues at all is also decided by whichever outcome happens to sit last
-in the handler's list, so a hop followed by a message never hops.
+**A handler can queue several hops, but the run executes only the last one. The rest vanish silently.**
+
+| Term | Meaning |
+|---|---|
+| Hop | A command a finished command queues to run next. |
+| Chain | The commands that run in turn after one ask, before the app asks again. |
+| History | Every step the run took, with the outcomes each produced. |
+| Pending | Hops queued and not yet run. |
+
+The fluent builder appends whatever it is given, so queueing five hops is legal. `MoveToNext()` then scans everything the run has produced and takes the last hop queued. Whether the run continues at all depends on which outcome sits last in the handler's list, so a hop followed by a message never hops.
 
 ```mermaid
 flowchart LR
@@ -25,18 +27,13 @@ flowchart LR
     A -.->|dropped| B["B never runs"]
 ```
 
-Nothing records which hops were already taken. The run does keep its full
-history — each step stores the outcomes it produced, including a record
-of the command that ran — but `CliWorkflowRun` re-reads that raw history
-in place, each time, itself.
+Nothing records which hops were already taken. The run keeps its full history, including a record of each command that ran, but `CliWorkflowRun` re-reads that raw history itself, in place, each time.
 
 ## Decision
 
-Every queued hop runs, in the order written. When a hop's own command
-queues further hops, those run first and the earlier queue then resumes —
-nested to-do lists. A queues B then C, B queues D: the order is A, B, D,
-C. An existing chain keeps its exact meaning when a sibling is stacked
-behind it.
+**Every queued hop runs, in the order written. When a hop queues further hops, those run first, then the earlier queue resumes.**
+
+A queues B then C, and B queues D. The order is A, B, D, C. Each box shows what runs, what it queues, and what waits afterwards:
 
 ```mermaid
 flowchart LR
@@ -45,42 +42,33 @@ flowchart LR
     D --> C["C runs<br/>pending: none"]
 ```
 
-Each box is one step: what runs, what it queues, and what is left waiting
-afterwards. B's own hop D lands at the front of the pending list, so it
-runs before A's remaining plan resumes.
+B's hop D lands at the front of the pending list, so it runs before A's remaining plan resumes. An existing chain keeps its exact meaning when a sibling is stacked behind it.
 
-The hops still waiting are derived, not stored: replay the history — an
-executed step consumes the front of the pending list, its new hops go on
-the front. The replay is an extension over what `ICliWorkflowRunState`
-already exposes (`AllOutcomeStateChanges()`), not a new interface member;
-`CliWorkflowRun` asks "any hop pending?" and "which is next?", never
-interpreting raw history itself. Factories still
-receive the flat outcome history as data — the state hides
-interpretation, not the outcomes.
+The pending hops are derived, not stored. Replaying the history gives them:
+
+| Step in the history | Effect on pending |
+|---|---|
+| A step executed. | It consumes the front of the pending list. |
+| That step queued new hops. | They go on the front. |
+
+| Piece | Shape |
+|---|---|
+| The replay | An extension over `ICliWorkflowRunState.AllOutcomeStateChanges()`, not a new interface member. |
+| `CliWorkflowRun` | Asks "any hop pending?" and "which is next?". It never interprets raw history itself. |
+| Factories | Still receive the flat outcome history as data. The state hides interpretation, not the outcomes. |
 
 ## Alternatives considered
 
-- **One hop only, throw on a second** (#152's fallback) — bans a shape
-  the builder invites; the fluent calls read "then B, then C".
-- **New hops at the back of the queue** — a one-line derivation (skip one
-  hop per step taken), but stacking a sibling reorders an existing
-  chain's own follow-ups.
-- **Earliest hop with no matching ran-record**
-  ([#124](https://github.com/KitCli/KitCli/issues/124)) — matches on the
-  command, so two hops to the same command type are indistinguishable.
-- **An explicit queue field on the run** — state that can drift from a
-  history that already holds enough.
+- **One hop only, throw on a second** (#152's fallback). It bans a shape the builder invites, since the fluent calls read "then B, then C".
+- **New hops at the back of the queue.** The derivation is one line (skip one hop per step taken), but stacking a sibling reorders an existing chain's own follow-ups.
+- **Earliest hop with no matching ran-record** ([#124](https://github.com/KitCli/KitCli/issues/124)). It matches on the command, so two hops to the same command type are indistinguishable.
+- **An explicit queue field on the run.** It is state that can drift from a history that already holds enough.
 
 ## Consequences
 
-- List position stops mattering: a hop followed by a message now hops.
-  A behavior change, so a `CHANGELOG.md` entry ships with the code.
-- The public API only gains: no type changes shape and the interface
-  gains no member, so this is a minor release, not a major.
-- Rewrites the chain-by-type ADR's "still takes the last queued hop" consequence.
-- The move-past-ask guard asks the state, so hops consumed steps ago no
-  longer count as pending — a latent bug gone.
-- Depth-first costs a replay instead of a skip-count; it is one
-  well-named method on the state, pinned by ordering tests.
-- Still nothing detects an unending chain
-  ([#173](https://github.com/KitCli/KitCli/issues/173)).
+| Gets easier | Gets harder |
+|---|---|
+| List position stops mattering: a hop followed by a message now hops. | That is a behavior change, so a `CHANGELOG.md` entry ships with the code. |
+| The public API only gains. No type changes shape and the interface gains no member, so this is a minor release, not a major. | It rewrites the chain-by-type ADR's "still takes the last queued hop" consequence. |
+| The move-past-ask guard asks the state, so hops consumed steps ago no longer count as pending. A latent bug is gone. | Depth-first costs a replay instead of a skip-count. It is one well-named method on the state, pinned by ordering tests. |
+| | Still nothing detects an unending chain ([#173](https://github.com/KitCli/KitCli/issues/173)). |
