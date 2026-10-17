@@ -82,7 +82,7 @@ The author's code loses the `ReturnTo` field, the per-sender factories and the
 ```csharp
 // Choose source's handler, after a good answer
 return FinishThisCommand()
-    .ByResultingIn(new SourceOutcome(picked))
+    .ByResultingIn(new ChosenSourceOutcome(chosenSource))
     .ByCarryingOn()
     .End();
 
