@@ -1,17 +1,17 @@
-# How does a command know where it was sent from, and when to carry on?
+# How could KitCli know where a command was sent from, and when to carry on?
 
 - **Status:** In Review
 - **Release:** Unreleased
-- **Spike:** none filed — tests the hand-written `ReturnTo` in
+- **Spike:** none filed — tests building the hand-written `ReturnTo` in
   [Asking for a missing value and carrying on](../user-guides/asking-for-a-missing-value-and-carrying-on.md)
+  into KitCli
 - **Time-box:** none agreed — ran inline
 - **Date:** 2026-10-17
 
 ## Verdict
 
-**No new complexity.** "Where" and "when" both work with what KitCli has
-today: `/export` passes where to carry on along with the move, and Choose
-source decides when.
+**New complexity.** KitCli needs new code to write down which command sent the
+user to a question, and to send them back when the question says "carry on".
 
 `/export` needs a source to export from. When the user has not chosen one,
 `/export` sends them to Choose source, which asks "Which source?". Once they
@@ -28,12 +28,12 @@ know two things:
 | Command | One step the app runs, such as `/export`. |
 | Run | Every command from what the user typed up to the one that ends it. |
 | Move | One command handing over to the next, written `ByMovingToCommand`. |
-| Factory | Builds a command just before it runs. It can read values earlier commands passed or remembered. |
+| Factory | Builds a command just before it runs. It can read notes earlier commands left. |
 
-### Today, as the guide shows
+### Today
 
-Choose source holds a `ReturnTo` field. One factory per sending command fills
-that field in, each checking which command ran just before:
+The app's author builds both halves by hand. Choose source holds a `ReturnTo`
+field, and one factory per sending command fills it in:
 
 ```mermaid
 sequenceDiagram
@@ -42,85 +42,106 @@ sequenceDiagram
     participant C as Choose source
     U->>E: /export
     E->>C: move
-    Note over C: the factory for /export sets<br/>ReturnTo = /export
+    Note over C: the author's factory for /export<br/>sets ReturnTo = /export
     C-->>U: Which source?
     U->>C: Warehouse
+    Note over C: the author's handler checks<br/>ReturnTo is not null
     C->>E: move to ReturnTo
 ```
 
 Every command that can send the user to Choose source needs its own factory.
-Asking again is built by yet another factory, which must copy `ReturnTo`
-across or lose it.
+Asking again needs another factory, which must copy `ReturnTo` across.
 
-### With what exists, in fewer pieces
+### After this work
 
-`/export` passes where to carry on as part of the move. Choose source then
-needs one factory, whoever sent the user there:
-
-```csharp
-// /export's handler
-FinishThisCommand()
-    .ByMovingToCommand<ChooseSourceCliCommand>(
-        new NextCliCommandArgument<Type>("return-to", typeof(ExportCliCommand)))
-    .EndAsync();
-
-// Choose source's only factory
-public override CliCommand Create()
-    => new ChooseSourceCliCommand(GetArgument<Type>("return-to")?.Value);
-```
+KitCli writes a note when it follows a move: "Choose source was sent here by
+`/export`." When Choose source says "carry on", KitCli reads the note and runs
+`/export` again:
 
 ```mermaid
 sequenceDiagram
     actor U as User
     participant E as /export
+    participant K as KitCli
     participant C as Choose source
     U->>E: /export
-    E->>C: move, return-to = /export
-    Note over C: the one factory sets<br/>ReturnTo = /export
+    E->>K: move to Choose source
+    Note over K: note: Choose source was sent by /export
+    K->>C: run
     C-->>U: Which source?
     U->>C: Warehouse
-    C->>E: move to ReturnTo
+    C->>K: carry on
+    Note over K: reads the note
+    K->>E: run again
 ```
 
-Typed on its own, Choose source gets no `return-to`, so `ReturnTo` is `null`
-and it finishes. Its handler decides when to carry on:
+The author's code loses the `ReturnTo` field, the per-sender factories and the
+`null` check. `/export` is unchanged. The names below are proposals, not on
+`main`:
 
-| The user | Choose source |
+```csharp
+// Choose source's handler, after a good answer
+return FinishThisCommand()
+    .ByResultingIn(new SourceOutcome(picked))
+    .ByCarryingOn()
+    .End();
+
+// Choose source's factory, to word a message such as "Back to export"
+public override CliCommand Create()
+    => new ChooseSourceCliCommand(BackToExport: WasSentFrom<ExportCliCommand>());
+```
+
+KitCli handles each case:
+
+| What happens | What KitCli does |
 |---|---|
-| Picks a source | Moves to `ReturnTo`. |
-| Picks something invalid | Moves to Choose source again, passing `return-to` along. |
-| Cancels | Ends the run with a message. |
+| The user types Choose source on its own. | No note is written, so `ByCarryingOn()` does nothing and the command just finishes. |
+| Choose source asks again by moving to itself. | It keeps the note it already has, instead of writing "sent by Choose source". |
+| Choose source carries on. | It sends the user back without writing a new note. |
+| The user cancels. | Choose source ends the run as it does today, and the note goes with it. |
 
 ## Recommendation
 
-**One docs ticket: rewrite the guide to pass `return-to` with the move.** It
-replaces one factory per sending command with a single factory. No KitCli
-code changes.
+Three delivery tickets, in this order, as one minor release. An ADR comes with
+the first, because the note is a new pattern every command can use.
+
+**1. Write the "sent by" note when following a move, and add `WasSentFrom<T>()`.**
+
+**2. Add `ByCarryingOn()`.** It sends the user back to the command in the note.
+
+**3. Rewrite the asking guide around the two.**
 
 ## What was established
 
 | Fact | Consequence |
 |---|---|
-| A move can carry typed values to the next command's factory. | "Where" travels with the move, without a factory per sender. |
-| A value passed with a move reaches only the next command. | A question that leads to another question loses it. See [Carrying on after nested questions](what-would-it-take-to-carry-on-after-nested-questions.md). |
-| `/export` runs again from the top, rebuilt by its factory. | A typed flag such as `--dry-run` is lost unless remembered first, and anything done before sending runs twice. |
+| The run can already tell a typed command from a moved-to one. | KitCli knows when to write a note and when not to. |
+| Factories already read earlier notes, such as the record of which command ran. | `WasSentFrom<T>()` can read the new note the same way. |
+| The guide's factory checks only which command ran last. | Typing Choose source straight after `/export`, in the same run, wrongly sends the user back. The note fixes this. |
+| `/export` runs again from the top, rebuilt by its factory. | A typed flag such as `--dry-run` is lost unless remembered first. |
 
 ## Evidence
 
-Read against `65934ad`. The sample above was compiled against it.
+Read against `eec501a`.
 
 | File | Shows |
 |---|---|
-| `docs/user-guides/asking-for-a-missing-value-and-carrying-on.md:35-65` | The `ReturnTo` field, the per-sender factory and the `null` check. |
-| `KitCli.Commands.Abstractions/Arguments/NextCliCommandArgument.cs:13` | A typed value a move carries to the next factory. |
-| `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:87` | `GetArgument<T>`, matching a passed value by name and type. |
-| `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:162` | `LastCommandIs<T>()`, which each per-sender factory checks today. |
+| `docs/user-guides/asking-for-a-missing-value-and-carrying-on.md:35-65` | The hand-written `ReturnTo` field, per-sender factory and `null` check. |
+| `KitCli.Workflow/Run/CliWorkflowRun.cs:120` | A typed command is recorded with what the user typed. |
+| `KitCli.Workflow/Run/CliWorkflowRun.cs:136` | A moved-to command is recorded without it. |
+| `KitCli.Workflow/Run/CliWorkflowRun.cs:164` | Every command that runs is recorded. |
+| `KitCli.Workflow/Run/CliWorkflowRun.cs:214` | A moved-to command is built from a blank instruction, which is why typed flags are lost. |
+| `KitCli.Workflow.Commands/CliWorkflowCommandProvider.cs:46` | Factories read earlier outcomes turned into notes. |
+| `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:162` | `LastCommandIs<T>()`, the check the guide's factories use today. |
 
 ## Open questions
 
-None.
+- Should asking again be its own call, such as `ByAskingAgain()`, or any move
+  from a command to itself?
+- When KitCli runs `/export` again, should it replay what the user first typed,
+  so flags such as `--dry-run` survive?
 
 ## Out of scope
 
-- **A question that leads to another question.** It needs new code:
+- **A question that leads to another question.** It needs more new code:
   [Carrying on after nested questions](what-would-it-take-to-carry-on-after-nested-questions.md).

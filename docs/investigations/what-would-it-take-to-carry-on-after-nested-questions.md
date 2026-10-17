@@ -3,122 +3,111 @@
 - **Status:** In Review
 - **Release:** Unreleased
 - **Spike:** none filed — follows on from
-  [How does a command know where it was sent from](how-does-a-command-know-where-it-was-sent-from.md),
-  against [#152](https://github.com/KitCli/KitCli/issues/152), *select the
-  next command by queued outcome*
+  [How could KitCli know where a command was sent from](how-does-a-command-know-where-it-was-sent-from.md)
 - **Time-box:** none agreed — ran inline
 - **Date:** 2026-10-17
 
 ## Verdict
 
-**New complexity.** It needs #152, plus one new check that lets a factory
-see which command is waiting to run after the one it builds.
+**New complexity.** When the user comes back to a command, KitCli must give
+that command back the note it had the first time, so it can carry on in turn.
 
 `/export` sends the user to Choose source. Choose source sends them on to
-Choose folder. After the folder is chosen, the app should carry on with Choose
-source, then `/export`. Passing "where to carry on" along with each move, which
-works for one question, loses `/export`:
-
-```mermaid
-sequenceDiagram
-    participant E as /export
-    participant S as Choose source
-    participant F as Choose folder
-    E->>S: move, return-to = /export
-    S->>F: move, return-to = Choose source
-    F->>S: move to return-to
-    Note over S: no return-to this time
-    Note over E,S: /export is never reached
-```
+Choose folder. After both answers, the app should carry on with Choose source,
+then `/export`.
 
 | Term | Meaning |
 |---|---|
 | Command | One step the app runs, such as `/export`. |
 | Move | One command handing over to the next, written `ByMovingToCommand`. |
-| Queue | The moves waiting to run, once #152 lets a command make several. |
-| Factory | Builds a command just before it runs. It can read values earlier commands passed or remembered. |
+| Note | What KitCli writes when it follows a move: "Choose source was sent here by `/export`". |
+| Carry on | A command telling KitCli it is done, written `ByCarryingOn()`, so KitCli sends the user back. |
 
-### After #152
+### With one note per command
 
-`/export` queues Choose source, then itself. Choose source queues Choose
-folder, then itself. Each command's own moves run before earlier ones resume,
-so the order comes out right:
+The [previous investigation](how-does-a-command-know-where-it-was-sent-from.md)
+writes no note when the user is sent back. So Choose source comes back from
+Choose folder with no note, and stops:
 
 ```mermaid
 sequenceDiagram
     participant E as /export
     participant S as Choose source
     participant F as Choose folder
-    Note over E: queues Choose source, then /export
-    E->>S: run
-    Note over S: queues Choose folder, then Choose source
-    S->>F: run
-    F->>S: next in the queue
-    S->>E: next in the queue
+    E->>S: move
+    Note over S: note: sent by /export
+    S->>F: move
+    Note over F: note: sent by Choose source
+    F->>S: carry on
+    Note over S: no note this time
+    Note over E,S: /export is never reached
 ```
 
-"When" needs nothing more. A command that finishes normally lets the queue
-carry on. A bad answer moves to the same command again, which runs first.
+### After this work
 
-"Where" still needs new code. Choose source cannot see `/export` waiting, so
-it cannot tell being sent from being typed on its own. A factory reads only
-passed or remembered values, and nothing remembers a queued move. The check
-would sit beside `LastCommandIs`. The name below is a proposal, not on `main`:
+When KitCli sends the user back to a command, it hands that command the note
+it had the first time:
 
-```csharp
-public override CliCommand Create()
-    => new ChooseSourceCliCommand(SentFromExport: NextQueuedCommandIs<ExportCliCommand>());
+```mermaid
+sequenceDiagram
+    participant E as /export
+    participant S as Choose source
+    participant F as Choose folder
+    E->>S: move
+    Note over S: note: sent by /export
+    S->>F: move
+    Note over F: note: sent by Choose source
+    F->>S: carry on
+    Note over S: note again: sent by /export
+    S->>E: carry on
 ```
+
+The author writes nothing extra. Each question still ends with `ByCarryingOn()`.
 
 ## Recommendation
 
-**One feature ticket after #152: let a factory check which command is queued
-after the one it builds.** New public API, so a minor release.
+**One delivery ticket, after the previous investigation's tickets: carrying
+on restores the note the command had when it first ran.** Part of the same
+minor release.
 
 ## What was established
 
 | Fact | Consequence |
 |---|---|
-| A value passed with a move reaches only the next command. | It is lost one question deeper. |
-| `MoveToNext()` runs only the last queued move today. | Queueing `/export` behind Choose source needs #152 first. |
-| A factory reads only outcomes turned into remembered values, and a queued move is not one. | After #152, Choose source cannot see `/export` waiting without the new check. |
+| Notes stack up like a pile: a move adds one, carrying on removes one. | Working out a command's note means reading the run's history from the start, not just one step back. |
+| The run keeps every command it ran, in order. | The pile can be worked out from that history, with nothing new stored. |
+| #152 proposes reading the history the same way to find queued moves. | The two can share one way of reading the history. |
 
-The spike also considered saving a "return to" note on every move. Going back
-is itself a move, so it saves a new note over the one still needed:
+An earlier idea, writing a note on every move including going back, was
+rejected. Going back writes a note over the one still needed:
 
 ```mermaid
 sequenceDiagram
     participant E as /export
     participant S as Choose source
     participant F as Choose folder
-    E->>S: move, note: return to /export
-    S->>F: move, note: return to Choose source
-    F->>S: go back, note: return to Choose folder
+    E->>S: move, note: sent by /export
+    S->>F: move, note: sent by Choose source
+    F->>S: go back, note: sent by Choose folder
     S->>F: go back to the newest note
     Note over E,F: /export is never reached
 ```
 
 ## Evidence
 
-Read against `65934ad`.
+Read against `eec501a`.
 
 | File | Shows |
 |---|---|
-| `KitCli.Workflow/Run/CliWorkflowRun.cs:140` | `MoveToNext()` takes only the last queued move. |
-| `KitCli.Workflow.Commands/CliWorkflowCommandProvider.cs:46` | A factory sees only outcomes that an artefact factory turns into remembered values. |
-| `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:162` | `LastCommandIs<T>()`, the check the new one would sit beside. |
-| [Run every queued hop, depth-first](../adr/run-every-queued-hop-depth-first.md) | The proposed order: a command's own moves first, then earlier ones resume. |
+| `KitCli.Workflow/Run/CliWorkflowRun.cs:164` | Every command that runs is recorded, in order. |
+| [Run every queued hop, depth-first](../adr/run-every-queued-hop-depth-first.md) | #152's proposal to work out queued moves by reading the history. |
 
 ## Open questions
 
-- After #152, when Choose source finishes on a remembered value, does the
-  queued `/export` keep the run going? Today the run pauses for the user.
-- Does ending the run throw away moves still queued? It must, or a cancel at
-  "Which source?" carries on to `/export` anyway.
-- Choose source asking again forever, with no way out, is
-  [#173](https://github.com/KitCli/KitCli/issues/173).
+- A command that keeps sending the user round, with no way out, never
+  ends. That is [#173](https://github.com/KitCli/KitCli/issues/173).
 
 ## Out of scope
 
-- **A pile of senders that going back removes from.** It would fix the
-  note-per-move idea, but #152 gives the same order without it.
+- **One question, then carrying on.** That is the
+  [previous investigation](how-does-a-command-know-where-it-was-sent-from.md).
