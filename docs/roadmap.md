@@ -36,7 +36,10 @@ layout: landing
       <code>ICommand</code>, <code>ICommandGenerator</code>,
       <code>ICommandHandler</code> and a DI-driven console loop. On the 8th an
       instruction structure, typed argument builders and a parser turn a typed
-      line into one of those commands. Four of
+      line into one of those commands, and on the 23rd it learns
+      <a href="user-guides/creating-sub-commands.md">sub-commands</a>: the
+      word after the command name, as in <code>/user edit</code>, reaches the
+      command's generator as a sub-command name. Four of
       <a href="README.md#the-seven-words">the seven words</a> exist by the end
       of the month.
     </p>
@@ -66,7 +69,9 @@ layout: landing
       <code>Cli.Workflow</code> are projects of their own, types take the
       <code>Cli</code> prefix they still carry, and instruction parsing is
       rewritten around <a href="concepts/instruction-parsing-pipeline.md">token
-      indexing</a>.
+      indexing</a>. The app's view models become
+      <a href="concepts/tables.md"><code>CliTable</code></a>, with the table
+      builder and its aggregator split apart.
     </p>
   </div>
 </div>
@@ -122,8 +127,12 @@ layout: landing
     <p>
       Being referenced rather than edited shows up the wiring a consumer had
       been writing by hand: registries and same-assembly auto-registration
-      remove it. Command reactions and automatic chaining arrive, outcome lists
-      turn fluent, and artefacts become records.
+      remove it. Outcomes print through
+      <a href="concepts/outcome-writing.md">registered writers</a>, and a
+      command with no arguments no longer needs a factory of its own. Command
+      reactions and automatic chaining arrive, outcome lists turn fluent,
+      artefacts become records, and the aggregator and table builder take
+      their current shape.
     </p>
   </div>
 </div>
