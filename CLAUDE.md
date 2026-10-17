@@ -1,8 +1,8 @@
 # KitCli
 
 A .NET CLI framework: DI-driven command dispatch (MediatR), with
-Commands/Outcomes/Artefacts/Workflow abstractions layered on top. 16
-projects publish as a single, unified-version set of NuGet packages.
+Commands/Outcomes/Artefacts/Workflow abstractions layered on top. 19
+projects, 9 of them published as NuGet packages, each with its own version.
 
 <!-- The full process for reviews, ADRs, concept docs, and issue triage
 lives in the "repo-operating-model" skill — invoke it rather than

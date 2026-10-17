@@ -1,8 +1,9 @@
 # Changelog
 
 All notable changes to KitCli's packages are documented here. Format is
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). All 9 packages
-version together — see `CONTRIBUTING.md#versioning--releases` for why.
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each of the 9
+packages has its own version, and only what changed gets a new one — see
+`CONTRIBUTING.md#versioning--releases`.
 
 ## [Unreleased]
 
