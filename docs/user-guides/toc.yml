@@ -22,12 +22,14 @@
       href: creating-sub-commands.md
     - name: Suggesting what to run next
       href: suggesting-what-to-run-next.md
-- name: Chaining and state
+- name: Chaining
   items:
     - name: Chaining commands together
       href: chaining-commands.md
     - name: Running side effects with command reactions
       href: command-reactions.md
+- name: State
+  items:
     - name: Remembering your own state
       href: remembering-your-own-state.md
     - name: Remembering state across separate asks
