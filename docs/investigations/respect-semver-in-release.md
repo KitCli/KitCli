@@ -9,104 +9,79 @@
 
 ## Verdict
 
-New complexity. #135 asks whether there is a real bug. There is, it is not
-subtle, and it shipped: v2.0.0's breaking change was sized 1.0.14 by the tool
-and corrected by hand.
+**New complexity.** [#135](https://github.com/KitCli/KitCli/issues/135) asks whether there is a real bug. There is, it shipped, and v2.0.0's breaking change was sized 1.0.14 by the tool and corrected by hand.
 
-The complexity is not the patch-only arithmetic. It is that the obvious fix is
-also wrong, and that one class of break cannot be detected mechanically at all.
-[#127](https://github.com/KitCli/KitCli/issues/127) proposes deriving the bump
-from Conventional Commit types; the commit that made v2.0.0 breaking carried no
-`!`, so that derivation lands on 1.1.0. Fixing this properly needs a public API
-baseline across nine packages, a change to two places in the tool, a cross-check
-layer, and a decision that does not exist yet
-([#128](https://github.com/KitCli/KitCli/issues/128)).
+The complexity is not the patch-only arithmetic. The obvious fix is also wrong, and one class of break cannot be detected mechanically at all. [#127](https://github.com/KitCli/KitCli/issues/127) proposes deriving the bump from Conventional Commit types. The commit that made v2.0.0 breaking carried no `!`, so that derivation lands on 1.1.0.
 
-Two things this found that #135 did not assume: the tool's *choice of packages*
-is already correct and only the size is wrong, and behavioural breaking changes
-have shipped as patches with no signature change to detect.
+| Term | Meaning |
+|---|---|
+| Bump level | `Major`, `Minor` or `Patch`: the part of `X.Y.Z` the release increments. |
+| Cone | A changed package plus every package that references it. |
+| Public API baseline | `PublicAPI.Shipped.txt` per package, listing the API released so far. |
+| `PublicAPI.Unshipped.txt` | API changed since the last release. A `*REMOVED*` line marks a removal. |
+
+Fixing this properly needs a public API baseline across nine packages, a change to two places in the tool, a cross-check layer, and a decision that does not exist yet ([#128](https://github.com/KitCli/KitCli/issues/128)).
+
+Two findings #135 did not assume. The tool's *choice of packages* is already correct and only the size is wrong. Behavioural breaking changes have shipped as patches with no signature change to detect.
+
+### Today
+
+```mermaid
+flowchart LR
+    C["changed project"] --> S["changed or depends-on-bumped sweep"]
+    S --> P["every package in the cone"]
+    P --> B["BumpPatchVersion"]
+    B --> V["1.0.14, whatever the change was"]
+```
+
+### After this work
+
+```mermaid
+flowchart LR
+    A["PublicAPI.Unshipped.txt per package"] --> L["own level"]
+    L --> M["max of own level and highest level referenced"]
+    M --> V["Bump(ProjectInfo, BumpLevel)"]
+    V --> X["cross-check against CHANGELOG.md and commit !"]
+```
 
 ## Recommendation
 
-#135 stays open as the parent. The build hangs off it in this order — the ADR
-first, because the analyzer baseline is a wide diff that should not land before
-the model it serves is agreed:
+#135 stays open as the parent. The build hangs off it in this order. The ADR comes first, because the analyzer baseline is a wide diff that should not land before the model it serves is agreed.
 
-1. **Blocked on #128.** It decides per-package vs lockstep versioning. Everything
-   below assumes per-package.
-2. **ADR — derive bumps from the public API diff.** Written as
-   the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md).
-3. **Adopt `Microsoft.CodeAnalysis.PublicApiAnalyzers`** across the nine packable
-   projects, with a committed `PublicAPI.Shipped.txt` baseline. Standalone value:
-   silent signature breaks become build failures whether or not the tool ever
-   reads the files. Wide diff, its own PR.
-4. **Derive the level.** `VersionBumper.BumpPatchVersion` becomes
-   `Bump(ProjectInfo, BumpLevel)`; a `*REMOVED*` line in `PublicAPI.Unshipped.txt`
-   is `Major`, any other line `Minor`, an empty file over a changed project
-   `Patch`. `ReleaseRunner`'s `changed || dependsOnBumped` sweep becomes
-   `max(own level, highest level of anything referenced)`. Releasing moves
-   `Unshipped` into `Shipped`.
-5. **Cross-checks.** Fail the release when `CHANGELOG.md`'s `**Breaking:**`
-   markers or a commit's `!` disagree with the API diff.
-6. **Release skill**, next to `repo-operating-model` — the procedure, not the
-   arithmetic. Includes bumping `KitCli.Tooling.Release`'s own `KitCli` pin,
-   still on 1.0.12.
+**1. Blocked on #128.** It decides per-package versus lockstep versioning. Everything below assumes per-package.
+
+**2. ADR: derive bumps from the public API diff.** Written as the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md).
+
+**3. Adopt `Microsoft.CodeAnalysis.PublicApiAnalyzers`** across the nine packable projects, with a committed `PublicAPI.Shipped.txt` baseline. Standalone value: silent signature breaks become build failures whether or not the tool ever reads the files. Wide diff, its own PR.
+
+**4. Derive the level.** `VersionBumper.BumpPatchVersion` becomes `Bump(ProjectInfo, BumpLevel)`. Releasing moves `Unshipped` into `Shipped`. `ReleaseRunner`'s `changed || dependsOnBumped` sweep becomes `max(own level, highest level of anything referenced)`.
+
+| In `PublicAPI.Unshipped.txt` | Level |
+|---|---|
+| A `*REMOVED*` line | `Major` |
+| Any other line | `Minor` |
+| An empty file over a changed project | `Patch` |
+
+**5. Cross-checks.** Fail the release when `CHANGELOG.md`'s `**Breaking:**` markers or a commit's `!` disagree with the API diff.
+
+**6. Release skill,** next to `repo-operating-model`: the procedure, not the arithmetic. It includes bumping `KitCli.Tooling.Release`'s own `KitCli` pin, still on 1.0.12.
 
 ## What was established
 
-- **The tool is structurally patch-only.** `VersionBumper` exposes one operation,
-  `BumpPatchVersion`, which parses three integers and increments the third. No
-  argument makes it produce anything else.
-- **Its choice of packages is already right.** The `changed || dependsOnBumped`
-  sweep produced exactly the six packages v2.0.0 needed — the transitive cone of
-  `KitCli.Commands.Abstractions`. Only the number was wrong.
-- **`dotnet pack` emits exact inter-package versions, not ranges.** So every
-  package in a break's cone must carry that break's level: a "minor" on an
-  intermediate would still drag the incompatible type to its consumers. This is
-  the constraint behind the `max` rule above.
-- **Conventional Commit types are an insufficient signal on their own.** The
-  commit was `feat(workflow): resolve a chained command through its factory
-  (#154)`, with no `!`, for a change that removed public API.
-- **`CHANGELOG.md` held the only correct signal**, as a hand-written
-  `**Breaking:**` line, and nothing read it.
-- **Behavioural breaks leave no signature to diff.** v1.0.13 turned a captured
-  `Scoped` dependency into a startup failure; v1.0.12 made an unhandled handler
-  exception end the session. Both shipped as patches. No API-diff tool detects
-  either, which bounds what any of this can guarantee.
-- **The plumbing for a commit-based cross-check already exists.**
-  `ProjectChangeDetector` computes `{lastReleaseCommit}..HEAD` per project to
-  answer "did this change", and that is the same range whose subjects a
-  cross-check needs.
-- **Microsoft does not derive the major from breakage.**
-  `Microsoft.Extensions.DependencyInjection` and `Microsoft.EntityFrameworkCore`
-  publish majors 1, 2, 3, 5, 6, 7, 8, 9, 10 — the annual .NET release train,
-  with 4 skipped to avoid colliding with .NET Framework 4.x. Their major tracks
-  the platform band, not the API diff this investigation proposes reading.
-- **Microsoft's advice to library authors is weaker than semver, and points
-  elsewhere.** [Versioning and .NET
-  libraries](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/versioning)
-  says only "CONSIDER using SemVer 2.0.0". The firmer rules sit on [Breaking
-  changes](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/breaking-changes):
-  "DO minimize breaking changes when developing a low-level .NET library",
-  "CONSIDER placing the ObsoleteAttribute on types and members that you intend
-  to remove", and "CONSIDER keeping types and methods with the ObsoleteAttribute
-  indefinitely in low and middle-level libraries". KitCli is a low-level library
-  by that page's own definition.
-- **A climbing major is a break-rate symptom, not a numbering defect.** Microsoft
-  sits at 10 by not removing public API; libraries that rename freely reach
-  Newtonsoft.Json 13, MediatR 14, AutoMapper 16. KitCli moved 1.0.13 to 3.0.0 in
-  roughly 36 hours. Deriving the level correctly, as recommended above, makes
-  that rate legible — it does not slow it. Only a deprecation policy does.
-- **Deprecation would have downgraded most of the host-merge ADR.** `TerminalCliApp`,
-  `ArgsCliApp`, `BasicTerminalCliApp` and `WithBasicTerminalApp()` could each
-  have stayed as an `[Obsolete]` forwarder, leaving a minor. `ExecuteRunOperation`
-  is the exception: its `protected` signature changed, which breaks a subclass
-  override with or without the shims.
-- **Three docs disagree about the model today.** `CHANGELOG.md`'s header says
-  "All 9 packages version together" and `CLAUDE.md` says the projects "publish as
-  a single, unified-version set"; `CONTRIBUTING.md#versioning--releases` says they
-  do not ship in lockstep, and the committed versions agree with it. Whichever way
-  #128 lands, two of the three need rewriting.
+| Fact | Consequence |
+|---|---|
+| **The tool is structurally patch-only.** `VersionBumper` exposes one operation, `BumpPatchVersion`, which parses three integers and increments the third. | No argument makes it produce anything else. |
+| **Its choice of packages is already right.** The `changed \|\| dependsOnBumped` sweep produced exactly the six packages v2.0.0 needed: the transitive cone of `KitCli.Commands.Abstractions`. | Only the number was wrong. |
+| **`dotnet pack` emits exact inter-package versions, not ranges.** | Every package in a break's cone must carry that break's level. A "minor" on an intermediate would still drag the incompatible type to its consumers. This is the constraint behind the `max` rule. |
+| **Conventional Commit types are an insufficient signal alone.** The commit was `feat(workflow): resolve a chained command through its factory (#154)`, with no `!`, for a change that removed public API. | Commit types can only cross-check. |
+| **`CHANGELOG.md` held the only correct signal,** a hand-written `**Breaking:**` line. | Nothing read it. |
+| **Behavioural breaks leave no signature to diff.** v1.0.13 turned a captured `Scoped` dependency into a startup failure. v1.0.12 made an unhandled handler exception end the session. Both shipped as patches. | No API-diff tool detects either, which bounds what any of this can guarantee. |
+| **The plumbing for a commit-based cross-check exists.** `ProjectChangeDetector` computes `{lastReleaseCommit}..HEAD` per project to answer "did this change". | That is the same range whose subjects a cross-check needs. |
+| **Microsoft does not derive the major from breakage.** `Microsoft.Extensions.DependencyInjection` and `Microsoft.EntityFrameworkCore` publish majors 1, 2, 3, 5, 6, 7, 8, 9, 10: the annual .NET release train, with 4 skipped to avoid colliding with .NET Framework 4.x. | Their major tracks the platform band, not the API diff this investigation proposes reading. |
+| **Microsoft's advice to library authors is weaker than semver, and points elsewhere.** [Versioning and .NET libraries](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/versioning) says only "CONSIDER using SemVer 2.0.0". The firmer rules sit on [Breaking changes](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/breaking-changes): "DO minimize breaking changes when developing a low-level .NET library", "CONSIDER placing the ObsoleteAttribute on types and members that you intend to remove", and "CONSIDER keeping types and methods with the ObsoleteAttribute indefinitely in low and middle-level libraries". | KitCli is a low-level library by that page's own definition. |
+| **A climbing major is a break-rate symptom, not a numbering defect.** Microsoft sits at 10 by not removing public API. Libraries that rename freely reach Newtonsoft.Json 13, MediatR 14, AutoMapper 16. KitCli moved 1.0.13 to 3.0.0 in roughly 36 hours. | Deriving the level correctly makes that rate legible. It does not slow it. Only a deprecation policy does. |
+| **Deprecation would have downgraded most of the host-merge ADR.** `TerminalCliApp`, `ArgsCliApp`, `BasicTerminalCliApp` and `WithBasicTerminalApp()` could each have stayed as an `[Obsolete]` forwarder, leaving a minor. | `ExecuteRunOperation` is the exception: its `protected` signature changed, which breaks a subclass override with or without the shims. |
+| **Three docs disagree about the model today.** `CHANGELOG.md`'s header says "All 9 packages version together" and `CLAUDE.md` says the projects "publish as a single, unified-version set". `CONTRIBUTING.md#versioning--releases` says they do not ship in lockstep, and the committed versions agree with it. | Whichever way #128 lands, two of the three need rewriting. |
 
 ## Evidence
 
@@ -121,10 +96,15 @@ feat(workflow): resolve a chained command through its factory (#154)
 
 The break itself, `KitCli.Commands.Abstractions/Outcomes/Reusable/NextCliCommandOutcome.cs`:
 
+In 1.0.9:
+
 ```csharp
-// 1.0.9
 public record NextCliCommandOutcome(CliCommand NextCommand) : Outcome(OutcomeKind.Reusable);
-// 2.0.0
+```
+
+In 2.0.0:
+
+```csharp
 public abstract record NextCliCommandOutcome() : Outcome(OutcomeKind.Reusable);
 ```
 

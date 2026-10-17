@@ -15,111 +15,90 @@
 
 ## Verdict
 
-New complexity. [#167](https://github.com/KitCli/KitCli/issues/167) reads as
-a missing `MoveToNext()` call, and it is one. But the loop that call belongs
-to already exists twice, once in each host, and the second copy is where the
-step gets dropped. Fixing #167 by adding a third thing to `ArgsCliApp` keeps
-the copy that caused it.
+**New complexity.** [#167](https://github.com/KitCli/KitCli/issues/167) reads as a missing `MoveToNext()` call, and it is one. But the loop that call belongs to exists twice, once per host, and the second copy is where the step gets dropped. Adding a third thing to `ArgsCliApp` keeps the copy that caused it.
 
-Most of this is genuinely small. `TerminalCliApp.Run` and `ArgsCliApp.Run`
-run the same eight steps around the same `Workflow.NextRun()`, and differ in
-two places only: where an ask comes from, and when the session stops. Leave
-the loop in one place and a one-shot invocation drives its chain, because
-there is no longer a second loop that doesn't.
+| Term | Meaning |
+|---|---|
+| Host | The class that runs the session: `TerminalCliApp` (interactive) and `ArgsCliApp` (one-shot). Now `CliApp` and `HeadlessCliApp`. |
+| Ask | What the user typed, e.g. `/test-next`. |
+| Chain | One ask running several commands in a row. |
+| Run | Every command from the first one up to a final outcome. |
 
-The complexity is what that exposes. Once a one-shot invocation ends when its
-*run* ends rather than after its first command, a chain that never ends
-([#168](https://github.com/KitCli/KitCli/issues/168)) leaves the process
-waiting instead of exiting early — a worse failure than the one being fixed,
-and reason enough that #168 is a blocker rather than a neighbour. Around
-that: `Run`'s signature moves, which breaks any consumer not going through
-`CliAppBuilder`; the [CliApp-split ADR](../adr/args-driven-cli-app.md) chose this
-split deliberately and has to be amended, not quietly contradicted;
-`OnMovingPastAsk` starts firing in one-shot mode, which a concept doc
-currently promises it never does; and the loop being rewritten has one test.
+Most of this is small. `TerminalCliApp.Run` and `ArgsCliApp.Run` run the same eight steps around the same `Workflow.NextRun()`, and differ in two places only:
+
+| | `TerminalCliApp` | `ArgsCliApp` |
+|---|---|---|
+| Where an ask comes from | The prompt, repeatedly. | The command-line args, once. |
+| When the session stops | The user exits. | After one `RespondToAsk`, whatever state the run reached. |
+
+```mermaid
+flowchart LR
+    subgraph Session["One session"]
+        N["Workflow.NextRun()"] --> A["ask"]
+        A --> E["execute, then MoveToNext() while a step is queued"]
+        E --> W["WriteOutcomes"]
+        W --> S{"stop?"}
+    end
+    S -->|"no"| N
+```
+
+Leave the loop in one place and a one-shot invocation drives its chain, because no second loop remains that doesn't.
+
+The complexity is what that exposes:
+
+- **A chain that never ends leaves the process waiting.** Once a one-shot invocation ends when its *run* ends rather than after its first command, [#168](https://github.com/KitCli/KitCli/issues/168) stops being a neighbour. It is a worse failure than the early exit being fixed, so it is a blocker.
+- **`Run`'s signature moves,** which breaks any consumer not going through `CliAppBuilder`.
+- **The [CliApp-split ADR](../adr/args-driven-cli-app.md) chose this split deliberately.** It has to be amended, not quietly contradicted.
+- **`OnMovingPastAsk` starts firing in one-shot mode,** which a concept doc currently promises it never does.
+- **The loop being rewritten has one test.**
 
 ## Recommendation
 
-#167 stays open as the parent. #169 closes — it answered its question.
+#167 stays open as the parent. #169 closes: it answered its question.
 
-1. **#168 first, and it is a hard blocker.** Decide what a run that ends on a
-   queued step does: reach a named terminal state, or return a diagnostic
-   outcome. Today `Workflow.Stop()` hides the question in one-shot mode.
-   Nothing below is safe until an unterminated chain has a defined ending.
-2. **An ADR**, amending the [CliApp-split ADR](../adr/args-driven-cli-app.md), which
-   is still `Proposed`.
-3. **The host change itself**, closing #167 rather than a follow-up ticket
-   doing so: the truncation *is* the second copy.
-4. **Cover the host.** A `KitCli.Playground.Scenarios` chain run under both
-   apps. The loop has one test today, which is how #167 shipped — see
-   [#26](https://github.com/KitCli/KitCli/issues/26) and the *Add Tests for
-   the App Host and Scenarios* milestone.
-5. **Docs, in the same PR as the change they describe** —
-   [`cli-app-host.md`](../concepts/cli-app-host.md), the user guides on
-   [headless apps](../user-guides/creating-a-headless-app.md),
-   [interactive apps](../user-guides/creating-an-interactive-app.md) and
-   [chaining](../user-guides/chaining-commands.md), and `CHANGELOG.md`.
+**1. #168 first, and it is a hard blocker.** Decide what a run that ends on a queued step does: reach a named terminal state, or return a diagnostic outcome. Today `Workflow.Stop()` hides the question in one-shot mode. Nothing below is safe until an unterminated chain has a defined ending.
+
+**2. An ADR,** amending the [CliApp-split ADR](../adr/args-driven-cli-app.md), which is still `Proposed`.
+
+**3. The host change itself,** closing #167 rather than a follow-up ticket doing so. The truncation *is* the second copy.
+
+**4. Cover the host.** A `KitCli.Playground.Scenarios` chain run under both apps. The loop has one test today, which is how #167 shipped. See [#26](https://github.com/KitCli/KitCli/issues/26) and the *Add Tests for the App Host and Scenarios* milestone.
+
+**5. Docs, in the same PR as the change they describe:**
+[`cli-app-host.md`](../concepts/cli-app-host.md), the user guides on [headless apps](../user-guides/creating-a-headless-app.md), [interactive apps](../user-guides/creating-an-interactive-app.md) and [chaining](../user-guides/chaining-commands.md), and `CHANGELOG.md`.
 
 ## What was built, and where it departed
 
-[#172](https://github.com/KitCli/KitCli/pull/172) shipped 2 through 5 as one
-change, recorded in
-the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md). Two
-departures worth the paper trail.
+[#172](https://github.com/KitCli/KitCli/pull/172) shipped 2 through 5 as one change, recorded in the [host-merge ADR](../adr/merge-the-hosts-and-name-the-variant-headless.md). Two departures are worth the paper trail.
 
-**The seam was the wrong answer, twice over.** This document proposed hoisting
-the loop behind a method supplying the next ask. Written out, that method had
-one real implementation — `Io.AskAsync` — and `CliApp` already holds `ICliIo`.
-The seam abstracted something the base class had all along, and forced the
-one-shot host to implement a member meaning "not me". Three variants were tried
-and dropped: the ask-source seam, a base-class default returning none, and an
-`ICliIo` that yields the args once. What shipped instead: `TerminalCliApp`
-folded into `CliApp`, `ArgsCliApp` became `HeadlessCliApp` and overrides `Run`.
-No seam exists.
+**The seam was the wrong answer, twice over.** This document proposed hoisting the loop behind a method supplying the next ask. Written out, that method had one real implementation, `Io.AskAsync`, and `CliApp` already holds `ICliIo`. The seam abstracted something the base class had all along, and forced the one-shot host to implement a member meaning "not me". Three variants were tried and dropped: the ask-source seam, a base-class default returning none, and an `ICliIo` that yields the args once.
 
-**#168 did not go first.** The order above was not followed — the host change
-shipped ahead of it, so a chain that hands on forever now leaves a headless
-invocation running rather than truncating silently. That trade is recorded in
-the host-merge ADR's consequences and in the chaining guide, and
-[`/test-unending-chain`](https://github.com/KitCli/KitCli/blob/main/KitCli.Playground.Scenarios/TestUnendingChainCliCommand.cs)
-demonstrates it. The blocker call stands: this is a worse failure than the one
-fixed, and it is live.
+```mermaid
+classDiagram
+    class CliApp {
+        +Run()
+    }
+    class HeadlessCliApp {
+        +Run()
+    }
+    CliApp <|-- HeadlessCliApp : overrides Run
+```
+
+`TerminalCliApp` folded into `CliApp`. `ArgsCliApp` became `HeadlessCliApp` and overrides `Run`. No seam exists.
+
+**#168 did not go first.** The host change shipped ahead of it, so a chain that hands on forever now leaves a headless invocation running rather than truncating silently. That trade is recorded in the host-merge ADR's consequences and in the chaining guide, and [`/test-unending-chain`](https://github.com/KitCli/KitCli/blob/main/KitCli.Playground.Scenarios/TestUnendingChainCliCommand.cs) demonstrates it. The blocker call stands: this is a worse failure than the one fixed, and it is live.
 
 ## What was established
 
-- **The two hosts differ in two behaviours.** Both call `OnSessionStart`,
-  `Io.Pause`, `SetUpEventHandlers`, `Workflow.NextRun`, `OnRunCreated`,
-  `WriteOutcomes`, `OnRunComplete` and `OnSessionEnd` identically. Only the
-  ask source and the stop rule differ.
-- **`ArgsCliApp` stops on a command, not on a run.** `Workflow.Stop()` fires
-  after one `RespondToAsk` whatever state the run reached, so a run parked at
-  `MovePastAsk` is abandoned there — never `Finished`, so its DI scope is
-  never disposed.
-- **The continuation branch needs nothing one-shot-specific.**
-  `TerminalCliApp.ExecuteRunOperation` already reads a queued `MovePastAsk`
-  and calls `run.MoveToNext()`. Sharing it is a move, not a rewrite.
-- **The stop rule is the real design question.** A one-shot session has to
-  end when its run is finished, and the check has to sit outside
-  `Workflow.NextRun()` so an exhausted ask source cannot create a spare run
-  and respond to it with `null`. Putting it in a lifecycle hook works but
-  spends `OnRunComplete`, which consumers override; a separate seam keeps all
-  six hooks theirs.
-- **Stopping the workflow is the sanctioned move.** `ExitCliCommandHandler`
-  ends an interactive session with `Workflow.Stop()`, and the CliApp-split ADR rejected
-  reaching into `run.State` for the same purpose. A host may stop a workflow;
-  it may not finish a run.
-- **Only one host handles an exceptional run.** `RethrowIfExceptional` is
-  `TerminalCliApp`'s, added so an unaccounted-for failure ends the session
-  ([#104](https://github.com/KitCli/KitCli/issues/104)). A one-shot
-  invocation writes the `ExceptionOutcome` and exits 0. Sharing the loop
-  makes this one behaviour by default, which is a change worth deciding
-  rather than inheriting.
-- **The public surface moves.** `ArgsCliApp.Run(List<IOutcomeIoWriter>,
-  string[])` and `TerminalCliApp.Run(List<IOutcomeIoWriter>, string[]?)` are
-  both public, and `CliAppBuilder.Run` dispatches on the concrete type.
-  Collapsing them to one `Run` is a major bump under
-  the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md).
-  `CliAppBuilder`'s no-args guard survives unchanged.
+| Fact | Consequence |
+|---|---|
+| **The two hosts differ in two behaviours.** Both call `OnSessionStart`, `Io.Pause`, `SetUpEventHandlers`, `Workflow.NextRun`, `OnRunCreated`, `WriteOutcomes`, `OnRunComplete` and `OnSessionEnd` identically. | Only the ask source and the stop rule differ. |
+| **`ArgsCliApp` stops on a command, not on a run.** `Workflow.Stop()` fires after one `RespondToAsk` whatever state the run reached. | A run parked at `MovePastAsk` is abandoned there: never `Finished`, so its DI scope is never disposed. |
+| **The continuation branch needs nothing one-shot-specific.** `TerminalCliApp.ExecuteRunOperation` already reads a queued `MovePastAsk` and calls `run.MoveToNext()`. | Sharing it is a move, not a rewrite. |
+| **The stop rule is the real design question.** A one-shot session has to end when its run is finished. | The check has to sit outside `Workflow.NextRun()`, so an exhausted ask source cannot create a spare run and respond to it with `null`. Putting it in a lifecycle hook works but spends `OnRunComplete`, which consumers override. A separate seam keeps all six hooks theirs. |
+| **Stopping the workflow is the sanctioned move.** `ExitCliCommandHandler` ends an interactive session with `Workflow.Stop()`, and the CliApp-split ADR rejected reaching into `run.State` for the same purpose. | A host may stop a workflow. It may not finish a run. |
+| **Only one host handles an exceptional run.** `RethrowIfExceptional` is `TerminalCliApp`'s, added so an unaccounted-for failure ends the session ([#104](https://github.com/KitCli/KitCli/issues/104)). A one-shot invocation writes the `ExceptionOutcome` and exits 0. | Sharing the loop makes this one behaviour by default, which is a change worth deciding rather than inheriting. |
+| **The public surface moves.** `ArgsCliApp.Run(List<IOutcomeIoWriter>, string[])` and `TerminalCliApp.Run(List<IOutcomeIoWriter>, string[]?)` are both public, and `CliAppBuilder.Run` dispatches on the concrete type. | Collapsing them to one `Run` is a major bump under the [API-diff versioning ADR](../adr/derive-version-bumps-from-the-public-api-diff.md). `CliAppBuilder`'s no-args guard survives unchanged. |
 
 ## Evidence
 

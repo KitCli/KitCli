@@ -8,58 +8,77 @@
 
 ## Verdict
 
-**New complexity.** The per-run scope from
-the [scope-per-run ADR](../adr/di-scope-per-workflow-run.md) exists and works, but
-only command handlers resolve from it. Every other extension point is a
-singleton resolved from the root provider, so a consumer's `Scoped`
-registration fails loudly at startup and their `Transient` registration is
-**silently** promoted to process lifetime. Two independent mechanisms
-cause this, and neither is visible to `ValidateScopes` or
-`ValidateOnBuild`. Correcting it means changing registration lifetimes
-across the instruction pipeline, command factories, artefact factories and
-writers, and moving scope disposal out of `CliWorkflowRun` into the host —
-milestone-scale, not a ticket.
+**New complexity.** The per-run scope exists, but only command handlers resolve from it, so a consumer's `Scoped` registration fails at startup and their `Transient` registration is **silently** kept for the life of the process. Fixing it spans the instruction pipeline, command factories, artefact factories and writers, and moves scope disposal out of `CliWorkflowRun` into the host: milestone-scale, not a ticket.
+
+| Term | Meaning |
+|---|---|
+| Root provider | The container built at startup. Singletons live here. |
+| Run scope | The per-run scope from the [scope-per-run ADR](../adr/di-scope-per-workflow-run.md). `Scoped` services live here. |
+| Extension point | A service KitCli calls during a run: instruction pipeline, command factories, artefact factories, writers. |
+| `Singleton`, `Scoped`, `Transient` | A service that lives for the process, the run or one resolution. |
+
+### Today
+
+Handlers reach the run scope. Every other extension point is a singleton built from the root provider:
+
+```mermaid
+flowchart LR
+    subgraph P["Process"]
+        R["root provider"]
+        S["singleton extension points"]
+    end
+    subgraph Run["One run"]
+        SC["run scope"]
+        H["command handlers"]
+    end
+    R -->|"resolves"| S
+    SC -->|"resolves"| H
+    S -.->|"captures root, never the scope"| R
+```
+
+Two mechanisms cause it, and neither is visible to `ValidateScopes` or `ValidateOnBuild`:
+
+| Consumer registers | Held by a singleton | Result |
+|---|---|---|
+| `Scoped` | Fails at startup | Loud. |
+| `Transient` | Becomes a singleton | **Silent.** The graph is legal, so nothing flags it. |
 
 ## Recommendation
 
-Accept the [run-scope ADR](../adr/resolve-the-whole-run-from-its-scope.md),
-which supersedes 0002: every KitCli service that executes during a run is
-registered `Transient` and resolved from the run's scope; only `ICliIo`,
-`ICliWorkflow` and `CliApp` stay `Singleton`.
+Accept the [run-scope ADR](../adr/resolve-the-whole-run-from-its-scope.md), which supersedes the [scope-per-run ADR](../adr/di-scope-per-workflow-run.md): every KitCli service that executes during a run is registered `Transient` and resolved from the run's scope. Only `ICliIo`, `ICliWorkflow` and `CliApp` stay `Singleton`.
 
-Slice under the *Scope Dependency Injection Per Workflow Run* milestone,
-by area board — Workflow (#6), Commands (#9), Artefacts (#10). Delivery
-order needs a joint planning pass; it is not implied by this document.
+Slice under the *Scope Dependency Injection Per Workflow Run* milestone, by area board: Workflow (#6), Commands (#9), Artefacts (#10). Delivery order needs a joint planning pass; this document does not imply one.
 
 ## What was established
 
-Permanent home for all of these is
-[microsoft-dependency-injection.md](../technology/microsoft-dependency-injection.md).
+The permanent home for these is [microsoft-dependency-injection.md](../technology/microsoft-dependency-injection.md).
 
-1. **Effective lifetime is `max(registered, holder's)`.** A dependency
-   lives at least as long as whatever injected it. Registration is a
-   floor, not a ceiling.
-2. **A singleton injecting `IServiceProvider` captures the *root*
-   provider**, even when the singleton is itself resolved from a scope.
-   `CliWorkflowCommandProvider` does this; MediatR's transient `Mediator`
-   does not, which is the only reason handlers reach the scope.
-3. **`Transient`-inside-`Singleton` is silent.** No validation flags it —
-   the graph is legal. `Scoped`-inside-`Singleton` at least throws at
-   startup. The silent case is the more dangerous of the two.
-4. **`ValidateOnBuild` does not inspect instance registrations, factory
-   lambdas, or open generics.** It does inspect keyed type registrations.
-   KitCli uses instance registrations in the artefact discovery loops and
-   for `IOptions<InstructionSettings>`.
-5. **The run scope is disposed before outcomes are written** — inside
-   `ExecuteCommand`'s `finally`, two frames below `CliApp.WriteOutcomes`.
-   It survives a command that returns a reusable outcome and dies on one
-   that ends the run.
-6. **Consumer artefact factories are built by `Activator.CreateInstance`**
-   and registered as instances, so they take no constructor dependencies
-   at any lifetime. The DI-constructed path, `AddArtefactFactory<T>()`, is
-   `private`.
-7. **The container holds 29 descriptors: 25 singleton, 4 transient, zero
-   scoped.**
+| Fact | Consequence |
+|---|---|
+| Effective lifetime is `max(registered, holder's)`. | Registration is a floor, not a ceiling. |
+| A singleton injecting `IServiceProvider` captures the *root* provider, even when the singleton is resolved from a scope. | `CliWorkflowCommandProvider` does this. MediatR's transient `Mediator` does not, which is the only reason handlers reach the scope. |
+| `Transient` inside `Singleton` raises no validation error. `Scoped` inside `Singleton` throws at startup. | The silent case is the more dangerous. |
+| `ValidateOnBuild` does not inspect instance registrations, factory lambdas or open generics. It does inspect keyed type registrations. | KitCli uses instance registrations in the artefact discovery loops and for `IOptions<InstructionSettings>`, so those go unchecked. |
+| The run scope is disposed before outcomes are written, inside `ExecuteCommand`'s `finally`, two frames below `CliApp.WriteOutcomes`. | The scope survives a command that returns a reusable outcome and dies on one that ends the run. |
+| Consumer artefact factories are built by `Activator.CreateInstance` and registered as instances. The DI-constructed path, `AddArtefactFactory<T>()`, is `private`. | They take no constructor dependencies at any lifetime. |
+| The container holds 29 descriptors: 25 singleton, 4 transient, zero scoped. | Almost nothing resolves per run today. |
+
+The disposal order, from the evidence below:
+
+```mermaid
+sequenceDiagram
+    participant H as Handler
+    participant R as CliWorkflowRun
+    participant W as WriteOutcomes
+    H->>R: NothingOutcome (final)
+    Note over R: run Finished<br/>scope disposed in finally
+    R->>W: write outcomes
+    Note over W: writer probe: ObjectDisposedException
+    H->>R: PageSizeOutcome (reusable)
+    Note over R: run continues<br/>scope alive
+    R->>W: write outcomes
+    Note over W: writer probe: same instance
+```
 
 ## Evidence
 

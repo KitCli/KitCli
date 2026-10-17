@@ -8,171 +8,153 @@
 
 ## Verdict
 
-New complexity. Declaration wins, but not in the shape #8 proposed, and
-not as one ticket.
+**New complexity. Declaration wins, but not in the shape #8 proposed, and not as one ticket.** Parse keeps every argument as its raw text, and the retrieval helpers convert to the type the caller asked for, failing loudly when the text will not convert.
 
-Both repros are real. With the seven builders in production registration
-order, `/spend --amount .5` binds as
-`InstructionArgument<DirectoryInfo>` and `--reference 0012` becomes
-`int 12`, the leading zero gone. `0.5` binds fine — the bug is
-content-dependent, which is exactly the problem: what a value *is* cannot
-be read off what it *looks like*.
+| Term | Meaning |
+|---|---|
+| Instruction | The parsed ask: a command name, sub-command and `--name value` arguments. |
+| Argument builder | One of seven classes that guess an argument's type from its text. `InstructionParser.Parse` takes the first that accepts. |
+| Command factory | The class that decides whether it applies, then builds the command. |
+| Retrieval helper | `GetArgument<T>` and `GetRequiredArgument<T>` on `CliCommandFactory`. |
+| Chain path | A handler hands arguments to the next command, typed by the handler. |
 
-#8 proposed an up-front schema: each command declares its argument names
-and CLR types, and the parser binds against them. That shape cannot work
-here. Arguments are typed inside `InstructionParser.Parse`, before any
-factory is chosen — and choosing a factory can depend on the arguments,
-because `CanCreateWhen()` may call `AnyArgument<T>`. A schema keyed by
-command is consulted after selection, but selection is what it would need
-to inform. Unioning the declarations of every factory under a name breaks
-the moment two of them declare the same argument differently.
+### Today
 
-The declaration KitCli needs already exists, twice. Every retrieval site
-names both halves — `GetRequiredArgument<decimal>("amount")` — and the
-chain path already builds arguments from declared types with no
-inference at all (`NextCliCommandArgument<TValue>.ToInstructionArgument()`).
-Today the same factory receives `decimal` from a chained hop and
-`DirectoryInfo` from the terminal for the same value. The framework
-already disagrees with itself, and the declared side is the correct one.
+Both repros are real, using the seven builders in production registration order:
 
-So the fix is: parse keeps every argument as its raw text, and the
-retrieval helpers convert to the type the caller asked for, failing
-loudly when the text will not convert. That deletes the builder chain —
-a published extension point — reverses one of
-the [first-match-wins ADR](../adr/first-match-wins-resolution.md)'s four points,
-changes what run history records, needs a converter registry and a live
-error code, rewrites a concept doc and a user guide, and lands as a major
-bump. It also settles #9 and #40 outright, fixes #22 as a side effect,
-and brings part of #21's dead taxonomy to life. That is several tickets
-and an ADR, not the sized-13 bug fix #8 started as.
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant P as InstructionParser
+    participant F as Factory
+    U->>P: /spend --amount .5 --reference 0012
+    Note over P: .5 binds as InstructionArgument of DirectoryInfo<br/>0012 binds as int 12, leading zero gone
+    P->>F: typed arguments
+    Note over F: 0.5 binds fine, so the bug depends on content
+```
+
+### After this work
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant P as InstructionParser
+    participant F as Factory
+    U->>P: /spend --amount .5 --reference 0012
+    Note over P: both stay raw text
+    P->>F: raw arguments
+    F->>F: GetRequiredArgument of decimal for amount
+    Note over F: converts to decimal, or throws<br/>ArgumentNotConvertible
+```
+
+What a value *is* cannot be read off what it *looks like*.
+
+### Why #8's schema cannot work
+
+#8 proposed an up-front schema: each command declares its argument names and CLR types, and the parser binds against them.
+
+| Fact | Consequence |
+|---|---|
+| Arguments are typed inside `InstructionParser.Parse`, before any factory is chosen. | A schema keyed by command is consulted after selection. |
+| Choosing a factory can depend on the arguments, because `CanCreateWhen()` may call `AnyArgument<T>`. | Selection is what the schema would need to inform. |
+| Two factories under one name can declare the same argument differently. | Unioning their declarations breaks. |
+
+### The declaration already exists, twice
+
+Every retrieval site names both halves, as in `GetRequiredArgument<decimal>("amount")`. The chain path builds arguments from declared types with no inference at all (`NextCliCommandArgument<TValue>.ToInstructionArgument()`). Today the same factory receives `decimal` from a chained hop and `DirectoryInfo` from the terminal for the same value. The framework disagrees with itself, and the declared side is the correct one.
+
+### What the fix touches
+
+The fix deletes the builder chain, a published extension point. It also:
+
+- reverses one of the [first-match-wins ADR](../adr/first-match-wins-resolution.md)'s four points;
+- changes what run history records;
+- needs a converter registry and a live error code;
+- rewrites a concept doc and a user guide;
+- lands as a major bump.
+
+It settles #9 and #40 outright, fixes #22 as a side effect, and brings part of #21's dead taxonomy to life. That is several tickets and an ADR, not the sized-13 bug fix #8 started as.
 
 ## Recommendation
 
-#8 closes once the breakdown below is agreed. Build in this order.
+**#8 closes once the breakdown below is agreed.** Build in this order.
 
-1. **Cover `CliCommandFactory`'s retrieval helpers**
-   ([#114](https://github.com/KitCli/KitCli/issues/114)) — the contract
-   that changes, already the first step of the descriptor build
-   (the factory-needs investigation). One prerequisite, shared by both workstreams.
-2. **`feat(instructions)`: a converter registry** — additive.
-   `IInstructionArgumentConverter` chosen by *target CLR type*, not by
-   content, so there is no ordering and nothing to shadow. Ship the
-   seven built-ins, pinned to `CultureInfo.InvariantCulture` with
-   explicit styles (closes the mechanism behind #22). A null raw value
-   requested as `bool` converts to `true` — the flag idiom
-   `--dry-run` must survive.
-3. **`feat(instructions)!`: type at retrieval, not at parse** — the
-   breaking ticket. `InstructionParser.Parse` emits a raw argument
-   (`RawInstructionArgument(string Name, string? Value)` under
-   `AnonymousInstructionArgument`); `GetArgument<T>` returns a
-   chain-typed `InstructionArgument<T>` as-is, otherwise converts the
-   raw text through the registry. Failure throws `InstructionException`
-   with a new `ArgumentNotConvertible` code naming the argument, its
-   text, and the requested type; `GetRequiredArgument<T>`'s bare
-   `Exception` becomes `ArgumentIsRequired`, making #21's codes real.
-   Delete the seven builders and `IInstructionArgumentBuilder`. The ADR
-   superseding the first-match-wins ADR's parser row rides in this PR, as do the
-   rewrites of the [instruction parsing pipeline](../concepts/instruction-parsing-pipeline.md)
-   concept doc and the [reading command arguments](../user-guides/reading-command-arguments.md) guide
-   and the `CHANGELOG.md` breaking entry. If the file count passes 20,
-   split the doc rewrites out, nothing else.
-4. **Settle the satellites** — #9 and #40 close as moot (no builder
-   chain to be unreachable or untested); #22 closes on verification;
-   #21 is re-scoped to whatever stays dead.
-5. **Coordinate with the descriptor build**
-   ([#190](https://github.com/KitCli/KitCli/issues/190),
-   [#191](https://github.com/KitCli/KitCli/issues/191)) —
-   `RequiresArgument<T>` should test convertibility through the same
-   registry, and `--help` can render the declared types. Same registry,
-   two consumers.
+**1. Cover `CliCommandFactory`'s retrieval helpers** ([#114](https://github.com/KitCli/KitCli/issues/114)). This is the contract that changes. It is already the first step of the descriptor build (the [factory-needs investigation](should-a-command-factory-declare-what-it-needs.md)), a prerequisite shared by both workstreams.
+
+**2. `feat(instructions)`: a converter registry.** Additive.
+
+- `IInstructionArgumentConverter` is chosen by *target CLR type*, not by content, so there is no ordering and nothing to shadow.
+- Ship the seven built-ins, pinned to `CultureInfo.InvariantCulture` with explicit styles. This closes the mechanism behind #22.
+- A null raw value requested as `bool` converts to `true`, so the flag idiom `--dry-run` survives.
+
+**3. `feat(instructions)!`: type at retrieval, not at parse.** The breaking ticket.
+
+```mermaid
+flowchart LR
+    subgraph Parse
+        T["token"] --> R["RawInstructionArgument(string Name, string? Value)"]
+    end
+    subgraph Retrieval
+        R --> G["GetArgument of T"]
+        C["chain-typed InstructionArgument of T"] -->|"returned as-is"| G
+        G -->|"otherwise"| REG["converter registry"]
+        REG -->|"fails"| E["InstructionException: ArgumentNotConvertible"]
+    end
+```
+
+- `InstructionParser.Parse` emits `RawInstructionArgument(string Name, string? Value)` under `AnonymousInstructionArgument`.
+- `GetArgument<T>` returns a chain-typed `InstructionArgument<T>` as-is, otherwise converts the raw text through the registry.
+- Failure throws `InstructionException` with a new `ArgumentNotConvertible` code naming the argument, its text and the requested type.
+- `GetRequiredArgument<T>`'s bare `Exception` becomes `ArgumentIsRequired`, making #21's codes real.
+- Delete the seven builders and `IInstructionArgumentBuilder`.
+- The same PR carries the ADR superseding the first-match-wins ADR's parser row, the rewrites of the [instruction parsing pipeline](../concepts/instruction-parsing-pipeline.md) concept doc and the [reading command arguments](../user-guides/reading-command-arguments.md) guide, and the `CHANGELOG.md` breaking entry. If the file count passes 20, split the doc rewrites out, nothing else.
+
+**4. Settle the satellites.**
+
+| Issue | Outcome |
+|---|---|
+| #9, #40 | Close as moot: no builder chain to be unreachable or untested. |
+| #22 | Closes on verification. |
+| #21 | Re-scoped to whatever stays dead. |
+
+**5. Coordinate with the descriptor build** ([#190](https://github.com/KitCli/KitCli/issues/190), [#191](https://github.com/KitCli/KitCli/issues/191)). `RequiresArgument<T>` should test convertibility through the same registry, and `--help` can render the declared types. One registry, two consumers.
 
 ## What was established
 
-**Typing happens before the command exists, and cannot be moved after
-it.** `CliWorkflowRun.RespondToAsk` parses at line 92 and resolves the
-command at line 104; between them sits the validator. Factory selection
-reads the typed arguments (`Attach`, then `CanCreateWhen`), so any
-scheme that needs the factory before it can type the arguments is
-circular. Conversion at retrieval is the only place a per-command
-declaration and a raw value can meet without restructuring the run.
-
-**The chain path is already declaration-typed.**
-`NextCliCommandArgument<TValue>` creates `InstructionArgument<TValue>`
-from the type the handler wrote, no inference. Retrieval-time conversion
-must pass these through untouched, which the as-is check in step 3
-covers.
-
-**Consumers already pay for content typing at every money argument.**
-SpendfulnessCli's `InstructionArgumentExtensions.OfCurrencyType` probes
-`int` then `decimal`, because `--amount 5` infers `int` and
-`--amount 5.5` infers `decimal`. Under declared retrieval,
-`GetRequiredArgument<decimal>("amount")` answers both and the workaround
-dies.
-
-**Deleting the builder chain breaks no working consumer.** #9
-established that `BoolInstructionArgumentBuilder.For` returns `true`
-unconditionally and sits ahead of any builder a consumer appends after
-`AddCliInstructions()`, so the extension point is unreachable from
-consuming code. Still a public-surface break: packages version in
-lockstep (the [lockstep ADR](../adr/version-the-packages-in-lockstep.md)),
-so the set takes a major.
-
-**Raw history is truer history.** Run state records the instruction
-(`InstructionCliWorkflowRunStateChange`), so today it stores parse-time
-types — which #22 shows are locale-dependent. Raw text plus
-invariant-culture conversion makes a recorded run mean the same thing on
-every host.
-
-**The first-match-wins ADR's other three points stand.** Command factories, artefact
-factories, and outcome writers resolve a *handler* for a value that
-genuinely exists; the parser was minting a *type* for one. Only the
-parser row is superseded.
+| Fact | Consequence |
+|---|---|
+| `CliWorkflowRun.RespondToAsk` parses at line 92 and resolves the command at line 104, with the validator between. Factory selection reads the typed arguments (`Attach`, then `CanCreateWhen`). | Typing happens before the command exists and cannot move after it. Any scheme that needs the factory before it can type the arguments is circular. Conversion at retrieval is the only place a per-command declaration and a raw value can meet without restructuring the run. |
+| `NextCliCommandArgument<TValue>` creates `InstructionArgument<TValue>` from the type the handler wrote, no inference. | The chain path is already declaration-typed. Retrieval-time conversion must pass these through untouched, which the as-is check in step 3 covers. |
+| SpendfulnessCli's `InstructionArgumentExtensions.OfCurrencyType` probes `int` then `decimal`, because `--amount 5` infers `int` and `--amount 5.5` infers `decimal`. | Consumers already pay for content typing at every money argument. Under declared retrieval, `GetRequiredArgument<decimal>("amount")` answers both and the workaround dies. |
+| #9 established that `BoolInstructionArgumentBuilder.For` returns `true` unconditionally and sits ahead of any builder a consumer appends after `AddCliInstructions()`. | The extension point is unreachable from consuming code, so deleting the builder chain breaks no working consumer. It is still a public-surface break: packages version in lockstep (the [lockstep ADR](../adr/version-the-packages-in-lockstep.md)), so the set takes a major. |
+| Run state records the instruction (`InstructionCliWorkflowRunStateChange`), so today it stores parse-time types, which #22 shows are locale-dependent. | Raw text plus invariant-culture conversion makes a recorded run mean the same thing on every host. Raw history is truer history. |
+| Command factories, artefact factories and outcome writers resolve a *handler* for a value that genuinely exists. The parser was minting a *type* for one. | The first-match-wins ADR's other three points stand. Only the parser row is superseded. |
 
 ## Evidence
 
-- Throwaway NUnit fixture in `KitCli.Instructions.Tests`, all seven
-  builders in the order `AddCliInstructionArgumentBuilders` registers
-  them: `.5` → `InstructionArgument<DirectoryInfo>`, `0012` →
-  `InstructionArgument<int>` value `12`, `0.5` →
-  `InstructionArgument<decimal>`. Deleted after the run.
-- `KitCli.Instructions/Parsers/InstructionParser.cs:42-44` —
-  `.First(builder => builder.For(token.Value))`.
-- `KitCli.Instructions/Extensions/ServiceCollectionExtensions.cs:29-37`
-  — the registration order.
-- `KitCli.Workflow/Run/CliWorkflowRun.cs:92,104` — parse before
-  resolve; `:207-213` — the chain path building declared-type arguments.
-- `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:94-106`
-  — `GetRequiredArgument<T>` and its bare `Exception`; `:214-220` —
-  retrieval is `OfType<InstructionArgument<T>>()`, which is why a
-  mis-typed argument reads as missing.
-- `KitCli.Commands.Abstractions/Arguments/NextCliCommandArgument.cs:17-18`
-  — `ToInstructionArgument`.
-- `KitCli.Instructions.Abstractions/InstructionExceptionCode.cs` —
-  `ArgumentIsRequired` exists and nothing throws it (#21).
-- `SpendfulnessCli.Commands.Reporting/InstructionArgumentExtensions.cs`
-  — `OfCurrencyType`.
-- `KitCli.Tooling.Release/ReleaseCliCommand.cs:16-17` — the flag idiom
-  step 2 must preserve.
+Read against the throwaway fixture below and these files.
+
+| Source | Shows |
+|---|---|
+| Throwaway NUnit fixture in `KitCli.Instructions.Tests`, all seven builders in the order `AddCliInstructionArgumentBuilders` registers them. Deleted after the run. | `.5` becomes `InstructionArgument<DirectoryInfo>`, `0012` becomes `InstructionArgument<int>` with value `12`, `0.5` becomes `InstructionArgument<decimal>`. |
+| `KitCli.Instructions/Parsers/InstructionParser.cs:42-44` | `.First(builder => builder.For(token.Value))`. |
+| `KitCli.Instructions/Extensions/ServiceCollectionExtensions.cs:29-37` | The registration order. |
+| `KitCli.Workflow/Run/CliWorkflowRun.cs:92,104` and `:207-213` | Parse before resolve. The chain path builds declared-type arguments. |
+| `KitCli.Commands.Abstractions/Factories/CliCommandFactory.cs:94-106` and `:214-220` | `GetRequiredArgument<T>` and its bare `Exception`. Retrieval is `OfType<InstructionArgument<T>>()`, which is why a mis-typed argument reads as missing. |
+| `KitCli.Commands.Abstractions/Arguments/NextCliCommandArgument.cs:17-18` | `ToInstructionArgument`. |
+| `KitCli.Instructions.Abstractions/InstructionExceptionCode.cs` | `ArgumentIsRequired` exists and nothing throws it (#21). |
+| `SpendfulnessCli.Commands.Reporting/InstructionArgumentExtensions.cs` | `OfCurrencyType`. |
+| `KitCli.Tooling.Release/ReleaseCliCommand.cs:16-17` | The flag idiom step 2 must preserve. |
 
 ## Open questions
 
-- `GetArgument<T>(null)` — "the last argument of that type, any name" —
-  has no meaning over raw text, where every value converts to `string`.
-  Either the name becomes required or null means "the last argument"
-  outright. The [reading command arguments](../user-guides/reading-command-arguments.md)
-  guide currently blesses the null form for single-argument commands.
-- A chain-typed `InstructionArgument<int>` retrieved as
-  `GetArgument<decimal>`: convert through the registry, or miss? Decide
-  in step 3's ticket.
-- Does `DirectoryInfo` stay a built-in converter target, now that a path
-  is only a `DirectoryInfo` when a factory asks for one?
+- **What does `GetArgument<T>(null)` mean?** It reads "the last argument of that type, any name", which has no meaning over raw text, where every value converts to `string`. Either the name becomes required or null means "the last argument" outright. The [reading command arguments](../user-guides/reading-command-arguments.md) guide currently blesses the null form for single-argument commands.
+- **Should a chain-typed argument convert?** A chain-typed `InstructionArgument<int>` retrieved as `GetArgument<decimal>` either converts through the registry or misses. Decide in step 3's ticket.
+- **Does `DirectoryInfo` stay a built-in converter target?** A path is now only a `DirectoryInfo` when a factory asks for one.
 
 ## Out of scope
 
-- Quoting and escaping in the tokenizer (#39) — same milestone
-  neighborhood, different stage of the pipeline.
-- Rebuilding validation on FluentValidation (#183).
-- The descriptor build itself (#189, #190, #191), past sharing the
-  registry.
-- Most-specific-match for the first-match-wins ADR's other three points, out of scope
-  here exactly as it was in the factory-needs investigation.
+- **Quoting and escaping in the tokenizer** (#39). Same milestone neighborhood, different stage of the pipeline.
+- **Rebuilding validation on FluentValidation** (#183).
+- **The descriptor build itself** (#189, #190, #191), past sharing the registry.
+- **Most-specific-match for the first-match-wins ADR's other three points.** Out of scope here exactly as it was in the factory-needs investigation.
