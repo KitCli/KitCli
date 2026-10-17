@@ -8,13 +8,9 @@ history before and after the maintainer started using Claude Code on
 
 ## Summary
 
-- **The pace held steady and the mix of work changed.** A working day
-  produces 8 commits either way. Since July, more than half of each
-  day's changes are documentation, and test changes outpace code changes.
-- **Tests tripled**, from 129 to 389. **Documentation pages grew from 4
-  to 83**, including 21 ADRs, 14 concept docs and 10 investigations.
-- **Work now goes through issues and pull requests**: 116 pull requests
-  merged and 67 issues closed, up from none before July.
+The pace held steady at 8 commits per working day, and the mix of work
+changed: since July, more than half of each day's changes are
+documentation, and tests have tripled.
 
 ## Methodology
 
@@ -28,18 +24,24 @@ as code.
 
 ## Findings
 
-Changes for each working day:
+February is the baseline. January holds the first scaffolding, which is
+half of all lines added before July.
 
-| | Feb only (8 days) | Jan–Feb (10 days) | Jul–Oct (24 days) |
-|---|---|---|---|
-| Commits | 8.5 | 8.0 | 8.0 |
-| Code lines changed | 496 | 655 | 229 |
-| Test lines changed | 200 | 413 | 263 |
-| Docs lines changed | 3 | 3 | 875 |
-| All lines changed | 839 | 1,280 | 1,499 |
+```mermaid
+xychart-beta
+    title "Lines changed per working day"
+    x-axis ["Code Feb", "Code Jul-Oct", "Tests Feb", "Tests Jul-Oct", "Docs Feb", "Docs Jul-Oct"]
+    y-axis "Lines" 0 --> 900
+    bar [496, 229, 200, 263, 3, 875]
+```
 
-February is the fairer baseline. January holds the first scaffolding,
-which is half of all lines added before July.
+```mermaid
+xychart-beta
+    title "Totals before July and on 2026-10-17"
+    x-axis ["Tests before", "Tests now", "Doc pages before", "Doc pages now", "PRs merged before", "PRs merged now", "Issues closed before", "Issues closed now"]
+    y-axis "Count" 0 --> 400
+    bar [129, 389, 4, 83, 0, 116, 0, 67]
+```
 
 ## Caveats
 
