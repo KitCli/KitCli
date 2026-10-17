@@ -1,10 +1,19 @@
 # Microsoft.Extensions.DependencyInjection
 
-KitCli builds one container, in `CliAppBuilder.Run()`, from
-`Microsoft.Extensions.DependencyInjection` 10.0.2 on `net10.0`. This page
-answers "can I do X with the container" — which features KitCli supports,
-and where each one stops. For *why* the run scope exists, see
-the [scope-per-run ADR](../adr/di-scope-per-workflow-run.md).
+**KitCli builds one container and opens one scope per workflow run. Only
+command handlers can resolve run-scoped services today.** This page answers
+"can I do X with the container": which features KitCli supports, and where
+each one stops. For *why* the run scope exists, see the
+[scope-per-run ADR](../adr/di-scope-per-workflow-run.md).
+
+| Term | Meaning |
+|---|---|
+| Container | The one service provider, built in `CliAppBuilder.Run()` from `Microsoft.Extensions.DependencyInjection` 10.0.2 on `net10.0`. |
+| Run | Every command from the first up to a final outcome. |
+| Run scope | The `IServiceScope` a run opens, so `Scoped` services live as long as the run. |
+| Extension point | A type a consumer or KitCli registers that the host calls, such as `IArtefactFactory`. |
+
+The container builds with both validations on:
 
 ```csharp
 var serviceProvider = _services.BuildServiceProvider(new ServiceProviderOptions
@@ -43,6 +52,7 @@ gap for the rest.
 | `IInstructionArgumentBuilder` | No | Yes | singleton → transient |
 | `IInstructionValidator` | No | Yes | singleton → transient |
 | `ICliWorkflowCommandProvider` | No | Yes | singleton → transient |
+| `ICliWorkflowReactionProvider` | No | Not covered by the ADR | singleton |
 | `ICliCommandFactory` | No | Yes | keyed singleton → keyed transient |
 | `IArtefactFactory` (built-in) | No | Yes | singleton → transient |
 | `IArtefactFactory` (yours) | No | No | instance, `Activator`-built |
@@ -73,10 +83,20 @@ misses the scope, and registering it `Scoped` is what fixes that.
 
 ## The run scope's lifetime
 
-The scope opens in `CliWorkflow.CreateNewRun()` and is disposed in
-`CliWorkflowRun.UpdateStateWhenFinished()`, the moment the run reaches
-`Finished`. That happens inside `ExecuteCommand`'s `finally`, so it
-completes **before** `CliApp.WriteOutcomes` runs.
+One scope per run. It opens at `CliWorkflow.cs:60` in `CreateNewRun()` and is
+disposed at `CliWorkflowRun.cs:289` in `UpdateStateWhenFinished()`, the moment
+the run reaches `Finished`. That happens inside `ExecuteCommand`'s `finally`,
+so it completes **before** `CliApp.WriteOutcomes` runs.
+
+```mermaid
+stateDiagram-v2
+    [*] --> ScopeOpen: CreateNewRun()
+    ScopeOpen --> ScopeOpen: reusable outcome, MovePastAsk
+    ScopeOpen --> ScopeDisposed: final outcome, Finished
+    ScopeDisposed --> [*]: WriteOutcomes() runs, scope already gone
+```
+
+The same order, step by step:
 
 ```mermaid
 sequenceDiagram

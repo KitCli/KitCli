@@ -16,7 +16,15 @@ follow one before assuming a gap still stands.
   milestone that already owns its surface. Most gaps the report shows were
   already on the board — see the skipped list below.
 - Workflow (98%) and Instructions (94%) are in good shape; the host
-  project (47%) and Commands.Abstractions (66%) hold the real debt.
+  project (47%) and Commands.Abstractions (66%) hold the real debt:
+
+```mermaid
+xychart-beta
+    title "Statement coverage by project"
+    x-axis ["Workflow", "Instructions", "Commands.Abstractions", "Host"]
+    y-axis "Percent covered" 0 --> 100
+    bar [98, 94, 66, 47]
+```
 
 ## Methodology
 

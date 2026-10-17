@@ -9,8 +9,16 @@ stands.
 
 ## Summary
 
-- **37 findings**, all filed as GitHub issues: **7 high**, **16 medium**,
-  **14 low**.
+- **37 findings**, all filed as GitHub issues:
+
+```mermaid
+xychart-beta
+    title "Findings by severity"
+    x-axis ["High", "Medium", "Low"]
+    y-axis "Findings" 0 --> 20
+    bar [7, 16, 14]
+```
+
 - Every finding carries all three label axes (type/area/severity) per
   [`CONTRIBUTING.md`](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md) — the full list is always
   queryable directly from GitHub:
