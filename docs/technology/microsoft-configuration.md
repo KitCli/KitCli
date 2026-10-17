@@ -47,7 +47,7 @@ ASP.NET Core, so a published app reads the secrets file of any machine that has 
 **The configuration is built once.** The first `WithSettings` or
 `WithRegistry<TSettings, TRegistry>` call builds the `IConfigurationRoot`
 (`CliAppBuilder.cs:110`, `:237`) and later calls reuse it. A source added after
-that call is ignored without error. No issue tracks it.
+that call is ignored without error: [#345](https://github.com/KitCli/KitCli/issues/345).
 
 ## Binding shapes
 
@@ -91,7 +91,7 @@ the file when it changes. What reaches your code depends on the accessor.
 
 - **Two sources only.** No environment variables or command-line provider, and no
   issue tracks adding them.
-- **A source added after the first read is dropped silently.** No issue tracks it.
+- **A source added after the first read is dropped silently.** [#345](https://github.com/KitCli/KitCli/issues/345).
 - **A missing section binds defaults in `WithSettings<T>`.**
   [#325](https://github.com/KitCli/KitCli/issues/325).
 - **`InstructionSettings` ignores reload.** [#139](https://github.com/KitCli/KitCli/issues/139).
