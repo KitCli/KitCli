@@ -56,9 +56,11 @@
   items:
     - name: Resolving the run from its scope
       href: resolve-the-whole-run-from-its-scope.md
+    - name: Running queued hops depth-first
+      href: run-every-queued-hop-depth-first.md
+- name: Rejected
+  items:
     - name: Version bumps from the API diff
       href: derive-version-bumps-from-the-public-api-diff.md
     - name: Versioning packages in lockstep
       href: version-the-packages-in-lockstep.md
-    - name: Running queued hops depth-first
-      href: run-every-queued-hop-depth-first.md

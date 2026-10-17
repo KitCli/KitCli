@@ -1,6 +1,6 @@
 # Give the roadmap a page of its own, outside the five kinds
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-26
 Release: 3.1.0
 
@@ -32,7 +32,7 @@ That year explains most of the shapes a reader meets: why a command is a marker 
 
 ## Decision
 
-**[`docs/roadmap.md`](../roadmap.md) is a single unnumbered page at the docs root, in the top navigation, outside the five kinds and their numbering.**
+**[`docs/roadmap.md`](../roadmap.md) is a single page at the docs root, in the top navigation, outside the five kinds.**
 
 ```mermaid
 flowchart LR
@@ -58,7 +58,7 @@ It keeps the name **Roadmap** even though it looks backwards. That is the word a
 
 ## Alternatives considered
 
-- **A sixth numbered kind, with its own `0000-template.md`.** A template and a sequence number for a folder that will only ever hold one page. Numbering says "more of these are coming"; none are.
+- **A sixth kind, with its own `template.md`.** A template for a folder that will only ever hold one page. A kind says "more of these are coming"; none are.
 - **A review.** The folder is dated snapshots of what was wrong, and its index page says "historical only". Close enough to attract the page, wrong enough to make both harder to describe afterwards.
 - **Extending `CHANGELOG.md` backwards.** It is generated from squash-merge titles against released versions. The year that matters has neither.
 - **Generating the page from `git log`.** The value is the judgement about which twenty commits out of a thousand mattered. A generator emits the thousand.

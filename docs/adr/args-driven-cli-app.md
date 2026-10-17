@@ -1,6 +1,6 @@
 # Split CliApp into ArgsCliApp and TerminalCliApp
 
-Status: Proposed
+Status: Superseded by Merge the hosts and name the variant headless
 Date: 2026-08-22
 Release: 1.0.11
 

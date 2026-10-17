@@ -55,7 +55,7 @@ sequenceDiagram
 
 | Fact | Consequence |
 |---|---|
-| `SuggestionOutcomeIoWriter` calls the existing `ICliIo.Pause()` before each suggestion. | Every suggestion is visually separated. |
+| `SuggestionOutcomeIoWriter` calls the existing `ICliIo.Pause()` before each suggestion. Since the [could-be-next ADR](suggest-commands-that-could-be-next.md), the run emits one `PauseOutcome` before the list instead, and the writer no longer pauses. | Every suggestion is visually separated. |
 | Each name is prefixed with the configured `InstructionSettings.Prefix`. | The prefix is never a hardcoded `/`. |
 | A command that declares none. | The run still returns a silent `NothingOutcome`, and its state is untouched. |
 

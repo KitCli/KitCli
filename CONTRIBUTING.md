@@ -120,7 +120,8 @@ code.
 
 `toc.yml` groups them by the release their work shipped in, oldest first,
 under a short label with no number. Work not shipped yet sits under
-`Unreleased` until it ships. Each ADR's `Release:` line names the same
+`Unreleased` until it ships, and a rejected decision sits under `Rejected`.
+Each ADR's `Release:` line names the same
 group, so move both together. Refer to an ADR by a short name for its
 decision, such as "the lockstep ADR", linked to its file.
 
@@ -396,8 +397,9 @@ version, so upgrading the umbrella still delivers lower-level fixes
 through its dependencies. That replaces this file's former "one version
 number, always" policy, making the drift on
 [#58](https://github.com/KitCli/KitCli/issues/58) intended rather than
-accidental. Which model is right is owed an ADR —
-[#128](https://github.com/KitCli/KitCli/issues/128).
+accidental. The
+[lockstep ADR](docs/adr/version-the-packages-in-lockstep.md) proposed one
+version for every package, and was rejected.
 
 ## Code style
 

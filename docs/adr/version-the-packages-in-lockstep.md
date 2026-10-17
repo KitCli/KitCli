@@ -1,8 +1,12 @@
 # Version all nine packages in lockstep
 
-Status: Proposed
+Status: Rejected
 Date: 2026-08-29
-Release: Unreleased
+Release: Rejected
+
+**Never built.** Each package keeps its own version. `CONTRIBUTING.md`'s
+[Versioning & releases](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md#versioning--releases)
+says to bump only what changed.
 
 Answers the question the [API-diff versioning ADR](derive-version-bumps-from-the-public-api-diff.md)
 deferred, on [#128](https://github.com/KitCli/KitCli/issues/128).

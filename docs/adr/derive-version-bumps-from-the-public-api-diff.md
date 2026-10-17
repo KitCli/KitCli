@@ -1,8 +1,13 @@
 # Derive each package's version bump from its public API diff
 
-Status: Proposed
+Status: Rejected
 Date: 2026-08-25
-Release: Unreleased
+Release: Rejected
+
+**Never built.** The release tool this changes was deleted in
+[#285](https://github.com/KitCli/KitCli/pull/285). The sizing rule lives on as a
+manual step in `CONTRIBUTING.md`'s
+[Versioning & releases](https://github.com/KitCli/KitCli/blob/main/CONTRIBUTING.md#versioning--releases).
 
 Justified by
 the [SemVer investigation](../investigations/respect-semver-in-release.md),
@@ -84,8 +89,8 @@ The `**Breaking:**` markers and the `!` in commit subjects become cross-checks, 
 | Gets easier | Gets harder |
 |---|---|
 | Silent signature breaks become build failures, whether or not the tool ever reads the files. | A PR that changes public API cannot compile until it records the change. That is the mechanism, and it is friction on every such PR. |
-| `VersionBumper` becomes unit-testable, which it is not today. | Adoption needs a `PublicAPI.Shipped.txt` baseline for nine packages first. |
+| `VersionBumper` would have become unit-testable, which it never was. | Adoption needs a `PublicAPI.Shipped.txt` baseline for nine packages first. |
 | The tool will not understate a signature break, and will not contradict a written `**Breaking:**`. | **Behavioural breaks are still missed.** v1.0.13 turned a captured `Scoped` dependency into a startup failure and v1.0.12 made an unhandled handler exception end the session. Both changed no signature and both shipped as patches. For these the `CHANGELOG.md` cross-check is the only signal, and it only fires if a human wrote the marker. |
 | | The tool cannot catch a behavioural break nobody wrote down. |
 
-The work sequences as baseline, then derivation, then the release procedure. The last is a skill rather than code, including the step that bumps `KitCli.Tooling.Release`'s own `KitCli` pin, which nothing mechanical asks for.
+The work would have sequenced as baseline, then derivation, then the release procedure. The last was to be a skill rather than code, including the step that bumped `KitCli.Tooling.Release`'s own `KitCli` pin, which nothing mechanical asked for.

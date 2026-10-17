@@ -1,6 +1,6 @@
 # Drive Ctrl+C shutdown with a CancellationToken, not Environment.Exit
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-22
 Release: 1.0.11
 

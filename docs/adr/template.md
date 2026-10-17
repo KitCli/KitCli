@@ -26,9 +26,9 @@ docs/investigations/can-an-artefact-outlive-the-run-that-made-it.md.
 
 # Short title in imperative mood
 
-Status: Proposed | Accepted | Superseded by <ADR title>
+Status: Proposed | Accepted | Rejected | Superseded by <ADR title>
 Date: YYYY-MM-DD
-Release: Unreleased | X.Y.Z
+Release: Unreleased | X.Y.Z | Rejected
 
 ## Context
 

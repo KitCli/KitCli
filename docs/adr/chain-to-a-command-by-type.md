@@ -1,6 +1,6 @@
 # Chain to a command by type, and let its factory build it
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-25
 Release: 2.0.0
 

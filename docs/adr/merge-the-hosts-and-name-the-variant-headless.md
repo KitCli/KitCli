@@ -1,6 +1,6 @@
 # Merge the hosts and name the variant headless
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-26
 Release: 3.0.0
 
@@ -74,7 +74,7 @@ classDiagram
 
 | Gets easier | Gets harder |
 |---|---|
-| The continuation loop is written once, so a chain runs every step in both hosts. | Reverses the CliApp-split ADR, which is still `Proposed`. Breaking for every consumer naming the old types. |
+| The continuation loop is written once, so a chain runs every step in both hosts. | Reverses the CliApp-split ADR, now marked superseded. Breaking for every consumer naming the old types. |
 | A headless app rethrows an `ExceptionOutcome` like an interactive one, so a throwing handler ends it with a non-zero exit instead of 0. | `KitCli.Tooling.Release` consumed the published `KitCli` package, not the project, so it stayed on `ArgsCliApp` until a release shipped the new name and its pin was bumped. The rename was a two-step. That tool has since been deleted. |
 | | The continuation loop reads the run's *current* status rather than `WasChangedTo`'s history, which a `while` requires. History answers true forever once a run has moved past an ask. |
 | | **A chain that never ends now leaves a headless invocation running** rather than truncating it silently. That is [#168](https://github.com/KitCli/KitCli/issues/168), and it is why #168 blocks the rest of this work. |

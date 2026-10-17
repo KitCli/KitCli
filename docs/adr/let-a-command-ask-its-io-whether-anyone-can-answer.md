@@ -1,6 +1,6 @@
 # Let a command ask its I/O whether anyone can answer
 
-Status: Proposed
+Status: Accepted
 Date: 2026-09-05
 Release: 3.4.0
 
