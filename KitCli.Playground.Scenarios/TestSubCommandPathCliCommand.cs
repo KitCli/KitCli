@@ -9,7 +9,7 @@ namespace KitCli.Playground.Scenarios;
 /// Says back the sub-command name exactly as it was parsed. Typing
 /// <c>/test-sub-command-path user edit cir</c> shows every word after the command name arriving as one
 /// string, rather than as a path of separate words a command could match against. Recorded in
-/// <c>docs/investigations/0009-how-many-sub-commands-can-one-instruction-address.md</c>.
+/// <c>docs/investigations/how-many-sub-commands-can-one-instruction-address.md</c>.
 /// </summary>
 /// <param name="SubCommandName">The sub-command name the factory read off the instruction.</param>
 public record TestSubCommandPathCliCommand(string SubCommandName) : CliCommand;
