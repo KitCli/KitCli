@@ -1,3 +1,7 @@
+- name: MediatR
+  href: mediatr.md
+- name: Microsoft.Extensions.Configuration
+  href: microsoft-configuration.md
 - name: Microsoft.Extensions.DependencyInjection
   href: microsoft-dependency-injection.md
 - name: Spectre.Console
